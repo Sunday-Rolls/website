@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, mergeConfig } from 'vitest/config'
-import viteConfig from './vite.config'
+import viteConfig from './vite.config.ts'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
