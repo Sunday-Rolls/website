@@ -61,7 +61,7 @@ describe('ShopPage', () => {
   it('uses the Figma shop header banner asset', () => {
     renderWithRouter(<ShopPage />)
 
-    const banner = document.querySelector('img[src="/assets/shop/header-banner.png"]')
+    const banner = document.querySelector('img[src="/assets/shop/banner.jpg"]')
     expect(banner).not.toBeNull()
   })
 

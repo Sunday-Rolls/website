@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { homeAssets } from '@/assets'
 import { usePageContent } from '@/lib/content'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -22,9 +23,17 @@ export function AboutPage() {
           ))}
         </div>
 
-        <div className="aspect-[4/3] rounded-lg bg-gradient-to-br from-warm-sand to-canvas-tan lg:col-span-2" />
+        <img
+          src={homeAssets.crew}
+          alt="Sunday Rolls crew"
+          className="aspect-[4/3] w-full rounded-lg object-cover lg:col-span-2"
+        />
 
-        <div className="aspect-[3/4] rounded-lg bg-gradient-to-br from-heritage-green to-forest-green" />
+        <img
+          src={homeAssets.lifestyle}
+          alt="Sunday Rolls headcovers in a golf bag"
+          className="aspect-[3/4] w-full rounded-lg object-cover"
+        />
 
         <div className="space-y-4 self-center">
           <h2 className="font-display text-section-title text-heritage-green">

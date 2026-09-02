@@ -86,7 +86,7 @@ describe('ProductPage', () => {
 
     await waitFor(() => {
       const gallery = screen.getByRole('img', { name: 'Retro Roller - Grey' })
-      expect(gallery).toHaveAttribute('src', '/assets/shop/product-1.png')
+      expect(gallery).toHaveAttribute('src', '/assets/products/retro-roller-grey.jpg')
     })
   })
 })

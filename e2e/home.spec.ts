@@ -31,10 +31,10 @@ test.describe('Homepage', () => {
 
     const heroRequest = page.waitForResponse(
       (response) =>
-        response.url().includes('/assets/home/hero.png') && response.status() === 200,
+        response.url().includes('/assets/home/hero.jpg') && response.status() === 200,
     )
 
     await heroRequest
-    await expect(page.locator('img[src="/assets/home/hero.png"]').first()).toBeVisible()
+    await expect(page.locator('img[src="/assets/home/hero.jpg"]').first()).toBeVisible()
   })
 })

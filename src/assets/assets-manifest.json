@@ -1,0 +1,30 @@
+{
+  "brand": {
+    "logo": "/assets/brand/logo.svg"
+  },
+  "home": {
+    "hero": "/assets/home/hero.jpg",
+    "crew": "/assets/home/crew.jpg",
+    "lifestyle": "/assets/home/lifestyle.png"
+  },
+  "shop": {
+    "banner": "/assets/shop/banner.jpg"
+  },
+  "products": {
+    "retro-roller-grey": "/assets/products/retro-roller-grey.jpg",
+    "retro-roller-purple": "/assets/products/retro-roller-purple.jpg",
+    "retro-roller-yellow": "/assets/products/retro-roller-yellow.jpg",
+    "flagstick-fuel": "/assets/products/flagstick-fuel.jpg",
+    "the-corduroy": "/assets/products/the-corduroy.jpg",
+    "sunday-stripes": "/assets/products/sunday-stripes.jpg",
+    "the-birdie-machine": "/assets/products/the-birdie-machine.jpg",
+    "the-breakfast-roller": "/assets/products/the-breakfast-roller.jpg",
+    "mallet-retro-roller-white": "/assets/products/mallet-retro-roller-white.jpg",
+    "mallet-retro-roller-grey": "/assets/products/mallet-retro-roller-grey.jpg",
+    "mallet-sunday-stripes": "/assets/products/mallet-sunday-stripes.jpg",
+    "mallet-the-corduroy": "/assets/products/mallet-the-corduroy.jpg",
+    "sunny-side-up": "/assets/products/sunny-side-up.jpg",
+    "coin-collector": "/assets/products/coin-collector.jpg",
+    "the-doodle": "/assets/products/the-doodle.jpg"
+  }
+}

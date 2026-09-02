@@ -71,7 +71,7 @@ describe('HomePage', () => {
   it('uses Figma hero asset', () => {
     renderWithRouter(<HomePage />)
 
-    const heroImages = Array.from(document.querySelectorAll('img[src="/assets/home/hero.png"]'))
+    const heroImages = Array.from(document.querySelectorAll('img[src="/assets/home/hero.jpg"]'))
     expect(heroImages.length).toBeGreaterThan(0)
   })
 })

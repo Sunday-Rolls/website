@@ -1,6 +1,6 @@
 import catalogData from '@/data/product-catalog.json'
 import type { ProductCategory, ShopifyProduct } from '@/lib/shopify'
-import { homeAssets, shopAssets } from '@/assets'
+import { getProductImage } from '@/assets'
 
 export type CatalogProductStatus = 'Published' | 'Draft' | 'Unpublished' | 'Deleted' | string
 
@@ -41,12 +41,6 @@ export interface ProductValidationResult {
 
 const catalogProducts = catalogData as CatalogProduct[]
 
-const imagePool = [
-  ...shopAssets.products,
-  ...homeAssets.featuredProducts,
-  ...shopAssets.products,
-]
-
 export function slugifyProductTitle(title: string): string {
   return title
     .toLowerCase()
@@ -85,7 +79,6 @@ function defaultFeatures(product: CatalogProduct): string[] {
 
 export function catalogProductToShopifyProduct(
   product: CatalogProduct,
-  index: number,
 ): ShopifyProduct {
   return {
     id: `catalog-${product.handle}`,
@@ -95,7 +88,7 @@ export function catalogProductToShopifyProduct(
     price: '$55.00',
     material: product.productToken || 'Premium headcover',
     category: product.category,
-    imageUrl: imagePool[index % imagePool.length],
+    imageUrl: product.images[0] ?? getProductImage(product.handle),
     imageAlt: product.title,
     features: defaultFeatures(product),
   }

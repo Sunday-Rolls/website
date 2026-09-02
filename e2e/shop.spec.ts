@@ -31,9 +31,9 @@ test.describe('Shop page', () => {
 
     await page.waitForResponse(
       (response) =>
-        response.url().includes('/assets/shop/header-banner.png') && response.status() === 200,
+        response.url().includes('/assets/shop/banner.jpg') && response.status() === 200,
     )
 
-    await expect(page.locator('img[src="/assets/shop/header-banner.png"]').first()).toBeVisible()
+    await expect(page.locator('img[src="/assets/shop/banner.jpg"]').first()).toBeVisible()
   })
 })

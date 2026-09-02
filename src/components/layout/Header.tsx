@@ -15,7 +15,7 @@ export function Header() {
             src={brandAssets.logoMark}
             alt=""
             aria-hidden="true"
-            className="size-8 shrink-0"
+            className="h-9 w-auto shrink-0"
           />
           <span className="font-display text-lg tracking-wide">{brand.name}</span>
         </Link>

@@ -17,7 +17,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/cb0706e3-50ec-46c1-bfb8-509777063bff/DF3+Grey+Gameboy.JPG?format=1000w"
+      "/assets/products/retro-roller-grey.jpg"
     ]
   },
   {
@@ -38,7 +38,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/e03973a6-9d24-4a73-a770-79264d461d0a/DF3+Purple+Gameboy.JPG?format=1000w"
+      "/assets/products/retro-roller-purple.jpg"
     ]
   },
   {
@@ -59,7 +59,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/85c6003b-7db7-4829-ae1e-b3265636c029/DF3+Yellow+Gameboy.JPG?format=1000w"
+      "/assets/products/retro-roller-yellow.jpg"
     ]
   },
   {
@@ -80,7 +80,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/3fe7a0a6-349b-4254-8de4-b912cecec6b5/DF3+Morning+Dew.JPG?format=1000w"
+      "/assets/products/flagstick-fuel.jpg"
     ]
   },
   {
@@ -101,7 +101,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/dd10e65c-af97-4821-b2b2-944daa97e4e8/DF3+Corduroy.JPG?format=1000w"
+      "/assets/products/the-corduroy.jpg"
     ]
   },
   {
@@ -122,7 +122,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/17bdb94e-67b8-490c-92eb-a3794f00d7d2/DF3+Sunday+Stripes.JPG?format=1000w"
+      "/assets/products/sunday-stripes.jpg"
     ]
   },
   {
@@ -143,7 +143,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/6bc5ce77-a52a-49a7-ad8a-7d3a9c987c24/DF3+Scooby.JPG?format=1000w"
+      "/assets/products/the-birdie-machine.jpg"
     ]
   },
   {
@@ -164,7 +164,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/20cb69a1-f184-4fc1-baaa-dacd00a6be3b/DF3+Breakfast+Roller.JPG?format=1000w"
+      "/assets/products/the-breakfast-roller.jpg"
     ]
   },
   {
@@ -185,7 +185,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/46bb820c-89ed-41af-964b-62ed27a3768b/Mallet+White+Gameboy.JPG?format=1000w"
+      "/assets/products/mallet-retro-roller-white.jpg"
     ]
   },
   {
@@ -206,7 +206,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/b0bec8dc-8770-4ca3-96a5-d8315df4a2b7/IMG_4547.JPG?format=1000w"
+      "/assets/products/mallet-retro-roller-grey.jpg"
     ]
   },
   {
@@ -227,7 +227,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/904d5549-f466-4dba-9989-59ef242ca9b6/Mallet+Sunday+Stripes.JPG?format=1000w"
+      "/assets/products/mallet-sunday-stripes.jpg"
     ]
   },
   {
@@ -248,7 +248,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/5e9081b8-33e3-40ef-87cb-b98f6737b220/Mallet+Corduroy.JPG?format=1000w"
+      "/assets/products/mallet-the-corduroy.jpg"
     ]
   },
   {
@@ -269,7 +269,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/2b50073c-17d8-4fa6-8d63-1bc17022d8ed/Oz+Egg.JPG?format=1000w"
+      "/assets/products/sunny-side-up.jpg"
     ]
   },
   {
@@ -290,7 +290,7 @@
       "unit": "in"
     },
     "images": [
-      "https://images.squarespace-cdn.com/content/v1/68d847794748c81c26a22b90/b47eeb36-342a-46ea-8b96-f2c74f3c9ec5/Oz+Mario.JPG?format=1000w"
+      "/assets/products/coin-collector.jpg"
     ]
   },
   {
@@ -310,6 +310,8 @@
       "height": "",
       "unit": ""
     },
-    "images": []
+    "images": [
+      "/assets/products/the-doodle.jpg"
+    ]
   }
 ]
