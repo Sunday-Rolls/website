@@ -1,32 +1,37 @@
 import assetsManifest from './assets-manifest.json'
+import { assetUrl } from '@/lib/asset-url'
 
 export const brandAssets = {
-  logo: assetsManifest.brand.logo,
-  logoMark: assetsManifest.brand.logo,
+  logo: assetUrl(assetsManifest.brand.logo),
+  logoMark: assetUrl(assetsManifest.brand.logo),
 } as const
 
 export const homeAssets = {
-  hero: assetsManifest.home.hero,
-  heroTexture: '/assets/home/hero-texture.svg',
-  lifestyle: assetsManifest.home.lifestyle,
-  crew: assetsManifest.home.crew,
+  hero: assetUrl(assetsManifest.home.hero),
+  heroTexture: assetUrl('/assets/home/hero-texture.svg'),
+  lifestyle: assetUrl(assetsManifest.home.lifestyle),
+  crew: assetUrl(assetsManifest.home.crew),
   featuredProducts: [
-    assetsManifest.products['the-birdie-machine'],
-    assetsManifest.products['flagstick-fuel'],
-    assetsManifest.products['retro-roller-yellow'],
-    assetsManifest.products['the-corduroy'],
+    assetUrl(assetsManifest.products['the-birdie-machine']),
+    assetUrl(assetsManifest.products['flagstick-fuel']),
+    assetUrl(assetsManifest.products['retro-roller-yellow']),
+    assetUrl(assetsManifest.products['the-corduroy']),
   ],
 } as const
 
 export const shopAssets = {
-  headerBanner: assetsManifest.shop.banner,
-  products: Object.values(assetsManifest.products),
+  headerBanner: assetUrl(assetsManifest.shop.banner),
+  products: Object.values(assetsManifest.products).map(assetUrl),
 } as const
 
 export const productAssets = {
-  galleryFallback: assetsManifest.products['retro-roller-grey'],
+  galleryFallback: assetUrl(assetsManifest.products['retro-roller-grey']),
 } as const
 
 export function getProductImage(handle: string): string {
-  return assetsManifest.products[handle as keyof typeof assetsManifest.products] ?? productAssets.galleryFallback
+  const path =
+    assetsManifest.products[handle as keyof typeof assetsManifest.products] ??
+    assetsManifest.products['retro-roller-grey']
+
+  return assetUrl(path)
 }

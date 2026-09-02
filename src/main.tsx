@@ -7,7 +7,13 @@ import '@fontsource/inter/500.css'
 import '@fontsource/inter/600.css'
 import './index.css'
 import App from '@/App'
+import { assetUrl } from '@/lib/asset-url'
 import { initGtm } from '@/lib/gtm'
+
+const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+if (favicon) {
+  favicon.href = assetUrl('/assets/brand/logo.svg')
+}
 
 initGtm()
 

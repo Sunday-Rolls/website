@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import galleryContent from '@/content/pages/gallery.json'
+import { assetUrl } from '@/lib/asset-url'
 import { GalleryPage } from '@/pages/GalleryPage'
 import { renderWithRouter } from '@/test/test-utils'
 
@@ -14,11 +15,14 @@ describe('GalleryPage', () => {
     expect(screen.getByText(galleryContent.header.subtitle)).toBeInTheDocument()
     expect(screen.getByRole('img', { name: galleryContent.featured.alt })).toHaveAttribute(
       'src',
-      galleryContent.featured.image,
+      assetUrl(galleryContent.featured.image),
     )
 
     for (const item of galleryContent.items) {
-      expect(screen.getByRole('img', { name: item.alt })).toHaveAttribute('src', item.image)
+      expect(screen.getByRole('img', { name: item.alt })).toHaveAttribute(
+        'src',
+        assetUrl(item.image),
+      )
     }
   })
 })

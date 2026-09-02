@@ -1,3 +1,4 @@
+import { assetUrl } from '@/lib/asset-url'
 import { cn } from '@/lib/utils'
 
 interface GalleryFigureProps {
@@ -24,7 +25,7 @@ export function GalleryFigure({
         )}
       >
         <img
-          src={image}
+          src={assetUrl(image)}
           alt={alt}
           className="h-full w-full object-cover"
           loading="lazy"

@@ -1,6 +1,7 @@
 import catalogData from '@/data/product-catalog.json'
 import type { ProductCategory, ShopifyProduct } from '@/lib/shopify'
 import { getProductImage } from '@/assets'
+import { assetUrl } from '@/lib/asset-url'
 
 export type CatalogProductStatus = 'Published' | 'Draft' | 'Unpublished' | 'Deleted' | string
 
@@ -88,7 +89,9 @@ export function catalogProductToShopifyProduct(
     price: '$55.00',
     material: product.productToken || 'Premium headcover',
     category: product.category,
-    imageUrl: product.images[0] ?? getProductImage(product.handle),
+    imageUrl: product.images[0]
+      ? assetUrl(product.images[0])
+      : getProductImage(product.handle),
     imageAlt: product.title,
     features: defaultFeatures(product),
   }
