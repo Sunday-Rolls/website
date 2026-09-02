@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "Gallery — Sunday Rolls",
+    "description": "Lifestyle and product photography from Sunday Rolls."
+  },
+  "header": {
+    "title": "Gallery",
+    "subtitle": "Idea for Lifestyle Page"
+  },
+  "items": [
+    { "caption": "Lifestyle Photo", "alt": "Sunday Rolls lifestyle photography" },
+    { "caption": "Lifestyle Photo", "alt": "Sunday Rolls lifestyle photography" },
+    { "caption": "Lifestyle Photo", "alt": "Sunday Rolls lifestyle photography" }
+  ]
+}

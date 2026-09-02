@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "title": "Our Story — Sunday Rolls",
+    "description": "Built for golfers who love the traditions of the game."
+  },
+  "hero": {
+    "title": "Our Story",
+    "lines": [
+      "Built for golfers who love",
+      "the traditions of the game."
+    ]
+  },
+  "tradition": {
+    "title": "Rooted in Tradition",
+    "lines": [
+      "Inspired by golf's golden era,",
+      "crafted for today's walk."
+    ]
+  },
+  "values": {
+    "items": [
+      { "label": "Quality" },
+      { "label": "Integrity" },
+      { "label": "Tradition" }
+    ]
+  }
+}

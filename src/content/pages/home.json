@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "title": "Sunday Rolls — Premium Golf Goods",
+    "description": "Premium vintage-inspired golf goods. Make every day a Sunday."
+  },
+  "hero": {
+    "headline": "Make Every Day a Sunday.",
+    "subheadline": "Premium vintage-inspired golf goods.",
+    "cta": {
+      "labelKey": "shopCollection",
+      "href": "/shop"
+    }
+  },
+  "values": {
+    "items": [
+      { "label": "Heritage" },
+      { "label": "Materials" },
+      { "label": "Built to Walk" },
+      { "label": "Made to Last" }
+    ]
+  },
+  "featured": {
+    "title": "Featured Collection",
+    "subtitle": "Timeless golf goods built for the walk.",
+    "cta": {
+      "labelKey": "shopCollection",
+      "href": "/shop"
+    }
+  }
+}

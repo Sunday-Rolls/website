@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "title": "Our Collection — Sunday Rolls",
+    "description": "Timeless golf goods built for the walk."
+  },
+  "header": {
+    "title": "Our Collection",
+    "subtitle": "Timeless golf goods built for the walk."
+  },
+  "filters": {
+    "label": "Filter",
+    "options": [
+      { "label": "All Products", "value": "all" },
+      { "label": "Headcovers", "value": "headcovers" },
+      { "label": "Bags", "value": "bags" },
+      { "label": "Accessories", "value": "accessories" }
+    ]
+  },
+  "emptyState": {
+    "title": "No products found",
+    "description": "Try adjusting your filters or check back soon for new drops."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "title": "Contact Us — Sunday Rolls",
+    "description": "We would love to hear from you."
+  },
+  "header": {
+    "title": "Contact Us",
+    "subtitle": "We would love to hear from you."
+  },
+  "form": {
+    "name": { "label": "Name", "placeholder": "Name" },
+    "email": { "label": "Email", "placeholder": "Email" },
+    "subject": { "label": "Subject", "placeholder": "Subject" },
+    "message": { "label": "Message", "placeholder": "Message" },
+    "submitLabelKey": "sendMessage"
+  },
+  "sidebar": {
+    "title": "Get in Touch",
+    "email": { "label": "Email", "value": "EMAIL" },
+    "phone": { "label": "Phone", "value": "PHONE" }
+  }
+}

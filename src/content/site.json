@@ -1,0 +1,53 @@
+{
+  "brand": {
+    "name": "Sunday Rolls",
+    "shortName": "SR",
+    "tagline": "Make every day a Sunday.",
+    "description": "Premium vintage-inspired golf goods."
+  },
+  "navigation": {
+    "primary": [
+      { "label": "Shop", "href": "/shop" },
+      { "label": "About", "href": "/about" },
+      { "label": "Contact", "href": "/contact" }
+    ],
+    "footerShop": [
+      { "label": "All Products", "href": "/shop" },
+      { "label": "Headcovers", "href": "/shop?category=headcovers" },
+      { "label": "Bags", "href": "/shop?category=bags" },
+      { "label": "Accessories", "href": "/shop?category=accessories" }
+    ],
+    "footerCompany": [
+      { "label": "About", "href": "/about" },
+      { "label": "Gallery", "href": "/gallery" },
+      { "label": "Contact", "href": "/contact" }
+    ],
+    "footerSupport": [
+      { "label": "FAQ", "href": "/contact#faq" },
+      { "label": "Shipping", "href": "/contact#shipping" },
+      { "label": "Returns", "href": "/contact#returns" }
+    ]
+  },
+  "footer": {
+    "newsletter": {
+      "placeholder": "Email address",
+      "submitLabel": "Subscribe"
+    },
+    "columns": {
+      "shop": "Shop",
+      "company": "Company",
+      "support": "Support"
+    },
+    "copyright": "© {year} Sunday Rolls. All rights reserved."
+  },
+  "buttons": {
+    "shopCollection": "Shop Collection",
+    "learnMore": "Learn More",
+    "viewDetails": "View Details",
+    "addToCart": "Add to Cart",
+    "checkout": "Checkout",
+    "continueShopping": "Continue Shopping",
+    "backToHome": "Back to Home",
+    "sendMessage": "Send Message"
+  }
+}

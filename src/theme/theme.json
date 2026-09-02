@@ -1,0 +1,78 @@
+{
+  "colors": {
+    "heritageGreen": "#1B3A2F",
+    "forestGreen": "#274B3A",
+    "cream": "#F6F2E8",
+    "canvasTan": "#CDBA94",
+    "leather": "#8A5A3B",
+    "matteBlack": "#1A1A1A",
+    "softGold": "#B08D57",
+    "white": "#FFFFFF",
+    "warmSand": "#E7DECE",
+    "sand": "#EDE3CB"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond, Georgia, serif",
+    "body": "Inter, system-ui, sans-serif"
+  },
+  "typography": {
+    "hero": {
+      "fontFamily": "display",
+      "fontSize": "clamp(2.5rem, 5vw, 3.75rem)",
+      "fontWeight": "500",
+      "lineHeight": "1.1",
+      "letterSpacing": "-0.02em"
+    },
+    "pageTitle": {
+      "fontFamily": "display",
+      "fontSize": "clamp(2rem, 4vw, 2.75rem)",
+      "fontWeight": "500",
+      "lineHeight": "1.15"
+    },
+    "sectionTitle": {
+      "fontFamily": "display",
+      "fontSize": "1.75rem",
+      "fontWeight": "500",
+      "lineHeight": "1.2"
+    },
+    "body": {
+      "fontFamily": "body",
+      "fontSize": "1rem",
+      "fontWeight": "400",
+      "lineHeight": "1.6"
+    },
+    "bodySmall": {
+      "fontFamily": "body",
+      "fontSize": "0.875rem",
+      "fontWeight": "400",
+      "lineHeight": "1.5"
+    },
+    "label": {
+      "fontFamily": "body",
+      "fontSize": "0.75rem",
+      "fontWeight": "600",
+      "lineHeight": "1.2",
+      "letterSpacing": "0.12em",
+      "textTransform": "uppercase"
+    },
+    "nav": {
+      "fontFamily": "body",
+      "fontSize": "0.6875rem",
+      "fontWeight": "500",
+      "lineHeight": "1.2",
+      "letterSpacing": "0.14em",
+      "textTransform": "uppercase"
+    }
+  },
+  "spacing": {
+    "sectionY": "4rem",
+    "sectionYLarge": "6rem",
+    "containerX": "1.5rem",
+    "containerMax": "72rem"
+  },
+  "radii": {
+    "sm": "0.25rem",
+    "md": "0.5rem",
+    "lg": "0.75rem"
+  }
+}

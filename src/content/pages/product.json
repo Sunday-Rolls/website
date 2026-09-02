@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "title": "Product — Sunday Rolls",
+    "description": "Shop premium vintage-inspired golf goods."
+  },
+  "loading": "Loading product…",
+  "notFound": {
+    "title": "Product not found",
+    "description": "This product may have moved or is no longer available."
+  },
+  "featuresHeading": "Product Features",
+  "defaultFeatures": [
+    "Plush velvet interior",
+    "Premium exterior materials"
+  ],
+  "story": {
+    "title": "Built for the Walk",
+    "description": "Lightweight. Balanced. Designed for every round."
+  }
+}

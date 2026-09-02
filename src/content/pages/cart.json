@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "title": "Your Cart — Sunday Rolls",
+    "description": "Review your Sunday Rolls cart."
+  },
+  "header": {
+    "title": "Your Cart",
+    "continueShoppingKey": "continueShopping",
+    "continueShoppingHref": "/shop"
+  },
+  "summary": {
+    "totalLabel": "Total",
+    "checkoutLabelKey": "checkout"
+  },
+  "emptyState": {
+    "title": "Your cart is empty",
+    "description": "Explore our collection and find something you'll love.",
+    "cta": {
+      "labelKey": "shopCollection",
+      "href": "/shop"
+    }
+  }
+}

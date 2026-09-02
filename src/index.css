@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --color-heritage-green: #1b3a2f;
+  --color-forest-green: #274b3a;
+  --color-cream: #f6f2e8;
+  --color-canvas-tan: #cdba94;
+  --color-leather: #8a5a3b;
+  --color-matte-black: #1a1a1a;
+  --color-soft-gold: #b08d57;
+  --color-white: #ffffff;
+  --color-warm-sand: #e7dece;
+  --color-sand: #ede3cb;
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: Inter, system-ui, sans-serif;
+
+  --text-hero: clamp(2.5rem, 5vw, 3.75rem);
+  --text-hero--line-height: 1.1;
+  --text-hero--letter-spacing: -0.02em;
+
+  --text-page-title: clamp(2rem, 4vw, 2.75rem);
+  --text-page-title--line-height: 1.15;
+
+  --text-section-title: 1.75rem;
+  --text-section-title--line-height: 1.2;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+
+  --text-body-small: 0.875rem;
+  --text-body-small--line-height: 1.5;
+
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.12em;
+
+  --text-nav: 0.6875rem;
+  --text-nav--line-height: 1.2;
+  --text-nav--letter-spacing: 0.14em;
+
+  --spacing-section-y: 4rem;
+  --spacing-container-x: 1.5rem;
+  --container-max: 72rem;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply m-0 bg-cream font-body text-body text-matte-black antialiased;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  a {
+    @apply no-underline;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility font-body {
+  font-family: var(--font-body);
+}
+
+@utility text-hero {
+  font-size: var(--text-hero);
+  line-height: var(--text-hero--line-height);
+  letter-spacing: var(--text-hero--letter-spacing);
+}
+
+@utility text-page-title {
+  font-size: var(--text-page-title);
+  line-height: var(--text-page-title--line-height);
+}
+
+@utility text-section-title {
+  font-size: var(--text-section-title);
+  line-height: var(--text-section-title--line-height);
+}
+
+@utility text-body {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+@utility text-body-small {
+  font-size: var(--text-body-small);
+  line-height: var(--text-body-small--line-height);
+}
+
+@utility text-label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+}
+
+@utility text-nav {
+  font-size: var(--text-nav);
+  line-height: var(--text-nav--line-height);
+  letter-spacing: var(--text-nav--letter-spacing);
+  text-transform: uppercase;
+}
+
+@utility max-w-container {
+  max-width: var(--container-max);
+}
+
+@utility px-container-x {
+  padding-inline: var(--spacing-container-x);
+}
+
+@utility py-section-y {
+  padding-block: var(--spacing-section-y);
+}
