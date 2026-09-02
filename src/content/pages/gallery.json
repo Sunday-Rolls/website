@@ -7,9 +7,26 @@
     "title": "Gallery",
     "subtitle": "Idea for Lifestyle Page"
   },
+  "featured": {
+    "caption": "Lifestyle Photo",
+    "alt": "Featured Sunday Rolls lifestyle photography",
+    "image": "/assets/home/hero.png"
+  },
   "items": [
-    { "caption": "Lifestyle Photo", "alt": "Sunday Rolls lifestyle photography" },
-    { "caption": "Lifestyle Photo", "alt": "Sunday Rolls lifestyle photography" },
-    { "caption": "Lifestyle Photo", "alt": "Sunday Rolls lifestyle photography" }
+    {
+      "caption": "Lifestyle Photo",
+      "alt": "Sunday Rolls on the course",
+      "image": "/assets/shop/header-banner.png"
+    },
+    {
+      "caption": "Lifestyle Photo",
+      "alt": "Sunday Rolls headcover detail",
+      "image": "/assets/shop/product-1.png"
+    },
+    {
+      "caption": "Lifestyle Photo",
+      "alt": "Sunday Rolls product styling",
+      "image": "/assets/shop/product-2.png"
+    }
   ]
 }

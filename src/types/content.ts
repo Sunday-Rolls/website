@@ -111,7 +111,12 @@ export interface GalleryContent {
     title: string
     subtitle: string
   }
-  items: Array<{ caption: string; alt: string }>
+  featured: {
+    caption: string
+    alt: string
+    image: string
+  }
+  items: Array<{ caption: string; alt: string; image: string }>
 }
 
 export interface ContactContent {
