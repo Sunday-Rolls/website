@@ -9,6 +9,7 @@ import {
 } from '@/lib/shopify'
 import { ProductDetails } from '@/components/product/ProductDetails'
 import { ProductGallery } from '@/components/product/ProductGallery'
+import { ProductReviews } from '@/components/product/ProductReviews'
 import { ProductStory } from '@/components/product/ProductStory'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -55,6 +56,7 @@ export function ProductPage() {
         <ProductGallery product={product} />
         <ProductDetails product={product} />
       </Container>
+      <ProductReviews product={product} />
       <ProductStory />
     </>
   )

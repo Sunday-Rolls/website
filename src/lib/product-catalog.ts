@@ -1,5 +1,10 @@
 import catalogData from '@/data/product-catalog.json'
-import type { ProductCategory, ShopifyProduct } from '@/lib/shopify'
+import type {
+  HeadcoverSubcategory,
+  ProductCategory,
+  ProductFeature,
+  ShopifyProduct,
+} from '@/lib/shopify'
 import { getProductImage } from '@/assets'
 import { assetUrl } from '@/lib/asset-url'
 
@@ -13,6 +18,7 @@ export interface CatalogProduct {
   description: string
   sellingMethod: string
   category: ProductCategory
+  subcategory?: HeadcoverSubcategory
   productToken: string
   itemWeight?: string
   itemWeightUnit?: string
@@ -22,6 +28,8 @@ export interface CatalogProduct {
     height?: string
     unit?: string
   }
+  dimensionsDisplay?: string
+  keyFeatures?: ProductFeature[]
   images: string[]
 }
 
@@ -63,6 +71,10 @@ export function getPublishedCatalogProducts(): CatalogProduct[] {
 }
 
 function defaultFeatures(product: CatalogProduct): string[] {
+  if (product.keyFeatures?.length) {
+    return product.keyFeatures.map((feature) => `${feature.label}: ${feature.text}`)
+  }
+
   const features = ['Plush velvet interior', 'Premium exterior materials']
 
   if (product.itemWeight && product.itemWeightUnit) {
@@ -78,6 +90,17 @@ function defaultFeatures(product: CatalogProduct): string[] {
   return features
 }
 
+function formatDimensionsDisplay(product: CatalogProduct): string | undefined {
+  if (product.dimensionsDisplay) return product.dimensionsDisplay
+
+  if (product.dimensions?.length && product.dimensions?.width) {
+    const unit = product.dimensions.unit ?? 'in'
+    return `${product.dimensions.length} ${unit} (Length) × ${product.dimensions.width} ${unit} (Width)`
+  }
+
+  return undefined
+}
+
 export function catalogProductToShopifyProduct(
   product: CatalogProduct,
 ): ShopifyProduct {
@@ -89,11 +112,14 @@ export function catalogProductToShopifyProduct(
     price: '$55.00',
     material: product.productToken || 'Premium headcover',
     category: product.category,
+    subcategory: product.subcategory,
     imageUrl: product.images[0]
       ? assetUrl(product.images[0])
       : getProductImage(product.handle),
     imageAlt: product.title,
     features: defaultFeatures(product),
+    keyFeatures: product.keyFeatures,
+    dimensionsDisplay: formatDimensionsDisplay(product),
   }
 }
 

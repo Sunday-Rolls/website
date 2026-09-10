@@ -10,6 +10,7 @@ interface ButtonProps {
   type?: 'button' | 'submit'
   className?: string
   onClick?: () => void
+  disabled?: boolean
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -24,12 +25,14 @@ function ButtonInner({
   children,
   variant = 'primary',
   className,
-}: Pick<ButtonProps, 'children' | 'variant' | 'className'>) {
+  disabled,
+}: Pick<ButtonProps, 'children' | 'variant' | 'className' | 'disabled'>) {
   return (
     <span
       className={cn(
         'inline-flex items-center justify-center px-6 py-3 font-body text-label uppercase tracking-widest transition-colors',
         variantClasses[variant],
+        disabled && 'cursor-not-allowed opacity-60',
         className,
       )}
     >
@@ -45,8 +48,9 @@ export function Button({
   type = 'button',
   className,
   onClick,
+  disabled = false,
 }: ButtonProps) {
-  if (href) {
+  if (href && !disabled) {
     const isExternal = href.startsWith('http')
 
     if (isExternal) {
@@ -65,8 +69,15 @@ export function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={cn('inline-block', className)}>
-      <ButtonInner variant={variant}>{children}</ButtonInner>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={cn('inline-block', className)}
+    >
+      <ButtonInner variant={variant} disabled={disabled}>
+        {children}
+      </ButtonInner>
     </button>
   )
 }

@@ -1,27 +1,70 @@
 {
   "meta": {
     "title": "Our Story — Sunday Rolls",
-    "description": "Built for golfers who love the traditions of the game."
+    "description": "A new take on tradition, nostalgia, and the joy of golf."
   },
   "hero": {
     "title": "Our Story",
+    "eyebrow": "Find Your Pace",
     "lines": [
-      "Built for golfers who love",
-      "the traditions of the game."
+      "Sunday Rolls started the way many of life's best ideas do—with a conversation among friends after a round of golf.",
+      "We've been playing together since high school and college, sharing countless rounds, road trips, and the belief that the best part of golf has never been the score. It's the people you play with, the traditions you build, and the memories that stay with you long after the final putt.",
+      "While searching for more options for a L.A.B. putter, we realized something was missing. Too many products were built for trends instead of longevity. We wanted gear that felt timeless—products crafted with intention, built to last, and designed to look just as good years from now as they do today.",
+      "That idea became Sunday Rolls.",
+      "We create premium golf goods inspired by classic design and the feeling that keeps golfers coming back: good company, unhurried rounds, and a game played at your own pace."
     ]
   },
   "tradition": {
-    "title": "Rooted in Tradition",
+    "title": "A new take on tradition",
     "lines": [
-      "Inspired by golf's golden era,",
-      "crafted for today's walk."
+      "We couldn't find a headcover that matched the vibe (and fit) of our L.A.B. putters—so we built it.",
+      "Premium materials, a magnetic fit that stays put, and a touch of nostalgia stitched in. Started by three guys who love golf and wanted to bring more style to the course."
     ]
   },
   "values": {
+    "title": "What we stand for",
     "items": [
-      { "label": "Quality" },
-      { "label": "Integrity" },
-      { "label": "Tradition" }
+      {
+        "label": "Craftsmanship",
+        "description": "Built to last."
+      },
+      {
+        "label": "Heritage",
+        "description": "Inspired by the traditions that make golf timeless."
+      },
+      {
+        "label": "Fellowship",
+        "description": "Great golf begins with good company."
+      },
+      {
+        "label": "Curiosity",
+        "description": "Always improving. Never finished."
+      },
+      {
+        "label": "Enjoy the Walk",
+        "description": "Find your pace."
+      }
+    ]
+  },
+  "team": {
+    "title": "The crew",
+    "subtitle": "Three friends, one brand—and a lot of Sunday rounds.",
+    "members": [
+      {
+        "name": "Founder name",
+        "role": "Co-Founder",
+        "bio": "Add 2–3 sentences about your path into golf, what you care about on the course, and the part of Sunday Rolls you own day to day."
+      },
+      {
+        "name": "Founder name",
+        "role": "Co-Founder",
+        "bio": "Add 2–3 sentences about your path into golf, what you care about on the course, and the part of Sunday Rolls you own day to day."
+      },
+      {
+        "name": "Founder name",
+        "role": "Co-Founder",
+        "bio": "Add 2–3 sentences about your path into golf, what you care about on the course, and the part of Sunday Rolls you own day to day."
+      }
     ]
   }
 }

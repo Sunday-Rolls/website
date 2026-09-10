@@ -12,6 +12,17 @@
     "totalLabel": "Total",
     "checkoutLabelKey": "checkout"
   },
+  "lineActions": {
+    "quantityLabel": "Qty",
+    "removeLabel": "Remove",
+    "decreaseLabel": "Decrease quantity",
+    "increaseLabel": "Increase quantity"
+  },
+  "status": {
+    "loading": "Loading your cart…",
+    "updating": "Updating cart…",
+    "unavailable": "Checkout isn’t available yet. Connect Shopify Storefront API to enable cart."
+  },
   "emptyState": {
     "title": "Your cart is empty",
     "description": "Explore our collection and find something you'll love.",

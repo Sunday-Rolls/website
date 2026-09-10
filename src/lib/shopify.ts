@@ -2,13 +2,16 @@ import { createStorefrontApiClient } from '@shopify/storefront-api-client'
 import { productAssets } from '@/assets'
 import {
   buildPlaceholderProductsFromCatalog,
+  catalogProductToShopifyProduct,
+  getCatalogProductByHandle,
 } from '@/lib/product-catalog'
 
 const storeDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN
 const publicAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN
 const apiVersion = import.meta.env.VITE_SHOPIFY_API_VERSION ?? '2025-01'
 
-export type ProductCategory = 'headcovers' | 'bags' | 'accessories'
+export type ProductCategory = 'headcovers' | 'bags' | 'towels' | 'accessories'
+export type HeadcoverSubcategory = 'center-shafted' | 'mallet' | 'oz-mezz'
 
 export const isShopifyConfigured = Boolean(storeDomain && publicAccessToken)
 
@@ -19,6 +22,11 @@ export const shopifyClient = isShopifyConfigured
       publicAccessToken: publicAccessToken!,
     })
   : null
+
+export interface ProductFeature {
+  label: string
+  text: string
+}
 
 export interface ShopifyProduct {
   id: string
@@ -31,28 +39,62 @@ export interface ShopifyProduct {
   imageAlt?: string
   material?: string
   category?: ProductCategory
+  subcategory?: HeadcoverSubcategory
   features?: string[]
+  keyFeatures?: ProductFeature[]
+  dimensionsDisplay?: string
+  /** Storefront variant GID required for cart lines */
+  variantId?: string
 }
+
+export interface CartLineItem {
+  id: string
+  quantity: number
+  title: string
+  handle: string
+  variantId: string
+  price: string
+  imageUrl?: string
+  imageAlt?: string
+}
+
+export interface ShopifyCart {
+  id: string
+  checkoutUrl: string
+  totalQuantity: number
+  subtotal: string
+  total: string
+  lines: CartLineItem[]
+}
+
+const PRODUCT_SELECTION = `
+  id
+  handle
+  title
+  description
+  featuredImage {
+    url
+    altText
+  }
+  priceRange {
+    minVariantPrice {
+      amount
+      currencyCode
+    }
+  }
+  variants(first: 1) {
+    nodes {
+      id
+    }
+  }
+`
 
 const PRODUCTS_QUERY = `#graphql
   query Products($first: Int!) {
     products(first: $first) {
       edges {
         node {
-          id
-          handle
-          title
-          description
-          featuredImage {
-            url
-            altText
-          }
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
+          ${PRODUCT_SELECTION}
         }
       }
     }
@@ -62,44 +104,185 @@ const PRODUCTS_QUERY = `#graphql
 const PRODUCT_BY_HANDLE_QUERY = `#graphql
   query ProductByHandle($handle: String!) {
     product(handle: $handle) {
+      ${PRODUCT_SELECTION}
+    }
+  }
+`
+
+const CART_SELECTION = `
+  id
+  checkoutUrl
+  totalQuantity
+  cost {
+    subtotalAmount {
+      amount
+      currencyCode
+    }
+    totalAmount {
+      amount
+      currencyCode
+    }
+  }
+  lines(first: 100) {
+    nodes {
       id
-      handle
-      title
-      description
-      featuredImage {
-        url
-        altText
-      }
-      priceRange {
-        minVariantPrice {
-          amount
-          currencyCode
+      quantity
+      merchandise {
+        ... on ProductVariant {
+          id
+          title
+          price {
+            amount
+            currencyCode
+          }
+          image {
+            url
+            altText
+          }
+          product {
+            title
+            handle
+          }
         }
       }
     }
   }
 `
 
-function formatPrice(amount: string, currencyCode: string): string {
+const CART_CREATE = `#graphql
+  mutation CartCreate($lines: [CartLineInput!]) {
+    cartCreate(input: { lines: $lines }) {
+      cart {
+        ${CART_SELECTION}
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`
+
+const CART_QUERY = `#graphql
+  query Cart($id: ID!) {
+    cart(id: $id) {
+      ${CART_SELECTION}
+    }
+  }
+`
+
+const CART_LINES_ADD = `#graphql
+  mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+    cartLinesAdd(cartId: $cartId, lines: $lines) {
+      cart {
+        ${CART_SELECTION}
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`
+
+const CART_LINES_UPDATE = `#graphql
+  mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart {
+        ${CART_SELECTION}
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`
+
+const CART_LINES_REMOVE = `#graphql
+  mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart {
+        ${CART_SELECTION}
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`
+
+type Money = { amount: string; currencyCode: string }
+
+type ProductNode = {
+  id: string
+  handle: string
+  title: string
+  description: string
+  featuredImage?: { url: string; altText?: string | null } | null
+  priceRange: { minVariantPrice: Money }
+  variants?: { nodes: Array<{ id: string }> }
+}
+
+type CartNode = {
+  id: string
+  checkoutUrl: string
+  totalQuantity: number
+  cost: {
+    subtotalAmount: Money
+    totalAmount: Money
+  }
+  lines: {
+    nodes: Array<{
+      id: string
+      quantity: number
+      merchandise: {
+        id: string
+        title: string
+        price: Money
+        image?: { url: string; altText?: string | null } | null
+        product: { title: string; handle: string }
+      }
+    }>
+  }
+}
+
+export function formatPrice(amount: string, currencyCode: string): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,
   }).format(Number(amount))
 }
 
-function mapProduct(node: {
-  id: string
-  handle: string
-  title: string
-  description: string
-  featuredImage?: { url: string; altText?: string | null } | null
-  priceRange: {
-    minVariantPrice: { amount: string; currencyCode: string }
-  }
-}): ShopifyProduct {
-  const { amount, currencyCode } = node.priceRange.minVariantPrice
+function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
+  const catalog = getCatalogProductByHandle(product.handle)
+  if (!catalog) return product
+
+  const fromCatalog = catalogProductToShopifyProduct(catalog)
 
   return {
+    ...fromCatalog,
+    ...product,
+    id: product.id,
+    price: product.price,
+    imageUrl: product.imageUrl ?? fromCatalog.imageUrl,
+    imageAlt: product.imageAlt ?? fromCatalog.imageAlt,
+    variantId: product.variantId,
+    description: product.description || fromCatalog.description,
+    material: fromCatalog.material,
+    category: fromCatalog.category,
+    subcategory: fromCatalog.subcategory,
+    features: fromCatalog.features,
+    keyFeatures: fromCatalog.keyFeatures,
+    dimensionsDisplay: fromCatalog.dimensionsDisplay,
+  }
+}
+
+function mapProduct(node: ProductNode): ShopifyProduct {
+  const { amount, currencyCode } = node.priceRange.minVariantPrice
+
+  return enrichFromCatalog({
     id: node.id,
     handle: node.handle,
     title: node.title,
@@ -107,7 +290,39 @@ function mapProduct(node: {
     price: formatPrice(amount, currencyCode),
     imageUrl: node.featuredImage?.url,
     imageAlt: node.featuredImage?.altText ?? node.title,
+    variantId: node.variants?.nodes?.[0]?.id,
+  })
+}
+
+function mapCart(node: CartNode): ShopifyCart {
+  return {
+    id: node.id,
+    checkoutUrl: node.checkoutUrl,
+    totalQuantity: node.totalQuantity,
+    subtotal: formatPrice(
+      node.cost.subtotalAmount.amount,
+      node.cost.subtotalAmount.currencyCode,
+    ),
+    total: formatPrice(node.cost.totalAmount.amount, node.cost.totalAmount.currencyCode),
+    lines: node.lines.nodes.map((line) => ({
+      id: line.id,
+      quantity: line.quantity,
+      title: line.merchandise.product.title,
+      handle: line.merchandise.product.handle,
+      variantId: line.merchandise.id,
+      price: formatPrice(line.merchandise.price.amount, line.merchandise.price.currencyCode),
+      imageUrl: line.merchandise.image?.url,
+      imageAlt: line.merchandise.image?.altText ?? line.merchandise.product.title,
+    })),
   }
+}
+
+function userErrorMessage(
+  errors: Array<{ message: string }> | undefined,
+  fallback: string,
+): string {
+  if (errors?.length) return errors.map((error) => error.message).join('; ')
+  return fallback
 }
 
 export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {
@@ -123,9 +338,7 @@ export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {
   }
 
   return (
-    data?.products?.edges?.map((edge: { node: Parameters<typeof mapProduct>[0] }) =>
-      mapProduct(edge.node),
-    ) ?? []
+    data?.products?.edges?.map((edge: { node: ProductNode }) => mapProduct(edge.node)) ?? []
   )
 }
 
@@ -146,11 +359,119 @@ export async function fetchProductByHandle(
   return mapProduct(data.product)
 }
 
+export async function createCart(
+  lines: Array<{ merchandiseId: string; quantity: number }> = [],
+): Promise<ShopifyCart> {
+  if (!shopifyClient) throw new Error('Shopify is not configured')
+
+  const { data, errors } = await shopifyClient.request(CART_CREATE, {
+    variables: { lines },
+  })
+
+  const payload = data?.cartCreate
+  if (errors || !payload?.cart) {
+    throw new Error(userErrorMessage(payload?.userErrors, 'Unable to create cart'))
+  }
+  if (payload.userErrors?.length) {
+    throw new Error(userErrorMessage(payload.userErrors, 'Unable to create cart'))
+  }
+
+  return mapCart(payload.cart)
+}
+
+export async function fetchCart(cartId: string): Promise<ShopifyCart | null> {
+  if (!shopifyClient) return null
+
+  const { data, errors } = await shopifyClient.request(CART_QUERY, {
+    variables: { id: cartId },
+  })
+
+  if (errors) {
+    console.error('Shopify cart query failed', errors)
+    return null
+  }
+
+  return data?.cart ? mapCart(data.cart) : null
+}
+
+export async function addCartLines(
+  cartId: string,
+  lines: Array<{ merchandiseId: string; quantity: number }>,
+): Promise<ShopifyCart> {
+  if (!shopifyClient) throw new Error('Shopify is not configured')
+
+  const { data, errors } = await shopifyClient.request(CART_LINES_ADD, {
+    variables: { cartId, lines },
+  })
+
+  const payload = data?.cartLinesAdd
+  if (errors || !payload?.cart) {
+    throw new Error(userErrorMessage(payload?.userErrors, 'Unable to add to cart'))
+  }
+  if (payload.userErrors?.length) {
+    throw new Error(userErrorMessage(payload.userErrors, 'Unable to add to cart'))
+  }
+
+  return mapCart(payload.cart)
+}
+
+export async function updateCartLines(
+  cartId: string,
+  lines: Array<{ id: string; quantity: number }>,
+): Promise<ShopifyCart> {
+  if (!shopifyClient) throw new Error('Shopify is not configured')
+
+  const { data, errors } = await shopifyClient.request(CART_LINES_UPDATE, {
+    variables: { cartId, lines },
+  })
+
+  const payload = data?.cartLinesUpdate
+  if (errors || !payload?.cart) {
+    throw new Error(userErrorMessage(payload?.userErrors, 'Unable to update cart'))
+  }
+  if (payload.userErrors?.length) {
+    throw new Error(userErrorMessage(payload.userErrors, 'Unable to update cart'))
+  }
+
+  return mapCart(payload.cart)
+}
+
+export async function removeCartLines(
+  cartId: string,
+  lineIds: string[],
+): Promise<ShopifyCart> {
+  if (!shopifyClient) throw new Error('Shopify is not configured')
+
+  const { data, errors } = await shopifyClient.request(CART_LINES_REMOVE, {
+    variables: { cartId, lineIds },
+  })
+
+  const payload = data?.cartLinesRemove
+  if (errors || !payload?.cart) {
+    throw new Error(userErrorMessage(payload?.userErrors, 'Unable to remove from cart'))
+  }
+  if (payload.userErrors?.length) {
+    throw new Error(userErrorMessage(payload.userErrors, 'Unable to remove from cart'))
+  }
+
+  return mapCart(payload.cart)
+}
+
+const HEADCOVER_SUBCATEGORIES = new Set<string>([
+  'center-shafted',
+  'mallet',
+  'oz-mezz',
+])
+
 export function filterProductsByCategory(
   products: ShopifyProduct[],
   category: string,
 ): ShopifyProduct[] {
   if (category === 'all') return products
+
+  if (HEADCOVER_SUBCATEGORIES.has(category)) {
+    return products.filter((product) => product.subcategory === category)
+  }
 
   return products.filter((product) => product.category === category)
 }

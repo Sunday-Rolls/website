@@ -7,7 +7,10 @@ test.describe('Product page', () => {
 
     await expect(page.getByRole('heading', { level: 1, name: 'Retro Roller - Grey' })).toBeVisible()
     await expect(page.getByText('$55.00')).toBeVisible()
-    await expect(page.getByText('Plush velvet interior')).toBeVisible()
+    await expect(page.getByText(/Precision Fit:/i)).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 2, name: productContent.reviews.heading }),
+    ).toBeVisible()
     await expect(
       page.getByRole('heading', { level: 2, name: productContent.story.title }),
     ).toBeVisible()

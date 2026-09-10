@@ -14,6 +14,8 @@ vi.mock('@/lib/shopify', async () => {
   }
 })
 
+const visibleFilters = shopContent.filters.options.filter((option) => !option.hidden)
+
 describe('ShopPage', () => {
   it('renders collection header from shop.json', () => {
     renderWithRouter(<ShopPage />)
@@ -30,28 +32,40 @@ describe('ShopPage', () => {
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(15)
   })
 
-  it('renders category filters from content', () => {
+  it('renders visible category filters from content and hides Bags', () => {
     renderWithRouter(<ShopPage />)
 
-    for (const option of shopContent.filters.options) {
+    for (const option of visibleFilters) {
       expect(screen.getByRole('button', { name: option.label })).toBeInTheDocument()
     }
+
+    expect(screen.queryByRole('button', { name: 'Bags' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Towels' })).toBeInTheDocument()
   })
 
-  it('filters products when a category is selected', async () => {
+  it('shows headcover type filters and filters by subcategory', async () => {
     const user = userEvent.setup()
     renderWithRouter(<ShopPage />)
 
     await user.click(screen.getByRole('button', { name: 'Headcovers' }))
 
+    expect(screen.getByRole('button', { name: 'Center Shafted' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mallet' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'OZ1i & Mezz.1' })).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(15)
+
+    await user.click(screen.getByRole('button', { name: 'Mallet' }))
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(4)
+
+    await user.click(screen.getByRole('button', { name: 'OZ1i & Mezz.1' }))
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(2)
   })
 
-  it('shows empty state for categories not in the catalog', async () => {
+  it('shows empty state for towels until products are added', async () => {
     const user = userEvent.setup()
     renderWithRouter(<ShopPage />)
 
-    await user.click(screen.getByRole('button', { name: 'Bags' }))
+    await user.click(screen.getByRole('button', { name: 'Towels' }))
 
     expect(
       screen.getByRole('heading', { level: 2, name: shopContent.emptyState.title }),

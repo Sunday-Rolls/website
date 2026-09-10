@@ -1,5 +1,6 @@
 import { render, type RenderOptions } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, type MemoryRouterProps } from 'react-router-dom'
+import { CartProvider } from '@/lib/cart'
 
 interface RenderWithRouterOptions extends Omit<RenderOptions, 'wrapper'> {
   route?: string
@@ -15,9 +16,11 @@ export function renderWithRouter(
 
   return render(
     <MemoryRouter initialEntries={[route]} {...routerProps}>
-      <Routes>
-        <Route path={routePath} element={ui} />
-      </Routes>
+      <CartProvider>
+        <Routes>
+          <Route path={routePath} element={ui} />
+        </Routes>
+      </CartProvider>
     </MemoryRouter>,
     options,
   )

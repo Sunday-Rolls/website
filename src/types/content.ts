@@ -59,6 +59,14 @@ export interface HomeContent {
   }
 }
 
+export interface ShopFilterOption {
+  label: string
+  value: string
+  /** Set true to hide from the shop UI without deleting the option (e.g. Bags). */
+  hidden?: boolean
+  children?: Array<{ label: string; value: string; hidden?: boolean }>
+}
+
 export interface ShopContent {
   meta: PageMeta
   header: {
@@ -67,12 +75,21 @@ export interface ShopContent {
   }
   filters: {
     label: string
-    options: Array<{ label: string; value: string }>
+    subFilterLabel?: string
+    options: ShopFilterOption[]
   }
   emptyState: {
     title: string
     description: string
   }
+  _docs?: Record<string, string>
+}
+
+export interface ProductReview {
+  author: string
+  location?: string
+  rating: number
+  text: string
 }
 
 export interface ProductContent {
@@ -83,10 +100,16 @@ export interface ProductContent {
     description: string
   }
   featuresHeading: string
+  dimensionsHeading?: string
   defaultFeatures: string[]
   story: {
     title: string
     description: string
+  }
+  reviews?: {
+    heading: string
+    empty: string
+    items: ProductReview[]
   }
 }
 
@@ -94,6 +117,7 @@ export interface AboutContent {
   meta: PageMeta
   hero: {
     title: string
+    eyebrow?: string
     lines: string[]
   }
   tradition: {
@@ -101,7 +125,13 @@ export interface AboutContent {
     lines: string[]
   }
   values: {
-    items: Array<{ label: string }>
+    title?: string
+    items: Array<{ label: string; description?: string }>
+  }
+  team?: {
+    title: string
+    subtitle?: string
+    members: Array<{ name: string; role: string; bio: string }>
   }
 }
 
@@ -137,6 +167,13 @@ export interface ContactContent {
     email: { label: string; value: string }
     phone: { label: string; value: string }
   }
+  returnPolicy?: {
+    id: string
+    title: string
+    shipToLabel: string
+    address: string
+    body: string[]
+  }
 }
 
 export interface CartContent {
@@ -149,6 +186,17 @@ export interface CartContent {
   summary: {
     totalLabel: string
     checkoutLabelKey: string
+  }
+  lineActions: {
+    quantityLabel: string
+    removeLabel: string
+    decreaseLabel: string
+    increaseLabel: string
+  }
+  status: {
+    loading: string
+    updating: string
+    unavailable: string
   }
   emptyState: {
     title: string

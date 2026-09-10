@@ -1,4 +1,9 @@
 {
+  "_docs": {
+    "hideCategory": "Set \"hidden\": true on a filter option to remove it from the shop UI (Bags is hidden for now). Set \"hidden\": false or delete the field to show it again.",
+    "addCategory": "Add { \"label\", \"value\" } under filters.options. Use the same value as product.category in product-catalog.json. For headcover types, add under the Headcovers option's children and set product.subcategory.",
+    "addProduct": "Add a product in product-catalog.json with category (headcovers | towels | bags) and optional subcategory (center-shafted | mallet | oz-mezz)."
+  },
   "meta": {
     "title": "Our Collection — Sunday Rolls",
     "description": "Timeless golf goods built for the walk."
@@ -9,11 +14,24 @@
   },
   "filters": {
     "label": "Filter",
+    "subFilterLabel": "Headcover type",
     "options": [
       { "label": "All Products", "value": "all" },
-      { "label": "Headcovers", "value": "headcovers" },
-      { "label": "Bags", "value": "bags" },
-      { "label": "Accessories", "value": "accessories" }
+      {
+        "label": "Headcovers",
+        "value": "headcovers",
+        "children": [
+          { "label": "Center Shafted", "value": "center-shafted" },
+          { "label": "Mallet", "value": "mallet" },
+          { "label": "OZ1i & Mezz.1", "value": "oz-mezz" }
+        ]
+      },
+      {
+        "label": "Bags",
+        "value": "bags",
+        "hidden": true
+      },
+      { "label": "Towels", "value": "towels" }
     ]
   },
   "emptyState": {

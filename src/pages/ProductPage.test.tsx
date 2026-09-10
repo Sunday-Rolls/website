@@ -32,7 +32,7 @@ describe('ProductPage', () => {
     expect(screen.getByText('Headcover')).toBeInTheDocument()
   })
 
-  it('renders product features from catalog data', async () => {
+  it('renders description, key features, and dimensions from catalog data', async () => {
     renderWithRouter(<ProductPage />, {
       route: '/products/retro-roller-grey',
       path: '/products/:handle',
@@ -40,9 +40,25 @@ describe('ProductPage', () => {
 
     await screen.findByRole('heading', { level: 1, name: 'Retro Roller - Grey' })
 
-    for (const feature of ['Plush velvet interior', 'Premium exterior materials', '8 oz']) {
-      expect(screen.getByText(new RegExp(feature))).toBeInTheDocument()
-    }
+    expect(
+      screen.getByText(/nostalgic gaming energy straight to the course/i),
+    ).toBeInTheDocument()
+    expect(screen.getByText(productContent.featuresHeading)).toBeInTheDocument()
+    expect(screen.getByText(/Precision Fit:/i)).toBeInTheDocument()
+    expect(screen.getByText(productContent.dimensionsHeading)).toBeInTheDocument()
+    expect(screen.getByText(/4\.625 in\. \(Length\)/)).toBeInTheDocument()
+  })
+
+  it('renders reviews for headcovers', async () => {
+    renderWithRouter(<ProductPage />, {
+      route: '/products/retro-roller-grey',
+      path: '/products/:handle',
+    })
+
+    expect(
+      await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(productContent.reviews.items[0].author)).toBeInTheDocument()
   })
 
   it('renders story section from product.json', async () => {

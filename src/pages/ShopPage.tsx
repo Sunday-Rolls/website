@@ -21,7 +21,7 @@ export function ShopPage() {
   useEffect(() => {
     document.title = content.meta.title
 
-    fetchProducts(12).then((items) => {
+    fetchProducts(50).then((items) => {
       if (items.length > 0) setProducts(items)
     })
   }, [content.meta.title])

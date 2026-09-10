@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "Contact Us — Sunday Rolls",
-    "description": "We would love to hear from you."
+    "description": "Get in touch with the Sunday Rolls crew."
   },
   "header": {
     "title": "Contact Us",
-    "subtitle": "We would love to hear from you."
+    "subtitle": "Please direct any inquiries or concerns to our support team. We strive to respond to all communications within 24–48 hours."
   },
   "form": {
     "name": { "label": "Name", "placeholder": "Name" },
@@ -16,7 +16,17 @@
   },
   "sidebar": {
     "title": "Get in Touch",
-    "email": { "label": "Email", "value": "EMAIL" },
-    "phone": { "label": "Phone", "value": "PHONE" }
+    "email": { "label": "Email", "value": "Sundayrollsco@gmail.com" },
+    "phone": { "label": "Phone", "value": "(612) 750-0674" }
+  },
+  "returnPolicy": {
+    "id": "returns",
+    "title": "Return Policy",
+    "shipToLabel": "Please ship all returns to",
+    "address": "5026 Aldrich Avenue S, Minneapolis, MN 55419",
+    "body": [
+      "We offer a 100% refund on the purchase price of your order. We kindly ask that you cover the cost of return shipping. Once received, your refund will be processed promptly.",
+      "The return window is 30 days after the product is received."
+    ]
   }
 }
