@@ -1,18 +1,23 @@
-name: Deploy staging to GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
   workflow_dispatch:
+    inputs:
+      slug:
+        description: Preview folder under /previews/ (letters, numbers, dashes)
+        required: true
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
+  pull-requests: write
 
 concurrency:
-  group: staging-pages
+  group: github-pages
   cancel-in-progress: false
 
 jobs:
@@ -25,40 +30,141 @@ jobs:
       VITE_SHOPIFY_STOREFRONT_TOKEN: ${{ secrets.VITE_SHOPIFY_STOREFRONT_TOKEN }}
       VITE_SHOPIFY_API_VERSION: ${{ secrets.VITE_SHOPIFY_API_VERSION }}
       VITE_GTM_ID: ${{ secrets.VITE_GTM_ID }}
+      PAGES_BASE: /website
+      RAW_SLUG: ${{ inputs.slug }}
+    outputs:
+      slug: ${{ steps.slug.outputs.value }}
+      kind: ${{ steps.slug.outputs.kind }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Fetch existing site tree
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+
+      - name: Prepare site directory
+        run: |
+          mkdir -p site/previews
+          rm -rf site/.git site/.github
+
+      - name: Resolve preview slug
+        id: slug
+        run: |
+          sanitize() {
+            echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9-]+/-/g; s/^-+//; s/-+$//; s/-+/-/g'
+          }
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "value=pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+            echo "kind=preview" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=$(sanitize "$RAW_SLUG")" >> "$GITHUB_OUTPUT"
+            echo "kind=preview" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=" >> "$GITHUB_OUTPUT"
+            echo "kind=production" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node
+        if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Seed production site from main
+        if: ${{ steps.slug.outputs.kind == 'preview' && !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
+        run: |
+          if [ -f site/index.html ]; then
+            echo "Production site already present"
+            exit 0
+          fi
+          git fetch origin main --depth 1
+          mkdir -p /tmp/main-src
+          git archive origin/main | tar -x -C /tmp/main-src
+          cd /tmp/main-src
+          npm ci
+          npm run build:staging
+          rsync -a dist/ "${GITHUB_WORKSPACE}/site/"
 
       - name: Install dependencies
+        if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
         run: npm ci
 
       - name: Run unit tests
+        if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
         run: npm run test
 
-      - name: Build for GitHub Pages
-        run: npm run build:staging
+      - name: Build production site
+        if: ${{ steps.slug.outputs.kind == 'production' }}
+        run: |
+          VITE_BASE_PATH="${PAGES_BASE}/" npm run build:pages
+          rsync -a --delete --exclude previews/ dist/ site/
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Build preview site
+        if: ${{ steps.slug.outputs.kind == 'preview' && !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
+        run: |
+          SLUG="${{ steps.slug.outputs.value }}"
+          VITE_BASE_PATH="${PAGES_BASE}/previews/${SLUG}/" npm run build:pages
+          rm -rf "site/previews/${SLUG}"
+          mkdir -p "site/previews/${SLUG}"
+          rsync -a dist/ "site/previews/${SLUG}/"
+
+      - name: Remove closed PR preview
+        if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
+        run: rm -rf "site/previews/${{ steps.slug.outputs.value }}"
+
+      - name: Install SPA 404 fallback
+        run: sed "s|__PAGES_BASE__|${PAGES_BASE}|g" scripts/gh-pages-404.html > site/404.html
+
+      - name: Persist site tree
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: dist
+          folder: site
+          branch: gh-pages
+          clean: true
+          git-config-name: github-actions[bot]
+          git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Comment preview URL
+        if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_SLUG: ${{ steps.slug.outputs.value }}
+        with:
+          script: |
+            const slug = process.env.PREVIEW_SLUG
+            const url = `https://sunday-rolls.github.io/website/previews/${slug}/`
+            const body = [
+              '## Preview',
+              '',
+              url,
+              '',
+              'This public link is what to send the client. The GitHub PR itself is in a private repo.',
+            ].join('\n')
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const existing = comments.find((comment) =>
+              comment.body?.includes('sunday-rolls.github.io/website/previews/'),
+            )
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              })
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              })
+            }

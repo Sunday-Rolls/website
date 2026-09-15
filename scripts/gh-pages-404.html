@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sunday Rolls</title>
+    <script>
+      (function () {
+        var basePrefix = '__PAGES_BASE__'
+        var path = location.pathname
+        var escaped = basePrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        var preview = path.match(new RegExp('^' + escaped + '/previews/([^/]+)'))
+        var base = preview ? basePrefix + '/previews/' + preview[1] : basePrefix
+        var rest = path.slice(base.length) || '/'
+        if (rest.charAt(0) !== '/') rest = '/' + rest
+        try {
+          sessionStorage.setItem(
+            'sunday-rolls-spa-path',
+            rest + location.search + location.hash,
+          )
+        } catch (e) {}
+        location.replace(base + '/')
+      })()
+    </script>
+  </head>
+  <body></body>
+</html>

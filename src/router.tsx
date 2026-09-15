@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
+import { restoreSpaPathFromRedirect } from '@/lib/spa-path-restore'
 import { AboutPage } from '@/pages/AboutPage'
 import { CartPage } from '@/pages/CartPage'
 import { ContactPage } from '@/pages/ContactPage'
@@ -8,6 +9,8 @@ import { HomePage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { ProductPage } from '@/pages/ProductPage'
 import { ShopPage } from '@/pages/ShopPage'
+
+restoreSpaPathFromRedirect()
 
 const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '')
 
