@@ -14,8 +14,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
   pull-requests: write
 
 concurrency:
@@ -92,9 +90,6 @@ jobs:
           npm run build:staging
           rsync -a dist/ "${GITHUB_WORKSPACE}/site/"
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
       - name: Install dependencies
         if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
         run: npm ci
@@ -125,11 +120,6 @@ jobs:
       - name: Install SPA 404 fallback
         run: sed "s|__PAGES_BASE__|${PAGES_BASE}|g" scripts/gh-pages-404.html > site/404.html
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
       - name: Persist site tree
         uses: JamesIves/github-pages-deploy-action@v4
         with:
@@ -139,22 +129,11 @@ jobs:
           git-config-name: github-actions[bot]
           git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
       - name: Comment preview URL
         if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
         uses: actions/github-script@v7
         env:
-          PREVIEW_SLUG: ${{ needs.build.outputs.slug }}
+          PREVIEW_SLUG: ${{ steps.slug.outputs.value }}
         with:
           script: |
             const slug = process.env.PREVIEW_SLUG
@@ -164,7 +143,7 @@ jobs:
               '',
               url,
               '',
-              'This link updates on every push to this PR. Share it with the client for this design pass.',
+              'This public link is what to send the client. The GitHub PR itself is in a private repo.',
             ].join('\n')
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
