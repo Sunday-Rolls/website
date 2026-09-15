@@ -275,9 +275,17 @@ function mergeProductImages(
   primary: ProductImage[] | undefined,
   fallback: ProductImage[] | undefined,
 ): ProductImage[] | undefined {
-  if (primary?.length) return primary
-  if (fallback?.length) return fallback
-  return undefined
+  const merged: ProductImage[] = []
+  const seen = new Set<string>()
+
+  for (const image of [...(primary ?? []), ...(fallback ?? [])]) {
+    if (!image.url || seen.has(image.url)) continue
+    seen.add(image.url)
+    merged.push(image)
+    if (merged.length >= 5) break
+  }
+
+  return merged.length > 0 ? merged : undefined
 }
 
 function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {

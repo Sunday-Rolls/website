@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { productAssets } from '@/assets'
+import { productAssets, shopAssets } from '@/assets'
 import {
   getPlaceholderProductImage,
   type ProductImage,
@@ -12,13 +12,48 @@ interface ProductGalleryProps {
   className?: string
 }
 
+const GALLERY_SLOT_COUNT = 5
+
 function resolveImages(product: ShopifyProduct): ProductImage[] {
-  if (product.images?.length) return product.images
+  const seed: ProductImage[] = product.images?.length
+    ? [...product.images]
+    : [
+        {
+          url:
+            product.imageUrl ??
+            getPlaceholderProductImage(product.handle) ??
+            productAssets.galleryFallback,
+          alt: product.imageAlt ?? product.title,
+        },
+      ]
 
-  const fallback =
-    product.imageUrl ?? getPlaceholderProductImage(product.handle) ?? productAssets.galleryFallback
+  const images: ProductImage[] = []
+  const seen = new Set<string>()
 
-  return [{ url: fallback, alt: product.imageAlt ?? product.title }]
+  for (const image of seed) {
+    if (!image.url || seen.has(image.url)) continue
+    seen.add(image.url)
+    images.push(image)
+  }
+
+  for (const url of shopAssets.products) {
+    if (images.length >= GALLERY_SLOT_COUNT) break
+    if (seen.has(url)) continue
+    seen.add(url)
+    images.push({
+      url,
+      alt: `${product.title} view ${images.length + 1}`,
+    })
+  }
+
+  while (images.length < GALLERY_SLOT_COUNT && images[0]) {
+    images.push({
+      url: images[0].url,
+      alt: `${product.title} view ${images.length + 1}`,
+    })
+  }
+
+  return images
 }
 
 export function ProductGallery({ product, className }: ProductGalleryProps) {
@@ -30,14 +65,13 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
   }, [product.handle])
 
   const active = images[Math.min(activeIndex, images.length - 1)] ?? images[0]
-  const showCarousel = images.length > 1
 
   function goTo(index: number) {
     setActiveIndex((index + images.length) % images.length)
   }
 
   return (
-    <div className={cn('space-y-3', className)}>
+    <div className={cn('space-y-4', className)}>
       <div className="overflow-hidden rounded-sm border border-sand bg-cream">
         <img
           src={active.url}
@@ -46,57 +80,41 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
         />
       </div>
 
-      {showCarousel ? (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={() => goTo(activeIndex - 1)}
-              className="font-body text-label uppercase tracking-[0.12em] text-heritage-green transition-opacity hover:opacity-70"
-              aria-label="Previous product image"
-            >
-              Prev
-            </button>
-            <p className="font-body text-body-small text-matte-black/60">
-              {activeIndex + 1} / {images.length}
-            </p>
-            <button
-              type="button"
-              onClick={() => goTo(activeIndex + 1)}
-              className="font-body text-label uppercase tracking-[0.12em] text-heritage-green transition-opacity hover:opacity-70"
-              aria-label="Next product image"
-            >
-              Next
-            </button>
-          </div>
-
-          <ul className="grid grid-cols-5 gap-2" aria-label="Product image thumbnails">
-            {images.map((image, index) => {
-              const selected = index === activeIndex
-              return (
-                <li key={`${image.url}-${index}`}>
-                  <button
-                    type="button"
-                    onClick={() => goTo(index)}
-                    aria-label={`Show image ${index + 1}`}
-                    aria-current={selected ? 'true' : undefined}
-                    className={cn(
-                      'overflow-hidden rounded-sm border bg-cream transition-colors',
-                      selected ? 'border-heritage-green' : 'border-sand hover:border-canvas-tan',
-                    )}
-                  >
-                    <img
-                      src={image.url}
-                      alt=""
-                      className="aspect-square h-auto w-full object-cover"
-                    />
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      ) : null}
+      <div className="space-y-2">
+        <p className="font-body text-label uppercase tracking-[0.12em] text-matte-black/55">
+          More views
+        </p>
+        <ul
+          className="flex gap-2 overflow-x-auto pb-1"
+          aria-label="Product image thumbnails"
+        >
+          {images.map((image, index) => {
+            const selected = index === activeIndex
+            return (
+              <li key={`${image.url}-${index}`} className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => goTo(index)}
+                  aria-label={`Show image ${index + 1}`}
+                  aria-current={selected ? 'true' : undefined}
+                  className={cn(
+                    'block h-16 w-16 overflow-hidden rounded-sm border bg-cream transition-colors sm:h-20 sm:w-20',
+                    selected
+                      ? 'border-heritage-green ring-1 ring-heritage-green'
+                      : 'border-sand hover:border-canvas-tan',
+                  )}
+                >
+                  <img
+                    src={image.url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
     </div>
   )
 }

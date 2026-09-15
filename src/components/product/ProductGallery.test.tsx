@@ -10,29 +10,22 @@ const product: ShopifyProduct = {
   title: 'The Doodle',
   description: 'A cover',
   price: '$55.00',
-  images: [
-    { url: '/a.jpg', alt: 'The Doodle front' },
-    { url: '/b.jpg', alt: 'The Doodle side' },
-    { url: '/c.jpg', alt: 'The Doodle back' },
-    { url: '/d.jpg', alt: 'The Doodle detail' },
-    { url: '/e.jpg', alt: 'The Doodle lifestyle' },
-  ],
+  imageUrl: '/a.jpg',
+  images: [{ url: '/a.jpg', alt: 'The Doodle front' }],
 }
 
 describe('ProductGallery', () => {
-  it('shows the first image and lets the user flip through the carousel', async () => {
+  it('always shows a thumbnail strip under the main image', async () => {
     const user = userEvent.setup()
     render(<ProductGallery product={product} />)
 
     expect(screen.getByAltText('The Doodle front')).toBeInTheDocument()
-    expect(screen.getByText('1 / 5')).toBeInTheDocument()
+    expect(screen.getByText('More views')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Next product image' }))
-    expect(screen.getByAltText('The Doodle side')).toBeInTheDocument()
-    expect(screen.getByText('2 / 5')).toBeInTheDocument()
+    const thumbnails = screen.getAllByRole('button', { name: /Show image/ })
+    expect(thumbnails.length).toBeGreaterThanOrEqual(2)
 
-    await user.click(screen.getByRole('button', { name: 'Show image 5' }))
-    expect(screen.getByAltText('The Doodle lifestyle')).toBeInTheDocument()
-    expect(screen.getByText('5 / 5')).toBeInTheDocument()
+    await user.click(thumbnails[1])
+    expect(thumbnails[1]).toHaveAttribute('aria-current', 'true')
   })
 })
