@@ -3,10 +3,38 @@ import type {
   HeadcoverSubcategory,
   ProductCategory,
   ProductFeature,
+  ProductImage,
   ShopifyProduct,
 } from '@/lib/shopify'
-import { getProductImage } from '@/assets'
+import { getProductImage, shopAssets } from '@/assets'
 import { assetUrl } from '@/lib/asset-url'
+
+const PLACEHOLDER_GALLERY_COUNT = 5
+
+function buildPlaceholderGallery(product: CatalogProduct): ProductImage[] {
+  const primary = product.images[0]
+    ? assetUrl(product.images[0])
+    : getProductImage(product.handle)
+  const pool = shopAssets.products.filter((url) => url !== primary)
+  const images: ProductImage[] = [{ url: primary, alt: product.title }]
+
+  for (const url of pool) {
+    if (images.length >= PLACEHOLDER_GALLERY_COUNT) break
+    images.push({
+      url,
+      alt: `${product.title} view ${images.length + 1}`,
+    })
+  }
+
+  while (images.length < PLACEHOLDER_GALLERY_COUNT) {
+    images.push({
+      url: primary,
+      alt: `${product.title} view ${images.length + 1}`,
+    })
+  }
+
+  return images
+}
 
 export type CatalogProductStatus = 'Published' | 'Draft' | 'Unpublished' | 'Deleted' | string
 
@@ -104,6 +132,8 @@ function formatDimensionsDisplay(product: CatalogProduct): string | undefined {
 export function catalogProductToShopifyProduct(
   product: CatalogProduct,
 ): ShopifyProduct {
+  const images = buildPlaceholderGallery(product)
+
   return {
     id: `catalog-${product.handle}`,
     handle: product.handle,
@@ -113,10 +143,9 @@ export function catalogProductToShopifyProduct(
     material: product.productToken || 'Premium headcover',
     category: product.category,
     subcategory: product.subcategory,
-    imageUrl: product.images[0]
-      ? assetUrl(product.images[0])
-      : getProductImage(product.handle),
-    imageAlt: product.title,
+    imageUrl: images[0]?.url,
+    imageAlt: images[0]?.alt ?? product.title,
+    images,
     features: defaultFeatures(product),
     keyFeatures: product.keyFeatures,
     dimensionsDisplay: formatDimensionsDisplay(product),
