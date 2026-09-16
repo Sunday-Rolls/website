@@ -117,7 +117,10 @@ export interface ProductReview {
   author: string
   location?: string
   rating: number
+  /** Empty string for star-only Etsy ratings with no written review. */
   text: string
+  /** Listing title from Etsy when present (especially useful for star-only reviews). */
+  listing?: string
 }
 
 export interface ProductContent {

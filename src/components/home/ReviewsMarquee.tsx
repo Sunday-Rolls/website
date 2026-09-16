@@ -39,11 +39,15 @@ export function ReviewsMarquee() {
               className="w-[min(85vw,22rem)] shrink-0 border border-cream/15 bg-forest-green/50 p-6 backdrop-blur-sm"
             >
               <StarRating rating={review.rating} />
-              <p className="mt-4 font-body text-body text-cream/90">“{review.text}”</p>
-              <div className="mt-5 space-y-0.5">
+              {review.text ? (
+                <p className="mt-4 font-body text-body text-cream/90">“{review.text}”</p>
+              ) : null}
+              <div className={review.text ? 'mt-5 space-y-0.5' : 'mt-4 space-y-0.5'}>
                 <p className="font-body text-body-small font-semibold text-white">{review.author}</p>
                 {review.location ? (
                   <p className="font-body text-body-small text-soft-gold/90">{review.location}</p>
+                ) : review.listing ? (
+                  <p className="font-body text-body-small text-soft-gold/90">{review.listing}</p>
                 ) : null}
               </div>
             </article>

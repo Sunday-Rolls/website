@@ -16,7 +16,8 @@
     "test:all": "vitest run && playwright test",
     "catalog:sync": "python3 scripts/sync-product-catalog.py",
     "catalog:port-shopify": "node scripts/port-catalog-to-shopify.mjs",
-    "assets:scrape": "python3 scripts/scrape-sundayrolls-assets.py"
+    "assets:scrape": "python3 scripts/scrape-sundayrolls-assets.py",
+    "reviews:scrape": "node scripts/scrape-etsy-reviews.mjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
