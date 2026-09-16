@@ -83,16 +83,6 @@ describe('HomePage', () => {
     expect(screen.getAllByText(`“${firstReview!.text}”`).length).toBeGreaterThan(0)
   })
 
-  it('enables homepage section scroll snap while mounted', () => {
-    const { unmount } = renderWithRouter(<HomePage />)
-
-    expect(document.documentElement.classList.contains('home-scroll-snap')).toBe(true)
-    expect(document.documentElement.classList.contains('home-smooth-scroll')).toBe(true)
-    unmount()
-    expect(document.documentElement.classList.contains('home-scroll-snap')).toBe(false)
-    expect(document.documentElement.classList.contains('home-smooth-scroll')).toBe(false)
-  })
-
   it('renders carousel next controls for product blocks', () => {
     renderWithRouter(<HomePage />)
 

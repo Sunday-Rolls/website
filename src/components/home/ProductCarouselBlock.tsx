@@ -137,7 +137,7 @@ export function ProductCarouselBlock({
   return (
     <section
       className={cn(
-        'home-snap-section py-section-y',
+        'py-section-y',
         tone === 'sand' ? 'bg-warm-sand/45' : 'bg-cream',
       )}
     >

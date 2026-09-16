@@ -7,7 +7,7 @@ export function StoryBanner() {
   const { story } = usePageContent('home')
 
   return (
-    <section className="home-snap-section bg-cream py-section-y" aria-labelledby="home-story-heading">
+    <section className="bg-cream py-section-y" aria-labelledby="home-story-heading">
       <Container>
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
           <div className="space-y-6 lg:max-w-xl">

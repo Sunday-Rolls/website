@@ -24,7 +24,7 @@ export function ReviewsMarquee() {
   if (writtenReviews.length === 0) return null
 
   return (
-    <section className="home-snap-section overflow-hidden bg-heritage-green py-section-y text-cream" aria-labelledby="home-reviews-heading">
+    <section className="overflow-hidden bg-heritage-green py-section-y text-cream" aria-labelledby="home-reviews-heading">
       <div className="mx-auto mb-10 w-full max-w-container px-container-x">
         <h2 id="home-reviews-heading" className="font-display text-section-title text-white">
           {reviews.title}

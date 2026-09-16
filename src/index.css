@@ -149,27 +149,4 @@
   }
 }
 
-/* Homepage vertical section snap — enabled while HomePage is mounted. */
-html.home-scroll-snap {
-  scroll-snap-type: y proximity;
-  scroll-padding-top: 4rem;
-}
-
-/* JS smooth scroll owns desktop wheel pacing; keep native snap assist on touch. */
-html.home-scroll-snap.home-smooth-scroll {
-  scroll-behavior: auto;
-}
-
-html.home-scroll-snap .home-snap-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html.home-scroll-snap {
-    scroll-snap-type: none;
-    scroll-behavior: auto;
-  }
-}
-
 
