@@ -39,11 +39,10 @@ test.describe('Homepage', () => {
     await expect(page.locator('source[src="/assets/home/videos/hero-golf.mp4"]').first()).toBeAttached()
   })
 
-  test('shows story banner and team section', async ({ page }) => {
+  test('shows story banner without team section', async ({ page }) => {
     await page.goto('/')
 
     await expect(page.getByRole('heading', { level: 2, name: homeContent.story.title })).toBeVisible()
-    await expect(page.getByRole('heading', { level: 2, name: homeContent.team.title })).toBeVisible()
-    await expect(page.getByRole('link', { name: homeContent.team.cta.label })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: 'Meet the Team' })).toHaveCount(0)
   })
 })

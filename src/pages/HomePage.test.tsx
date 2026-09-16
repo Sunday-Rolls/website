@@ -61,7 +61,7 @@ describe('HomePage', () => {
     expect(screen.getAllByRole('heading', { level: 3, name: 'Flagstick Fuel' }).length).toBeGreaterThan(0)
   })
 
-  it('renders reviews, story banner, and team section', () => {
+  it('renders reviews and story banner', () => {
     renderWithRouter(<HomePage />)
 
     expect(
@@ -70,13 +70,14 @@ describe('HomePage', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: homeContent.story.title }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { level: 2, name: homeContent.team.title }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: homeContent.team.cta.label })).toHaveAttribute(
-      'href',
-      '/about',
-    )
+    expect(screen.queryByRole('heading', { level: 2, name: 'Meet the Team' })).not.toBeInTheDocument()
+  })
+
+  it('renders carousel next controls for product blocks', () => {
+    renderWithRouter(<HomePage />)
+
+    expect(screen.getByRole('button', { name: 'Next Center Shafted Putter Covers' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous Center Shafted Putter Covers' })).toBeInTheDocument()
   })
 
   it('links hero CTA to the shop page', () => {

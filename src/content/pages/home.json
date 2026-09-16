@@ -104,20 +104,5 @@
       "label": "Our Story",
       "href": "/about"
     }
-  },
-  "team": {
-    "title": "Meet the Team",
-    "subtitle": "Lifelong friends. Partners in the walk.",
-    "cta": {
-      "label": "About Us",
-      "href": "/about"
-    },
-    "members": [
-      { "name": "Partner name", "role": "Partner", "focus": "12% 40%" },
-      { "name": "Partner name", "role": "Partner", "focus": "32% 40%" },
-      { "name": "Partner name", "role": "Partner", "focus": "50% 38%" },
-      { "name": "Partner name", "role": "Partner", "focus": "68% 40%" },
-      { "name": "Partner name", "role": "Partner", "focus": "88% 42%" }
-    ]
   }
 }
