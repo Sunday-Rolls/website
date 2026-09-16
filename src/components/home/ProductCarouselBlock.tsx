@@ -93,7 +93,22 @@ export function ProductCarouselBlock({
     if (!scroller || !item) return
 
     const left = item.offsetLeft - (scroller.clientWidth - item.offsetWidth) / 2
-    scroller.scrollTo({ left, behavior: 'smooth' })
+    const start = scroller.scrollLeft
+    const change = left - start
+    if (Math.abs(change) < 1) return
+
+    const durationMs = 700
+    const startTime = performance.now()
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - startTime) / durationMs)
+      scroller.scrollLeft = start + change * easeInOutCubic(progress)
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+
+    requestAnimationFrame(tick)
   }
 
   function goPrevious() {

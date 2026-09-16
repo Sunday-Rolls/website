@@ -153,7 +153,11 @@
 html.home-scroll-snap {
   scroll-snap-type: y proximity;
   scroll-padding-top: 4rem;
-  scroll-behavior: smooth;
+}
+
+/* JS smooth scroll owns desktop wheel pacing; keep native snap assist on touch. */
+html.home-scroll-snap.home-smooth-scroll {
+  scroll-behavior: auto;
 }
 
 html.home-scroll-snap .home-snap-section {

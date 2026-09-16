@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { usePageContent } from '@/lib/content'
+import { useHomeSmoothScroll } from '@/hooks/useHomeSmoothScroll'
 import {
   fetchProducts,
   filterProductsByCategory,
@@ -18,6 +19,8 @@ const HOME_SCROLL_SNAP_CLASS = 'home-scroll-snap'
 export function HomePage() {
   const content = usePageContent('home')
   const [products, setProducts] = useState<ShopifyProduct[]>(placeholderProducts)
+
+  useHomeSmoothScroll()
 
   useEffect(() => {
     document.title = content.meta.title

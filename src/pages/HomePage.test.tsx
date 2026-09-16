@@ -87,8 +87,10 @@ describe('HomePage', () => {
     const { unmount } = renderWithRouter(<HomePage />)
 
     expect(document.documentElement.classList.contains('home-scroll-snap')).toBe(true)
+    expect(document.documentElement.classList.contains('home-smooth-scroll')).toBe(true)
     unmount()
     expect(document.documentElement.classList.contains('home-scroll-snap')).toBe(false)
+    expect(document.documentElement.classList.contains('home-smooth-scroll')).toBe(false)
   })
 
   it('renders carousel next controls for product blocks', () => {
