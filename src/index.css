@@ -149,3 +149,27 @@
   }
 }
 
+/* Homepage vertical section snap — enabled while HomePage is mounted. */
+html.home-scroll-snap {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 4rem;
+}
+
+html.home-scroll-snap .home-snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+@media (max-width: 767px) {
+  html.home-scroll-snap {
+    scroll-snap-type: y mandatory;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.home-scroll-snap {
+    scroll-snap-type: none;
+  }
+}
+
+

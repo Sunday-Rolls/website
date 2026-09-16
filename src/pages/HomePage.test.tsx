@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import homeContent from '@/content/pages/home.json'
+import reviewsData from '@/data/reviews.json'
 import { HomePage } from '@/pages/HomePage'
 import { renderWithRouter } from '@/test/test-utils'
 
@@ -71,6 +72,23 @@ describe('HomePage', () => {
       screen.getByRole('heading', { level: 2, name: homeContent.story.title }),
     ).toBeInTheDocument()
     expect(screen.queryByRole('heading', { level: 2, name: 'Meet the Team' })).not.toBeInTheDocument()
+  })
+
+  it('populates the reviews marquee from reviews.json', () => {
+    renderWithRouter(<HomePage />)
+
+    const firstReview = reviewsData.items.find((review) => review.text.trim().length > 0)
+    expect(firstReview).toBeDefined()
+    expect(screen.getAllByText(firstReview!.author).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(`“${firstReview!.text}”`).length).toBeGreaterThan(0)
+  })
+
+  it('enables homepage section scroll snap while mounted', () => {
+    const { unmount } = renderWithRouter(<HomePage />)
+
+    expect(document.documentElement.classList.contains('home-scroll-snap')).toBe(true)
+    unmount()
+    expect(document.documentElement.classList.contains('home-scroll-snap')).toBe(false)
   })
 
   it('renders carousel next controls for product blocks', () => {

@@ -11,7 +11,7 @@ export function HeroSection() {
   const posterSrc = content.hero.poster ? assetUrl(content.hero.poster) : homeAssets.hero
 
   return (
-    <section className="relative overflow-hidden bg-heritage-green text-cream">
+    <section className="home-snap-section relative overflow-hidden bg-heritage-green text-cream">
       <div className="absolute inset-0">
         <video
           className="h-full w-full object-cover"

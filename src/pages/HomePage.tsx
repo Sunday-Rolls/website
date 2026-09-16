@@ -13,6 +13,8 @@ import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
 import { StoryBanner } from '@/components/home/StoryBanner'
 import { ValueStrip } from '@/components/ui/ValueStrip'
 
+const HOME_SCROLL_SNAP_CLASS = 'home-scroll-snap'
+
 export function HomePage() {
   const content = usePageContent('home')
   const [products, setProducts] = useState<ShopifyProduct[]>(placeholderProducts)
@@ -24,6 +26,13 @@ export function HomePage() {
       if (items.length > 0) setProducts(items)
     })
   }, [content.meta.title])
+
+  useEffect(() => {
+    document.documentElement.classList.add(HOME_SCROLL_SNAP_CLASS)
+    return () => {
+      document.documentElement.classList.remove(HOME_SCROLL_SNAP_CLASS)
+    }
+  }, [])
 
   const blocks = useMemo(
     () =>

@@ -11,7 +11,7 @@ export function MediaBreak() {
   const posterSrc = mediaBreak.poster ? assetUrl(mediaBreak.poster) : homeAssets.lifestyle
 
   return (
-    <section className="relative overflow-hidden bg-matte-black">
+    <section className="home-snap-section relative overflow-hidden bg-matte-black">
       <div className="relative min-h-[min(52vh,420px)]">
         <video
           className="absolute inset-0 h-full w-full object-cover opacity-80"
