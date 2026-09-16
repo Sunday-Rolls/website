@@ -15,12 +15,6 @@ export function AboutPage() {
       <Container className="py-section-y">
         <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
           <div className="space-y-6 lg:max-w-xl">
-            {content.hero.eyebrow ? (
-              <p className="font-body text-label uppercase tracking-widest text-matte-black/45">
-                {content.hero.eyebrow}
-              </p>
-            ) : null}
-
             <h1 className="font-display text-page-title text-heritage-green">
               {content.hero.title}
             </h1>
