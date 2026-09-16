@@ -17,10 +17,6 @@ export interface SiteContent {
     footerSupport: NavLink[]
   }
   footer: {
-    newsletter: {
-      placeholder: string
-      submitLabel: string
-    }
     columns: {
       shop: string
       company: string
@@ -84,6 +80,13 @@ export interface HomeContent {
     title: string
     lines: string[]
     cta: ContentLink
+  }
+  newsletter: {
+    eyebrow?: string
+    title: string
+    description: string
+    placeholder: string
+    submitLabel: string
   }
 }
 

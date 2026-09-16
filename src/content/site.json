@@ -31,10 +31,6 @@
     ]
   },
   "footer": {
-    "newsletter": {
-      "placeholder": "Email address",
-      "submitLabel": "Subscribe"
-    },
     "columns": {
       "shop": "Shop",
       "company": "Company",
