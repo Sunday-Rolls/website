@@ -11,6 +11,8 @@ export const homeAssets = {
   heroTexture: assetUrl('/assets/home/hero-texture.svg'),
   lifestyle: assetUrl(assetsManifest.home.lifestyle),
   crew: assetUrl(assetsManifest.home.crew),
+  heroVideo: assetUrl(assetsManifest.home.heroVideo),
+  swingVideo: assetUrl(assetsManifest.home.swingVideo),
   featuredProducts: [
     assetUrl(assetsManifest.products['the-birdie-machine']),
     assetUrl(assetsManifest.products['flagstick-fuel']),

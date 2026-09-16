@@ -40,22 +40,44 @@ describe('HomePage', () => {
     }
   })
 
-  it('renders featured collection section', () => {
+  it('renders product category blocks with shop all links', () => {
+    renderWithRouter(<HomePage />)
+
+    for (const block of homeContent.productBlocks) {
+      const heading = screen.getByRole('heading', { level: 2, name: block.title })
+      const section = heading.closest('section')
+      expect(section).not.toBeNull()
+      expect(within(section!).getByRole('link', { name: block.shopAll.label })).toHaveAttribute(
+        'href',
+        block.shopAll.href,
+      )
+    }
+  })
+
+  it('renders center-shafted products in the first carousel block', () => {
+    renderWithRouter(<HomePage />)
+
+    expect(screen.getAllByRole('heading', { level: 3, name: 'Retro Roller - Grey' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('heading', { level: 3, name: 'Flagstick Fuel' }).length).toBeGreaterThan(0)
+  })
+
+  it('renders reviews and story banner', () => {
     renderWithRouter(<HomePage />)
 
     expect(
-      screen.getByRole('heading', { level: 2, name: homeContent.featured.title }),
+      screen.getByRole('heading', { level: 2, name: homeContent.reviews.title }),
     ).toBeInTheDocument()
-    expect(screen.getByText(homeContent.featured.subtitle)).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: homeContent.story.title }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 2, name: 'Meet the Team' })).not.toBeInTheDocument()
   })
 
-  it('renders four featured product cards from the catalog', () => {
+  it('renders carousel next controls for product blocks', () => {
     renderWithRouter(<HomePage />)
 
-    expect(screen.getAllByRole('heading', { level: 3, name: 'Retro Roller - Grey' })).toHaveLength(1)
-    expect(screen.getAllByRole('heading', { level: 3, name: 'Retro Roller - Purple' })).toHaveLength(1)
-    expect(screen.getAllByRole('heading', { level: 3, name: 'Retro Roller - Yellow' })).toHaveLength(1)
-    expect(screen.getAllByRole('heading', { level: 3, name: 'Flagstick Fuel' })).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Next Center Shafted Putter Covers' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous Center Shafted Putter Covers' })).toBeInTheDocument()
   })
 
   it('links hero CTA to the shop page', () => {
@@ -68,10 +90,10 @@ describe('HomePage', () => {
     expect(shopLink).toHaveAttribute('href', '/shop')
   })
 
-  it('uses Figma hero asset', () => {
+  it('uses hero video with poster fallback', () => {
     renderWithRouter(<HomePage />)
 
-    const heroImages = Array.from(document.querySelectorAll('img[src="/assets/home/hero.jpg"]'))
-    expect(heroImages.length).toBeGreaterThan(0)
+    const video = document.querySelector('video source[src="/assets/home/videos/hero-golf.mp4"]')
+    expect(video).not.toBeNull()
   })
 })

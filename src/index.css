@@ -127,3 +127,25 @@
 @utility py-section-y {
   padding-block: var(--spacing-section-y);
 }
+
+@keyframes home-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer utilities {
+  .home-marquee {
+    animation: home-marquee-scroll 45s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-marquee {
+      animation: none;
+    }
+  }
+}
+

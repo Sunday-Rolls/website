@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { homeAssets } from '@/assets'
 import { usePageContent } from '@/lib/content'
 import { Container } from '@/components/ui/Container'
-import { PageHeader } from '@/components/ui/PageHeader'
 
 export function AboutPage() {
   const content = usePageContent('about')
@@ -13,32 +12,30 @@ export function AboutPage() {
 
   return (
     <>
-      <Container className="flex flex-col items-start gap-12 py-section-y lg:gap-16">
-        <div className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-16">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              {content.hero.eyebrow ? (
-                <p className="font-body text-label uppercase tracking-widest text-leather">
-                  {content.hero.eyebrow}
-                </p>
-              ) : null}
-              <PageHeader title={content.hero.title} />
+      <Container className="py-section-y">
+        <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16">
+          <div className="space-y-6 lg:max-w-xl">
+            <h1 className="font-display text-page-title text-heritage-green">
+              {content.hero.title}
+            </h1>
+
+            <div className="space-y-5 font-body text-body text-matte-black/80">
+              {content.hero.lines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
             </div>
-
-            <img
-              src={homeAssets.crew}
-              alt="Sunday Rolls crew"
-              className="aspect-[4/3] w-full rounded-lg object-cover object-[center_25%]"
-            />
           </div>
 
-          <div className="space-y-5 font-body text-body text-matte-black/80 lg:pt-10">
-            {content.hero.lines.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
-        </div>
-        {content.team ? (
+          <img
+            src={homeAssets.crew}
+            alt="The Sunday Rolls crew"
+            className="aspect-[5/4] w-full object-cover object-[center_18%] sm:aspect-[4/3]"
+          />
+        </section>
+      </Container>
+
+      {content.team ? (
+        <Container className="pb-section-y">
           <section className="w-full space-y-10 border-t border-sand pt-12">
             <div className="max-w-2xl space-y-3">
               <h2 className="font-display text-section-title text-heritage-green">
@@ -66,13 +63,15 @@ export function AboutPage() {
               ))}
             </div>
           </section>
-        ) : null}
+        </Container>
+      ) : null}
 
+      <Container className="pb-section-y">
         <div className="grid w-full gap-10 border-t border-sand pt-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <img
             src={homeAssets.lifestyle}
             alt="Sunday Rolls headcovers in a golf bag"
-            className="aspect-[4/5] w-full max-w-md rounded-lg object-cover"
+            className="aspect-[4/5] w-full max-w-md object-cover"
           />
 
           <div className="space-y-4">

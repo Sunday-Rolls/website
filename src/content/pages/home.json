@@ -5,11 +5,13 @@
   },
   "hero": {
     "headline": "Make Every Day a Sunday.",
-    "subheadline": "Premium vintage-inspired golf goods.",
+    "subheadline": "Premium vintage-inspired golf goods built for the walk.",
     "cta": {
       "labelKey": "shopCollection",
       "href": "/shop"
-    }
+    },
+    "video": "/assets/home/videos/hero-golf.mp4",
+    "poster": "/assets/home/hero.jpg"
   },
   "values": {
     "items": [
@@ -19,12 +21,88 @@
       { "label": "Made to Last" }
     ]
   },
-  "featured": {
-    "title": "Featured Collection",
-    "subtitle": "Timeless golf goods built for the walk.",
+  "productBlocks": [
+    {
+      "id": "center-shafted",
+      "title": "Center Shafted Putter Covers",
+      "subtitle": "Dialed fit for L.A.B. and center-shafted mallets.",
+      "filter": "center-shafted",
+      "shopAll": {
+        "label": "Shop All",
+        "href": "/shop?category=center-shafted"
+      }
+    },
+    {
+      "id": "mallet",
+      "title": "Mallet Putter Covers",
+      "subtitle": "Heel-shafted covers with the same Sunday swagger.",
+      "filter": "mallet",
+      "shopAll": {
+        "label": "Shop All",
+        "href": "/shop?category=mallet"
+      }
+    },
+    {
+      "id": "oz-mezz",
+      "title": "Ozi.I and Mezz.I Putter Covers",
+      "subtitle": "Purpose-built for OZ.1i and Mezz.1 profiles.",
+      "filter": "oz-mezz",
+      "shopAll": {
+        "label": "Shop All",
+        "href": "/shop?category=oz-mezz"
+      }
+    }
+  ],
+  "mediaBreak": {
+    "video": "/assets/home/videos/swing-golf.mp4",
+    "poster": "/assets/home/lifestyle.png",
+    "caption": "Built for the good times on the course."
+  },
+  "reviews": {
+    "title": "What golfers are saying",
+    "items": [
+      {
+        "author": "Jordan M.",
+        "location": "Minneapolis, MN",
+        "rating": 5,
+        "text": "Fit on my DF3 is dialed and the embroidery looks even better in person. Gets compliments every round."
+      },
+      {
+        "author": "Alex R.",
+        "location": "Scottsdale, AZ",
+        "rating": 5,
+        "text": "Premium feel without the bulky look. Magnetic closure stays put in the bag and the velvet lining is soft on the putter."
+      },
+      {
+        "author": "Sam K.",
+        "location": "Chicago, IL",
+        "rating": 5,
+        "text": "Finally a cover that matches the putter. Quality stitching, fun design, and it feels built to last."
+      },
+      {
+        "author": "Chris T.",
+        "location": "Austin, TX",
+        "rating": 5,
+        "text": "Looks sharp in the bag and holds up after a full season of cart-to-green abuse. Already ordered a second."
+      },
+      {
+        "author": "Morgan L.",
+        "location": "Denver, CO",
+        "rating": 5,
+        "text": "The colors pop and the fit is exact. Friends keep asking where I got it."
+      }
+    ]
+  },
+  "story": {
+    "eyebrow": "Our Story",
+    "title": "Built by friends, for the good times.",
+    "lines": [
+      "Sunday Rolls started with a simple idea — create golf products that blend timeless style with modern performance. We're a group of lifelong friends who share a love for the game, a respect for its roots, and a belief that golf is better when it's fun.",
+      "From our first headcover to our latest designs, everything we make is crafted with purpose, built to last, and inspired by the moments that keep us coming back to the course."
+    ],
     "cta": {
-      "labelKey": "shopCollection",
-      "href": "/shop"
+      "label": "Our Story",
+      "href": "/about"
     }
   }
 }

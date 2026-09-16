@@ -22,6 +22,43 @@ export function Footer() {
             placeholder={footer.newsletter.placeholder}
             submitLabel={footer.newsletter.submitLabel}
           />
+
+          {(footer.contact || footer.social?.instagram) && (
+            <div className="space-y-2 pt-2 font-body text-body-small text-cream/85">
+              {footer.contact?.email ? (
+                <p>
+                  <a
+                    href={`mailto:${footer.contact.email}`}
+                    className="transition-colors hover:text-white"
+                  >
+                    {footer.contact.email}
+                  </a>
+                </p>
+              ) : null}
+              {footer.contact?.phone ? (
+                <p>
+                  <a
+                    href={`tel:${footer.contact.phone.replace(/[^\d+]/g, '')}`}
+                    className="transition-colors hover:text-white"
+                  >
+                    {footer.contact.phone}
+                  </a>
+                </p>
+              ) : null}
+              {footer.social?.instagram ? (
+                <p>
+                  <a
+                    href={footer.social.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="transition-colors hover:text-white"
+                  >
+                    Instagram
+                  </a>
+                </p>
+              ) : null}
+            </div>
+          )}
         </div>
 
         <div className="grid gap-8 sm:grid-cols-3">

@@ -40,10 +40,18 @@
       "company": "Company",
       "support": "Support"
     },
+    "contact": {
+      "email": "Sundayrollsco@gmail.com",
+      "phone": "(612) 750-0674"
+    },
+    "social": {
+      "instagram": "https://www.instagram.com/sundayrolls_co/"
+    },
     "copyright": "© {year} Sunday Rolls. All rights reserved."
   },
   "buttons": {
     "shopCollection": "Shop Collection",
+    "shopAll": "Shop All",
     "learnMore": "Learn More",
     "viewDetails": "View Details",
     "addToCart": "Add to Cart",
