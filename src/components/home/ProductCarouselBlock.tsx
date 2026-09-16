@@ -13,10 +13,12 @@ interface ProductCarouselBlockProps {
   tone?: 'cream' | 'sand'
 }
 
+const MOBILE_BREAKPOINT = 560
+
 function visibleCountForWidth(width: number) {
   if (width >= 1100) return 4
   if (width >= 860) return 3
-  if (width >= 560) return 2
+  if (width >= MOBILE_BREAKPOINT) return 2
   return 1
 }
 
@@ -26,8 +28,11 @@ export function ProductCarouselBlock({
   tone = 'cream',
 }: ProductCarouselBlockProps) {
   const trackRef = useRef<HTMLDivElement>(null)
+  const mobileScrollerRef = useRef<HTMLDivElement>(null)
   const [visibleCount, setVisibleCount] = useState(1)
   const [page, setPage] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const isMobile = visibleCount === 1
   const maxPage = Math.max(0, Math.ceil(products.length / visibleCount) - 1)
 
   useEffect(() => {
@@ -51,17 +56,83 @@ export function ProductCarouselBlock({
     setPage((current) => Math.min(current, maxPage))
   }, [maxPage])
 
+  useEffect(() => {
+    if (!isMobile) return
+
+    const scroller = mobileScrollerRef.current
+    if (!scroller) return
+
+    const syncActiveIndex = () => {
+      const items = Array.from(scroller.querySelectorAll<HTMLElement>('[data-carousel-item]'))
+      if (items.length === 0) return
+
+      const scrollerCenter = scroller.scrollLeft + scroller.clientWidth / 2
+      let closestIndex = 0
+      let closestDistance = Number.POSITIVE_INFINITY
+
+      items.forEach((item, index) => {
+        const itemCenter = item.offsetLeft + item.offsetWidth / 2
+        const distance = Math.abs(itemCenter - scrollerCenter)
+        if (distance < closestDistance) {
+          closestDistance = distance
+          closestIndex = index
+        }
+      })
+
+      setActiveIndex(closestIndex)
+    }
+
+    syncActiveIndex()
+    scroller.addEventListener('scroll', syncActiveIndex, { passive: true })
+    return () => scroller.removeEventListener('scroll', syncActiveIndex)
+  }, [isMobile, products.length])
+
+  function scrollMobileToIndex(index: number) {
+    const scroller = mobileScrollerRef.current
+    const item = scroller?.querySelectorAll<HTMLElement>('[data-carousel-item]')[index]
+    if (!scroller || !item) return
+
+    const left = item.offsetLeft - (scroller.clientWidth - item.offsetWidth) / 2
+    const start = scroller.scrollLeft
+    const change = left - start
+    if (Math.abs(change) < 1) return
+
+    const durationMs = 700
+    const startTime = performance.now()
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - startTime) / durationMs)
+      scroller.scrollLeft = start + change * easeInOutCubic(progress)
+      if (progress < 1) requestAnimationFrame(tick)
+    }
+
+    requestAnimationFrame(tick)
+  }
+
   function goPrevious() {
+    if (isMobile) {
+      scrollMobileToIndex(Math.max(0, activeIndex - 1))
+      return
+    }
     setPage((current) => Math.max(0, current - 1))
   }
 
   function goNext() {
+    if (isMobile) {
+      scrollMobileToIndex(Math.min(products.length - 1, activeIndex + 1))
+      return
+    }
     setPage((current) => Math.min(maxPage, current + 1))
   }
 
-  const canGoPrevious = page > 0
-  const canGoNext = page < maxPage
+  const canGoPrevious = isMobile ? activeIndex > 0 : page > 0
+  const canGoNext = isMobile ? activeIndex < products.length - 1 : page < maxPage
   const itemWidthPercent = 100 / visibleCount
+  const showControls = isMobile ? products.length > 1 : maxPage > 0
+  const dotCount = isMobile ? products.length : maxPage + 1
+  const activeDot = isMobile ? activeIndex : page
 
   return (
     <section
@@ -79,7 +150,7 @@ export function ProductCarouselBlock({
             ) : null}
           </div>
 
-          {maxPage > 0 ? (
+          {showControls ? (
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -103,41 +174,65 @@ export function ProductCarouselBlock({
           ) : null}
         </div>
 
-        <div
-          ref={trackRef}
-          className="overflow-hidden"
-          aria-roledescription="carousel"
-          aria-label={block.title}
-        >
-          <div
-            className="flex transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${page * 100}%)` }}
-            role="list"
-          >
-            {products.map((product) => (
+        <div ref={trackRef} aria-roledescription="carousel" aria-label={block.title}>
+          {isMobile ? (
+            <div
+              ref={mobileScrollerRef}
+              className="product-carousel-snap -mx-container-x flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[12.5%] pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              role="list"
+            >
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  data-carousel-item
+                  role="listitem"
+                  className="w-[75%] shrink-0 snap-center"
+                >
+                  <ProductCard product={product} className="h-full border-sand/80 bg-white/90" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-hidden">
               <div
-                key={product.id}
-                role="listitem"
-                className="shrink-0 px-2 first:pl-0 last:pr-0 sm:px-2.5"
-                style={{ width: `${itemWidthPercent}%` }}
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${page * 100}%)` }}
+                role="list"
               >
-                <ProductCard product={product} className="h-full border-sand/80 bg-white/90" />
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    role="listitem"
+                    className="shrink-0 px-2 first:pl-0 last:pr-0 sm:px-2.5"
+                    style={{ width: `${itemWidthPercent}%` }}
+                  >
+                    <ProductCard product={product} className="h-full border-sand/80 bg-white/90" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
-        {maxPage > 0 ? (
+        {showControls ? (
           <div className="flex justify-center gap-2">
-            {Array.from({ length: maxPage + 1 }, (_, index) => (
+            {Array.from({ length: dotCount }, (_, index) => (
               <button
                 key={index}
                 type="button"
-                onClick={() => setPage(index)}
+                onClick={() => {
+                  if (isMobile) {
+                    scrollMobileToIndex(index)
+                    return
+                  }
+                  setPage(index)
+                }}
                 aria-label={`Go to ${block.title} page ${index + 1}`}
                 className={cn(
                   'h-2 w-2 rounded-full transition-colors',
-                  index === page ? 'bg-heritage-green' : 'bg-heritage-green/25 hover:bg-heritage-green/50',
+                  index === activeDot
+                    ? 'bg-heritage-green'
+                    : 'bg-heritage-green/25 hover:bg-heritage-green/50',
                 )}
               />
             ))}
