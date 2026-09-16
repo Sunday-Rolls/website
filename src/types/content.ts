@@ -87,6 +87,10 @@ export interface HomeContent {
     description: string
     placeholder: string
     submitLabel: string
+    submittingLabel: string
+    successMessage: string
+    errorMessage: string
+    consent?: string
   }
 }
 

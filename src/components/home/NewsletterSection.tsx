@@ -1,9 +1,31 @@
+import { useState } from 'react'
 import { usePageContent } from '@/lib/content'
+import { pushEvent } from '@/lib/gtm'
+import { subscribeToNewsletter } from '@/lib/shopify'
 import { Container } from '@/components/ui/Container'
 import { EmailInput } from '@/components/ui/EmailInput'
 
+type Status = { tone: 'success' | 'error'; message: string } | null
+
 export function NewsletterSection() {
   const { newsletter } = usePageContent('home')
+  const [status, setStatus] = useState<Status>(null)
+
+  async function handleSubscribe(email: string) {
+    setStatus(null)
+
+    try {
+      await subscribeToNewsletter(email)
+      setStatus({ tone: 'success', message: newsletter.successMessage })
+      pushEvent('newsletter_subscribe', { method: 'shopify_storefront' })
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : newsletter.errorMessage
+      setStatus({ tone: 'error', message })
+    }
+  }
 
   return (
     <section
@@ -30,8 +52,28 @@ export function NewsletterSection() {
           <EmailInput
             placeholder={newsletter.placeholder}
             submitLabel={newsletter.submitLabel}
+            submittingLabel={newsletter.submittingLabel}
             className="mx-auto"
+            disabled={status?.tone === 'success'}
+            onSubmitEmail={handleSubscribe}
           />
+
+          {newsletter.consent ? (
+            <p className="font-body text-body-small text-cream/65">{newsletter.consent}</p>
+          ) : null}
+
+          {status ? (
+            <p
+              role="status"
+              className={
+                status.tone === 'success'
+                  ? 'font-body text-body-small text-soft-gold'
+                  : 'font-body text-body-small text-canvas-tan'
+              }
+            >
+              {status.message}
+            </p>
+          ) : null}
         </div>
       </Container>
     </section>
