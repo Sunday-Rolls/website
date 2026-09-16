@@ -5,7 +5,9 @@
   "home": {
     "hero": "/assets/home/hero.jpg",
     "crew": "/assets/home/crew.jpg",
-    "lifestyle": "/assets/home/lifestyle.png"
+    "lifestyle": "/assets/home/lifestyle.png",
+    "heroVideo": "/assets/home/videos/hero-golf.mp4",
+    "swingVideo": "/assets/home/videos/swing-golf.mp4"
   },
   "shop": {
     "banner": "/assets/shop/banner.jpg"

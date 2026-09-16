@@ -26,6 +26,13 @@ export interface SiteContent {
       company: string
       support: string
     }
+    contact?: {
+      email: string
+      phone: string
+    }
+    social?: {
+      instagram?: string
+    }
     copyright: string
   }
   buttons: Record<string, string>
@@ -42,20 +49,47 @@ export interface ContentLink {
   href: string
 }
 
+export interface HomeProductBlock {
+  id: string
+  title: string
+  subtitle?: string
+  filter: string
+  shopAll: ContentLink
+}
+
 export interface HomeContent {
   meta: PageMeta
   hero: {
     headline: string
     subheadline: string
     cta: ContentLink
+    video?: string
+    poster?: string
   }
   values: {
     items: Array<{ label: string }>
   }
-  featured: {
+  productBlocks: HomeProductBlock[]
+  mediaBreak?: {
+    video: string
+    poster?: string
+    caption?: string
+  }
+  reviews: {
     title: string
-    subtitle: string
+    items: ProductReview[]
+  }
+  story: {
+    eyebrow?: string
+    title: string
+    lines: string[]
     cta: ContentLink
+  }
+  team: {
+    title: string
+    subtitle?: string
+    cta: ContentLink
+    members: Array<{ name: string; role: string; focus?: string }>
   }
 }
 
