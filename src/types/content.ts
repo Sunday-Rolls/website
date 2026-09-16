@@ -119,10 +119,6 @@ export interface AboutContent {
     title: string
     eyebrow?: string
     lines: string[]
-    cta?: {
-      label: string
-      href: string
-    }
   }
   tradition: {
     title: string

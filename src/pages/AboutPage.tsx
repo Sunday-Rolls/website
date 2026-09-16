@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { homeAssets } from '@/assets'
 import { usePageContent } from '@/lib/content'
-import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 
 export function AboutPage() {
@@ -31,10 +30,6 @@ export function AboutPage() {
                 <p key={line}>{line}</p>
               ))}
             </div>
-
-            {content.hero.cta ? (
-              <Button href={content.hero.cta.href}>{content.hero.cta.label} →</Button>
-            ) : null}
           </div>
 
           <img
@@ -78,10 +73,7 @@ export function AboutPage() {
       ) : null}
 
       <Container className="pb-section-y">
-        <div
-          id="tradition"
-          className="grid scroll-mt-28 w-full gap-10 border-t border-sand pt-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16"
-        >
+        <div className="grid w-full gap-10 border-t border-sand pt-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <img
             src={homeAssets.lifestyle}
             alt="Sunday Rolls headcovers in a golf bag"
