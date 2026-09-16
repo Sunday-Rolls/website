@@ -16,6 +16,7 @@ dist-ssr
 !.env.example
 .password
 .etsy-browser-profile/
+output/
 
 # Editor directories and files
 .vscode/*

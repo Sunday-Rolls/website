@@ -21,6 +21,21 @@
   "reviews": {
     "heading": "Reviews",
     "empty": "Reviews coming soon—be the first to share your round.",
+    "leaveCta": "Leave a review",
+    "form": {
+      "title": "Share your round",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "locationLabel": "Location (optional)",
+      "locationPlaceholder": "City, State",
+      "ratingLabel": "Rating",
+      "reviewLabel": "Review",
+      "reviewPlaceholder": "How’s it playing?",
+      "submitLabel": "Submit review",
+      "cancelLabel": "Cancel",
+      "success": "Thanks — your review is live on this product.",
+      "error": "Please add your name, a rating, and a short review."
+    },
     "items": []
   }
 }

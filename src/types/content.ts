@@ -121,6 +121,14 @@ export interface ProductReview {
   text: string
   /** Listing title from Etsy when present (especially useful for star-only reviews). */
   listing?: string
+  /** Shopify product handle when the review is tied to a specific product. */
+  productHandle?: string
+  /** Stable id for site-submitted reviews (and dedupe). */
+  id?: string
+  /** Where the review came from. */
+  source?: 'etsy' | 'site'
+  /** ISO timestamp for site-submitted reviews. */
+  createdAt?: string
 }
 
 export interface ProductContent {
@@ -140,6 +148,21 @@ export interface ProductContent {
   reviews?: {
     heading: string
     empty: string
+    leaveCta: string
+    form: {
+      title: string
+      nameLabel: string
+      namePlaceholder: string
+      locationLabel: string
+      locationPlaceholder: string
+      ratingLabel: string
+      reviewLabel: string
+      reviewPlaceholder: string
+      submitLabel: string
+      cancelLabel: string
+      success: string
+      error: string
+    }
     items: ProductReview[]
   }
 }

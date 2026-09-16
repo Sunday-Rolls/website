@@ -15,6 +15,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from '@playwright/test'
+import { withInferredProductHandle } from './lib/infer-product-handle.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
@@ -261,25 +262,29 @@ async function main() {
       if (added === 0) break
     }
 
-    const items = [...byKey.values()]
+    const items = [...byKey.values()].map((item) =>
+      withInferredProductHandle({ ...item, source: 'etsy' }),
+    )
     if (items.length === 0) {
       throw new Error('Page loaded but no review cards were found. Etsy may have changed markup.')
     }
 
     const written = items.filter((r) => r.text).length
     const starOnly = items.length - written
+    const tagged = items.filter((r) => r.productHandle).length
 
     const payload = {
       source: args.url.split('#')[0],
       scrapedAt: new Date().toISOString(),
       count: items.length,
+      taggedCount: tagged,
       items,
     }
 
     mkdirSync(dirname(outPath), { recursive: true })
     writeFileSync(outPath, `${JSON.stringify(payload, null, 2)}\n`)
     console.log(
-      `\nWrote ${items.length} reviews (${written} with text, ${starOnly} star-only) → ${outPath}`,
+      `\nWrote ${items.length} reviews (${written} with text, ${starOnly} star-only, ${tagged} product-tagged) → ${outPath}`,
     )
   } finally {
     await context.close()

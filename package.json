@@ -17,7 +17,9 @@
     "catalog:sync": "python3 scripts/sync-product-catalog.py",
     "catalog:port-shopify": "node scripts/port-catalog-to-shopify.mjs",
     "assets:scrape": "python3 scripts/scrape-sundayrolls-assets.py",
-    "reviews:scrape": "node scripts/scrape-etsy-reviews.mjs"
+    "reviews:scrape": "node scripts/scrape-etsy-reviews.mjs",
+    "reviews:tag-handles": "node scripts/tag-review-product-handles.mjs",
+    "reviews:qr": "node scripts/generate-product-review-qrs.mjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
@@ -36,12 +38,14 @@
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24.13.3",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
     "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^29.1.1",
     "oxlint": "^1.79.0",
+    "qrcode": "^1.5.4",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
     "vitest": "^4.1.11"
