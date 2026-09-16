@@ -85,12 +85,6 @@ export interface HomeContent {
     lines: string[]
     cta: ContentLink
   }
-  team: {
-    title: string
-    subtitle?: string
-    cta: ContentLink
-    members: Array<{ name: string; role: string; focus?: string }>
-  }
 }
 
 export interface ShopFilterOption {

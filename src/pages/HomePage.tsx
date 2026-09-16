@@ -11,7 +11,6 @@ import { MediaBreak } from '@/components/home/MediaBreak'
 import { ProductCarouselBlock } from '@/components/home/ProductCarouselBlock'
 import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
 import { StoryBanner } from '@/components/home/StoryBanner'
-import { TeamCarousel } from '@/components/home/TeamCarousel'
 import { ValueStrip } from '@/components/ui/ValueStrip'
 
 export function HomePage() {
@@ -51,7 +50,6 @@ export function HomePage() {
       <MediaBreak />
       <ReviewsMarquee />
       <StoryBanner />
-      <TeamCarousel />
     </>
   )
 }
