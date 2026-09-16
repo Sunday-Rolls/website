@@ -39,11 +39,13 @@ export function ReviewsMarquee() {
           {loopItems.map((review, index) => (
             <article
               key={`${review.author}-${index}`}
-              className="w-[min(85vw,22rem)] shrink-0 border border-cream/15 bg-forest-green/50 p-6 backdrop-blur-sm"
+              className="flex h-44 w-[min(85vw,22rem)] shrink-0 flex-col border border-cream/15 bg-forest-green/50 p-5 backdrop-blur-sm"
             >
               <StarRating rating={review.rating} />
-              <p className="mt-4 font-body text-body text-cream/90">“{review.text}”</p>
-              <div className="mt-5 space-y-0.5">
+              <p className="mt-3 line-clamp-3 font-body text-body text-cream/90">
+                “{review.text}”
+              </p>
+              <div className="mt-auto space-y-0.5 pt-3">
                 <p className="font-body text-body-small font-semibold text-white">{review.author}</p>
                 {review.location ? (
                   <p className="font-body text-body-small text-soft-gold/90">{review.location}</p>
