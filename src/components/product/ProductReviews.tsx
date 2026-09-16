@@ -51,17 +51,21 @@ export function ProductReviews({ product }: ProductReviewsProps) {
           <ul className="grid gap-6 md:grid-cols-3">
             {reviews.items.map((review) => (
               <li
-                key={`${review.author}-${review.text.slice(0, 24)}`}
+                key={`${review.author}-${review.rating}-${review.text.slice(0, 24) || review.listing?.slice(0, 24) || 'stars'}`}
                 className="space-y-3 border-t border-sand pt-5"
               >
                 <StarRating rating={review.rating} />
-                <p className="font-body text-body text-matte-black/80">“{review.text}”</p>
+                {review.text ? (
+                  <p className="font-body text-body text-matte-black/80">“{review.text}”</p>
+                ) : null}
                 <div className="space-y-0.5">
                   <p className="font-body text-body-small font-semibold text-heritage-green">
                     {review.author}
                   </p>
                   {review.location ? (
                     <p className="font-body text-body-small text-leather">{review.location}</p>
+                  ) : review.listing ? (
+                    <p className="font-body text-body-small text-leather">{review.listing}</p>
                   ) : null}
                 </div>
               </li>

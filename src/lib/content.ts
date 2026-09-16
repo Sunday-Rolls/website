@@ -7,18 +7,36 @@ import galleryContent from '@/content/pages/gallery.json'
 import contactContent from '@/content/pages/contact.json'
 import cartContent from '@/content/pages/cart.json'
 import notFoundContent from '@/content/pages/not-found.json'
+import reviewsData from '@/data/reviews.json'
 import theme from '@/theme/theme.json'
 import type {
   PageContentMap,
   PageKey,
+  ProductReview,
   SiteContent,
 } from '@/types/content'
 import type { Theme } from '@/types/theme'
 
+const reviewItems = (reviewsData.items ?? []) as ProductReview[]
+
 const pageContent: PageContentMap = {
-  home: homeContent,
+  home: {
+    ...homeContent,
+    reviews: {
+      ...homeContent.reviews,
+      items: reviewItems,
+    },
+  },
   shop: shopContent,
-  product: productContent,
+  product: {
+    ...productContent,
+    reviews: productContent.reviews
+      ? {
+          ...productContent.reviews,
+          items: reviewItems,
+        }
+      : undefined,
+  },
   about: aboutContent,
   gallery: galleryContent,
   contact: contactContent,
@@ -36,6 +54,10 @@ export function getPageContent<K extends PageKey>(page: K): PageContentMap[K] {
 
 export function getTheme(): Theme {
   return theme as Theme
+}
+
+export function getReviewItems(): ProductReview[] {
+  return reviewItems
 }
 
 export function getButtonLabel(key: string): string {

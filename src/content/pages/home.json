@@ -60,38 +60,7 @@
   },
   "reviews": {
     "title": "What golfers are saying",
-    "items": [
-      {
-        "author": "Jordan M.",
-        "location": "Minneapolis, MN",
-        "rating": 5,
-        "text": "Fit on my DF3 is dialed and the embroidery looks even better in person. Gets compliments every round."
-      },
-      {
-        "author": "Alex R.",
-        "location": "Scottsdale, AZ",
-        "rating": 5,
-        "text": "Premium feel without the bulky look. Magnetic closure stays put in the bag and the velvet lining is soft on the putter."
-      },
-      {
-        "author": "Sam K.",
-        "location": "Chicago, IL",
-        "rating": 5,
-        "text": "Finally a cover that matches the putter. Quality stitching, fun design, and it feels built to last."
-      },
-      {
-        "author": "Chris T.",
-        "location": "Austin, TX",
-        "rating": 5,
-        "text": "Looks sharp in the bag and holds up after a full season of cart-to-green abuse. Already ordered a second."
-      },
-      {
-        "author": "Morgan L.",
-        "location": "Denver, CO",
-        "rating": 5,
-        "text": "The colors pop and the fit is exact. Friends keep asking where I got it."
-      }
-    ]
+    "items": []
   },
   "story": {
     "eyebrow": "Our Story",

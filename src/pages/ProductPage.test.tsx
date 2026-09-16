@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import productContent from '@/content/pages/product.json'
+import reviewsData from '@/data/reviews.json'
 import { ProductPage } from '@/pages/ProductPage'
 import { renderWithRouter } from '@/test/test-utils'
 
@@ -58,7 +59,7 @@ describe('ProductPage', () => {
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
     ).toBeInTheDocument()
-    expect(screen.getByText(productContent.reviews.items[0].author)).toBeInTheDocument()
+    expect(screen.getByText(reviewsData.items[0].author)).toBeInTheDocument()
   })
 
   it('renders story section from product.json', async () => {
