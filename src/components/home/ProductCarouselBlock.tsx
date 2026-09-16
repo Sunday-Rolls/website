@@ -163,7 +163,7 @@ export function ProductCarouselBlock({
           {isMobile ? (
             <div
               ref={mobileScrollerRef}
-              className="product-carousel-snap -mx-container-x flex snap-x snap-mandatory gap-4 overflow-x-auto px-[12.5%] pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="product-carousel-snap -mx-container-x flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[12.5%] pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               role="list"
             >
               {products.map((product) => (
@@ -171,7 +171,7 @@ export function ProductCarouselBlock({
                   key={product.id}
                   data-carousel-item
                   role="listitem"
-                  className="w-[75%] shrink-0 snap-center snap-always"
+                  className="w-[75%] shrink-0 snap-center"
                 >
                   <ProductCard product={product} className="h-full border-sand/80 bg-white/90" />
                 </div>

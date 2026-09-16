@@ -9,7 +9,7 @@ export function ValueStrip({ items, className }: ValueStripProps) {
   const useSpreadLayout = items.length <= 3
 
   return (
-    <div className={cn('home-snap-section border-y border-sand bg-sand/30 py-6', className)}>
+    <div className={cn('border-y border-sand bg-sand/30 py-6', className)}>
       <div
         className={cn(
           'mx-auto w-full max-w-container px-container-x',
