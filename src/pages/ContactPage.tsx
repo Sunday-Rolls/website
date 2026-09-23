@@ -1,21 +1,90 @@
-import { useEffect } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { getButtonLabel, usePageContent } from '@/lib/content'
+import { submitContactForm } from '@/lib/contact-api'
+import { pushEvent } from '@/lib/gtm'
+import { toastError, toastSuccess } from '@/lib/toast'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
 
+type FormState = {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
+const emptyForm: FormState = {
+  name: '',
+  email: '',
+  subject: '',
+  message: '',
+}
+
 export function ContactPage() {
   const content = usePageContent('contact')
+  const [form, setForm] = useState<FormState>(emptyForm)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     document.title = content.meta.title
   }, [content.meta.title])
 
-  const fields = [
-    content.form.name,
-    content.form.email,
-    content.form.subject,
-    content.form.message,
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await submitContactForm(form)
+      pushEvent('contact_submit', { method: 'contact_api' })
+      toastSuccess(
+        content.form.successMessage ??
+          "Message sent — we'll get back to you soon.",
+      )
+      setForm(emptyForm)
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : (content.form.errorMessage ?? 'Something went wrong. Please try again.')
+      toastError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((current) => ({ ...current, [key]: value }))
+  }
+
+  const fields: Array<{
+    key: keyof FormState
+    label: string
+    placeholder: string
+    multiline?: boolean
+  }> = [
+    {
+      key: 'name',
+      label: content.form.name.label,
+      placeholder: content.form.name.placeholder,
+    },
+    {
+      key: 'email',
+      label: content.form.email.label,
+      placeholder: content.form.email.placeholder,
+    },
+    {
+      key: 'subject',
+      label: content.form.subject.label,
+      placeholder: content.form.subject.placeholder,
+    },
+    {
+      key: 'message',
+      label: content.form.message.label,
+      placeholder: content.form.message.placeholder,
+      multiline: true,
+    },
   ]
 
   return (
@@ -24,35 +93,43 @@ export function ContactPage() {
         <div className="space-y-8">
           <PageHeader title={content.header.title} subtitle={content.header.subtitle} />
 
-          <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
-            {fields.map((field) => {
-              const isMessage = field.label === content.form.message.label
+          <form className="space-y-4" onSubmit={(event) => void handleSubmit(event)}>
+            {fields.map((field) => (
+              <label key={field.key} className="block space-y-2">
+                <span className="font-body text-label uppercase tracking-widest text-heritage-green">
+                  {field.label}
+                </span>
+                {field.multiline ? (
+                  <textarea
+                    name={field.key}
+                    value={form[field.key]}
+                    onChange={(event) => updateField(field.key, event.target.value)}
+                    placeholder={field.placeholder}
+                    rows={5}
+                    required
+                    disabled={isSubmitting}
+                    className="w-full rounded-md border border-sand bg-white px-4 py-3 font-body text-body focus:border-heritage-green focus:outline-none disabled:opacity-60"
+                  />
+                ) : (
+                  <input
+                    type={field.key === 'email' ? 'email' : 'text'}
+                    name={field.key}
+                    value={form[field.key]}
+                    onChange={(event) => updateField(field.key, event.target.value)}
+                    placeholder={field.placeholder}
+                    required
+                    disabled={isSubmitting}
+                    className="w-full rounded-md border border-sand bg-white px-4 py-3 font-body text-body focus:border-heritage-green focus:outline-none disabled:opacity-60"
+                  />
+                )}
+              </label>
+            ))}
 
-              return (
-                <label key={field.label} className="block space-y-2">
-                  <span className="font-body text-label uppercase tracking-widest text-heritage-green">
-                    {field.label}
-                  </span>
-                  {isMessage ? (
-                    <textarea
-                      name={field.label.toLowerCase()}
-                      placeholder={field.placeholder}
-                      rows={5}
-                      className="w-full rounded-md border border-sand bg-white px-4 py-3 font-body text-body focus:border-heritage-green focus:outline-none"
-                    />
-                  ) : (
-                    <input
-                      type={field.label === content.form.email.label ? 'email' : 'text'}
-                      name={field.label.toLowerCase()}
-                      placeholder={field.placeholder}
-                      className="w-full rounded-md border border-sand bg-white px-4 py-3 font-body text-body focus:border-heritage-green focus:outline-none"
-                    />
-                  )}
-                </label>
-              )
-            })}
-
-            <Button type="submit">{getButtonLabel(content.form.submitLabelKey)}</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? (content.form.submittingLabel ?? 'Sending…')
+                : getButtonLabel(content.form.submitLabelKey)}
+            </Button>
           </form>
         </div>
 

@@ -222,6 +222,9 @@ export interface ContactContent {
     subject: { label: string; placeholder: string }
     message: { label: string; placeholder: string }
     submitLabelKey: string
+    submittingLabel?: string
+    successMessage?: string
+    errorMessage?: string
   }
   sidebar: {
     title: string
