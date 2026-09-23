@@ -42,6 +42,11 @@ export interface ProductFeature {
   text: string
 }
 
+export interface ProductImage {
+  url: string
+  alt?: string
+}
+
 export interface ShopifyProduct {
   id: string
   handle: string
@@ -51,6 +56,8 @@ export interface ShopifyProduct {
   compareAtPrice?: string
   imageUrl?: string
   imageAlt?: string
+  /** Gallery slides — Shopify media when available, catalog/placeholders otherwise */
+  images?: ProductImage[]
   material?: string
   category?: ProductCategory
   subcategory?: HeadcoverSubcategory
@@ -89,6 +96,12 @@ const PRODUCT_SELECTION = `
   featuredImage {
     url
     altText
+  }
+  images(first: 5) {
+    nodes {
+      url
+      altText
+    }
   }
   priceRange {
     minVariantPrice {
@@ -235,6 +248,9 @@ type ProductNode = {
   title: string
   description: string
   featuredImage?: { url: string; altText?: string | null } | null
+  images?: {
+    nodes: Array<{ url: string; altText?: string | null }>
+  } | null
   priceRange: { minVariantPrice: Money }
   variants?: { nodes: Array<{ id: string }> }
 }
@@ -269,19 +285,38 @@ export function formatPrice(amount: string, currencyCode: string): string {
   }).format(Number(amount))
 }
 
+function mergeProductImages(
+  primary: ProductImage[] | undefined,
+  fallback: ProductImage[] | undefined,
+): ProductImage[] | undefined {
+  const merged: ProductImage[] = []
+  const seen = new Set<string>()
+
+  for (const image of [...(primary ?? []), ...(fallback ?? [])]) {
+    if (!image.url || seen.has(image.url)) continue
+    seen.add(image.url)
+    merged.push(image)
+    if (merged.length >= 5) break
+  }
+
+  return merged.length > 0 ? merged : undefined
+}
+
 function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
   const catalog = getCatalogProductByHandle(product.handle)
   if (!catalog) return product
 
   const fromCatalog = catalogProductToShopifyProduct(catalog)
+  const images = mergeProductImages(product.images, fromCatalog.images)
 
   return {
     ...fromCatalog,
     ...product,
     id: product.id,
     price: product.price,
-    imageUrl: product.imageUrl ?? fromCatalog.imageUrl,
-    imageAlt: product.imageAlt ?? fromCatalog.imageAlt,
+    imageUrl: product.imageUrl ?? images?.[0]?.url ?? fromCatalog.imageUrl,
+    imageAlt: product.imageAlt ?? images?.[0]?.alt ?? fromCatalog.imageAlt,
+    images,
     variantId: product.variantId,
     description: product.description || fromCatalog.description,
     material: fromCatalog.material,
@@ -295,6 +330,15 @@ function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
 
 function mapProduct(node: ProductNode): ShopifyProduct {
   const { amount, currencyCode } = node.priceRange.minVariantPrice
+  const shopifyImages =
+    node.images?.nodes.map((image) => ({
+      url: image.url,
+      alt: image.altText ?? node.title,
+    })) ?? []
+  const featured = node.featuredImage
+    ? [{ url: node.featuredImage.url, alt: node.featuredImage.altText ?? node.title }]
+    : []
+  const images = shopifyImages.length > 0 ? shopifyImages : featured
 
   return enrichFromCatalog({
     id: node.id,
@@ -302,8 +346,9 @@ function mapProduct(node: ProductNode): ShopifyProduct {
     title: node.title,
     description: node.description,
     price: formatPrice(amount, currencyCode),
-    imageUrl: node.featuredImage?.url,
-    imageAlt: node.featuredImage?.altText ?? node.title,
+    imageUrl: images[0]?.url ?? node.featuredImage?.url,
+    imageAlt: images[0]?.alt ?? node.featuredImage?.altText ?? node.title,
+    images: images.length > 0 ? images : undefined,
     variantId: node.variants?.nodes?.[0]?.id,
   })
 }
