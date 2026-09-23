@@ -81,7 +81,7 @@
     "placeholder": "Email address",
     "submitLabel": "Subscribe",
     "submittingLabel": "Subscribing…",
-    "successMessage": "You're on the list — check your inbox if we need a quick confirm.",
+    "successMessage": "You're on the list — thanks for signing up.",
     "errorMessage": "Unable to subscribe right now. Please try again.",
     "consent": "By subscribing, you agree to receive marketing emails from Sunday Rolls. Unsubscribe anytime."
   }
