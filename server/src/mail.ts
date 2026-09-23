@@ -13,6 +13,9 @@ export function createMailer(config: Config) {
     host: config.smtpHost,
     port: config.smtpPort,
     secure: config.smtpPort === 465,
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
     auth: {
       user: config.smtpUser,
       pass: config.smtpPass,

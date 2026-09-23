@@ -25,6 +25,8 @@ npm run dev
 
 `CORS_ORIGINS` must include every site origin that hosts the form (local Vite + production Pages URL).
 
+**Important:** Railway **Hobby / Trial / Free** blocks outbound SMTP (ports 465/587). Gmail SMTP only works on **Pro+**, or switch the server to an HTTPS email API (Resend, etc.). See [Railway outbound networking](https://docs.railway.com/networking/outbound-networking).
+
 ## Gmail App Password
 
 1. Sign in as `sundayrollsdevops@gmail.com`
