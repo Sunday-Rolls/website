@@ -8,6 +8,7 @@ import {
 } from '@/lib/shopify'
 import { HeroSection } from '@/components/home/HeroSection'
 import { MediaBreak } from '@/components/home/MediaBreak'
+import { NewsletterSection } from '@/components/home/NewsletterSection'
 import { ProductCarouselBlock } from '@/components/home/ProductCarouselBlock'
 import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
 import { StoryBanner } from '@/components/home/StoryBanner'
@@ -50,6 +51,7 @@ export function HomePage() {
       <MediaBreak />
       <ReviewsMarquee />
       <StoryBanner />
+      <NewsletterSection />
     </>
   )
 }

@@ -73,5 +73,16 @@
       "label": "Our Story",
       "href": "/about"
     }
+  },
+  "newsletter": {
+    "eyebrow": "The Sunday List",
+    "title": "Get drops and course notes first.",
+    "description": "New releases, behind-the-scenes, and the occasional good deal — no spam, just Sunday.",
+    "placeholder": "Email address",
+    "submitLabel": "Subscribe",
+    "submittingLabel": "Subscribing…",
+    "successMessage": "You're on the list — check your inbox if we need a quick confirm.",
+    "errorMessage": "Unable to subscribe right now. Please try again.",
+    "consent": "By subscribing, you agree to receive marketing emails from Sunday Rolls. Unsubscribe anytime."
   }
 }

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { formatCopyright, useSiteContent } from '@/lib/content'
 import { Container } from '@/components/ui/Container'
-import { EmailInput } from '@/components/ui/EmailInput'
 
 export function Footer() {
   const { brand, navigation, footer } = useSiteContent()
@@ -18,13 +17,9 @@ export function Footer() {
         <div className="space-y-4">
           <p className="font-display text-xl">{brand.name}</p>
           <p className="font-body text-body-small text-cream/80">{brand.tagline}</p>
-          <EmailInput
-            placeholder={footer.newsletter.placeholder}
-            submitLabel={footer.newsletter.submitLabel}
-          />
 
           {(footer.contact || footer.social?.instagram) && (
-            <div className="space-y-2 pt-2 font-body text-body-small text-cream/85">
+            <div className="space-y-2 font-body text-body-small text-cream/85">
               {footer.contact?.email ? (
                 <p>
                   <a

@@ -23,6 +23,20 @@ export const shopifyClient = isShopifyConfigured
     })
   : null
 
+/**
+ * Newsletter subscribe (`customerEmailMarketingSubscribe`) is documented on
+ * Storefront `unstable` only — keep cart/product traffic on the stable version.
+ */
+const NEWSLETTER_API_VERSION = 'unstable'
+
+const newsletterClient = isShopifyConfigured
+  ? createStorefrontApiClient({
+      storeDomain: storeDomain!,
+      apiVersion: NEWSLETTER_API_VERSION,
+      publicAccessToken: publicAccessToken!,
+    })
+  : null
+
 export interface ProductFeature {
   label: string
   text: string
@@ -323,6 +337,45 @@ function userErrorMessage(
 ): string {
   if (errors?.length) return errors.map((error) => error.message).join('; ')
   return fallback
+}
+
+const NEWSLETTER_SUBSCRIBE_MUTATION = `#graphql
+  mutation customerEmailMarketingSubscribe($email: String!) {
+    customerEmailMarketingSubscribe(email: $email) {
+      customer {
+        email
+      }
+      customerUserErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`
+
+export async function subscribeToNewsletter(email: string): Promise<void> {
+  const trimmed = email.trim()
+  if (!trimmed) {
+    throw new Error('Enter an email address to subscribe.')
+  }
+  if (!newsletterClient) {
+    throw new Error('Newsletter signup is unavailable right now.')
+  }
+
+  const { data, errors } = await newsletterClient.request(NEWSLETTER_SUBSCRIBE_MUTATION, {
+    variables: { email: trimmed },
+  })
+
+  const payload = data?.customerEmailMarketingSubscribe
+  if (errors || !payload) {
+    throw new Error('Unable to subscribe right now. Please try again.')
+  }
+  if (payload.customerUserErrors?.length) {
+    throw new Error(
+      userErrorMessage(payload.customerUserErrors, 'Unable to subscribe right now. Please try again.'),
+    )
+  }
 }
 
 export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {

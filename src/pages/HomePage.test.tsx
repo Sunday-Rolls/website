@@ -62,7 +62,7 @@ describe('HomePage', () => {
     expect(screen.getAllByRole('heading', { level: 3, name: 'Flagstick Fuel' }).length).toBeGreaterThan(0)
   })
 
-  it('renders reviews and story banner', () => {
+  it('renders reviews, story banner, and newsletter section', () => {
     renderWithRouter(<HomePage />)
 
     expect(
@@ -71,6 +71,11 @@ describe('HomePage', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: homeContent.story.title }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: homeContent.newsletter.title }),
+    ).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(homeContent.newsletter.placeholder)).toBeInTheDocument()
+    expect(screen.getByText(homeContent.newsletter.consent!)).toBeInTheDocument()
     expect(screen.queryByRole('heading', { level: 2, name: 'Meet the Team' })).not.toBeInTheDocument()
   })
 
