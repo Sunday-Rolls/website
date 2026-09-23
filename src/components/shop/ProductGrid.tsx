@@ -4,9 +4,15 @@ import { ProductCard } from '@/components/ui/ProductCard'
 
 interface ProductGridProps {
   products: ShopifyProduct[]
+  listId?: string
+  listName?: string
 }
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  listId = 'shop',
+  listName = 'Shop',
+}: ProductGridProps) {
   const content = usePageContent('shop')
 
   if (products.length === 0) {
@@ -25,7 +31,12 @@ export function ProductGrid({ products }: ProductGridProps) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard
+          key={product.id}
+          product={product}
+          listId={listId}
+          listName={listName}
+        />
       ))}
     </div>
   )

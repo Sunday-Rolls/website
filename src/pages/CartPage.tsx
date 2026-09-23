@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '@/lib/cart'
 import {
@@ -5,6 +6,7 @@ import {
   resolveLinkLabel,
   usePageContent,
 } from '@/lib/content'
+import { trackBeginCheckout, trackViewCart } from '@/lib/gtm'
 import { isShopifyConfigured } from '@/lib/shopify'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
@@ -23,6 +25,22 @@ export function CartPage() {
 
   const lines = cart?.lines ?? []
   const isEmpty = !isLoading && lines.length === 0
+  const cartSignature = cart
+    ? `${cart.id}:${cart.totalQuantity}:${cart.total}:${lines.map((l) => `${l.id}:${l.quantity}`).join(',')}`
+    : ''
+
+  useEffect(() => {
+    if (isLoading || isEmpty || !cart || lines.length === 0) return
+    trackViewCart(
+      lines.map((item) => ({
+        id: item.variantId || item.id,
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      cart.total,
+    )
+  }, [cart, cartSignature, isEmpty, isLoading, lines])
 
   if (!isShopifyConfigured) {
     return (
@@ -57,6 +75,18 @@ export function CartPage() {
           {resolveLinkLabel(content.emptyState.cta)}
         </Button>
       </Container>
+    )
+  }
+
+  function handleCheckoutClick() {
+    trackBeginCheckout(
+      lines.map((item) => ({
+        id: item.variantId || item.id,
+        title: item.title,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      cart?.total,
     )
   }
 
@@ -157,7 +187,7 @@ export function CartPage() {
           {content.summary.totalLabel}: {cart?.total}
         </p>
         {cart?.checkoutUrl ? (
-          <Button href={cart.checkoutUrl}>
+          <Button href={cart.checkoutUrl} onClick={handleCheckoutClick}>
             {getButtonLabel(content.summary.checkoutLabelKey)}
           </Button>
         ) : (

@@ -1,14 +1,26 @@
 import { Link } from 'react-router-dom'
 import { getButtonLabel } from '@/lib/content'
+import { trackSelectItem } from '@/lib/gtm'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { cn } from '@/lib/utils'
 
 interface ProductCardProps {
   product: ShopifyProduct
   className?: string
+  listId?: string
+  listName?: string
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({
+  product,
+  className,
+  listId = 'shop',
+  listName = 'Shop',
+}: ProductCardProps) {
+  function handleSelect() {
+    trackSelectItem(product, listId, listName)
+  }
+
   return (
     <article
       className={cn(
@@ -16,7 +28,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         className,
       )}
     >
-      <Link to={`/products/${product.handle}`} className="block">
+      <Link to={`/products/${product.handle}`} className="block" onClick={handleSelect}>
         <div className="aspect-[4/5] bg-warm-sand">
           {product.imageUrl ? (
             <img
@@ -34,7 +46,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <Link to={`/products/${product.handle}`}>
+        <Link to={`/products/${product.handle}`} onClick={handleSelect}>
           <h3 className="font-display text-xl text-heritage-green">{product.title}</h3>
         </Link>
         <p className="font-body text-body-small text-matte-black/70">{product.price}</p>
@@ -44,6 +56,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <Link
           to={`/products/${product.handle}`}
           className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors hover:text-forest-green"
+          onClick={handleSelect}
         >
           {getButtonLabel('viewDetails')} →
         </Link>

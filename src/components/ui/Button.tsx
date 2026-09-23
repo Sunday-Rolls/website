@@ -55,7 +55,7 @@ export function Button({
 
     if (isExternal) {
       return (
-        <a href={href} className={cn('inline-block', className)}>
+        <a href={href} onClick={onClick} className={cn('inline-block', className)}>
           <ButtonInner variant={variant}>{children}</ButtonInner>
         </a>
       )

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
+import { trackViewItemList } from '@/lib/gtm'
 import {
   fetchProducts,
   filterProductsByCategory,
@@ -31,6 +32,15 @@ export function ShopPage() {
     [activeFilter, products],
   )
 
+  useEffect(() => {
+    if (filteredProducts.length === 0) return
+    trackViewItemList(
+      `shop_${activeFilter}`,
+      activeFilter === 'all' ? 'Shop' : `Shop — ${activeFilter}`,
+      filteredProducts,
+    )
+  }, [activeFilter, filteredProducts])
+
   function handleFilterChange(value: string) {
     if (value === 'all') {
       setSearchParams({})
@@ -46,7 +56,11 @@ export function ShopPage() {
 
       <Container className="space-y-10 py-section-y">
         <CategoryFilters activeFilter={activeFilter} onFilterChange={handleFilterChange} />
-        <ProductGrid products={filteredProducts} />
+        <ProductGrid
+          products={filteredProducts}
+          listId={`shop_${activeFilter}`}
+          listName={activeFilter === 'all' ? 'Shop' : `Shop — ${activeFilter}`}
+        />
       </Container>
     </>
   )
