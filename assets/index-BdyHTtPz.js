@@ -149,7 +149,7 @@ Please change the parent <Route path="${e}"> to <Route path="${e===`/`?`*`:`${e}
   mutation customerEmailMarketingSubscribe($email: String!) {
     customerEmailMarketingSubscribe(email: $email) {
       customer {
-        email
+        id
       }
       customerUserErrors {
         field
