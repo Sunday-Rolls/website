@@ -307,7 +307,11 @@ function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
   if (!catalog) return product
 
   const fromCatalog = catalogProductToShopifyProduct(catalog)
-  const images = mergeProductImages(product.images, fromCatalog.images)
+  // Prefer Shopify media as-is. Only fall back to catalog placeholders when
+  // the storefront product has no images yet — never pad real media with fillers.
+  const images = product.images?.length
+    ? product.images
+    : mergeProductImages(product.images, fromCatalog.images)
 
   return {
     ...fromCatalog,

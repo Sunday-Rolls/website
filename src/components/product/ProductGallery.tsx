@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { productAssets, shopAssets } from '@/assets'
+import { productAssets } from '@/assets'
 import {
   getPlaceholderProductImage,
   type ProductImage,
@@ -12,7 +12,8 @@ interface ProductGalleryProps {
   className?: string
 }
 
-const GALLERY_SLOT_COUNT = 5
+/** Minimum thumbnails when Shopify only has a single image (pad by repeating). */
+const MIN_GALLERY_SLOTS = 2
 
 function resolveImages(product: ShopifyProduct): ProductImage[] {
   const seed: ProductImage[] = product.images?.length
@@ -36,17 +37,8 @@ function resolveImages(product: ShopifyProduct): ProductImage[] {
     images.push(image)
   }
 
-  for (const url of shopAssets.products) {
-    if (images.length >= GALLERY_SLOT_COUNT) break
-    if (seen.has(url)) continue
-    seen.add(url)
-    images.push({
-      url,
-      alt: `${product.title} view ${images.length + 1}`,
-    })
-  }
-
-  while (images.length < GALLERY_SLOT_COUNT && images[0]) {
+  // Pad only with this product's own images — never mix in other products.
+  while (images.length < MIN_GALLERY_SLOTS && images[0]) {
     images.push({
       url: images[0].url,
       alt: `${product.title} view ${images.length + 1}`,
