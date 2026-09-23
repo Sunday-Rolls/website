@@ -23,7 +23,7 @@ describe('subscribeToNewsletter', () => {
     requestMock.mockResolvedValue({
       data: {
         customerEmailMarketingSubscribe: {
-          customer: { email: 'golfer@example.com' },
+          customer: { id: 'gid://shopify/Customer/1' },
           customerUserErrors: [],
         },
       },

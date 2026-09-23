@@ -388,11 +388,12 @@ function userErrorMessage(
   return fallback
 }
 
+// Storefront `CustomerMarketingSubscribe` only exposes `id` (not email) on unstable.
 const NEWSLETTER_SUBSCRIBE_MUTATION = `#graphql
   mutation customerEmailMarketingSubscribe($email: String!) {
     customerEmailMarketingSubscribe(email: $email) {
       customer {
-        email
+        id
       }
       customerUserErrors {
         field
