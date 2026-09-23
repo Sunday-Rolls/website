@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_SHOPIFY_STOREFRONT_TOKEN?: string
   readonly VITE_SHOPIFY_API_VERSION?: string
   readonly VITE_GTM_ID?: string
+  /** Optional webhook (e.g. Formspree) that receives site-submitted product reviews as JSON. */
+  readonly VITE_REVIEW_WEBHOOK_URL?: string
 }
 
 interface ImportMeta {

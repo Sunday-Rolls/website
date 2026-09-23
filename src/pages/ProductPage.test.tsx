@@ -59,7 +59,20 @@ describe('ProductPage', () => {
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: productContent.reviews.leaveCta })).toBeInTheDocument()
     expect(screen.getByText(reviewsData.items[0].author)).toBeInTheDocument()
+  })
+
+  it('opens the leave-a-review form from the QR query param', async () => {
+    renderWithRouter(<ProductPage />, {
+      route: '/products/retro-roller-grey?review=1',
+      path: '/products/:handle',
+    })
+
+    expect(
+      await screen.findByRole('heading', { level: 3, name: productContent.reviews.form.title }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText(productContent.reviews.form.nameLabel)).toBeInTheDocument()
   })
 
   it('renders story section from product.json', async () => {

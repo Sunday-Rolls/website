@@ -9,6 +9,7 @@ import cartContent from '@/content/pages/cart.json'
 import notFoundContent from '@/content/pages/not-found.json'
 import reviewsData from '@/data/reviews.json'
 import theme from '@/theme/theme.json'
+import { withInferredProductHandle } from '@/lib/reviews'
 import type {
   PageContentMap,
   PageKey,
@@ -17,7 +18,9 @@ import type {
 } from '@/types/content'
 import type { Theme } from '@/types/theme'
 
-const reviewItems = (reviewsData.items ?? []) as ProductReview[]
+const reviewItems = ((reviewsData.items ?? []) as ProductReview[]).map(
+  withInferredProductHandle,
+)
 
 const pageContent: PageContentMap = {
   home: {
