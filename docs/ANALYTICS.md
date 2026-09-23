@@ -9,6 +9,7 @@ The site pushes events to `window.dataLayer` via [`src/lib/gtm.ts`](../src/lib/g
 3. Copy the Measurement ID (`G-XXXXXXXX`).
 4. Sign in to [Google Tag Manager](https://tagmanager.google.com/) with the same account.
 5. Create a container for the site → copy the Container ID (`GTM-XXXXXXX`) into `VITE_GTM_ID` (local `.env` + GitHub Actions / Pages secrets).
+   Current demo container: **`GTM-PQSG4NXT`**.
 6. In GTM:
    - **GA4 Configuration** tag → Measurement ID `G-XXXXXXXX`, trigger All Pages (or Custom Event `page_view` if you prefer SPA-only).
    - **GA4 Event** tags for custom events below (Event name = dataLayer `event`, trigger = Custom Event matching that name).
