@@ -94,12 +94,11 @@ export interface HomeContent {
   }
 }
 
-export interface ShopFilterOption {
-  label: string
-  value: string
-  /** Set true to hide from the shop UI without deleting the option (e.g. Bags). */
-  hidden?: boolean
-  children?: Array<{ label: string; value: string; hidden?: boolean }>
+export interface ShopSection {
+  /** Matches `product.subcategory`. */
+  id: string
+  title: string
+  subtitle?: string
 }
 
 export interface ShopContent {
@@ -108,11 +107,7 @@ export interface ShopContent {
     title: string
     subtitle: string
   }
-  filters: {
-    label: string
-    subFilterLabel?: string
-    options: ShopFilterOption[]
-  }
+  sections: ShopSection[]
   emptyState: {
     title: string
     description: string

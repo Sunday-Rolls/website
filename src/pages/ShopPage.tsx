@@ -8,15 +8,15 @@ import {
   placeholderProducts,
   type ShopifyProduct,
 } from '@/lib/shopify'
-import { CategoryFilters } from '@/components/shop/CategoryFilters'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { ShopHeader } from '@/components/shop/ShopHeader'
 import { Container } from '@/components/ui/Container'
+import { cn } from '@/lib/utils'
 
 export function ShopPage() {
   const content = usePageContent('shop')
-  const [searchParams, setSearchParams] = useSearchParams()
-  const activeFilter = searchParams.get('category') ?? 'all'
+  const [searchParams] = useSearchParams()
+  const targetSection = searchParams.get('category')
   const [products, setProducts] = useState<ShopifyProduct[]>(placeholderProducts)
 
   useEffect(() => {
@@ -27,41 +27,69 @@ export function ShopPage() {
     })
   }, [content.meta.title])
 
-  const filteredProducts = useMemo(
-    () => filterProductsByCategory(products, activeFilter),
-    [activeFilter, products],
+  const sections = useMemo(
+    () =>
+      content.sections
+        .map((section) => ({
+          section,
+          products: filterProductsByCategory(products, section.id),
+        }))
+        .filter(({ products: sectionProducts }) => sectionProducts.length > 0),
+    [content.sections, products],
   )
 
   useEffect(() => {
-    if (filteredProducts.length === 0) return
-    trackViewItemList(
-      `shop_${activeFilter}`,
-      activeFilter === 'all' ? 'Shop' : `Shop — ${activeFilter}`,
-      filteredProducts,
-    )
-  }, [activeFilter, filteredProducts])
-
-  function handleFilterChange(value: string) {
-    if (value === 'all') {
-      setSearchParams({})
-      return
+    for (const { section, products: sectionProducts } of sections) {
+      trackViewItemList(`shop_${section.id}`, `Shop — ${section.title}`, sectionProducts)
     }
+  }, [sections])
 
-    setSearchParams({ category: value })
-  }
+  useEffect(() => {
+    if (!targetSection) return
+    document.getElementById(targetSection)?.scrollIntoView()
+  }, [targetSection])
 
   return (
     <>
       <ShopHeader />
 
-      <Container className="space-y-10 py-section-y">
-        <CategoryFilters activeFilter={activeFilter} onFilterChange={handleFilterChange} />
-        <ProductGrid
-          products={filteredProducts}
-          listId={`shop_${activeFilter}`}
-          listName={activeFilter === 'all' ? 'Shop' : `Shop — ${activeFilter}`}
-        />
-      </Container>
+      {sections.length === 0 ? (
+        <Container className="py-section-y">
+          <ProductGrid products={[]} />
+        </Container>
+      ) : null}
+
+      {sections.map(({ section, products: sectionProducts }, index) => (
+        <section
+          key={section.id}
+          id={section.id}
+          aria-labelledby={`shop-${section.id}-heading`}
+          className={cn(
+            'scroll-mt-16 py-10 md:py-14',
+            index % 2 === 0 ? 'bg-cream' : 'bg-warm-sand/45',
+          )}
+        >
+          <Container className="space-y-6">
+            <div className="max-w-2xl space-y-2">
+              <h2
+                id={`shop-${section.id}-heading`}
+                className="font-display text-page-title text-heritage-green"
+              >
+                {section.title}
+              </h2>
+              {section.subtitle ? (
+                <p className="font-body text-lg text-matte-black/75">{section.subtitle}</p>
+              ) : null}
+            </div>
+
+            <ProductGrid
+              products={sectionProducts}
+              listId={`shop_${section.id}`}
+              listName={`Shop — ${section.title}`}
+            />
+          </Container>
+        </section>
+      ))}
     </>
   )
 }

@@ -1,5 +1,4 @@
-import { screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import shopContent from '@/content/pages/shop.json'
 import { ShopPage } from '@/pages/ShopPage'
@@ -14,7 +13,11 @@ vi.mock('@/lib/shopify', async () => {
   }
 })
 
-const visibleFilters = shopContent.filters.options.filter((option) => !option.hidden)
+function sectionFor(title: string) {
+  const section = screen.getByRole('heading', { level: 2, name: title }).closest('section')
+  expect(section).not.toBeNull()
+  return section!
+}
 
 describe('ShopPage', () => {
   it('renders collection header from shop.json', () => {
@@ -26,50 +29,47 @@ describe('ShopPage', () => {
     expect(screen.getByText(shopContent.header.subtitle)).toBeInTheDocument()
   })
 
-  it('renders all catalog products by default', () => {
+  it('renders a section per putter cover type, in home page order, with its subtitle', () => {
     renderWithRouter(<ShopPage />)
 
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(15)
-  })
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
+    expect(headings).toEqual(shopContent.sections.map((section) => section.title))
 
-  it('renders visible category filters from content and hides Bags', () => {
-    renderWithRouter(<ShopPage />)
-
-    for (const option of visibleFilters) {
-      expect(screen.getByRole('button', { name: option.label })).toBeInTheDocument()
+    for (const section of shopContent.sections) {
+      expect(within(sectionFor(section.title)).getByText(section.subtitle)).toBeInTheDocument()
     }
-
-    expect(screen.queryByRole('button', { name: 'Bags' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Towels' })).toBeInTheDocument()
   })
 
-  it('shows headcover type filters and filters by subcategory', async () => {
-    const user = userEvent.setup()
+  it('groups every catalog product under its putter type', () => {
     renderWithRouter(<ShopPage />)
 
-    await user.click(screen.getByRole('button', { name: 'Headcovers' }))
+    const [centerShafted, mallet, ozMezz] = shopContent.sections.map((section) =>
+      sectionFor(section.title),
+    )
 
-    expect(screen.getByRole('button', { name: 'Center Shafted' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Mallet' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'OZ1i & Mezz.1' })).toBeInTheDocument()
+    expect(within(centerShafted).getAllByRole('heading', { level: 3 })).toHaveLength(9)
+    expect(within(centerShafted).getByRole('heading', { name: 'The Doodle' })).toBeInTheDocument()
+    expect(within(mallet).getAllByRole('heading', { level: 3 })).toHaveLength(4)
+    expect(within(ozMezz).getAllByRole('heading', { level: 3 })).toHaveLength(2)
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(15)
-
-    await user.click(screen.getByRole('button', { name: 'Mallet' }))
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(4)
-
-    await user.click(screen.getByRole('button', { name: 'OZ1i & Mezz.1' }))
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(2)
   })
 
-  it('shows empty state for towels until products are added', async () => {
-    const user = userEvent.setup()
+  it('does not render filter buttons or a towels section', () => {
     renderWithRouter(<ShopPage />)
 
-    await user.click(screen.getByRole('button', { name: 'Towels' }))
+    expect(screen.queryByRole('button', { name: 'All Products' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Headcovers' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/towels/i)).not.toBeInTheDocument()
+  })
 
-    expect(
-      screen.getByRole('heading', { level: 2, name: shopContent.emptyState.title }),
-    ).toBeInTheDocument()
+  it('scrolls to the section named in ?category= for Shop All links', () => {
+    const scrollIntoView = vi.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+
+    renderWithRouter(<ShopPage />, { route: '/shop?category=mallet' })
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1)
+    expect(scrollIntoView.mock.contexts[0]).toBe(sectionFor('Mallet Putter Covers'))
   })
 
   it('uses the Figma shop header banner asset', () => {
@@ -77,18 +77,5 @@ describe('ShopPage', () => {
 
     const banner = document.querySelector('img[src="/assets/shop/banner.jpg"]')
     expect(banner).not.toBeNull()
-  })
-
-  it('shows empty state when no products match the filter', async () => {
-    const user = userEvent.setup()
-    renderWithRouter(<ShopPage />, { route: '/shop?category=nonexistent' })
-
-    expect(
-      screen.getByRole('heading', { level: 2, name: shopContent.emptyState.title }),
-    ).toBeInTheDocument()
-    expect(screen.getByText(shopContent.emptyState.description)).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: 'All Products' }))
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(15)
   })
 })
