@@ -104,6 +104,18 @@ describe('HomePage', () => {
     expect(screen.getAllByText(`“${firstReview!.text}”`).length).toBeGreaterThan(0)
   })
 
+  it('shows the full text of long reviews instead of clamping them', () => {
+    renderWithRouter(<HomePage />)
+
+    const longestReview = [...reviewsData.items].sort((a, b) => b.text.length - a.text.length)[0]
+    const quotes = screen.getAllByText(`“${longestReview.text}”`)
+    expect(quotes.length).toBeGreaterThan(0)
+    for (const quote of quotes) {
+      expect(quote.className).not.toMatch(/line-clamp/)
+      expect(quote.closest('article')?.className).not.toMatch(/\bh-\d/)
+    }
+  })
+
   it('renders carousel next controls for product blocks', () => {
     renderWithRouter(<HomePage />)
 
