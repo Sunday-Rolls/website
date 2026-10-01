@@ -1,3 +1,4 @@
+import { assetUrl } from '@/lib/asset-url'
 import { useSiteContent } from '@/lib/content'
 import { cn } from '@/lib/utils'
 
@@ -9,36 +10,25 @@ const networks: Array<{ key: SocialNetwork; label: string }> = [
   { key: 'etsy', label: 'Etsy' },
 ]
 
+/** Logos are self-hosted in `public/assets/social` and masked so they inherit the text color. */
 function SocialIcon({ network, className }: { network: SocialNetwork; className?: string }) {
-  if (network === 'instagram') {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        className={className}
-        aria-hidden="true"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4.2" />
-        <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
-      </svg>
-    )
-  }
-
-  if (network === 'facebook') {
-    return (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-        <path d="M13.5 21v-7.6h2.6l.4-3h-3V8.5c0-.9.3-1.5 1.5-1.5h1.6V4.3c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.8v3h2.6V21z" />
-      </svg>
-    )
-  }
+  const url = `url("${assetUrl(`/assets/social/${network}.svg`)}")`
 
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M7 4h10.2l.4 4.2h-.9c-.4-1.8-1-2.6-3-2.6h-3v5.6h2.2c1.5 0 1.9-.6 2.1-1.9h.8v5.4H15c-.2-1.4-.6-2-2.1-2h-2.2v4.6c0 1.2.6 1.6 1.8 1.6h1.4c1.9 0 2.6-.9 3.2-2.9h.9L17.6 20H7v-.8c1.1-.2 1.4-.5 1.4-1.6V6.4c0-1.1-.3-1.4-1.4-1.6z" />
-    </svg>
+    <span
+      aria-hidden="true"
+      className={cn('inline-block bg-current', className)}
+      style={{
+        maskImage: url,
+        WebkitMaskImage: url,
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+      }}
+    />
   )
 }
 
