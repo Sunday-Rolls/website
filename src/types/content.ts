@@ -181,10 +181,6 @@ export interface AboutContent {
     eyebrow?: string
     lines: string[]
   }
-  tradition: {
-    title: string
-    lines: string[]
-  }
   values: {
     title?: string
     items: Array<{ label: string; description?: string }>
@@ -192,8 +188,22 @@ export interface AboutContent {
   team?: {
     title: string
     subtitle?: string
-    members: Array<{ name: string; role: string; bio: string }>
+    labels: {
+      hometown: string
+      handicap: string
+      favoriteCourse: string
+    }
+    members: TeamMember[]
   }
+}
+
+export interface TeamMember {
+  name: string
+  role: string
+  hometown: string
+  handicap: string
+  favoriteCourse: string
+  image: string
 }
 
 export interface GalleryContent {

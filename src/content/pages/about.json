@@ -10,11 +10,54 @@
       "From our first headcover to our latest designs, everything we make is crafted with purpose, built to last, and inspired by the moments that keep us coming back to the course."
     ]
   },
-  "tradition": {
-    "title": "A new take on tradition",
-    "lines": [
-      "We couldn’t find a headcover that matched the vibe (and fit) of our L.A.B. putters—so we built it.",
-      "Premium materials, a magnetic fit that stays put, and a touch of nostalgia stitched in. Started by friends who love golf and wanted to bring more style to the course."
+  "team": {
+    "title": "Meet the Team",
+    "labels": {
+      "hometown": "Hometown",
+      "handicap": "Handicap",
+      "favoriteCourse": "Favorite Course"
+    },
+    "members": [
+      {
+        "name": "Derick Kuchera",
+        "role": "Partner",
+        "hometown": "Eagan, MN",
+        "handicap": "1",
+        "favoriteCourse": "Pebble Beach",
+        "image": "/assets/about/team/derick.jpg"
+      },
+      {
+        "name": "Sam Wolfe",
+        "role": "Partner",
+        "hometown": "Eagan, MN",
+        "handicap": "11",
+        "favoriteCourse": "Hiawatha",
+        "image": "/assets/about/team/sam.jpg"
+      },
+      {
+        "name": "Alex Funk",
+        "role": "Partner",
+        "hometown": "Winona, MN",
+        "handicap": "6.5",
+        "favoriteCourse": "The Bridges",
+        "image": "/assets/about/team/alex.jpg"
+      },
+      {
+        "name": "Ben Weir",
+        "role": "Partner",
+        "hometown": "Rochester, MN",
+        "handicap": "5",
+        "favoriteCourse": "Whistling Straits",
+        "image": "/assets/about/team/ben.jpg"
+      },
+      {
+        "name": "Nick Kuchera",
+        "role": "Partner",
+        "hometown": "Eagan, MN",
+        "handicap": "2.5",
+        "favoriteCourse": "Tobacco Road",
+        "image": "/assets/about/team/nick.jpg"
+      }
     ]
   },
   "values": {
@@ -39,27 +82,6 @@
       {
         "label": "Enjoy the Walk",
         "description": "Find your pace."
-      }
-    ]
-  },
-  "team": {
-    "title": "The crew",
-    "subtitle": "Lifelong friends, one brand—and a lot of Sunday rounds.",
-    "members": [
-      {
-        "name": "Founder name",
-        "role": "Co-Founder",
-        "bio": "Add 2–3 sentences about your path into golf, what you care about on the course, and the part of Sunday Rolls you own day to day."
-      },
-      {
-        "name": "Founder name",
-        "role": "Co-Founder",
-        "bio": "Add 2–3 sentences about your path into golf, what you care about on the course, and the part of Sunday Rolls you own day to day."
-      },
-      {
-        "name": "Founder name",
-        "role": "Co-Founder",
-        "bio": "Add 2–3 sentences about your path into golf, what you care about on the course, and the part of Sunday Rolls you own day to day."
       }
     ]
   }
