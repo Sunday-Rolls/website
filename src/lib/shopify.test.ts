@@ -1,10 +1,32 @@
 import { describe, expect, it } from 'vitest'
-import { filterProductsByCategory, placeholderProducts } from '@/lib/shopify'
+import {
+  filterProductsByCategory,
+  moveFrontImageFirst,
+  placeholderProducts,
+} from '@/lib/shopify'
 import { validateProductsAgainstCatalog } from '@/lib/product-catalog'
+
+const subcategoryOrder = ['center-shafted', 'mallet', 'oz-mezz']
 
 describe('filterProductsByCategory', () => {
   it('returns all products for the all filter', () => {
     expect(filterProductsByCategory(placeholderProducts, 'all')).toHaveLength(15)
+  })
+
+  it('sorts all products center shafted, then mallet, then OZ like the home page', () => {
+    const shuffled = [...placeholderProducts].reverse()
+
+    for (const filter of ['all', 'headcovers']) {
+      const ranks = filterProductsByCategory(shuffled, filter).map((product) =>
+        subcategoryOrder.indexOf(product.subcategory ?? ''),
+      )
+      expect(ranks).toEqual([...ranks].sort((a, b) => a - b))
+    }
+
+    const doodleIndex = filterProductsByCategory(placeholderProducts, 'all').findIndex(
+      (product) => product.handle === 'the-doodle',
+    )
+    expect(doodleIndex).toBeLessThan(9)
   })
 
   it('returns only headcovers for the headcovers filter', () => {
@@ -29,6 +51,24 @@ describe('filterProductsByCategory', () => {
     expect(filterProductsByCategory(placeholderProducts, 'towels')).toHaveLength(0)
     expect(filterProductsByCategory(placeholderProducts, 'accessories')).toHaveLength(0)
     expect(filterProductsByCategory(placeholderProducts, 'nonexistent')).toHaveLength(0)
+  })
+})
+
+describe('moveFrontImageFirst', () => {
+  const images = ['dual', 'back', 'front', 'open'].map((url) => ({ url }))
+
+  it('moves the front-only shot to the start of the gallery', () => {
+    expect(moveFrontImageFirst(images, 2).map((image) => image.url)).toEqual([
+      'front',
+      'dual',
+      'back',
+      'open',
+    ])
+  })
+
+  it('keeps the original order when no front index is set or it is out of range', () => {
+    expect(moveFrontImageFirst(images)).toBe(images)
+    expect(moveFrontImageFirst(images, 9)).toBe(images)
   })
 })
 
