@@ -35,7 +35,7 @@ export function StoryBanner() {
           <img
             src={homeAssets.crew}
             alt="The Sunday Rolls crew"
-            className="aspect-[5/4] w-full object-cover object-[center_18%] sm:aspect-[4/3]"
+            className="aspect-[5/4] w-full object-cover object-[center_74%]"
           />
         </div>
       </Container>

@@ -11,6 +11,7 @@ import reviewsData from '@/data/reviews.json'
 import theme from '@/theme/theme.json'
 import { withInferredProductHandle } from '@/lib/reviews'
 import type {
+  HomeContent,
   PageContentMap,
   PageKey,
   ProductReview,
@@ -25,6 +26,7 @@ const reviewItems = ((reviewsData.items ?? []) as ProductReview[]).map(
 const pageContent: PageContentMap = {
   home: {
     ...homeContent,
+    values: homeContent.values as HomeContent['values'],
     reviews: {
       ...homeContent.reviews,
       items: reviewItems,

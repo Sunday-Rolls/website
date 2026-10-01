@@ -11,6 +11,7 @@ import { MediaBreak } from '@/components/home/MediaBreak'
 import { NewsletterSection } from '@/components/home/NewsletterSection'
 import { ProductCarouselBlock } from '@/components/home/ProductCarouselBlock'
 import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
+import { SocialsBanner } from '@/components/home/SocialsBanner'
 import { StoryBanner } from '@/components/home/StoryBanner'
 import { ValueStrip } from '@/components/ui/ValueStrip'
 
@@ -39,7 +40,7 @@ export function HomePage() {
   return (
     <>
       <HeroSection />
-      <ValueStrip items={content.values.items} className="border-sand bg-warm-sand/55" />
+      <ValueStrip items={content.values.items} />
       {blocks.map(({ block, products: blockProducts, tone }) => (
         <ProductCarouselBlock
           key={block.id}
@@ -51,6 +52,7 @@ export function HomePage() {
       <MediaBreak />
       <ReviewsMarquee />
       <StoryBanner />
+      <SocialsBanner />
       <NewsletterSection />
     </>
   )

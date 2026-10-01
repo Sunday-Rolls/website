@@ -34,7 +34,7 @@ export function HeroSection() {
         />
       </div>
 
-      <Container className="relative flex min-h-[min(88vh,780px)] items-end py-16 md:items-center md:py-section-y">
+      <Container className="relative flex min-h-[min(72vh,640px)] items-end py-16 md:items-center md:py-section-y">
         <div className="max-w-xl space-y-5 pb-4 md:pb-0">
           <p className="font-body text-label uppercase tracking-widest text-soft-gold">Sunday Rolls</p>
           <h1 className="font-display text-hero text-white">{content.hero.headline}</h1>
