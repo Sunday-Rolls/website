@@ -9,8 +9,8 @@ interface ProductCardProps {
   className?: string
   listId?: string
   listName?: string
-  /** `large` drops the material line and "View details" link in favor of bigger title and price text. */
-  size?: 'default' | 'large'
+  /** Hides the material line and "View details" link for shorter cards. */
+  compact?: boolean
 }
 
 export function ProductCard({
@@ -18,10 +18,8 @@ export function ProductCard({
   className,
   listId = 'shop',
   listName = 'Shop',
-  size = 'default',
+  compact = false,
 }: ProductCardProps) {
-  const isLarge = size === 'large'
-
   function handleSelect() {
     trackSelectItem(product, listId, listName)
   }
@@ -50,31 +48,15 @@ export function ProductCard({
         </div>
       </Link>
 
-      <div className={cn('flex flex-1 flex-col', isLarge ? 'gap-1 px-4 py-3.5' : 'gap-2 p-4')}>
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <Link to={`/products/${product.handle}`} onClick={handleSelect}>
-          <h3
-            className={cn(
-              'font-display text-heritage-green',
-              isLarge ? 'text-2xl leading-tight md:text-[1.65rem]' : 'text-xl',
-            )}
-          >
-            {product.title}
-          </h3>
+          <h3 className="font-display text-xl text-heritage-green">{product.title}</h3>
         </Link>
-        <p
-          className={cn(
-            'font-body',
-            isLarge
-              ? 'text-body font-medium text-matte-black/80'
-              : 'text-body-small text-matte-black/70',
-          )}
-        >
-          {product.price}
-        </p>
-        {!isLarge && product.material ? (
+        <p className="font-body text-body-small text-matte-black/70">{product.price}</p>
+        {!compact && product.material ? (
           <p className="font-body text-body-small text-leather">{product.material}</p>
         ) : null}
-        {!isLarge ? (
+        {!compact ? (
           <Link
             to={`/products/${product.handle}`}
             className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors hover:text-forest-green"

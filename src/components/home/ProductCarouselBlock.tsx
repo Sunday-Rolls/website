@@ -199,7 +199,7 @@ export function ProductCarouselBlock({
                 >
                   <ProductCard
                     product={product}
-                    size="large"
+                    compact
                     className="h-full border-sand/80 bg-white/90"
                   />
                 </div>
@@ -221,7 +221,7 @@ export function ProductCarouselBlock({
                   >
                     <ProductCard
                       product={product}
-                      size="large"
+                      compact
                       className="h-full border-sand/80 bg-white/90"
                     />
                   </div>
