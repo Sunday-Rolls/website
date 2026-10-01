@@ -142,6 +142,7 @@
     "images": [
       "/assets/products/flagstick-fuel.jpg"
     ],
+    "frontImageIndex": 1,
     "subcategory": "center-shafted",
     "keyFeatures": [
       {
@@ -183,6 +184,7 @@
     "images": [
       "/assets/products/the-corduroy.jpg"
     ],
+    "frontImageIndex": 2,
     "subcategory": "center-shafted",
     "keyFeatures": [
       {
@@ -347,6 +349,7 @@
     "images": [
       "/assets/products/mallet-retro-roller-white.jpg"
     ],
+    "frontImageIndex": 2,
     "subcategory": "mallet",
     "keyFeatures": [
       {
@@ -388,6 +391,7 @@
     "images": [
       "/assets/products/mallet-retro-roller-grey.jpg"
     ],
+    "frontImageIndex": 1,
     "subcategory": "mallet",
     "keyFeatures": [
       {
@@ -429,6 +433,7 @@
     "images": [
       "/assets/products/mallet-sunday-stripes.jpg"
     ],
+    "frontImageIndex": 2,
     "subcategory": "mallet",
     "keyFeatures": [
       {
@@ -470,6 +475,7 @@
     "images": [
       "/assets/products/mallet-the-corduroy.jpg"
     ],
+    "frontImageIndex": 1,
     "subcategory": "mallet",
     "keyFeatures": [
       {
@@ -552,6 +558,7 @@
     "images": [
       "/assets/products/coin-collector.jpg"
     ],
+    "frontImageIndex": 2,
     "subcategory": "oz-mezz",
     "keyFeatures": [
       {
