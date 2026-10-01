@@ -302,6 +302,15 @@ function mergeProductImages(
   return merged.length > 0 ? merged : undefined
 }
 
+export function moveFrontImageFirst(
+  images: ProductImage[],
+  frontImageIndex = 0,
+): ProductImage[] {
+  const front = images[frontImageIndex]
+  if (frontImageIndex <= 0 || !front) return images
+  return [front, ...images.filter((_, index) => index !== frontImageIndex)]
+}
+
 function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
   const catalog = getCatalogProductByHandle(product.handle)
   if (!catalog) return product
@@ -310,7 +319,7 @@ function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
   // Prefer Shopify media as-is. Only fall back to catalog placeholders when
   // the storefront product has no images yet — never pad real media with fillers.
   const images = product.images?.length
-    ? product.images
+    ? moveFrontImageFirst(product.images, catalog.frontImageIndex)
     : mergeProductImages(product.images, fromCatalog.images)
 
   return {
@@ -318,8 +327,8 @@ function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
     ...product,
     id: product.id,
     price: product.price,
-    imageUrl: product.imageUrl ?? images?.[0]?.url ?? fromCatalog.imageUrl,
-    imageAlt: product.imageAlt ?? images?.[0]?.alt ?? fromCatalog.imageAlt,
+    imageUrl: images?.[0]?.url ?? product.imageUrl ?? fromCatalog.imageUrl,
+    imageAlt: images?.[0]?.alt ?? product.imageAlt ?? fromCatalog.imageAlt,
     images,
     variantId: product.variantId,
     description: product.description || fromCatalog.description,
@@ -566,17 +575,33 @@ const HEADCOVER_SUBCATEGORIES = new Set<string>([
   'oz-mezz',
 ])
 
+/** Matches the order of the product blocks on the home page. */
+const HEADCOVER_SUBCATEGORY_ORDER: HeadcoverSubcategory[] = ['center-shafted', 'mallet', 'oz-mezz']
+
+function subcategoryRank(product: ShopifyProduct): number {
+  const rank = product.subcategory
+    ? HEADCOVER_SUBCATEGORY_ORDER.indexOf(product.subcategory)
+    : -1
+  return rank === -1 ? HEADCOVER_SUBCATEGORY_ORDER.length : rank
+}
+
+export function sortProductsBySubcategory(products: ShopifyProduct[]): ShopifyProduct[] {
+  return [...products].sort((a, b) => subcategoryRank(a) - subcategoryRank(b))
+}
+
 export function filterProductsByCategory(
   products: ShopifyProduct[],
   category: string,
 ): ShopifyProduct[] {
-  if (category === 'all') return products
+  if (category === 'all') return sortProductsBySubcategory(products)
 
   if (HEADCOVER_SUBCATEGORIES.has(category)) {
     return products.filter((product) => product.subcategory === category)
   }
 
-  return products.filter((product) => product.category === category)
+  return sortProductsBySubcategory(
+    products.filter((product) => product.category === category),
+  )
 }
 
 export const placeholderProducts: ShopifyProduct[] = buildPlaceholderProductsFromCatalog()
