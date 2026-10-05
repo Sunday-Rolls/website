@@ -13,11 +13,9 @@
     ],
     "footerShop": [
       { "label": "All Products", "href": "/shop" },
-      { "label": "Headcovers", "href": "/shop?category=headcovers" },
       { "label": "Center Shafted", "href": "/shop?category=center-shafted" },
       { "label": "Mallet", "href": "/shop?category=mallet" },
-      { "label": "OZ1i & Mezz.1", "href": "/shop?category=oz-mezz" },
-      { "label": "Towels", "href": "/shop?category=towels" }
+      { "label": "OZ1i & Mezz.1", "href": "/shop?category=oz-mezz" }
     ],
     "footerCompany": [
       { "label": "About", "href": "/about" },
