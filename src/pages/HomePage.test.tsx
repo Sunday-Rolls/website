@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import homeContent from '@/content/pages/home.json'
+import siteContent from '@/content/site.json'
 import reviewsData from '@/data/reviews.json'
 import { HomePage } from '@/pages/HomePage'
 import { renderWithRouter } from '@/test/test-utils'
@@ -77,6 +78,21 @@ describe('HomePage', () => {
     expect(screen.getByPlaceholderText(homeContent.newsletter.placeholder)).toBeInTheDocument()
     expect(screen.getByText(homeContent.newsletter.consent!)).toBeInTheDocument()
     expect(screen.queryByRole('heading', { level: 2, name: 'Meet the Team' })).not.toBeInTheDocument()
+  })
+
+  it('renders a socials banner with Facebook, Instagram, and Etsy links', () => {
+    renderWithRouter(<HomePage />)
+
+    const heading = screen.getByRole('heading', { level: 2, name: homeContent.socials.title })
+    const banner = heading.closest('section')
+    expect(banner).not.toBeNull()
+
+    for (const [label, href] of Object.entries(siteContent.footer.social)) {
+      const network = label.charAt(0).toUpperCase() + label.slice(1)
+      expect(
+        within(banner!).getByRole('link', { name: `Sunday Rolls on ${network}` }),
+      ).toHaveAttribute('href', href)
+    }
   })
 
   it('populates the reviews marquee from reviews.json', () => {

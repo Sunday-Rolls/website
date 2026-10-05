@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { formatCopyright, useSiteContent } from '@/lib/content'
 import { Container } from '@/components/ui/Container'
+import { SocialLinks } from '@/components/ui/SocialLinks'
 
 export function Footer() {
   const { brand, navigation, footer } = useSiteContent()
@@ -18,7 +19,7 @@ export function Footer() {
           <p className="font-display text-xl">{brand.name}</p>
           <p className="font-body text-body-small text-cream/80">{brand.tagline}</p>
 
-          {(footer.contact || footer.social?.instagram) && (
+          {footer.contact && (
             <div className="space-y-2 font-body text-body-small text-cream/85">
               {footer.contact?.email ? (
                 <p>
@@ -40,20 +41,10 @@ export function Footer() {
                   </a>
                 </p>
               ) : null}
-              {footer.social?.instagram ? (
-                <p>
-                  <a
-                    href={footer.social.instagram}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="transition-colors hover:text-white"
-                  >
-                    Instagram
-                  </a>
-                </p>
-              ) : null}
             </div>
           )}
+
+          <SocialLinks className="pt-1" />
         </div>
 
         <div className="grid gap-8 sm:grid-cols-3">

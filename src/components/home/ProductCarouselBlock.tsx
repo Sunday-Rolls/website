@@ -137,41 +137,50 @@ export function ProductCarouselBlock({
   return (
     <section
       className={cn(
-        'py-section-y',
+        'py-10 md:py-14',
         tone === 'sand' ? 'bg-warm-sand/45' : 'bg-cream',
       )}
     >
-      <Container className="space-y-8">
+      <Container className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl space-y-3">
-            <h2 className="font-display text-section-title text-heritage-green">{block.title}</h2>
+          <div className="max-w-2xl space-y-2">
+            <h2 className="font-display text-page-title text-heritage-green">{block.title}</h2>
             {block.subtitle ? (
-              <p className="font-body text-body text-matte-black/75">{block.subtitle}</p>
+              <p className="font-body text-lg text-matte-black/75">{block.subtitle}</p>
             ) : null}
           </div>
 
-          {showControls ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={goPrevious}
-                disabled={!canGoPrevious}
-                aria-label={`Previous ${block.title}`}
-                className="inline-flex h-11 w-11 items-center justify-center border border-heritage-green text-heritage-green transition-colors hover:bg-heritage-green hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-heritage-green"
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={!canGoNext}
-                aria-label={`Next ${block.title}`}
-                className="inline-flex h-11 w-11 items-center justify-center border border-heritage-green text-heritage-green transition-colors hover:bg-heritage-green hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-heritage-green"
-              >
-                →
-              </button>
-            </div>
-          ) : null}
+          <div className="flex items-center gap-2">
+            <Button
+              href={block.shopAll.href}
+              variant="secondary"
+              className="mr-2 [&_span]:px-5 [&_span]:py-2.5"
+            >
+              {resolveLinkLabel(block.shopAll)}
+            </Button>
+            {showControls ? (
+              <>
+                <button
+                  type="button"
+                  onClick={goPrevious}
+                  disabled={!canGoPrevious}
+                  aria-label={`Previous ${block.title}`}
+                  className="inline-flex h-11 w-11 items-center justify-center border border-heritage-green text-heritage-green transition-colors hover:bg-heritage-green hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-heritage-green"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={!canGoNext}
+                  aria-label={`Next ${block.title}`}
+                  className="inline-flex h-11 w-11 items-center justify-center border border-heritage-green text-heritage-green transition-colors hover:bg-heritage-green hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-transparent disabled:hover:text-heritage-green"
+                >
+                  →
+                </button>
+              </>
+            ) : null}
+          </div>
         </div>
 
         <div ref={trackRef} aria-roledescription="carousel" aria-label={block.title}>
@@ -188,12 +197,16 @@ export function ProductCarouselBlock({
                   role="listitem"
                   className="w-[75%] shrink-0 snap-center"
                 >
-                  <ProductCard product={product} className="h-full border-sand/80 bg-white/90" />
+                  <ProductCard
+                    product={product}
+                    compact
+                    className="h-full border-sand/80 bg-white/90"
+                  />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="overflow-hidden">
+            <div className="-mx-2 overflow-hidden sm:-mx-2.5">
               <div
                 className="flex transition-transform duration-500 ease-out"
                 style={{ transform: `translateX(-${page * 100}%)` }}
@@ -203,10 +216,14 @@ export function ProductCarouselBlock({
                   <div
                     key={product.id}
                     role="listitem"
-                    className="shrink-0 px-2 first:pl-0 last:pr-0 sm:px-2.5"
+                    className="shrink-0 px-2 sm:px-2.5"
                     style={{ width: `${itemWidthPercent}%` }}
                   >
-                    <ProductCard product={product} className="h-full border-sand/80 bg-white/90" />
+                    <ProductCard
+                      product={product}
+                      compact
+                      className="h-full border-sand/80 bg-white/90"
+                    />
                   </div>
                 ))}
               </div>
@@ -238,12 +255,6 @@ export function ProductCarouselBlock({
             ))}
           </div>
         ) : null}
-
-        <div className="flex justify-center pt-2">
-          <Button href={block.shopAll.href} variant="secondary">
-            {resolveLinkLabel(block.shopAll)}
-          </Button>
-        </div>
       </Container>
     </section>
   )

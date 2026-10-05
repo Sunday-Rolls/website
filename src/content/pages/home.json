@@ -4,7 +4,7 @@
     "description": "Premium vintage-inspired golf goods. Find your pace."
   },
   "hero": {
-    "headline": "Make Every Day a Sunday.",
+    "headline": "Find Your Pace.",
     "subheadline": "Premium vintage-inspired golf goods built for the walk.",
     "cta": {
       "labelKey": "shopCollection",
@@ -15,10 +15,10 @@
   },
   "values": {
     "items": [
-      { "label": "Heritage" },
-      { "label": "Materials" },
-      { "label": "Built to Walk" },
-      { "label": "Made to Last" }
+      { "label": "Heritage", "icon": "flag" },
+      { "label": "Materials", "icon": "spool" },
+      { "label": "Built to Walk", "icon": "bag" },
+      { "label": "Made to Last", "icon": "shield" }
     ]
   },
   "productBlocks": [
@@ -73,6 +73,10 @@
       "label": "Our Story",
       "href": "/about"
     }
+  },
+  "socials": {
+    "eyebrow": "Follow Along",
+    "title": "Find us on social."
   },
   "newsletter": {
     "eyebrow": "The Sunday List",

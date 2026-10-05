@@ -27,7 +27,9 @@ export interface SiteContent {
       phone: string
     }
     social?: {
+      facebook?: string
       instagram?: string
+      etsy?: string
     }
     copyright: string
   }
@@ -44,6 +46,8 @@ export interface ContentLink {
   label?: string
   href: string
 }
+
+export type ValueIcon = 'flag' | 'spool' | 'bag' | 'shield'
 
 export interface HomeProductBlock {
   id: string
@@ -63,9 +67,13 @@ export interface HomeContent {
     poster?: string
   }
   values: {
-    items: Array<{ label: string }>
+    items: Array<{ label: string; icon?: ValueIcon }>
   }
   productBlocks: HomeProductBlock[]
+  socials?: {
+    eyebrow?: string
+    title: string
+  }
   mediaBreak?: {
     video: string
     poster?: string

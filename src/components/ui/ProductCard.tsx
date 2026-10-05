@@ -9,6 +9,8 @@ interface ProductCardProps {
   className?: string
   listId?: string
   listName?: string
+  /** Hides the material line and "View details" link for shorter cards. */
+  compact?: boolean
 }
 
 export function ProductCard({
@@ -16,6 +18,7 @@ export function ProductCard({
   className,
   listId = 'shop',
   listName = 'Shop',
+  compact = false,
 }: ProductCardProps) {
   function handleSelect() {
     trackSelectItem(product, listId, listName)
@@ -50,16 +53,18 @@ export function ProductCard({
           <h3 className="font-display text-xl text-heritage-green">{product.title}</h3>
         </Link>
         <p className="font-body text-body-small text-matte-black/70">{product.price}</p>
-        {product.material ? (
+        {!compact && product.material ? (
           <p className="font-body text-body-small text-leather">{product.material}</p>
         ) : null}
-        <Link
-          to={`/products/${product.handle}`}
-          className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors hover:text-forest-green"
-          onClick={handleSelect}
-        >
-          {getButtonLabel('viewDetails')} →
-        </Link>
+        {!compact ? (
+          <Link
+            to={`/products/${product.handle}`}
+            className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors hover:text-forest-green"
+            onClick={handleSelect}
+          >
+            {getButtonLabel('viewDetails')} →
+          </Link>
+        ) : null}
       </div>
     </article>
   )
