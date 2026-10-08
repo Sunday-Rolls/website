@@ -209,20 +209,6 @@ export interface TeamMember {
   image: string
 }
 
-export interface GalleryContent {
-  meta: PageMeta
-  header: {
-    title: string
-    subtitle: string
-  }
-  featured: {
-    caption: string
-    alt: string
-    image: string
-  }
-  items: Array<{ caption: string; alt: string; image: string }>
-}
-
 export interface ContactContent {
   meta: PageMeta
   header: {
@@ -295,7 +281,6 @@ export type PageContentMap = {
   shop: ShopContent
   product: ProductContent
   about: AboutContent
-  gallery: GalleryContent
   contact: ContactContent
   cart: CartContent
   'not-found': NotFoundContent
