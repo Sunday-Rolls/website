@@ -16,6 +16,15 @@ npm install
 npm run dev
 ```
 
+## Tests
+
+```bash
+cd server
+npm test
+```
+
+Tests run the Hono app in-process with a mocked mailer, so they never send real email. CI runs them on every PR that touches `server/`.
+
 ## Railway
 
 1. Create a service with **Root Directory** = `server`

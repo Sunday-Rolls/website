@@ -23,8 +23,6 @@
       { "label": "Contact", "href": "/contact" }
     ],
     "footerSupport": [
-      { "label": "FAQ", "href": "/contact#faq" },
-      { "label": "Shipping", "href": "/contact#shipping" },
       { "label": "Returns", "href": "/contact#returns" }
     ]
   },
