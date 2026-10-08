@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import homeContent from '@/content/pages/home.json'
 import siteContent from '@/content/site.json'
 import reviewsData from '@/data/reviews.json'
+import { fitsMarqueeCard } from '@/lib/marquee-reviews'
 import { HomePage } from '@/pages/HomePage'
 import { renderWithRouter } from '@/test/test-utils'
 
@@ -95,25 +96,15 @@ describe('HomePage', () => {
     }
   })
 
-  it('populates the reviews marquee from reviews.json', () => {
+  it('populates the reviews marquee from reviews that fit on two lines', () => {
     renderWithRouter(<HomePage />)
 
-    const firstReview = reviewsData.items.find((review) => review.text.trim().length > 0)
-    expect(firstReview).toBeDefined()
-    expect(screen.getAllByText(firstReview!.author).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(`“${firstReview!.text}”`).length).toBeGreaterThan(0)
-  })
-
-  it('shows the full text of long reviews instead of clamping them', () => {
-    renderWithRouter(<HomePage />)
-
-    const longestReview = [...reviewsData.items].sort((a, b) => b.text.length - a.text.length)[0]
-    const quotes = screen.getAllByText(`“${longestReview.text}”`)
-    expect(quotes.length).toBeGreaterThan(0)
-    for (const quote of quotes) {
-      expect(quote.className).not.toMatch(/line-clamp/)
-      expect(quote.closest('article')?.className).not.toMatch(/\bh-\d/)
-    }
+    const shown = reviewsData.items.find((review) => fitsMarqueeCard(review.text))
+    const longest = [...reviewsData.items].sort((a, b) => b.text.length - a.text.length)[0]
+    expect(shown).toBeDefined()
+    expect(fitsMarqueeCard(longest.text)).toBe(false)
+    expect(screen.getAllByText(`“${shown!.text}”`).length).toBeGreaterThan(0)
+    expect(screen.queryByText(`“${longest.text}”`)).not.toBeInTheDocument()
   })
 
   it('renders carousel next controls for product blocks', () => {
