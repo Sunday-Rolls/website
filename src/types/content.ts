@@ -103,10 +103,12 @@ export interface HomeContent {
 }
 
 export interface ShopSection {
-  /** Matches `product.subcategory`. */
+  /** Matches `product.subcategory`, or `product.category` for towels. */
   id: string
   title: string
   subtitle?: string
+  /** Short label shown above the section title, e.g. "New!". */
+  badge?: string
 }
 
 export interface ShopContent {

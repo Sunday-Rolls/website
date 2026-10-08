@@ -1,7 +1,7 @@
 {
   "_docs": {
-    "addSection": "Add { \"id\", \"title\", \"subtitle\" } under sections. The id must match product.subcategory in product-catalog.json (center-shafted | mallet | oz-mezz). Sections render in this order; empty sections are hidden.",
-    "addProduct": "Add a product in product-catalog.json with category headcovers and a subcategory matching one of the sections."
+    "addSection": "Add { \"id\", \"title\", \"subtitle\", \"badge\"? } under sections. The id must match product.subcategory (center-shafted | mallet | oz-mezz) or product.category (towels). Sections render in this order; empty sections are hidden.",
+    "addProduct": "Add a product in product-catalog.json. Headcovers need a subcategory matching one of the putter sections. Towels use category \"towels\"."
   },
   "meta": {
     "title": "Our Collection — Sunday Rolls",
@@ -12,6 +12,12 @@
     "subtitle": "Timeless golf goods built for the walk."
   },
   "sections": [
+    {
+      "id": "towels",
+      "title": "Golf Towels",
+      "subtitle": "Waffle-knit towels with an embroidered SR monogram, made to live on the bag.",
+      "badge": "New!"
+    },
     {
       "id": "center-shafted",
       "title": "Center Shafted Putter Covers",

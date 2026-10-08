@@ -4,6 +4,7 @@ import {
   buildPlaceholderProductsFromCatalog,
   catalogProductToShopifyProduct,
   getCatalogProductByHandle,
+  getCatalogProducts,
 } from '@/lib/product-catalog'
 
 const storeDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN
@@ -449,9 +450,16 @@ export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {
     return []
   }
 
-  return (
+  const live =
     data?.products?.edges?.map((edge: { node: ProductNode }) => mapProduct(edge.node)) ?? []
-  )
+  return mergeCatalogOnlyProducts(live)
+}
+
+/** Keep published catalog products on the site until they exist in Shopify. */
+function mergeCatalogOnlyProducts(live: ShopifyProduct[]): ShopifyProduct[] {
+  const seen = new Set(live.map((product) => product.handle))
+  const extras = placeholderProducts.filter((product) => !seen.has(product.handle))
+  return [...live, ...extras]
 }
 
 export async function fetchProductByHandle(
@@ -578,6 +586,11 @@ const HEADCOVER_SUBCATEGORIES = new Set<string>([
 /** Matches the order of the product blocks on the home page. */
 const HEADCOVER_SUBCATEGORY_ORDER: HeadcoverSubcategory[] = ['center-shafted', 'mallet', 'oz-mezz']
 
+function catalogIndex(handle: string): number {
+  const index = getCatalogProducts().findIndex((product) => product.handle === handle)
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index
+}
+
 function subcategoryRank(product: ShopifyProduct): number {
   const rank = product.subcategory
     ? HEADCOVER_SUBCATEGORY_ORDER.indexOf(product.subcategory)
@@ -599,9 +612,13 @@ export function filterProductsByCategory(
     return products.filter((product) => product.subcategory === category)
   }
 
-  return sortProductsBySubcategory(
-    products.filter((product) => product.category === category),
-  )
+  return products
+    .filter((product) => product.category === category)
+    .sort((a, b) => {
+      const rank = subcategoryRank(a) - subcategoryRank(b)
+      if (rank !== 0) return rank
+      return catalogIndex(a.handle) - catalogIndex(b.handle)
+    })
 }
 
 export const placeholderProducts: ShopifyProduct[] = buildPlaceholderProductsFromCatalog()

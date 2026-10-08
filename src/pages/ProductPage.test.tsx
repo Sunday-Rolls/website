@@ -96,6 +96,26 @@ describe('ProductPage', () => {
     expect(await screen.findByRole('button', { name: 'Add to Cart' })).toBeInTheDocument()
   })
 
+  it('renders a towel product page without headcover reviews', async () => {
+    renderWithRouter(<ProductPage />, {
+      route: '/products/golf-towel-green-stripe',
+      path: '/products/:handle',
+    })
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Golf Towel - Green Stripe' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('$30.00')).toBeInTheDocument()
+    expect(screen.getByText('Towel')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Golf Towel - Green Stripe' })).toHaveAttribute(
+      'src',
+      '/assets/products/golf-towel-green-stripe.jpg',
+    )
+    expect(
+      screen.queryByRole('heading', { level: 2, name: productContent.reviews.heading }),
+    ).not.toBeInTheDocument()
+  })
+
   it('shows not found state for unknown handles', async () => {
     renderWithRouter(<ProductPage />, {
       route: '/products/unknown-product',

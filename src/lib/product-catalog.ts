@@ -11,10 +11,24 @@ import { assetUrl } from '@/lib/asset-url'
 
 const PLACEHOLDER_GALLERY_COUNT = 5
 
+function formatCatalogPrice(amount: string | undefined): string {
+  if (!amount) return '$55.00'
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(Number(amount))
+}
+
 function buildPlaceholderGallery(product: CatalogProduct): ProductImage[] {
-  const primary = product.images[0]
-    ? assetUrl(product.images[0])
-    : getProductImage(product.handle)
+  const own = product.images.filter(Boolean).map((path, index) => ({
+    url: assetUrl(path),
+    alt: index === 0 ? product.title : `${product.title} — view ${index + 1}`,
+  }))
+
+  // Real multi-shot sets should not be padded with other products.
+  if (own.length > 1) return own
+
+  const primary = own[0]?.url ?? getProductImage(product.handle)
   const pool = shopAssets.products.filter((url) => url !== primary)
   const images: ProductImage[] = [{ url: primary, alt: product.title }]
 
@@ -48,6 +62,8 @@ export interface CatalogProduct {
   category: ProductCategory
   subcategory?: HeadcoverSubcategory
   productToken: string
+  /** Shelf price in dollars, e.g. "80.00". Falls back to the headcover placeholder. */
+  price?: string
   itemWeight?: string
   itemWeightUnit?: string
   dimensions?: {
@@ -141,7 +157,7 @@ export function catalogProductToShopifyProduct(
     handle: product.handle,
     title: product.title,
     description: product.description,
-    price: '$55.00',
+    price: formatCatalogPrice(product.price),
     material: product.productToken || 'Premium headcover',
     category: product.category,
     subcategory: product.subcategory,

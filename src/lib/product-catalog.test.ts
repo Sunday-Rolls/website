@@ -10,8 +10,8 @@ import { placeholderProducts } from '@/lib/shopify'
 
 describe('product catalog', () => {
   it('loads all products from the Excel template', () => {
-    expect(getCatalogProducts()).toHaveLength(15)
-    expect(getPublishedCatalogProducts()).toHaveLength(15)
+    expect(getCatalogProducts()).toHaveLength(23)
+    expect(getPublishedCatalogProducts()).toHaveLength(23)
   })
 
   it('generates stable handles from product titles', () => {
@@ -23,6 +23,8 @@ describe('product catalog', () => {
     const titles = catalogData.map((product) => product.title)
     expect(titles).toContain('Retro Roller - Grey')
     expect(titles).toContain('The Doodle')
+    expect(titles).toContain('Morning Dew')
+    expect(titles).toContain('Golf Towel - Green Stripe')
     expect(titles).not.toContain('Hat')
   })
 })
