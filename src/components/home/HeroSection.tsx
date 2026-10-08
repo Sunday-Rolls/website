@@ -29,7 +29,7 @@ export function HeroSection() {
 
       <Container className="relative flex min-h-[min(68vh,640px)] items-center justify-center py-16 text-center md:py-section-y">
         <div className="mx-auto max-w-3xl space-y-5">
-          <p className="font-body text-base font-medium uppercase tracking-[0.18em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.55)]">
+          <p className="-mt-10 font-body text-base font-medium uppercase tracking-[0.18em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.55)]">
             Sunday Rolls
           </p>
           <h1 className="font-display text-hero text-white">{content.hero.headline}</h1>
