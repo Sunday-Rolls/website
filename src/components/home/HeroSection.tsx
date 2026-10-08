@@ -14,7 +14,7 @@ export function HeroSection() {
     <section className="relative overflow-hidden bg-heritage-green text-cream">
       <div className="absolute inset-0">
         <video
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-bottom"
           autoPlay
           muted
           loop
@@ -24,18 +24,11 @@ export function HeroSection() {
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-r from-heritage-green/92 via-heritage-green/72 to-heritage-green/35" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(176,141,87,0.22),transparent_55%)]" />
-        <img
-          src={homeAssets.heroTexture}
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-soft-light"
-        />
+        <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      <Container className="relative flex min-h-[min(72vh,640px)] items-end py-16 md:items-center md:py-section-y">
-        <div className="max-w-xl space-y-5 pb-4 md:pb-0">
+      <Container className="relative flex min-h-[min(68vh,640px)] items-center justify-center py-16 text-center md:py-section-y">
+        <div className="mx-auto max-w-3xl space-y-5">
           <p className="font-body text-label uppercase tracking-widest text-soft-gold">Sunday Rolls</p>
           <h1 className="font-display text-hero text-white">{content.hero.headline}</h1>
           <p className="font-body text-body text-cream/90">{content.hero.subheadline}</p>
