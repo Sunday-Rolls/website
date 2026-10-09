@@ -47,7 +47,7 @@ export function ShopPage() {
   useEffect(() => {
     if (!targetSection) return
     document.getElementById(targetSection)?.scrollIntoView()
-  }, [targetSection])
+  }, [targetSection, products])
 
   return (
     <>
@@ -71,6 +71,13 @@ export function ShopPage() {
         >
           <Container className="space-y-6">
             <div className="max-w-2xl space-y-2">
+              {section.badge ? (
+                <p>
+                  <span className="inline-flex items-center rounded-full bg-heritage-green px-2.5 py-0.5 font-body text-sm font-semibold tracking-wide text-cream">
+                    {section.badge}
+                  </span>
+                </p>
+              ) : null}
               <h2
                 id={`shop-${section.id}-heading`}
                 className="font-display text-page-title text-heritage-green"

@@ -10,16 +10,17 @@ const subcategoryOrder = ['center-shafted', 'mallet', 'oz-mezz']
 
 describe('filterProductsByCategory', () => {
   it('returns all products for the all filter', () => {
-    expect(filterProductsByCategory(placeholderProducts, 'all')).toHaveLength(15)
+    expect(filterProductsByCategory(placeholderProducts, 'all')).toHaveLength(23)
   })
 
   it('sorts all products center shafted, then mallet, then OZ like the home page', () => {
     const shuffled = [...placeholderProducts].reverse()
 
     for (const filter of ['all', 'headcovers']) {
-      const ranks = filterProductsByCategory(shuffled, filter).map((product) =>
-        subcategoryOrder.indexOf(product.subcategory ?? ''),
-      )
+      const ranks = filterProductsByCategory(shuffled, filter).map((product) => {
+        const rank = subcategoryOrder.indexOf(product.subcategory ?? '')
+        return rank === -1 ? subcategoryOrder.length : rank
+      })
       expect(ranks).toEqual([...ranks].sort((a, b) => a - b))
     }
 
@@ -31,7 +32,7 @@ describe('filterProductsByCategory', () => {
 
   it('returns only headcovers for the headcovers filter', () => {
     const results = filterProductsByCategory(placeholderProducts, 'headcovers')
-    expect(results).toHaveLength(15)
+    expect(results).toHaveLength(16)
     expect(results.every((product) => product.category === 'headcovers')).toBe(true)
   })
 
@@ -40,15 +41,29 @@ describe('filterProductsByCategory', () => {
     const mallet = filterProductsByCategory(placeholderProducts, 'mallet')
     const ozMezz = filterProductsByCategory(placeholderProducts, 'oz-mezz')
 
-    expect(centerShafted).toHaveLength(9)
+    expect(centerShafted).toHaveLength(10)
     expect(mallet).toHaveLength(4)
     expect(ozMezz).toHaveLength(2)
     expect(centerShafted.every((product) => product.subcategory === 'center-shafted')).toBe(true)
   })
 
+  it('returns towels in catalog order', () => {
+    const towels = filterProductsByCategory(placeholderProducts, 'towels')
+    expect(towels.map((product) => product.handle)).toEqual([
+      'golf-towel-green-stripe',
+      'golf-towel-blue-stripe',
+      'golf-towel-red-stripe',
+      'golf-towel-black-stripe',
+      'golf-towel-red-blue-stripe',
+      'golf-towel-solid-blue',
+      'golf-towel-solid-black',
+    ])
+    expect(towels.every((product) => product.category === 'towels')).toBe(true)
+    expect(towels[0]?.price).toBe('$30.00')
+  })
+
   it('returns an empty list for categories not in the catalog', () => {
     expect(filterProductsByCategory(placeholderProducts, 'bags')).toHaveLength(0)
-    expect(filterProductsByCategory(placeholderProducts, 'towels')).toHaveLength(0)
     expect(filterProductsByCategory(placeholderProducts, 'accessories')).toHaveLength(0)
     expect(filterProductsByCategory(placeholderProducts, 'nonexistent')).toHaveLength(0)
   })

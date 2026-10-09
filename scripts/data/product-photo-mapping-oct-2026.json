@@ -1,0 +1,78 @@
+{
+  "source": "/Users/ethanbett/Documents/Sunday Rolls/app/public/assets/products",
+  "products": {
+    "morning-dew": {
+      "title": "Morning Dew",
+      "files": [
+        "morning-dew.jpg",
+        "morning-dew-pair.jpg",
+        "morning-dew-open.jpg",
+        "morning-dew-back.jpg"
+      ]
+    },
+    "the-birdie-machine": {
+      "title": "The Birdie Machine",
+      "files": [
+        "the-birdie-machine.jpg",
+        "the-birdie-machine-pair.jpg",
+        "the-birdie-machine-open.jpg",
+        "the-birdie-machine-back.jpg"
+      ]
+    },
+    "golf-towel-green-stripe": {
+      "title": "Golf Towel - Green Stripe",
+      "files": [
+        "golf-towel-green-stripe.jpg",
+        "golf-towel-green-stripe-draped.jpg"
+      ]
+    },
+    "golf-towel-blue-stripe": {
+      "title": "Golf Towel - Blue Stripe",
+      "files": [
+        "golf-towel-blue-stripe.jpg",
+        "golf-towel-blue-stripe-draped.jpg",
+        "golf-towel-blue-stripe-flat.jpg"
+      ]
+    },
+    "golf-towel-red-stripe": {
+      "title": "Golf Towel - Red Stripe",
+      "files": [
+        "golf-towel-red-stripe.jpg",
+        "golf-towel-red-stripe-draped.jpg",
+        "golf-towel-red-stripe-flat.jpg"
+      ]
+    },
+    "golf-towel-black-stripe": {
+      "title": "Golf Towel - Black Stripe",
+      "files": [
+        "golf-towel-black-stripe.jpg",
+        "golf-towel-black-stripe-draped.jpg",
+        "golf-towel-black-stripe-flat.jpg"
+      ]
+    },
+    "golf-towel-red-blue-stripe": {
+      "title": "Golf Towel - Red & Blue Stripe",
+      "files": [
+        "golf-towel-red-blue-stripe.jpg",
+        "golf-towel-red-blue-stripe-draped.jpg",
+        "golf-towel-red-blue-stripe-flat.jpg"
+      ]
+    },
+    "golf-towel-solid-blue": {
+      "title": "Golf Towel - Solid Blue",
+      "files": [
+        "golf-towel-solid-blue.jpg",
+        "golf-towel-solid-blue-draped.jpg",
+        "golf-towel-solid-blue-flat.jpg"
+      ]
+    },
+    "golf-towel-solid-black": {
+      "title": "Golf Towel - Solid Black",
+      "files": [
+        "golf-towel-solid-black.jpg",
+        "golf-towel-solid-black-draped.jpg",
+        "golf-towel-solid-black-flat.jpg"
+      ]
+    }
+  }
+}

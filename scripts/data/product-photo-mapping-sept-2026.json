@@ -1,0 +1,164 @@
+{
+  "source": "/Users/ethanbett/Downloads/Product Photos - September 2026 2",
+  "products": {
+    "sunny-side-up": {
+      "title": "Sunny Side Up",
+      "confidence": "high",
+      "files": [
+        "1.png",
+        "2.png",
+        "3.png",
+        "4.png"
+      ],
+      "notes": "Fried egg Oz cover \u2014 front, dual, open, back"
+    },
+    "sunday-stripes": {
+      "title": "Sunday Stripes",
+      "confidence": "high",
+      "files": [
+        "5.png",
+        "6.png",
+        "7.png",
+        "8.png"
+      ],
+      "notes": "Blue/white seersucker with sailor embroidery (center-shafted)"
+    },
+    "flagstick-fuel": {
+      "title": "Flagstick Fuel",
+      "confidence": "high",
+      "files": [
+        "9.PNG",
+        "10.PNG",
+        "11.PNG",
+        "12.PNG"
+      ],
+      "notes": "Green Gatorade-style lightning bolt"
+    },
+    "mallet-retro-roller-white": {
+      "title": "Mallet - Retro Roller White",
+      "confidence": "high",
+      "files": [
+        "17.png",
+        "18.png",
+        "19.png",
+        "20.png"
+      ],
+      "notes": "White Game Boy mallet"
+    },
+    "mallet-retro-roller-grey": {
+      "title": "Mallet - Retro Roller Grey",
+      "confidence": "medium",
+      "files": [
+        "21.png",
+        "22.png",
+        "23.png",
+        "24.png"
+      ],
+      "notes": "Grey/off-white Game Boy mallet \u2014 confirm vs center-shafted grey"
+    },
+    "retro-roller-yellow": {
+      "title": "Retro Roller - Yellow",
+      "confidence": "high",
+      "files": [
+        "25.png",
+        "26.png",
+        "27.png",
+        "28.png"
+      ],
+      "notes": "Yellow Game Boy"
+    },
+    "the-corduroy": {
+      "title": "The Corduroy",
+      "confidence": "high",
+      "files": [
+        "33.png",
+        "34.png",
+        "35.png",
+        "36.png"
+      ],
+      "notes": "Brown corduroy + green stripe + logo patch"
+    },
+    "coin-collector": {
+      "title": "Coin Collector",
+      "confidence": "high",
+      "files": [
+        "37.png",
+        "38.png",
+        "39.png",
+        "40.png"
+      ],
+      "notes": "Blue Oz Mario/dino Game Mode cover"
+    },
+    "retro-roller-grey": {
+      "title": "Retro Roller - Grey",
+      "confidence": "medium",
+      "files": [
+        "41.png",
+        "42.png",
+        "43.png",
+        "44.png"
+      ],
+      "notes": "Light grey Game Boy \u2014 confirm vs mallet grey swap"
+    },
+    "mallet-the-corduroy": {
+      "title": "Mallet - The Corduroy",
+      "confidence": "high",
+      "files": [
+        "45.png",
+        "46.png",
+        "47.png",
+        "48.png"
+      ],
+      "notes": "Brown corduroy mallet dual + angles"
+    },
+    "the-breakfast-roller": {
+      "title": "The Breakfast Roller",
+      "confidence": "high",
+      "files": [
+        "53.png",
+        "54.png",
+        "55.png",
+        "56.png"
+      ],
+      "notes": "Orange Cap'n Crunch / monkey bogey cover"
+    },
+    "the-doodle": {
+      "title": "The Doodle",
+      "confidence": "high",
+      "files": [
+        "Doodle .png",
+        "Doodle 1.png",
+        "Doodle 2.png",
+        "Doodle 3.png"
+      ],
+      "notes": "Monster doodle pattern \u2014 reorder so best hero is first if needed"
+    },
+    "retro-roller-purple": {
+      "title": "Retro Roller - Purple",
+      "confidence": "high",
+      "files": [
+        "purple 1.png",
+        "purple 2.png",
+        "purple 3.png",
+        "purple 4.png"
+      ],
+      "notes": "Purple Game Boy"
+    },
+    "mallet-sunday-stripes": {
+      "title": "Mallet - Sunday Stripes",
+      "confidence": "high",
+      "files": [
+        "Stripes mallet 1.png",
+        "stripes mallet 2.png",
+        "stripes mallet 4.png",
+        "Stripes mallet 5.png"
+      ],
+      "notes": "Blue/white seersucker mallet (no sailor embroidery on face)"
+    }
+  },
+  "missing_from_shoot": [
+    "the-birdie-machine"
+  ],
+  "unassigned_files": [],
+  "missing_files": []
+}

@@ -23,6 +23,13 @@ const root = resolve(__dirname, '..')
 const API_VERSION = process.env.VITE_SHOPIFY_API_VERSION || process.env.SHOPIFY_API_VERSION || '2025-01'
 const DEFAULT_PRICE = process.env.DEFAULT_PRICE || '80.00'
 const DRY_RUN = process.env.DRY_RUN === '1'
+const SKIP_MEDIA = process.env.SKIP_MEDIA === '1'
+const ONLY = new Set(
+  (process.env.ONLY || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
+)
 const IMAGE_BASE =
   process.env.SHOPIFY_IMAGE_BASE ||
   'https://sunday-rolls.github.io/website/assets/products'
@@ -234,14 +241,44 @@ const DELETE_PRODUCT = `#graphql
   }
 `
 
+const PRODUCT_PUBLICATIONS = `#graphql
+  query ProductPublications($query: String!) {
+    products(first: 1, query: $query) {
+      nodes {
+        resourcePublications(first: 20) {
+          nodes { publication { id name } }
+        }
+      }
+    }
+  }
+`
+
 async function ensurePublicationIds(shop, token) {
   const data = await adminGraphql(shop, token, PUBLICATIONS)
   const nodes = data.publications?.nodes ?? []
   const preferred = nodes.filter((node) =>
-    /online store|headless|shop/i.test(node.name),
+    /online store|headless|sunday rolls|^shop$/i.test(node.name),
   )
-  const chosen = preferred.length ? preferred : nodes
-  return chosen.map((node) => node.id)
+
+  // Headless is not always returned by publications(), but the live storefront
+  // reads it. Copy channels from a product that is already on the site.
+  const existing = await adminGraphql(shop, token, PRODUCT_PUBLICATIONS, {
+    query: 'handle:the-birdie-machine',
+  })
+  const fromProduct =
+    existing.products?.nodes?.[0]?.resourcePublications?.nodes?.map(
+      (node) => node.publication,
+    ) ?? []
+  const siteChannels = fromProduct.filter((publication) =>
+    /online store|headless|sunday rolls|^shop$/i.test(publication.name),
+  )
+
+  const byId = new Map()
+  for (const publication of [...preferred, ...siteChannels]) {
+    if (publication?.id) byId.set(publication.id, publication.id)
+  }
+  const chosen = [...byId.keys()]
+  return chosen.length ? chosen : nodes.map((node) => node.id)
 }
 
 async function deleteTestProduct(shop, token) {
@@ -265,7 +302,7 @@ async function upsertProduct(shop, token, product, publicationIds) {
     return { skipped: true }
   }
 
-  const mediaSrc = imageUrl(product)
+  const mediaSrc = SKIP_MEDIA ? null : imageUrl(product)
   const media = mediaSrc
     ? [
         {
@@ -299,7 +336,7 @@ async function upsertProduct(shop, token, product, publicationIds) {
   if (variantId) {
     const priceData = await adminGraphql(shop, token, VARIANT_UPDATE, {
       productId: created.id,
-      variants: [{ id: variantId, price: DEFAULT_PRICE }],
+      variants: [{ id: variantId, price: product.price || DEFAULT_PRICE }],
     })
     const priceErrors = priceData.productVariantsBulkUpdate?.userErrors ?? []
     if (priceErrors.length) {
@@ -322,7 +359,7 @@ async function upsertProduct(shop, token, product, publicationIds) {
     }
   }
 
-  console.log(`ok    ${product.handle} @ $${DEFAULT_PRICE}`)
+  console.log(`ok    ${product.handle} @ $${product.price || DEFAULT_PRICE}`)
   return { created: true, id: created.id }
 }
 
@@ -340,7 +377,8 @@ async function main() {
 
   if (DRY_RUN) {
     for (const product of catalog) {
-      console.log(`dry   ${product.handle} → ${imageUrl(product)}`)
+      if (ONLY.size && !ONLY.has(product.handle)) continue
+      console.log(`dry   ${product.handle} → ${imageUrl(product)} @ $${product.price || DEFAULT_PRICE}`)
     }
     return
   }
@@ -352,6 +390,7 @@ async function main() {
   let created = 0
   let skipped = 0
   for (const product of catalog) {
+    if (ONLY.size && !ONLY.has(product.handle)) continue
     const result = await upsertProduct(shop, token, product, publicationIds)
     if (result.skipped) skipped += 1
     else created += 1

@@ -43,23 +43,26 @@ describe('ShopPage', () => {
   it('groups every catalog product under its putter type', () => {
     renderWithRouter(<ShopPage />)
 
-    const [centerShafted, mallet, ozMezz] = shopContent.sections.map((section) =>
+    const [towels, centerShafted, mallet, ozMezz] = shopContent.sections.map((section) =>
       sectionFor(section.title),
     )
 
-    expect(within(centerShafted).getAllByRole('heading', { level: 3 })).toHaveLength(9)
+    expect(within(towels).getAllByRole('heading', { level: 3 })).toHaveLength(7)
+    expect(within(towels).getByText('New!')).toBeInTheDocument()
+    expect(within(towels).getByRole('heading', { name: 'Golf Towel - Green Stripe' })).toBeInTheDocument()
+    expect(within(centerShafted).getAllByRole('heading', { level: 3 })).toHaveLength(10)
+    expect(within(centerShafted).getByRole('heading', { name: 'Morning Dew' })).toBeInTheDocument()
     expect(within(centerShafted).getByRole('heading', { name: 'The Doodle' })).toBeInTheDocument()
     expect(within(mallet).getAllByRole('heading', { level: 3 })).toHaveLength(4)
     expect(within(ozMezz).getAllByRole('heading', { level: 3 })).toHaveLength(2)
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(15)
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(23)
   })
 
-  it('does not render filter buttons or a towels section', () => {
+  it('does not render filter buttons', () => {
     renderWithRouter(<ShopPage />)
 
     expect(screen.queryByRole('button', { name: 'All Products' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Headcovers' })).not.toBeInTheDocument()
-    expect(screen.queryByText(/towels/i)).not.toBeInTheDocument()
   })
 
   it('scrolls to the section named in ?category= for Shop All links', () => {

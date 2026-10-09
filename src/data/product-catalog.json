@@ -265,7 +265,10 @@
       "unit": "in"
     },
     "images": [
-      "/assets/products/the-birdie-machine.jpg"
+      "/assets/products/the-birdie-machine.jpg",
+      "/assets/products/the-birdie-machine-pair.jpg",
+      "/assets/products/the-birdie-machine-open.jpg",
+      "/assets/products/the-birdie-machine-back.jpg"
     ],
     "subcategory": "center-shafted",
     "keyFeatures": [
@@ -620,5 +623,259 @@
       }
     ],
     "dimensionsDisplay": "4.625 in. (Length) × 5 in. (Width)"
+  },
+  {
+    "title": "Morning Dew",
+    "handle": "morning-dew",
+    "status": "Published",
+    "productType": "Sporting Accessories",
+    "description": "Start the round with a little extra fizz. Morning Dew is a center-shafted mallet cover in white and pine green, with a bold embroidered mark set over a row of evergreens. A plush interior and magnetic closure keep the putter protected from the first tee to the last putt.",
+    "sellingMethod": "By the item",
+    "category": "headcovers",
+    "productToken": "Headcover",
+    "price": "80.00",
+    "itemWeight": "8",
+    "itemWeightUnit": "oz",
+    "dimensions": {
+      "length": "4.625",
+      "width": "5",
+      "height": "2",
+      "unit": "in"
+    },
+    "images": [
+      "/assets/products/morning-dew.jpg",
+      "/assets/products/morning-dew-pair.jpg",
+      "/assets/products/morning-dew-open.jpg",
+      "/assets/products/morning-dew-back.jpg"
+    ],
+    "subcategory": "center-shafted",
+    "keyFeatures": [
+      {
+        "label": "Precision Fit",
+        "text": "Designed for the L.A.B. DF3 putter"
+      },
+      {
+        "label": "Premium Protection",
+        "text": "Soft velvet lining cushions your putter and prevents damage"
+      },
+      {
+        "label": "Durable Construction",
+        "text": "Reinforced stitching, magnetic closure and quality materials built for everyday play"
+      },
+      {
+        "label": "Designed in the USA",
+        "text": "Thoughtful craftsmanship with a playful, collector-worthy aesthetic"
+      }
+    ],
+    "dimensionsDisplay": "4.625 in. (Length) × 5 in. (Width)"
+  },
+  {
+    "title": "Golf Towel - Green Stripe",
+    "handle": "golf-towel-green-stripe",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A waffle-knit golf towel in white with forest-green stripes and a green SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-green-stripe.jpg",
+      "/assets/products/golf-towel-green-stripe-draped.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A green SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
+  },
+  {
+    "title": "Golf Towel - Blue Stripe",
+    "handle": "golf-towel-blue-stripe",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A waffle-knit golf towel in white with navy stripes and a blue SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-blue-stripe.jpg",
+      "/assets/products/golf-towel-blue-stripe-draped.jpg",
+      "/assets/products/golf-towel-blue-stripe-flat.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A blue SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
+  },
+  {
+    "title": "Golf Towel - Red Stripe",
+    "handle": "golf-towel-red-stripe",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A waffle-knit golf towel in white with red stripes and a red SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-red-stripe.jpg",
+      "/assets/products/golf-towel-red-stripe-draped.jpg",
+      "/assets/products/golf-towel-red-stripe-flat.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A red SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
+  },
+  {
+    "title": "Golf Towel - Black Stripe",
+    "handle": "golf-towel-black-stripe",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A waffle-knit golf towel in white with black stripes and a black SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-black-stripe.jpg",
+      "/assets/products/golf-towel-black-stripe-draped.jpg",
+      "/assets/products/golf-towel-black-stripe-flat.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A black SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
+  },
+  {
+    "title": "Golf Towel - Red & Blue Stripe",
+    "handle": "golf-towel-red-blue-stripe",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A waffle-knit golf towel in white with red and navy stripes and a two-tone SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-red-blue-stripe.jpg",
+      "/assets/products/golf-towel-red-blue-stripe-draped.jpg",
+      "/assets/products/golf-towel-red-blue-stripe-flat.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A red and navy SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
+  },
+  {
+    "title": "Golf Towel - Solid Blue",
+    "handle": "golf-towel-solid-blue",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A solid blue waffle-knit golf towel with pale stripes along one end and a white SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-solid-blue.jpg",
+      "/assets/products/golf-towel-solid-blue-draped.jpg",
+      "/assets/products/golf-towel-solid-blue-flat.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A white SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
+  },
+  {
+    "title": "Golf Towel - Solid Black",
+    "handle": "golf-towel-solid-black",
+    "status": "Published",
+    "productType": "Golf Towel",
+    "description": "A solid black waffle-knit golf towel with white stripes along one end and a white SR monogram on the cuff. The ribbed face pulls dew off the ball and grip, and it folds small enough to live on the bag.",
+    "sellingMethod": "By the item",
+    "category": "towels",
+    "productToken": "Towel",
+    "price": "30.00",
+    "images": [
+      "/assets/products/golf-towel-solid-black.jpg",
+      "/assets/products/golf-towel-solid-black-draped.jpg",
+      "/assets/products/golf-towel-solid-black-flat.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "Waffle Knit",
+        "text": "A ribbed face that pulls dew off the ball and grip"
+      },
+      {
+        "label": "Embroidered Monogram",
+        "text": "A white SR mark stitched into the cuff"
+      },
+      {
+        "label": "Made for the Bag",
+        "text": "Light enough to tuck on the bag and grab between shots"
+      }
+    ]
   }
 ]

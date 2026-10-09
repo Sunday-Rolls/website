@@ -13,6 +13,7 @@
     ],
     "footerShop": [
       { "label": "All Products", "href": "/shop" },
+      { "label": "Towels", "href": "/shop?category=towels" },
       { "label": "Center Shafted", "href": "/shop?category=center-shafted" },
       { "label": "Mallet", "href": "/shop?category=mallet" },
       { "label": "OZ1i & Mezz.1", "href": "/shop?category=oz-mezz" }
