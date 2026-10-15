@@ -561,11 +561,19 @@ async function loadOverview() {
   renderOverview(data)
 }
 
+function setPnLFeedback(message, isError = false) {
+  const el = $('#pnl-feedback')
+  if (!el) return
+  el.textContent = message
+  el.classList.toggle('error', isError)
+}
+
 async function loadPnL() {
   const year = $('#pnl-year').value
   const month = $('#pnl-month').value
   const { data } = await api(`/pnl?year=${year}&month=${encodeURIComponent(month)}`)
   renderPnL(data)
+  await loadManualOrders()
 }
 
 async function loadRoas() {
@@ -677,7 +685,7 @@ async function loadManualOrders() {
 async function loadDataPage() {
   const sync = await api('/sync-status')
   renderSyncList('#data-sync-status', sync.data || [])
-  await Promise.all([loadDriveFiles(), loadShopifyStatus(), loadManualOrders()])
+  await Promise.all([loadDriveFiles(), loadShopifyStatus()])
 }
 
 function setPage(page) {
@@ -773,7 +781,10 @@ function bind() {
       if (state.overview) renderTrendChart(state.overview.revenueByDay, state.series)
     })
   }
-  $('#pnl-refresh').addEventListener('click', () => loadPnL().catch(showError))
+  $('#pnl-refresh')?.addEventListener('click', () => loadPnL().catch(showError))
+  $('#pnl-refresh-cash')?.addEventListener('click', () => loadPnL().catch(showError))
+  $('#pnl-year')?.addEventListener('change', () => loadPnL().catch(showError))
+  $('#pnl-month')?.addEventListener('change', () => loadPnL().catch(showError))
 
   $('#sync-ga4-btn')?.addEventListener('click', async () => {
     setSyncFeedback('Syncing GA4…')
@@ -872,13 +883,13 @@ function bind() {
     }
   })
 
-  async function uploadCsv(inputId, endpoint, label) {
-    const file = $(inputId)?.files?.[0]
+  async function uploadCsv(input, endpoint, label) {
+    const file = input?.files?.[0]
     if (!file) {
-      setSyncFeedback(`Choose a ${label} CSV first`, true)
+      setPnLFeedback(`Choose a ${label} CSV first`, true)
       return
     }
-    setSyncFeedback(`Uploading ${file.name}…`)
+    setPnLFeedback(`Uploading ${file.name}…`)
     try {
       const body = new FormData()
       body.append('file', file)
@@ -889,24 +900,33 @@ function bind() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(json.error || `${label} upload failed`)
-      setSyncFeedback(
+      setPnLFeedback(
         `${label}: ${json.data.rows} rows${json.data.warnings?.length ? ` · ${json.data.warnings[0]}` : ''}`,
       )
-      loadDataPage().catch(showError)
+      input.value = ''
+      await loadPnL()
     } catch (err) {
-      setSyncFeedback(err.message, true)
+      setPnLFeedback(err.message, true)
     }
   }
 
-  $('#upload-revenue-btn')?.addEventListener('click', () => uploadCsv('#revenue-upload', '/import/revenue', 'Revenue'))
-  $('#upload-expense-btn')?.addEventListener('click', () => uploadCsv('#expense-upload', '/import/expenses', 'Expenses'))
-  $('#upload-cash-btn')?.addEventListener('click', () => uploadCsv('#cash-upload', '/import/cash', 'Cash'))
+  function bindCsvUpload(triggerId, inputId, endpoint, label) {
+    const trigger = $(triggerId)
+    const input = $(inputId)
+    if (!trigger || !input) return
+    trigger.addEventListener('click', () => input.click())
+    input.addEventListener('change', () => uploadCsv(input, endpoint, label).catch(showError))
+  }
+
+  bindCsvUpload('#pnl-upload-revenue', '#revenue-upload', '/import/revenue', 'Revenue')
+  bindCsvUpload('#pnl-upload-expenses', '#expense-upload', '/import/expenses', 'Expenses')
+  bindCsvUpload('#pnl-upload-cash', '#cash-upload', '/import/cash', 'Cash')
 
   $('#manual-revenue-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
     const form = event.currentTarget
     const fd = new FormData(form)
-    setSyncFeedback('Saving revenue row…')
+    setPnLFeedback('Saving revenue row…')
     try {
       const { data } = await api('/import/revenue', {
         method: 'POST',
@@ -921,11 +941,11 @@ function bind() {
           externalId: String(fd.get('externalId') || '').trim() || undefined,
         }),
       })
-      setSyncFeedback(`Saved ${data.rows} revenue row to the database`)
+      setPnLFeedback(`Saved ${data.rows} revenue row to the database`)
       form.reset()
-      loadDataPage().catch(showError)
+      await loadPnL()
     } catch (err) {
-      setSyncFeedback(err.message, true)
+      setPnLFeedback(err.message, true)
     }
   })
 

@@ -12,6 +12,7 @@
     "user:set-password": "tsx src/scripts/set-password.ts",
     "analytics:seed-demo": "tsx src/scripts/seed-demo.ts",
     "analytics:import-sheet": "tsx src/scripts/import-sheet.ts",
+    "analytics:import-squarespace": "tsx src/scripts/import-squarespace-orders.ts",
     "analytics:sync-ga4": "tsx src/scripts/sync-ga4.ts"
   },
   "engines": {
