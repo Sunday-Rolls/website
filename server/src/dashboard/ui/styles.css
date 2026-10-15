@@ -341,7 +341,42 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  margin: 0.75rem 0;
+  margin: 0.85rem 0 0;
+}
+.btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.55rem 1.15rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 1px 0 rgba(20, 32, 24, 0.08);
+}
+.btn-primary:hover {
+  background: #265a3a;
+  border-color: #265a3a;
+}
+.btn-secondary {
+  background: rgba(20, 32, 24, 0.05);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-secondary:hover {
+  background: var(--accent-soft);
+  border-color: rgba(47, 107, 69, 0.35);
+  color: var(--accent);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 .file-list {
   display: grid;
@@ -360,16 +395,23 @@ body {
   padding: 0.7rem 0.85rem;
   cursor: pointer;
   font: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.file-item:hover {
+  border-color: rgba(47, 107, 69, 0.35);
+  background: rgba(215, 234, 220, 0.35);
 }
 .file-item.active {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
 .sync-range { margin-top: 0.75rem; }
-#data-page .panel button:not(.ghost):not(.file-item) {
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
+#data-page .date-range label {
+  color: var(--muted);
+}
+#data-page .date-range input {
+  border: 1px solid var(--line);
+  background: #fff;
 }
 #roas-campaigns {
   display: grid;

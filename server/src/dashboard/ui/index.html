@@ -177,12 +177,16 @@
             <article class="panel">
               <h2>Google Analytics</h2>
               <p class="muted">Sessions, sources, product page views, Google Ads cost.</p>
-              <button type="button" id="sync-ga4-btn">Sync GA4</button>
+              <div class="sync-actions">
+                <button type="button" id="sync-ga4-btn" class="btn btn-primary">Sync GA4</button>
+              </div>
             </article>
             <article class="panel">
               <h2>Shopify orders</h2>
               <p id="shopify-status" class="muted">Checking connection…</p>
-              <button type="button" id="sync-shopify-btn">Sync Shopify</button>
+              <div class="sync-actions">
+                <button type="button" id="sync-shopify-btn" class="btn btn-primary">Sync Shopify</button>
+              </div>
             </article>
           </div>
 
@@ -190,8 +194,8 @@
             <h2>Sales Tracker</h2>
             <p class="muted">Pick a Google Sheet / Excel file from Drive, paste a link, or upload an .xlsx.</p>
             <div class="sync-actions">
-              <button type="button" id="drive-refresh-btn" class="ghost">Refresh Drive files</button>
-              <button type="button" id="sync-tracker-btn">Import selected file</button>
+              <button type="button" id="drive-refresh-btn" class="btn btn-secondary">Refresh Drive files</button>
+              <button type="button" id="sync-tracker-btn" class="btn btn-primary">Import selected file</button>
             </div>
             <label class="stack-label">Drive file or URL
               <input id="drive-file-id" type="text" placeholder="Spreadsheet URL or file id" />
@@ -200,7 +204,9 @@
             <label class="stack-label">Or upload .xlsx
               <input id="tracker-upload" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
             </label>
-            <button type="button" id="upload-tracker-btn" class="ghost">Upload &amp; import</button>
+            <div class="sync-actions">
+              <button type="button" id="upload-tracker-btn" class="btn btn-secondary">Upload &amp; import</button>
+            </div>
           </article>
 
           <article class="panel">
