@@ -15,7 +15,7 @@ describe('mapShopifyOrder', () => {
       shipping_address: { province_code: 'MN' },
       source_name: 'web',
       line_items: [
-        { title: 'Morning Dew', sku: 'MD-1', quantity: 2, price: '42.00' },
+        { title: 'Morning Dew', name: 'Morning Dew - Center Shafted', sku: 'MD-1', quantity: 2, price: '42.00' },
       ],
     })
     expect(order.channel).toBe('shopify')
@@ -24,7 +24,8 @@ describe('mapShopifyOrder', () => {
     expect(order.shippingCost).toBe(5)
     expect(order.state).toBe('MN')
     expect(order.lines[0]).toMatchObject({
-      productName: 'Morning Dew',
+      productName: 'Morning Dew - Center Shafted',
+      category: 'Morning Dew',
       quantity: 2,
       unitPrice: 42,
       lineRevenue: 84,
