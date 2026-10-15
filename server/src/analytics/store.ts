@@ -30,6 +30,8 @@ export type AnalyticsStore = {
   deleteSession(id: string): Promise<void>
   // data
   replaceOrders(orders: Order[]): Promise<number>
+  /** Insert or update by (channel, externalId). Leaves other orders untouched. */
+  upsertOrders(orders: Order[]): Promise<number>
   listOrders(): Promise<Order[]>
   replaceTraffic(rows: DailyTraffic[]): Promise<number>
   /** Merge traffic rows by (date, channel); leaves other days untouched. */
@@ -44,8 +46,10 @@ export type AnalyticsStore = {
   upsertProductViews(rows: DailyProductView[]): Promise<number>
   listProductViews(): Promise<DailyProductView[]>
   replaceExpenses(rows: Expense[]): Promise<number>
+  upsertExpenses(rows: Expense[]): Promise<number>
   listExpenses(): Promise<Expense[]>
   replaceCashForecast(rows: CashForecastRow[]): Promise<number>
+  upsertCashForecast(rows: CashForecastRow[]): Promise<number>
   listCashForecast(): Promise<CashForecastRow[]>
   replaceAbandoned(stats: AbandonedCartStats): Promise<void>
   getAbandoned(periodStart: string, periodEnd: string): Promise<AbandonedCartStats | null>
@@ -127,6 +131,13 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       return next.length
     },
 
+    async upsertOrders(next) {
+      const map = new Map(orders.map((o) => [`${o.channel}|${o.externalId}`, o]))
+      for (const order of next) map.set(`${order.channel}|${order.externalId}`, order)
+      orders = [...map.values()]
+      return next.length
+    },
+
     async listOrders() {
       return orders
     },
@@ -193,12 +204,40 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       return rows.length
     },
 
+    async upsertExpenses(rows) {
+      const map = new Map(expenses.map((e) => [e.id, e]))
+      // Prefer matching by date+category+amount+explanation when id is new
+      for (const row of rows) {
+        const existing = expenses.find(
+          (e) =>
+            e.spentAt === row.spentAt &&
+            e.category === row.category &&
+            e.amount === row.amount &&
+            e.explanation === row.explanation,
+        )
+        if (existing) {
+          map.set(existing.id, { ...row, id: existing.id })
+        } else {
+          map.set(row.id, row)
+        }
+      }
+      expenses = [...map.values()]
+      return rows.length
+    },
+
     async listExpenses() {
       return expenses
     },
 
     async replaceCashForecast(rows) {
       cash = rows
+      return rows.length
+    },
+
+    async upsertCashForecast(rows) {
+      const map = new Map(cash.map((r) => [r.monthEnd, r]))
+      for (const row of rows) map.set(row.monthEnd, row)
+      cash = [...map.values()].sort((a, b) => a.monthEnd.localeCompare(b.monthEnd))
       return rows.length
     },
 
@@ -317,41 +356,57 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       await db.query(`DELETE FROM analytics_order_lines`)
       await db.query(`DELETE FROM analytics_orders`)
       for (const order of orders) {
-        await db.query(
-          `INSERT INTO analytics_orders
-            (id, external_id, channel, ordered_at, revenue, fees, shipping_cost, marketing_cost, state, customer_email, is_returning, traffic_source)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-          [
-            order.id,
-            order.externalId,
-            order.channel,
-            order.orderedAt,
-            order.revenue,
-            order.fees,
-            order.shippingCost,
-            order.marketingCost,
-            order.state,
-            order.customerEmail,
-            order.isReturning,
-            order.trafficSource,
-          ],
+        await insertOrder(db, order)
+      }
+      return orders.length
+    },
+
+    async upsertOrders(orders) {
+      for (const order of orders) {
+        const { rows } = await db.query(
+          `SELECT id FROM analytics_orders WHERE channel = $1 AND external_id = $2`,
+          [order.channel, order.externalId],
         )
-        for (const line of order.lines) {
+        const existingId = rows[0] ? str(rows[0].id) : null
+        if (existingId) {
+          await db.query(`DELETE FROM analytics_order_lines WHERE order_id = $1`, [existingId])
           await db.query(
-            `INSERT INTO analytics_order_lines
-              (id, order_id, product_name, product_sku, category, quantity, unit_price, line_revenue)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+            `UPDATE analytics_orders SET
+               ordered_at = $2, revenue = $3, fees = $4, shipping_cost = $5, marketing_cost = $6,
+               state = $7, customer_email = $8, is_returning = $9, traffic_source = $10
+             WHERE id = $1`,
             [
-              randomUUID(),
-              order.id,
-              line.productName,
-              line.productSku,
-              line.category,
-              line.quantity,
-              line.unitPrice,
-              line.lineRevenue,
+              existingId,
+              order.orderedAt,
+              order.revenue,
+              order.fees,
+              order.shippingCost,
+              order.marketingCost,
+              order.state,
+              order.customerEmail,
+              order.isReturning,
+              order.trafficSource,
             ],
           )
+          for (const line of order.lines) {
+            await db.query(
+              `INSERT INTO analytics_order_lines
+                (id, order_id, product_name, product_sku, category, quantity, unit_price, line_revenue)
+               VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+              [
+                randomUUID(),
+                existingId,
+                line.productName,
+                line.productSku,
+                line.category,
+                line.quantity,
+                line.unitPrice,
+                line.lineRevenue,
+              ],
+            )
+          }
+        } else {
+          await insertOrder(db, order)
         }
       }
       return orders.length
@@ -592,6 +647,31 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       return rows.length
     },
 
+    async upsertExpenses(rows) {
+      for (const row of rows) {
+        const { rows: existing } = await db.query(
+          `SELECT id FROM analytics_expenses
+           WHERE spent_at = $1 AND category = $2 AND amount = $3 AND explanation = $4
+           LIMIT 1`,
+          [row.spentAt, row.category, row.amount, row.explanation],
+        )
+        if (existing[0]) {
+          await db.query(
+            `UPDATE analytics_expenses SET bucket = $2, product_line = $3 WHERE id = $1`,
+            [str(existing[0].id), row.bucket, row.productLine],
+          )
+        } else {
+          await db.query(
+            `INSERT INTO analytics_expenses
+              (id, spent_at, category, explanation, amount, bucket, product_line)
+             VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+            [row.id, row.spentAt, row.category, row.explanation, row.amount, row.bucket, row.productLine],
+          )
+        }
+      }
+      return rows.length
+    },
+
     async listExpenses() {
       const { rows } = await db.query(`SELECT * FROM analytics_expenses ORDER BY spent_at`)
       return rows.map((row) => ({
@@ -612,6 +692,35 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           `INSERT INTO analytics_cash_forecast
             (month_end, beginning_balance, collections, freight_and_fees, marketing, website, manufacturing, ending_balance)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          [
+            row.monthEnd,
+            row.beginningBalance,
+            row.collections,
+            row.freightAndFees,
+            row.marketing,
+            row.website,
+            row.manufacturing,
+            row.endingBalance,
+          ],
+        )
+      }
+      return rows.length
+    },
+
+    async upsertCashForecast(rows) {
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_cash_forecast
+            (month_end, beginning_balance, collections, freight_and_fees, marketing, website, manufacturing, ending_balance)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (month_end) DO UPDATE SET
+             beginning_balance = EXCLUDED.beginning_balance,
+             collections = EXCLUDED.collections,
+             freight_and_fees = EXCLUDED.freight_and_fees,
+             marketing = EXCLUDED.marketing,
+             website = EXCLUDED.website,
+             manufacturing = EXCLUDED.manufacturing,
+             ending_balance = EXCLUDED.ending_balance`,
           [
             row.monthEnd,
             row.beginningBalance,
@@ -697,6 +806,45 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       )
       return rows.map(rowToSync)
     },
+  }
+}
+
+async function insertOrder(db: Queryable, order: Order) {
+  await db.query(
+    `INSERT INTO analytics_orders
+      (id, external_id, channel, ordered_at, revenue, fees, shipping_cost, marketing_cost, state, customer_email, is_returning, traffic_source)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+    [
+      order.id,
+      order.externalId,
+      order.channel,
+      order.orderedAt,
+      order.revenue,
+      order.fees,
+      order.shippingCost,
+      order.marketingCost,
+      order.state,
+      order.customerEmail,
+      order.isReturning,
+      order.trafficSource,
+    ],
+  )
+  for (const line of order.lines) {
+    await db.query(
+      `INSERT INTO analytics_order_lines
+        (id, order_id, product_name, product_sku, category, quantity, unit_price, line_revenue)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        randomUUID(),
+        order.id,
+        line.productName,
+        line.productSku,
+        line.category,
+        line.quantity,
+        line.unitPrice,
+        line.lineRevenue,
+      ],
+    )
   }
 }
 

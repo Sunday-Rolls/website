@@ -384,6 +384,94 @@ async function loadRoas() {
   renderRoas(data, sync.data || [])
 }
 
+function syncPayload() {
+  const start = $('#sync-start')?.value || null
+  const end = $('#sync-end')?.value || null
+  return { start: start || undefined, end: end || undefined }
+}
+
+function setSyncFeedback(message, isError = false) {
+  const el = $('#sync-feedback')
+  if (!el) return
+  el.textContent = message
+  el.classList.toggle('error', isError)
+}
+
+function renderSyncList(target, syncs) {
+  const el = $(target)
+  if (!el) return
+  el.innerHTML =
+    !syncs.length
+      ? `<p class="muted">No sync runs yet.</p>`
+      : syncs
+          .map(
+            (s) => `<div class="row"><span>${escapeHtml(s.source)}</span><strong>${escapeHtml(s.status)}${s.finishedAt ? ` · ${new Date(s.finishedAt).toLocaleString()}` : ''}</strong></div>
+            <div class="muted">${escapeHtml(s.message || '')} · ${num(s.rowsTouched)} rows</div>`,
+          )
+          .join('')
+}
+
+function renderDriveFiles(files, defaultFileId) {
+  const el = $('#drive-files')
+  if (!el) return
+  if (!files.length) {
+    el.innerHTML = `<p class="muted">No spreadsheets visible to the service account yet. Share the Sales Tracker as Viewer with the analytics service account, or paste a file URL below.</p>`
+    return
+  }
+  el.innerHTML = files
+    .map((f) => {
+      const selected = f.id === defaultFileId || f.id === $('#drive-file-id')?.value
+      return `<button type="button" class="file-item ${selected ? 'active' : ''}" data-file-id="${escapeHtml(f.id)}">
+        <strong>${escapeHtml(f.name)}</strong>
+        <span class="muted">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</span>
+      </button>`
+    })
+    .join('')
+  for (const btn of el.querySelectorAll('.file-item')) {
+    btn.addEventListener('click', () => {
+      $('#drive-file-id').value = btn.dataset.fileId
+      for (const b of el.querySelectorAll('.file-item')) b.classList.toggle('active', b === btn)
+    })
+  }
+}
+
+async function loadDriveFiles() {
+  try {
+    const { data } = await api('/drive/files')
+    if (data.defaultFileId && !$('#drive-file-id').value) {
+      $('#drive-file-id').value = data.defaultFileId
+    }
+    renderDriveFiles(data.files || [], data.defaultFileId)
+  } catch (err) {
+    $('#drive-files').innerHTML = `<p class="error">${escapeHtml(err.message)}</p>`
+  }
+}
+
+async function loadShopifyStatus() {
+  const el = $('#shopify-status')
+  if (!el) return
+  try {
+    const { data } = await api('/shopify/status')
+    if (!data.configured) {
+      el.textContent = 'Not configured on the server yet.'
+      return
+    }
+    if (data.error) {
+      el.textContent = `Configured, but ping failed: ${data.error}`
+      return
+    }
+    el.textContent = `Connected to ${data.shop?.name || 'Shopify'} (${data.shop?.myshopifyDomain || ''})`
+  } catch (err) {
+    el.textContent = err.message
+  }
+}
+
+async function loadDataPage() {
+  const sync = await api('/sync-status')
+  renderSyncList('#data-sync-status', sync.data || [])
+  await Promise.all([loadDriveFiles(), loadShopifyStatus()])
+}
+
 function setPage(page) {
   for (const btn of document.querySelectorAll('#nav button')) {
     btn.classList.toggle('active', btn.dataset.page === page)
@@ -391,9 +479,11 @@ function setPage(page) {
   $('#overview-page').classList.toggle('hidden', page !== 'overview')
   $('#pnl-page').classList.toggle('hidden', page !== 'pnl')
   $('#roas-page').classList.toggle('hidden', page !== 'roas')
+  $('#data-page')?.classList.toggle('hidden', page !== 'data')
   if (page === 'overview') loadOverview().catch(showError)
   if (page === 'pnl') loadPnL().catch(showError)
   if (page === 'roas') loadRoas().catch(showError)
+  if (page === 'data') loadDataPage().catch(showError)
 }
 
 function showError(err) {
@@ -476,6 +566,97 @@ function bind() {
     })
   }
   $('#pnl-refresh').addEventListener('click', () => loadPnL().catch(showError))
+
+  $('#sync-ga4-btn')?.addEventListener('click', async () => {
+    setSyncFeedback('Syncing GA4…')
+    try {
+      const days =
+        $('#sync-start').value && $('#sync-end').value
+          ? Math.max(
+              1,
+              Math.round(
+                (new Date($('#sync-end').value) - new Date($('#sync-start').value)) / 86400000,
+              ) + 1,
+            )
+          : 90
+      const { data } = await api('/sync-ga4', { method: 'POST', body: JSON.stringify({ days }) })
+      setSyncFeedback(
+        `GA4 synced: ${data.trafficRows} traffic days, ${data.productViewRows} product rows, ${data.adSpendRows} ad spend rows`,
+      )
+      loadDataPage().catch(showError)
+    } catch (err) {
+      setSyncFeedback(err.message, true)
+    }
+  })
+
+  $('#sync-shopify-btn')?.addEventListener('click', async () => {
+    setSyncFeedback('Syncing Shopify orders…')
+    try {
+      const { data } = await api('/sync/shopify', {
+        method: 'POST',
+        body: JSON.stringify(syncPayload()),
+      })
+      setSyncFeedback(`Shopify synced: ${data.orders} orders`)
+      loadDataPage().catch(showError)
+    } catch (err) {
+      setSyncFeedback(err.message, true)
+    }
+  })
+
+  $('#drive-refresh-btn')?.addEventListener('click', () => loadDriveFiles().catch(showError))
+
+  $('#sync-tracker-btn')?.addEventListener('click', async () => {
+    setSyncFeedback('Importing Sales Tracker from Drive…')
+    try {
+      const { data } = await api('/sync/sales-tracker', {
+        method: 'POST',
+        body: JSON.stringify({
+          fileId: $('#drive-file-id').value,
+          ...syncPayload(),
+          includeCash: true,
+        }),
+      })
+      setSyncFeedback(
+        `Sales Tracker: ${data.orders} orders, ${data.expenses} expenses, ${data.cashRows} cash rows${
+          data.warnings?.length ? ` · ${data.warnings.length} warnings` : ''
+        }`,
+      )
+      loadDataPage().catch(showError)
+    } catch (err) {
+      setSyncFeedback(err.message, true)
+    }
+  })
+
+  $('#upload-tracker-btn')?.addEventListener('click', async () => {
+    const file = $('#tracker-upload')?.files?.[0]
+    if (!file) {
+      setSyncFeedback('Choose an .xlsx file first', true)
+      return
+    }
+    setSyncFeedback(`Uploading ${file.name}…`)
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      const { start, end } = syncPayload()
+      if (start) body.append('start', start)
+      if (end) body.append('end', end)
+      const res = await fetch('/dashboard/api/sync/sales-tracker/upload', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body,
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Upload failed')
+      const data = json.data
+      setSyncFeedback(
+        `Uploaded: ${data.orders} orders, ${data.expenses} expenses, ${data.cashRows} cash rows`,
+      )
+      loadDataPage().catch(showError)
+    } catch (err) {
+      setSyncFeedback(err.message, true)
+    }
+  })
+
   $('#export-pnl').addEventListener('click', () => {
     if (!state.pnl) return
     const lines = [['section', 'label', 'month', 'month_pct', 'ytd', 'ytd_pct']]

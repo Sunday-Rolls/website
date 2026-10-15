@@ -319,9 +319,57 @@ body {
 }
 .bars.stacked i { display: block; width: 100%; }
 
-#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status {
+#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status, #data-sync-status {
   display: grid;
   gap: 0.65rem;
+}
+.stack-label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.85rem 0 0.5rem;
+  font-size: 0.9rem;
+}
+.stack-label input[type="text"],
+.stack-label input[type="file"] {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+  background: #fff;
+}
+.sync-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0.75rem 0;
+}
+.file-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.75rem 0 1rem;
+  max-height: 240px;
+  overflow: auto;
+}
+.file-item {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  font: inherit;
+}
+.file-item.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.sync-range { margin-top: 0.75rem; }
+#data-page .panel button:not(.ghost):not(.file-item) {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
 }
 #roas-campaigns {
   display: grid;
