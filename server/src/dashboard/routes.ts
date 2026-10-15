@@ -17,7 +17,14 @@ import { buildDataAudit } from '../analytics/data-audit.js'
 import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { loadGscCredentialsFromEnv, syncGscToStore } from '../analytics/gsc-sync.js'
-import { parseCashCsv, parseExpenseCsv, parseRevenueCsv } from '../analytics/manual-import.js'
+import {
+  CSV_TEMPLATES,
+  orderFromManualRevenue,
+  parseCashCsv,
+  parseExpenseCsv,
+  parseRevenueCsv,
+  type ManualImportKind,
+} from '../analytics/manual-import.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
@@ -392,13 +399,96 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     }
   })
 
+  app.get('/api/import/templates/:kind', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const kind = c.req.param('kind') as ManualImportKind
+    const tpl = CSV_TEMPLATES[kind]
+    if (!tpl) return c.json({ ok: false, error: 'Unknown template (revenue|expenses|cash)' }, 404)
+    return new Response(tpl.body, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${tpl.filename}"`,
+        'Cache-Control': 'no-store',
+      },
+    })
+  })
+
+  app.get('/api/import/manual-orders', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const all = await store.listOrders()
+    const manual = all
+      .filter((o) => o.source === 'manual')
+      .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt))
+      .slice(0, 25)
+      .map((o) => ({
+        date: o.orderedAt.slice(0, 10),
+        channel: o.channel,
+        revenue: o.revenue,
+        product: o.lines[0]?.productName ?? '',
+        externalId: o.externalId,
+      }))
+    return c.json({
+      ok: true,
+      data: {
+        count: all.filter((o) => o.source === 'manual').length,
+        recent: manual,
+      },
+    })
+  })
+
   app.post('/api/import/revenue', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
-    const text = await readUploadText(c)
-    if (!text) return c.json({ ok: false, error: 'Upload a CSV as field "file" or JSON { csv }' }, 400)
+    const contentType = c.req.header('content-type') || ''
     const sync = await store.startSync('manual-revenue')
     try {
+      // Single-row JSON form: { date, channel, revenue, ... }
+      if (contentType.includes('application/json')) {
+        const body = (await c.req.json().catch(() => null)) as Record<string, unknown> | null
+        if (body && typeof body.csv === 'string') {
+          const parsed = parseRevenueCsv(body.csv)
+          if (!parsed.rows.length) {
+            await store.finishSync(sync.id, 'error', parsed.warnings[0] || 'No revenue rows', 0)
+            return c.json(
+              { ok: false, error: parsed.warnings[0] || 'No revenue rows', warnings: parsed.warnings },
+              400,
+            )
+          }
+          const n = await store.upsertOrders(parsed.rows)
+          await store.finishSync(sync.id, 'ok', `Manual revenue: ${n} rows`, n)
+          return c.json({ ok: true, data: { rows: n, warnings: parsed.warnings } })
+        }
+        if (body && typeof body.date === 'string' && typeof body.channel === 'string') {
+          const order = orderFromManualRevenue({
+            date: body.date,
+            channel: body.channel,
+            revenue: Number(body.revenue),
+            fees: body.fees != null ? Number(body.fees) : undefined,
+            shipping: body.shipping != null ? Number(body.shipping) : undefined,
+            marketing: body.marketing != null ? Number(body.marketing) : undefined,
+            product: typeof body.product === 'string' ? body.product : undefined,
+            externalId: typeof body.externalId === 'string' ? body.externalId : undefined,
+          })
+          if (!order) {
+            await store.finishSync(sync.id, 'error', 'Invalid date, channel, or revenue', 0)
+            return c.json({ ok: false, error: 'Invalid date, channel, or revenue' }, 400)
+          }
+          const n = await store.upsertOrders([order])
+          await store.finishSync(sync.id, 'ok', `Manual revenue: 1 row (${order.channel})`, n)
+          return c.json({ ok: true, data: { rows: n, warnings: [] as string[] } })
+        }
+        await store.finishSync(sync.id, 'error', 'Expected CSV upload or { date, channel, revenue }', 0)
+        return c.json({ ok: false, error: 'Expected CSV upload or { date, channel, revenue }' }, 400)
+      }
+
+      const text = await readUploadText(c)
+      if (!text) {
+        await store.finishSync(sync.id, 'error', 'Upload a CSV as field "file"', 0)
+        return c.json({ ok: false, error: 'Upload a CSV as field "file" or JSON { csv }' }, 400)
+      }
       const parsed = parseRevenueCsv(text)
       if (!parsed.rows.length) {
         await store.finishSync(sync.id, 'error', parsed.warnings[0] || 'No revenue rows', 0)

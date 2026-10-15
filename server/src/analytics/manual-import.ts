@@ -7,6 +7,88 @@ export type CsvImportResult<T> = {
   warnings: string[]
 }
 
+export type ManualImportKind = 'revenue' | 'expenses' | 'cash'
+
+/** Downloadable starter CSVs — same columns the parsers accept. */
+export const CSV_TEMPLATES: Record<ManualImportKind, { filename: string; body: string }> = {
+  revenue: {
+    filename: 'sunday-rolls-revenue-template.csv',
+    body: [
+      'date,channel,revenue,fees,shipping,marketing,product,external_id',
+      '2026-10-01,etsy,92.50,15.20,5.70,0,Headcover,etsy-3811712513',
+      '2026-10-02,ebay,80.00,12.00,7.50,0,Headcover,ebay-E42',
+      '2026-10-03,other,80.00,0,0,0,In person,ip-2026-10-03',
+      '',
+    ].join('\n'),
+  },
+  expenses: {
+    filename: 'sunday-rolls-expenses-template.csv',
+    body: [
+      'date,category,amount,bucket,explanation,product_line',
+      '2026-10-01,Manufacturing,500,cogs,Alibaba batch,Headcover',
+      '2026-10-05,Ads,250,sga,Meta boost,',
+      '2026-10-08,Website,49,sga,Software,',
+      '',
+    ].join('\n'),
+  },
+  cash: {
+    filename: 'sunday-rolls-cash-template.csv',
+    body: [
+      'month_end,beginning_balance,collections,freight_and_fees,marketing,website,manufacturing,ending_balance',
+      '2026-10-31,10000,5200,-800,-400,-50,-1000,12950',
+      '',
+    ].join('\n'),
+  },
+}
+
+export type ManualRevenueInput = {
+  date: string
+  channel: string
+  revenue: number
+  fees?: number
+  shipping?: number
+  marketing?: number
+  product?: string
+  externalId?: string
+}
+
+/** Build one manual order row (upsert key: channel + manual:channel:externalId). */
+export function orderFromManualRevenue(input: ManualRevenueInput): Order | null {
+  const day = toDate(input.date)
+  if (!day) return null
+  const channel = mapChannel(input.channel) as SalesChannel | null
+  if (!channel) return null
+  const revenue = Number(input.revenue)
+  if (!Number.isFinite(revenue) || revenue === 0) return null
+  const product = (input.product || '').trim() || (channel === 'etsy' ? 'Headcover' : 'Manual sale')
+  const externalRaw = (input.externalId || '').trim() || `row-${day}-${Math.abs(revenue)}`
+  return {
+    id: randomUUID(),
+    externalId: `manual:${channel}:${externalRaw}`,
+    channel,
+    source: 'manual',
+    orderedAt: `${day}T12:00:00.000Z`,
+    revenue,
+    fees: Math.abs(Number(input.fees) || 0),
+    shippingCost: Math.abs(Number(input.shipping) || 0),
+    marketingCost: Math.abs(Number(input.marketing) || 0),
+    state: null,
+    customerEmail: null,
+    isReturning: false,
+    trafficSource: null,
+    lines: [
+      {
+        productName: product,
+        productSku: null,
+        category: product,
+        quantity: 1,
+        unitPrice: revenue,
+        lineRevenue: revenue,
+      },
+    ],
+  }
+}
+
 /** Split a CSV line on commas, respecting simple double quotes. */
 export function splitCsvLine(line: string): string[] {
   const out: string[] = []
