@@ -6,21 +6,29 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/dashboard && cp -R src/dashboard/ui dist/dashboard/ui",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "user:set-password": "tsx src/scripts/set-password.ts",
+    "analytics:seed-demo": "tsx src/scripts/seed-demo.ts",
+    "analytics:import-sheet": "tsx src/scripts/import-sheet.ts"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "bcryptjs": "^3.0.3",
+    "exceljs": "^4.4.0",
     "hono": "^4.8.3",
-    "nodemailer": "^7.0.5"
+    "nodemailer": "^7.0.5",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.13.3",
     "@types/nodemailer": "^6.4.17",
+    "@types/pg": "^8.15.5",
     "tsx": "^4.20.3",
     "typescript": "~5.9.2",
     "vitest": "^4.1.11"
