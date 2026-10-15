@@ -254,11 +254,27 @@ body {
 .grid-2, .grid-3 {
   display: grid;
   gap: 0.9rem;
+  align-items: start;
 }
 .grid-2 { grid-template-columns: 1.2fr 1fr; }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-top { align-items: start; }
-.grid-top > .panel { height: auto; align-self: start; }
+.mosaic-pair > .panel {
+  height: auto;
+  align-self: start;
+}
+/* Column masonry: short tiles pack under neighbors instead of stretching a row. */
+.mosaic {
+  columns: 3;
+  column-gap: 0.9rem;
+}
+.mosaic > .panel {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 0.9rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
 .panel {
   background: var(--panel);
   border-radius: var(--radius);
@@ -337,7 +353,7 @@ body {
 }
 .bars.stacked i { display: block; width: 100%; }
 
-#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status, #data-sync-status {
+#funnel, #product-views, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status, #data-sync-status {
   display: grid;
   gap: 0.65rem;
 }
@@ -455,35 +471,6 @@ body {
   background: var(--accent);
 }
 .funnel-step .meta { color: var(--muted); font-size: 0.8rem; }
-.funnel-step.has-detail {
-  padding-bottom: 0.15rem;
-}
-.funnel-detail {
-  margin-top: 0.55rem;
-  padding: 0.55rem 0.7rem 0.65rem;
-  border-radius: 12px;
-  background: rgba(20, 32, 24, 0.04);
-  border: 1px solid var(--line);
-}
-.funnel-detail summary {
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--accent);
-  list-style: none;
-}
-.funnel-detail summary::-webkit-details-marker { display: none; }
-.funnel-detail summary::before {
-  content: '▸ ';
-  display: inline-block;
-  transition: transform 0.12s ease;
-}
-.funnel-detail[open] summary::before { transform: rotate(90deg); }
-.funnel-products {
-  display: grid;
-  gap: 0.55rem;
-  margin-top: 0.65rem;
-}
 
 .campaign-block {
   padding: 0 0 1rem;
@@ -564,11 +551,13 @@ tr.section td {
 
 @media (max-width: 1100px) {
   .kpi-row, #pnl-kpis, .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; }
+  .mosaic { columns: 2; }
   .campaign-row { grid-template-columns: 1fr 1fr; }
   .campaign-row.head { display: none; }
 }
 @media (max-width: 720px) {
   .kpi-row, #pnl-kpis, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .mosaic { columns: 1; }
   .dash-view { padding: 0.75rem; }
   .page { padding: 0.75rem; border-radius: 18px; gap: 0.75rem; }
   .brand-logo { height: 1.9rem; }

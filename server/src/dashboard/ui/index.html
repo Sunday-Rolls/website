@@ -66,7 +66,7 @@
             <p id="range-label" class="muted"></p>
           </div>
           <div id="kpi-row" class="kpi-row"></div>
-          <div class="grid-2 grid-top">
+          <div class="grid-2 mosaic-pair">
             <article class="panel">
               <div class="panel-head">
                 <h2 id="trend-title">Revenue trend</h2>
@@ -82,22 +82,16 @@
             </article>
             <article class="panel">
               <h2>Purchase funnel</h2>
-              <p class="muted">Open “Viewed a product” for product page views from GA4. Cart/checkout events need Shopify ecommerce tagging.</p>
+              <p class="muted">Cart/checkout steps need Shopify ecommerce tagging in GA4.</p>
               <div id="funnel"></div>
             </article>
           </div>
-          <div class="grid-2 grid-top">
+          <div class="mosaic">
             <article class="panel">
-              <h2>Sales by product</h2>
-              <p class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
-              <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
+              <h2>Views by product</h2>
+              <p class="muted">GA4 product page views for this range.</p>
+              <div id="product-views"></div>
             </article>
-            <article class="panel">
-              <h2>Traffic sources</h2>
-              <div id="sources"></div>
-            </article>
-          </div>
-          <div class="grid-3 grid-top">
             <article class="panel">
               <h2 id="states-title">Visitors by state</h2>
               <p id="states-note" class="muted"></p>
@@ -111,6 +105,15 @@
               <h2>Abandoned carts</h2>
               <p id="abandoned-note" class="muted"></p>
               <div id="abandoned" class="abandoned"></div>
+            </article>
+            <article class="panel">
+              <h2>Sales by product</h2>
+              <p class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
+              <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
+            </article>
+            <article class="panel">
+              <h2>Traffic sources</h2>
+              <div id="sources"></div>
             </article>
           </div>
         </div>
