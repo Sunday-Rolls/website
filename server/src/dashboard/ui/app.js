@@ -682,10 +682,54 @@ async function loadManualOrders() {
   }
 }
 
+async function loadReviewQrMeta() {
+  const meta = $('#review-qr-meta')
+  const select = $('#review-qr-target')
+  if (!meta || !select) return
+  try {
+    const { data } = await api(`/review-qrs?target=${encodeURIComponent(select.value || 'pages')}`)
+    meta.textContent = `${data.count} headcovers · ${data.label} · ${data.siteUrl}`
+  } catch (err) {
+    meta.textContent = err.message
+  }
+}
+
+async function exportReviewQrPdf() {
+  const select = $('#review-qr-target')
+  const target = select?.value || 'pages'
+  const btn = $('#export-review-qr-pdf')
+  if (btn) btn.disabled = true
+  try {
+    const res = await fetch(`/dashboard/api/review-qrs.pdf?target=${encodeURIComponent(target)}`, {
+      credentials: 'same-origin',
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.error || 'Failed to export PDF')
+    }
+    const blob = await res.blob()
+    const filename =
+      target === 'live' ? 'sunday-rolls-review-qrs-live.pdf' : 'sunday-rolls-review-qrs-pages.pdf'
+    const href = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = href
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(href)
+    setSyncFeedback(`Downloaded ${filename}`)
+  } catch (err) {
+    setSyncFeedback(err.message || 'Failed to export PDF', true)
+  } finally {
+    if (btn) btn.disabled = false
+  }
+}
+
 async function loadDataPage() {
   const sync = await api('/sync-status')
   renderSyncList('#data-sync-status', sync.data || [])
-  await Promise.all([loadDriveFiles(), loadShopifyStatus()])
+  await Promise.all([loadDriveFiles(), loadShopifyStatus(), loadReviewQrMeta()])
 }
 
 function setPage(page) {
@@ -809,6 +853,13 @@ function bind() {
     } catch (err) {
       setSyncFeedback(err.message, true)
     }
+  })
+
+  $('#review-qr-target')?.addEventListener('change', () => {
+    loadReviewQrMeta().catch(showError)
+  })
+  $('#export-review-qr-pdf')?.addEventListener('click', () => {
+    exportReviewQrPdf().catch(showError)
   })
 
   $('#sync-shopify-btn')?.addEventListener('click', async () => {

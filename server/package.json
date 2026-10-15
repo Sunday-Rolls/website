@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "tsc -p tsconfig.json && mkdir -p dist/dashboard && cp -R src/dashboard/ui dist/dashboard/ui",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/dashboard dist/data && cp -R src/dashboard/ui dist/dashboard/ui && cp src/data/review-qr-products.json dist/data/review-qr-products.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "user:set-password": "tsx src/scripts/set-password.ts",
@@ -25,13 +25,17 @@
     "google-auth-library": "^11.3.0",
     "hono": "^4.8.3",
     "nodemailer": "^7.0.5",
-    "pg": "^8.16.3"
+    "pdfkit": "^0.20.2",
+    "pg": "^8.16.3",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.13.3",
     "@types/nodemailer": "^6.4.17",
+    "@types/pdfkit": "^0.17.6",
     "@types/pg": "^8.15.5",
+    "@types/qrcode": "^1.5.6",
     "railway": "^3.16.0",
     "tsx": "^4.20.3",
     "typescript": "~5.9.2",

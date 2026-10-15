@@ -35,6 +35,12 @@ import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey } from '../analytics/types.js'
 import { clientIp } from '../app.js'
 import type { RateLimiter } from '../rate-limit.js'
+import {
+  buildReviewQrPdf,
+  listReviewQrProducts,
+  parseReviewQrTarget,
+  REVIEW_QR_SITE_TARGETS,
+} from '../review-qr-pdf.js'
 
 const UI_DIR = join(dirname(fileURLToPath(import.meta.url)), 'ui')
 
@@ -413,6 +419,48 @@ export function createDashboardRoutes(deps: DashboardDeps) {
         'Cache-Control': 'no-store',
       },
     })
+  })
+
+  app.get('/api/review-qrs', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const target = parseReviewQrTarget(c.req.query('target'))
+    const site = REVIEW_QR_SITE_TARGETS[target]
+    return c.json({
+      ok: true,
+      data: {
+        target,
+        label: site.label,
+        siteUrl: site.url,
+        count: listReviewQrProducts().length,
+        downloadPath: `/dashboard/api/review-qrs.pdf?target=${target}`,
+      },
+    })
+  })
+
+  app.get('/api/review-qrs.pdf', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+
+    const target = parseReviewQrTarget(c.req.query('target'))
+    try {
+      const pdf = await buildReviewQrPdf(target)
+      const filename =
+        target === 'live'
+          ? 'sunday-rolls-review-qrs-live.pdf'
+          : 'sunday-rolls-review-qrs-pages.pdf'
+      return new Response(new Uint8Array(pdf), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Cache-Control': 'no-store',
+        },
+      })
+    } catch (error) {
+      console.error('Failed to build review QR PDF', error)
+      return c.json({ ok: false, error: 'Failed to build QR PDF' }, 502)
+    }
   })
 
   app.get('/api/import/manual-orders', async (c) => {
