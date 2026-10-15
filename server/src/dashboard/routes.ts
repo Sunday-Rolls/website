@@ -13,6 +13,7 @@ import {
   sessionExpiry,
   verifyPassword,
 } from '../analytics/auth.js'
+import { buildDataAudit } from '../analytics/data-audit.js'
 import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
@@ -164,6 +165,20 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     return c.json({ ok: true, data: await store.latestSyncs(), cutoverAt: deps.cutoverAt })
+  })
+
+  /** Wipe all analytics metrics (keeps login users). Then re-sync live sources as needed. */
+  app.post('/api/reset-analytics', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    await store.clearAnalyticsData()
+    return c.json({ ok: true, message: 'Cleared orders, traffic, ads, expenses, cash, sync history' })
+  })
+
+  app.get('/api/data-audit', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    return c.json({ ok: true, data: await buildDataAudit(store) })
   })
 
   /** Dev/demo helper — disabled unless ANALYTICS_ALLOW_DEMO_SEED=true */

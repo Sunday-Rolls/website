@@ -21,6 +21,8 @@ type Queryable = {
 
 export type AnalyticsStore = {
   migrate(): Promise<void>
+  /** Wipe metrics tables (orders, traffic, ads, etc). Keeps dashboard users/sessions. */
+  clearAnalyticsData(): Promise<void>
   // users / sessions
   getUserByEmail(email: string): Promise<DashboardUser | null>
   getUserById(id: string): Promise<DashboardUser | null>
@@ -81,10 +83,22 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let expenses: Expense[] = []
   let cash: CashForecastRow[] = []
   let abandoned: AbandonedCartStats[] = []
-  const syncs: SyncRun[] = []
+  let syncs: SyncRun[] = []
 
   return {
     async migrate() {},
+
+    async clearAnalyticsData() {
+      orders = []
+      traffic = []
+      adSpend = []
+      keywords = []
+      productViews = []
+      expenses = []
+      cash = []
+      abandoned = []
+      syncs = []
+    },
 
     async getUserByEmail(email) {
       return [...users.values()].find((u) => u.email === email) ?? null
@@ -294,6 +308,23 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
   return {
     async migrate() {
       await db.query(ANALYTICS_SCHEMA_SQL)
+    },
+
+    async clearAnalyticsData() {
+      await db.query(`
+        TRUNCATE TABLE
+          analytics_order_lines,
+          analytics_orders,
+          analytics_daily_traffic,
+          analytics_daily_ad_spend,
+          analytics_search_keywords,
+          analytics_daily_product_views,
+          analytics_expenses,
+          analytics_cash_forecast,
+          analytics_abandoned_carts,
+          analytics_sync_runs
+        RESTART IDENTITY CASCADE
+      `)
     },
 
     async getUserByEmail(email) {
