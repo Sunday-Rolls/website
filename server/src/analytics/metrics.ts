@@ -242,18 +242,20 @@ export function buildOverview(input: {
     .sort((a, b) => b.visits - a.visits)
 
   const ordersWithState = curOrders.filter((o) => o.state?.trim())
-  const useOrderStates = orderCount > 0 && ordersWithState.length / orderCount >= 0.2
+  // Prefer real ship-to states whenever we have any (Shopify). Sales Tracker rows stay out of this chart.
+  const useOrderStates = ordersWithState.length > 0
   let stateBreakdownMode: 'orders' | 'visitors' = 'orders'
   let ordersByState: Array<{ state: string; orders: number; share: number }>
 
   if (useOrderStates) {
     const stateMap = new Map<string, number>()
-    for (const o of curOrders) {
-      const state = o.state?.trim() || 'Unknown'
+    for (const o of ordersWithState) {
+      const state = o.state!.trim()
       stateMap.set(state, (stateMap.get(state) ?? 0) + 1)
     }
+    const statedCount = ordersWithState.length
     ordersByState = [...stateMap.entries()]
-      .map(([state, n]) => ({ state, orders: n, share: orderCount ? (n / orderCount) * 100 : 0 }))
+      .map(([state, n]) => ({ state, orders: n, share: statedCount ? (n / statedCount) * 100 : 0 }))
       .sort((a, b) => b.orders - a.orders)
   } else {
     stateBreakdownMode = 'visitors'

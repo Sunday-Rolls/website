@@ -168,7 +168,7 @@ function renderOverview(data) {
     statesNote.textContent =
       geoMode === 'visitors'
         ? 'GA4 US sessions by region (Sales Tracker has no ship-to state). Switches to order states when Shopify fills them in.'
-        : 'Ship-to state from order data.'
+        : 'Ship-to state from orders that include an address (e.g. Shopify).'
   }
   const states = data.ordersByState.slice(0, 5)
   const other = data.ordersByState.slice(5)

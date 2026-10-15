@@ -6,6 +6,7 @@ import { CartPage } from '@/pages/CartPage'
 import { ContactPage } from '@/pages/ContactPage'
 import { HomePage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { OrderThankYouPage } from '@/pages/OrderThankYouPage'
 import { ProductPage } from '@/pages/ProductPage'
 import { ShopPage } from '@/pages/ShopPage'
 
@@ -26,6 +27,7 @@ export const router = createBrowserRouter(
         { path: 'about', element: <AboutPage /> },
         { path: 'contact', element: <ContactPage /> },
         { path: 'cart', element: <CartPage /> },
+        { path: 'order/thank-you', element: <OrderThankYouPage /> },
         { path: '*', element: <NotFoundPage /> },
       ],
     },
