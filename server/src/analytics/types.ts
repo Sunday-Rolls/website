@@ -1,0 +1,125 @@
+export type SalesChannel = 'etsy' | 'squarespace' | 'shopify' | 'ebay' | 'other'
+
+/** Website rollup: Squarespace before cutover, Shopify after. */
+export type WebsiteChannel = 'website'
+
+export type OrderChannel = SalesChannel | WebsiteChannel
+
+export type DashboardUser = {
+  id: string
+  email: string
+  name: string
+  passwordHash: string
+  createdAt: string
+}
+
+export type DashboardSession = {
+  id: string
+  userId: string
+  expiresAt: string
+}
+
+export type OrderLine = {
+  productName: string
+  productSku: string | null
+  category: string | null
+  quantity: number
+  unitPrice: number
+  lineRevenue: number
+}
+
+export type Order = {
+  id: string
+  externalId: string
+  channel: SalesChannel
+  orderedAt: string
+  revenue: number
+  fees: number
+  shippingCost: number
+  marketingCost: number
+  state: string | null
+  customerEmail: string | null
+  isReturning: boolean
+  trafficSource: string | null
+  lines: OrderLine[]
+}
+
+export type DailyTraffic = {
+  date: string
+  channel: 'website'
+  visits: number
+  uniqueVisitors: number
+  productViews: number
+  addToCarts: number
+  checkouts: number
+  purchases: number
+  sourceBreakdown: Record<string, number>
+}
+
+export type DailyAdSpend = {
+  date: string
+  platform: string
+  spend: number
+  platformReportedSales: number
+  platformReportedOrders: number
+}
+
+export type SearchKeyword = {
+  query: string
+  visits: number
+  periodStart: string
+  periodEnd: string
+}
+
+export type Expense = {
+  id: string
+  spentAt: string
+  category: string
+  explanation: string
+  amount: number
+  bucket: 'cogs' | 'sga'
+  productLine: string | null
+}
+
+export type CashForecastRow = {
+  monthEnd: string
+  beginningBalance: number
+  collections: number
+  freightAndFees: number
+  marketing: number
+  website: number
+  manufacturing: number
+  endingBalance: number
+}
+
+export type AbandonedCartStats = {
+  periodStart: string
+  periodEnd: string
+  abandoned: number
+  recovered: number
+  recoveredRevenue: number
+}
+
+export type SyncRun = {
+  id: string
+  source: string
+  startedAt: string
+  finishedAt: string | null
+  status: 'running' | 'ok' | 'error'
+  message: string | null
+  rowsTouched: number
+}
+
+export type PeriodKey = '7d' | '30d' | '90d' | 'year'
+
+export type OverviewQuery = {
+  period: PeriodKey
+  /** Inclusive end date YYYY-MM-DD; defaults to today UTC. */
+  asOf?: string
+}
+
+export type PublicUser = {
+  id: string
+  email: string
+  name: string
+}

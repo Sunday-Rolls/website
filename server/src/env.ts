@@ -16,6 +16,16 @@ export function loadConfig() {
     .map((origin) => origin.trim())
     .filter(Boolean)
 
+  const bootstrap = optional('DASHBOARD_BOOTSTRAP_USERS')
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const [email, name] = part.split(':')
+      return { email: email?.trim() ?? '', name: (name ?? email ?? '').trim() }
+    })
+    .filter((u) => u.email)
+
   return {
     port: Number(optional('PORT', '3001')) || 3001,
     corsOrigins,
@@ -26,6 +36,13 @@ export function loadConfig() {
     smtpPass: required('SMTP_PASS'),
     smtpHost: optional('SMTP_HOST', 'smtp.gmail.com'),
     smtpPort: Number(optional('SMTP_PORT', '465')) || 465,
+    databaseUrl: optional('DATABASE_URL'),
+    dashboardEnabled: optional('DASHBOARD_ENABLED', 'true') !== 'false',
+    dashboardSecureCookies: optional('DASHBOARD_SECURE_COOKIES', 'false') === 'true',
+    dashboardDemoPassword: optional('DASHBOARD_DEMO_PASSWORD'),
+    dashboardBootstrapUsers: bootstrap,
+    analyticsSeedDemoOnBoot: optional('ANALYTICS_SEED_DEMO_ON_BOOT', 'false') === 'true',
+    websiteCutoverAt: optional('WEBSITE_CUTOVER_AT') || null,
   }
 }
 

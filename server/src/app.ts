@@ -1,15 +1,24 @@
 import { Hono, type Context } from 'hono'
 import { cors } from 'hono/cors'
+import type { AnalyticsStore } from './analytics/store.js'
+import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
 import type { ContactPayload } from './mail.js'
 import { createRateLimiter } from './rate-limit.js'
+import { isValidHandle, parseReviewBody, REVIEW_LIMITS, type ReviewStore } from './reviews.js'
 
 export type AppDeps = {
-  config: Pick<Config, 'corsOrigins' | 'requireBrowserOrigin' | 'contactApiKey'>
+  config: Pick<Config, 'corsOrigins' | 'requireBrowserOrigin' | 'contactApiKey'> & {
+    dashboardSecureCookies?: boolean
+    websiteCutoverAt?: string | null
+  }
   sendContactEmail: (payload: ContactPayload) => Promise<void>
+  /** Omitted when DATABASE_URL is not set; review routes then answer 503. */
+  reviews?: ReviewStore
+  analytics?: AnalyticsStore
 }
 
-export function createApp({ config, sendContactEmail }: AppDeps) {
+export function createApp({ config, sendContactEmail, reviews, analytics }: AppDeps) {
   const app = new Hono()
   const checkRateLimit = createRateLimiter()
   const allowlist = new Set(config.corsOrigins)
@@ -37,6 +46,18 @@ export function createApp({ config, sendContactEmail }: AppDeps) {
   )
 
   app.get('/health', (c) => c.json({ ok: true }))
+
+  if (analytics) {
+    app.route(
+      '/dashboard',
+      createDashboardRoutes({
+        store: analytics,
+        checkRateLimit,
+        secureCookies: config.dashboardSecureCookies ?? false,
+        cutoverAt: config.websiteCutoverAt ?? null,
+      }),
+    )
+  }
 
   app.post('/contact', async (c) => {
     if (!hasAllowedBrowserOrigin(c)) {
@@ -76,6 +97,74 @@ export function createApp({ config, sendContactEmail }: AppDeps) {
     }
 
     return c.json({ ok: true })
+  })
+
+  app.get('/reviews', async (c) => {
+    if (!reviews) {
+      return c.json({ ok: false, error: 'Reviews are not available' }, 503)
+    }
+
+    const handle = c.req.query('handle')
+    if (!isValidHandle(handle)) {
+      return c.json({ ok: false, error: 'Unknown product' }, 400)
+    }
+
+    const rate = checkRateLimit(`reviews-read:${clientIp(c)}`, { limit: 120 })
+    if (!rate.ok) {
+      c.header('Retry-After', String(rate.retryAfterSec))
+      return c.json({ ok: false, error: 'Too many requests' }, 429)
+    }
+
+    try {
+      const items = await reviews.listByHandle(handle, REVIEW_LIMITS.list)
+      return c.json({ ok: true, reviews: items })
+    } catch (error) {
+      console.error('Failed to list reviews', error)
+      return c.json({ ok: false, error: 'Failed to load reviews' }, 502)
+    }
+  })
+
+  app.post('/reviews', async (c) => {
+    if (!reviews) {
+      return c.json({ ok: false, error: 'Reviews are not available' }, 503)
+    }
+
+    if (!hasAllowedBrowserOrigin(c)) {
+      return c.json({ ok: false, error: 'Forbidden origin' }, 403)
+    }
+
+    const rate = checkRateLimit(`reviews-write:${clientIp(c)}`, {
+      limit: 3,
+      windowMs: 10 * 60_000,
+    })
+    if (!rate.ok) {
+      c.header('Retry-After', String(rate.retryAfterSec))
+      return c.json({ ok: false, error: 'Too many requests' }, 429)
+    }
+
+    let body: unknown
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json({ ok: false, error: 'Invalid JSON body' }, 400)
+    }
+
+    const parsed = parseReviewBody(body)
+    if (!parsed.ok) {
+      return c.json({ ok: false, error: parsed.error }, 400)
+    }
+
+    if (parsed.spam) {
+      return c.json({ ok: true }, 201)
+    }
+
+    try {
+      const review = await reviews.create(parsed.value)
+      return c.json({ ok: true, review }, 201)
+    } catch (error) {
+      console.error('Failed to save review', error)
+      return c.json({ ok: false, error: 'Failed to save review' }, 502)
+    }
   })
 
   return app

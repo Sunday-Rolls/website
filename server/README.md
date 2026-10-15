@@ -1,20 +1,43 @@
-# Sunday Rolls contact API
+# Sunday Rolls API
 
-Small Node (Hono) service that accepts Contact Us form posts and emails the team via Gmail SMTP (nodemailer). No Resend.
+Hono service on Railway: contact form email, product reviews, and the internal analytics dashboard.
 
 ## Endpoints
 
 - `GET /health` → `{ ok: true }`
 - `POST /contact` JSON `{ name, email, subject, message }` → `{ ok: true }`
+- `GET|POST /reviews` — product reviews (requires `DATABASE_URL`)
+- `GET /dashboard/` — analytics UI (requires `DATABASE_URL`)
+- `POST /dashboard/api/login|logout`, `GET /dashboard/api/overview|pnl|roas|sync-status`
 
 ## Local
 
 ```bash
 cd server
-cp .env.example .env   # fill SMTP_USER / SMTP_PASS
+cp .env.example .env   # SMTP_* + DATABASE_URL
 npm install
 npm run dev
 ```
+
+Dashboard at `http://localhost:3001/dashboard/`.
+
+### First-time dashboard setup
+
+```bash
+# Create / reset a user password (bcrypt). No email forgot-password flow.
+npm run user:set-password -- sam@example.com 'a-long-password' Sam
+
+# Or bootstrap Sam/Alex/Derick on boot with a shared demo password:
+# DASHBOARD_DEMO_PASSWORD=... ANALYTICS_SEED_DEMO_ON_BOOT=true
+
+# Load mockup-shaped sample data
+npm run analytics:seed-demo
+
+# Import Derick's Sales Tracker workbook (orders, expenses, cash)
+npm run analytics:import-sheet -- "/path/to/Sunday Rolls Sales Tracker.xlsx"
+```
+
+Access / integration checklist: [docs/DASHBOARD_ACCESS.md](../docs/DASHBOARD_ACCESS.md).
 
 ## Tests
 
@@ -23,18 +46,15 @@ cd server
 npm test
 ```
 
-Tests run the Hono app in-process with a mocked mailer, so they never send real email. CI runs them on every PR that touches `server/`.
-
 ## Railway
 
-1. Create a service with **Root Directory** = `server`
-2. Set env vars from `.env.example` (`SMTP_*`, `CORS_ORIGINS`, `CONTACT_TO_EMAIL`, optional `CONTACT_API_KEY`)
+1. Service **Root Directory** = `server`
+2. Env vars from `.env.example` (`SMTP_*`, `DATABASE_URL`, dashboard vars)
 3. Build: `npm run build` · Start: `npm start`
-4. Generate a public domain; put it in the site’s `VITE_CONTACT_API_URL`
+4. Public domain → site `VITE_CONTACT_API_URL`; dashboard at `https://<api-host>/dashboard/`
+5. Production: `DASHBOARD_SECURE_COOKIES=true`, set passwords via `user:set-password` (Railway shell), do **not** leave `DASHBOARD_DEMO_PASSWORD` set
 
-`CORS_ORIGINS` must include every site origin that hosts the form (local Vite + production Pages URL).
-
-**Important:** Railway **Hobby / Trial / Free** blocks outbound SMTP (ports 465/587). Gmail SMTP only works on **Pro+**, or switch the server to an HTTPS email API (Resend, etc.). See [Railway outbound networking](https://docs.railway.com/networking/outbound-networking).
+**Important:** Railway **Hobby / Trial / Free** blocks outbound SMTP (ports 465/587). Gmail SMTP only works on **Pro+**, or switch to an HTTPS email API.
 
 ## Gmail App Password
 
