@@ -54,7 +54,7 @@ npm test
 4. Public domain → site `VITE_CONTACT_API_URL`; dashboard at `https://<api-host>/dashboard/`
 5. Production: `DASHBOARD_SECURE_COOKIES=true`, set passwords via `user:set-password` (Railway shell), do **not** leave `DASHBOARD_DEMO_PASSWORD` set
 
-**Important:** Railway **Hobby / Trial / Free** blocks outbound SMTP (ports 465/587). Gmail SMTP only works on **Pro+**, or switch to an HTTPS email API.
+**Important:** Railway **Hobby / Trial / Free** blocks outbound SMTP (ports 465/587). Prefer `RESEND_API_KEY` (HTTPS). Contact submissions are always saved to Postgres (`contact_messages`) when `DATABASE_URL` is set, so the GitHub Pages form still succeeds if email delivery fails.
 
 ## Gmail App Password
 

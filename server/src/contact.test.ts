@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createApp, type AppDeps } from './app.js'
+import { createMemoryContactStore } from './contact-store.js'
 
 const SITE = 'https://sunday-rolls.github.io'
 
@@ -10,8 +11,12 @@ const validBody = {
   message: 'Do you ship to Canada?',
 }
 
-function setup(overrides: Partial<AppDeps['config']> = {}) {
+function setup(
+  overrides: Partial<AppDeps['config']> = {},
+  options: { withContactStore?: boolean } = {},
+) {
   const sendContactEmail = vi.fn<AppDeps['sendContactEmail']>().mockResolvedValue(undefined)
+  const contacts = options.withContactStore ? createMemoryContactStore() : undefined
   const app = createApp({
     config: {
       corsOrigins: [SITE],
@@ -20,8 +25,9 @@ function setup(overrides: Partial<AppDeps['config']> = {}) {
       ...overrides,
     },
     sendContactEmail,
+    contacts,
   })
-  return { app, sendContactEmail }
+  return { app, sendContactEmail, contacts }
 }
 
 function postContact(
@@ -43,11 +49,11 @@ describe('POST /contact', () => {
     const response = await postContact(app, { ...validBody, name: '  Pat Golfer  ' })
 
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ ok: true })
+    expect(await response.json()).toEqual({ ok: true, emailed: true })
     expect(sendContactEmail).toHaveBeenCalledWith(validBody)
   })
 
-  it('returns 502 when the mailer fails', async () => {
+  it('returns 502 when the mailer fails and there is no contact store', async () => {
     const { app, sendContactEmail } = setup()
     sendContactEmail.mockRejectedValueOnce(new Error('SMTP down'))
     vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -56,6 +62,17 @@ describe('POST /contact', () => {
 
     expect(response.status).toBe(502)
     expect(await response.json()).toEqual({ ok: false, error: 'Failed to send message' })
+  })
+
+  it('still accepts the message when email fails but Postgres store succeeds', async () => {
+    const { app, sendContactEmail } = setup({}, { withContactStore: true })
+    sendContactEmail.mockRejectedValueOnce(new Error('SMTP blocked on Hobby'))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const response = await postContact(app, validBody)
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ ok: true, emailed: false })
   })
 
   it.each([
