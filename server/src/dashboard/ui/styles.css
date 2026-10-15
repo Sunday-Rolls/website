@@ -144,6 +144,9 @@ body {
 .top-actions { display: flex; gap: 0.75rem; align-items: center; }
 
 .page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
   background: rgba(247, 243, 232, 0.08);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 28px;
@@ -156,7 +159,6 @@ body {
   justify-content: space-between;
   gap: 0.75rem;
   align-items: center;
-  margin-bottom: 1rem;
   color: #f4f0e4;
 }
 .range-controls {
@@ -209,7 +211,9 @@ body {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+}
+#pnl-kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .kpi {
   background: var(--panel);
@@ -234,28 +238,34 @@ body {
 
 .grid-2, .grid-3 {
   display: grid;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  gap: 0.9rem;
 }
 .grid-2 { grid-template-columns: 1.2fr 1fr; }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .panel {
   background: var(--panel);
   border-radius: var(--radius);
-  padding: 1.1rem 1.2rem;
+  padding: 1.15rem 1.25rem;
   box-shadow: var(--shadow);
 }
 .panel h2 {
-  margin: 0 0 0.8rem;
+  margin: 0 0 0.65rem;
   font-size: 1.05rem;
   font-weight: 600;
+}
+.panel > .muted {
+  margin: -0.25rem 0 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
 }
 .panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
+  margin-bottom: 0.65rem;
 }
+.panel-head h2 { margin: 0; }
 .panel-head .ghost { color: var(--ink); background: var(--accent-soft); border: 0; }
 
 .bars {
@@ -294,9 +304,13 @@ body {
 }
 .bars.stacked i { display: block; width: 100%; }
 
-#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status, #roas-campaigns {
+#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.65rem;
+}
+#roas-campaigns {
+  display: grid;
+  gap: 1rem;
 }
 .row {
   display: grid;
@@ -320,23 +334,28 @@ body {
 .funnel-step .meta { color: var(--muted); font-size: 0.8rem; }
 
 .campaign-block {
-  padding: 0.85rem 0;
+  padding: 0 0 1rem;
   border-bottom: 1px solid var(--line);
 }
-.campaign-block:last-child { border-bottom: 0; padding-bottom: 0; }
-.campaign-block:first-child { padding-top: 0; }
+.campaign-block:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
 .campaign-block h3 {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.65rem;
   font-size: 0.95rem;
   font-weight: 650;
 }
 .campaign-row {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 0.7fr));
-  gap: 0.5rem;
-  align-items: center;
+  gap: 0.65rem 0.75rem;
+  align-items: start;
   font-size: 0.88rem;
-  padding: 0.35rem 0;
+  padding: 0.5rem 0;
+}
+.campaign-row + .campaign-row {
+  border-top: 1px solid rgba(20, 32, 24, 0.06);
 }
 .campaign-row.head {
   color: var(--muted);
@@ -361,14 +380,16 @@ table {
 }
 th, td {
   text-align: left;
-  padding: 0.55rem 0.35rem;
+  padding: 0.65rem 0.45rem;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
+tbody tr:last-child td { border-bottom: 0; }
 th { color: var(--muted); font-weight: 500; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
 tr.emphasize td { font-weight: 700; }
 tr.section td {
-  padding-top: 1rem;
+  padding-top: 1.15rem;
+  padding-bottom: 0.35rem;
   color: var(--muted);
   font-size: 0.75rem;
   letter-spacing: 0.06em;
@@ -390,13 +411,13 @@ tr.section td {
 }
 
 @media (max-width: 1100px) {
-  .kpi-row, .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; }
+  .kpi-row, #pnl-kpis, .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; }
   .campaign-row { grid-template-columns: 1fr 1fr; }
   .campaign-row.head { display: none; }
 }
 @media (max-width: 720px) {
-  .kpi-row, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .kpi-row, #pnl-kpis, .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .dash-view { padding: 0.75rem; }
-  .page { padding: 0.75rem; border-radius: 18px; }
+  .page { padding: 0.75rem; border-radius: 18px; gap: 0.75rem; }
   .brand-logo { height: 1.9rem; }
 }
