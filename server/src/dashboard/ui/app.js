@@ -55,33 +55,36 @@ function setPeriodPills(activePeriod) {
   }
 }
 
-function deltaHtml(metric, asPts = false) {
+/** @param {'money' | 'number' | 'pts'} format */
+function deltaHtml(metric, format = 'money') {
   if (!metric) return ''
+  const asPts = format === 'pts'
+  const fmtPrev = (v) => (asPts ? pct(v, 2) : format === 'number' ? num(v) : money(v))
   const change = asPts ? metric.changePts : metric.changePct
   if (change == null) {
-    return `<span class="delta">vs ${asPts ? pct(metric.previous, 2) : money(metric.previous)}</span>`
+    return `<span class="delta">vs ${fmtPrev(metric.previous)}</span>`
   }
   const up = change >= 0
   const label = asPts
     ? `${up ? '▲' : '▼'} ${Math.abs(change).toFixed(1)} pt`
-    : `${up ? '▲' : '▼'} ${Math.abs(change).toFixed(0)}% vs ${money(metric.previous)}`
+    : `${up ? '▲' : '▼'} ${Math.abs(change).toFixed(0)}% vs ${fmtPrev(metric.previous)}`
   return `<span class="delta ${up ? 'up' : 'down'}">${label}</span>`
 }
 
 function renderKpis(kpis) {
   const items = [
-    { label: 'Revenue', value: money(kpis.revenue.value), delta: deltaHtml(kpis.revenue) },
-    { label: 'Orders', value: num(kpis.orders.value), delta: deltaHtml(kpis.orders) },
-    { label: 'Average order value', value: moneyExact(kpis.aov.value), delta: deltaHtml(kpis.aov) },
+    { label: 'Revenue', value: money(kpis.revenue.value), delta: deltaHtml(kpis.revenue, 'money') },
+    { label: 'Orders', value: num(kpis.orders.value), delta: deltaHtml(kpis.orders, 'number') },
+    { label: 'Average order value', value: moneyExact(kpis.aov.value), delta: deltaHtml(kpis.aov, 'money') },
     {
       label: 'Conversion rate',
       value: pct(kpis.conversionRate.value, 2),
-      delta: deltaHtml(kpis.conversionRate, true) + ' <span class="muted">orders ÷ visits</span>',
+      delta: deltaHtml(kpis.conversionRate, 'pts') + ' <span class="muted">orders ÷ visits</span>',
     },
     {
       label: 'Visits',
       value: num(kpis.visits.value),
-      delta: `${deltaHtml(kpis.visits)} · ${num(kpis.uniqueVisitors)} unique`,
+      delta: `${deltaHtml(kpis.visits, 'number')} · ${num(kpis.uniqueVisitors)} unique`,
     },
   ]
   $('#kpi-row').innerHTML = items
@@ -335,9 +338,9 @@ function renderOverview(data) {
 function renderPnL(data) {
   state.pnl = data
   $('#pnl-kpis').innerHTML = [
-    { label: 'Revenue, YTD', value: money(data.kpis.revenueYtd.value), delta: deltaHtml(data.kpis.revenueYtd) },
-    { label: 'Gross margin, YTD', value: pct(data.kpis.grossMarginYtd.value), delta: deltaHtml(data.kpis.grossMarginYtd, true) },
-    { label: 'Net income, YTD', value: money(data.kpis.netIncomeYtd.value), delta: deltaHtml(data.kpis.netIncomeYtd) },
+    { label: 'Revenue, YTD', value: money(data.kpis.revenueYtd.value), delta: deltaHtml(data.kpis.revenueYtd, 'money') },
+    { label: 'Gross margin, YTD', value: pct(data.kpis.grossMarginYtd.value), delta: deltaHtml(data.kpis.grossMarginYtd, 'pts') },
+    { label: 'Net income, YTD', value: money(data.kpis.netIncomeYtd.value), delta: deltaHtml(data.kpis.netIncomeYtd, 'money') },
     { label: 'Cash on hand', value: money(data.kpis.cashOnHand), delta: '<span class="muted">from forecast</span>' },
   ]
     .map(
