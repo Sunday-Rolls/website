@@ -45,11 +45,16 @@ Set these on the Railway **website** service, then redeploy/rebuild:
 
 | Variable | Action |
 |----------|--------|
+| `RESEND_API_KEY` | **Required on Hobby** — Resend free plan (3k/mo, 100/day). SMTP is blocked on Hobby even when paid. |
+| `RESEND_FROM_EMAIL` | `Sunday Rolls Contact <onboarding@resend.dev>` until a domain is verified in Resend |
+| `CONTACT_TO_EMAIL` | Inbox for form submissions (e.g. `sundayrollsdevops@gmail.com`) |
 | `CORS_ORIGINS` | Include `https://www.sundayrollsgolf.com,https://sundayrollsgolf.com` (keep localhost / Pages during overlap if needed) |
 | `DASHBOARD_SECURE_COOKIES` | `true` |
 | `WEBSITE_CUTOVER_AT` | Cutover date `YYYY-MM-DD` |
 | `GA4_PROPERTY_RESOURCE` | `properties/513898453` (already) |
 | `SEARCH_CONSOLE_SITE_URL` | `https://www.sundayrollsgolf.com/` |
+
+Contact mail uses **Resend over HTTPS**, not Gmail SMTP. Submissions are also stored in Postgres `contact_messages`. See [server/README.md](../server/README.md).
 
 ### Shopify Customer events pixel
 

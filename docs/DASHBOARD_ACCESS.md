@@ -13,7 +13,7 @@ What we already have, and what still needs a human. Checked against Drive, the l
 | Weekly Sales Dashboard folder | Writable by devops | Folder id `1DfwrYHjTfi55woSst1O9d9D9JvYm5o-Y`. Devops is already a **writer**. Also has writers: Alex (`funk20alex@gmail.com`), Ben (`Benjamin.Weir4@gmail.com`), Nick, Sam (`stwolfe10@gmail.com`). |
 | Live Squarespace analytics IDs | Found | Site loads **GTM-PPTR6V3B** → GA4 **G-YKOBBOTPM4**, Google Ads **AW-17744695066**, Meta Pixel (`fbq`). |
 | Demo / new-site analytics IDs | Documented | [ANALYTICS.md](./ANALYTICS.md): GTM-PQSG4NXT / G-ET6SXZWE8E. Local `.env` still points at the **demo** GTM — must switch at cutover. |
-| Contact API on Railway | Healthy + linked | Workspace **sundayrolls's Projects** → project **sunday-rolls-contact** → service **contact-api** (online). Ethan (`ebettenga`) is a workspace member; CLI linked from `server/`. MCP can target the project by ID. No Postgres yet — contact-api only has SMTP/CORS vars. |
+| Contact API on Railway | Healthy + linked | Workspace **sundayrolls's Projects** → project **sunday-rolls-contact** → service **contact-api** (online). Ethan (`ebettenga`) is a workspace member; CLI linked from `server/`. Postgres + reviews + **Resend free plan** (`RESEND_API_KEY`) for contact email (Hobby blocks SMTP). |
 | Headcover Stock sheet | Readable + editable by devops | Drive id `1x1TRv9P6KQ6nCVr_JQPurihemNV9hJPQ` (Derick owns). Useful for inventory cover later. |
 | Shopify store domain in `.env` | Present but broken token | Shop `chrgrk-ff.myshopify.com`. Admin token returns **401 Invalid API key or access token**. |
 

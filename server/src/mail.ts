@@ -10,7 +10,13 @@ export type ContactPayload = {
 
 type MailConfig = Pick<
   Config,
-  'contactToEmail' | 'smtpUser' | 'smtpPass' | 'smtpHost' | 'smtpPort' | 'resendApiKey'
+  | 'contactToEmail'
+  | 'smtpUser'
+  | 'smtpPass'
+  | 'smtpHost'
+  | 'smtpPort'
+  | 'resendApiKey'
+  | 'resendFromEmail'
 >
 
 export function createMailer(config: MailConfig) {
@@ -18,9 +24,9 @@ export function createMailer(config: MailConfig) {
     const apiKey = config.resendApiKey
     if (!apiKey) throw new Error('RESEND_API_KEY is not configured')
 
-    const from = config.smtpUser
-      ? `Sunday Rolls Contact <${config.smtpUser}>`
-      : 'Sunday Rolls Contact <onboarding@resend.dev>'
+    // Never use SMTP_USER (Gmail) as Resend's from-address — it must be a
+    // Resend-verified domain, or onboarding@resend.dev on the free plan.
+    const from = config.resendFromEmail || 'Sunday Rolls Contact <onboarding@resend.dev>'
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
