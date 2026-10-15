@@ -92,15 +92,137 @@ function renderKpis(kpis) {
     .join('')
 }
 
-function renderBars(rows, key) {
-  const max = Math.max(...rows.map((r) => r[key]), 1)
-  $('#revenue-chart').innerHTML = rows
-    .map((r) => {
-      const h = Math.max(4, Math.round((r[key] / max) * 160))
-      const label = r.date.slice(5)
-      return `<div class="bar" style="height:${h}px" title="${r.date}: ${r[key]}"><span>${label}</span></div>`
+function parseDay(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d))
+}
+
+function formatAxisDate(iso, grain) {
+  const dt = parseDay(iso)
+  if (grain === 'month') {
+    return dt.toLocaleDateString('en-US', { month: 'short', year: '2-digit', timeZone: 'UTC' })
+  }
+  if (grain === 'week') {
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+  }
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+}
+
+/** Bucket daily points so year-long ranges stay readable. */
+function bucketTrend(rows, key) {
+  if (!rows.length) return { grain: 'day', points: [] }
+  const spanDays =
+    (parseDay(rows[rows.length - 1].date) - parseDay(rows[0].date)) / 86400000 + 1
+  let grain = 'day'
+  if (spanDays > 120) grain = 'month'
+  else if (spanDays > 45) grain = 'week'
+
+  if (grain === 'day') {
+    return {
+      grain,
+      points: rows.map((r) => ({ date: r.date, value: r[key] ?? 0, label: formatAxisDate(r.date, grain) })),
+    }
+  }
+
+  const buckets = new Map()
+  for (const row of rows) {
+    const dt = parseDay(row.date)
+    let bucketKey
+    if (grain === 'month') {
+      bucketKey = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}-01`
+    } else {
+      const day = dt.getUTCDay() || 7
+      const monday = new Date(dt)
+      monday.setUTCDate(dt.getUTCDate() - (day - 1))
+      bucketKey = monday.toISOString().slice(0, 10)
+    }
+    const cur = buckets.get(bucketKey) ?? { date: bucketKey, value: 0 }
+    cur.value += row[key] ?? 0
+    buckets.set(bucketKey, cur)
+  }
+  const points = [...buckets.values()]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((p) => ({ ...p, label: formatAxisDate(p.date, grain) }))
+  return { grain, points }
+}
+
+function renderTrendChart(rows, key) {
+  const { grain, points } = bucketTrend(rows, key)
+  const title = {
+    revenue: 'Revenue trend',
+    orders: 'Orders trend',
+    visits: 'Visits trend',
+  }[key]
+  const grainLabel = { day: 'Daily', week: 'Weekly totals', month: 'Monthly totals' }[grain]
+  $('#trend-title').textContent = title
+  $('#trend-grain').textContent = grainLabel
+
+  if (!points.length) {
+    $('#trend-summary').innerHTML = ''
+    $('#revenue-chart').innerHTML = `<p class="muted">No ${key} in this range.</p>`
+    return
+  }
+
+  const total = points.reduce((s, p) => s + p.value, 0)
+  const peak = points.reduce((best, p) => (p.value > best.value ? p : best), points[0])
+  const avg = total / points.length
+  const fmt = key === 'revenue' ? money : num
+  $('#trend-summary').innerHTML = `
+    <div class="stat"><div class="label">Total</div><div class="value">${fmt(total)}</div></div>
+    <div class="stat"><div class="label">Avg / ${grain}</div><div class="value">${fmt(avg)}</div></div>
+    <div class="stat"><div class="label">Peak</div><div class="value">${fmt(peak.value)}</div><div class="muted">${escapeHtml(formatAxisDate(peak.date, grain))}</div></div>`
+
+  const w = 640
+  const h = 220
+  const pad = { t: 16, r: 12, b: 36, l: 48 }
+  const innerW = w - pad.l - pad.r
+  const innerH = h - pad.t - pad.b
+  const max = Math.max(...points.map((p) => p.value), 1)
+  const xAt = (i) => pad.l + (points.length === 1 ? innerW / 2 : (i / (points.length - 1)) * innerW)
+  const yAt = (v) => pad.t + innerH - (v / max) * innerH
+  const line = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xAt(i).toFixed(1)} ${yAt(p.value).toFixed(1)}`).join(' ')
+  const area = `${line} L ${xAt(points.length - 1).toFixed(1)} ${(pad.t + innerH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(pad.t + innerH).toFixed(1)} Z`
+
+  const tickCount = Math.min(6, points.length)
+  const tickIdx = new Set(
+    Array.from({ length: tickCount }, (_, i) =>
+      points.length === 1 ? 0 : Math.round((i * (points.length - 1)) / (tickCount - 1)),
+    ),
+  )
+  const xTicks = [...tickIdx]
+    .sort((a, b) => a - b)
+    .map(
+      (i) =>
+        `<text x="${xAt(i).toFixed(1)}" y="${h - 10}" text-anchor="middle" class="chart-tick">${escapeHtml(points[i].label)}</text>`,
+    )
+    .join('')
+  const yTicks = [0, 0.5, 1]
+    .map((t) => {
+      const v = max * t
+      const y = yAt(v)
+      return `<line x1="${pad.l}" x2="${w - pad.r}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" class="chart-grid" />
+        <text x="${pad.l - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" class="chart-tick">${escapeHtml(fmt(v))}</text>`
     })
     .join('')
+  const dots =
+    points.length <= 60
+      ? points
+          .map(
+            (p, i) =>
+              `<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(p.value).toFixed(1)}" r="3" class="chart-dot">
+                <title>${escapeHtml(points[i].label)}: ${fmt(p.value)}</title>
+              </circle>`,
+          )
+          .join('')
+      : ''
+
+  $('#revenue-chart').innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="trend-svg">
+    ${yTicks}
+    <path d="${area}" class="chart-area" />
+    <path d="${line}" class="chart-line" fill="none" />
+    ${dots}
+    ${xTicks}
+  </svg>`
 }
 
 function renderOverview(data) {
@@ -108,7 +230,7 @@ function renderOverview(data) {
   $('#range-label').textContent = `${data.range.label} · compared with previous period`
   syncRangeInputs(data.range)
   renderKpis(data.kpis)
-  renderBars(data.revenueByDay, state.series)
+  renderTrendChart(data.revenueByDay, state.series)
 
   const productViews = data.productViewsByProduct || []
   $('#funnel').innerHTML = data.funnel
@@ -190,11 +312,18 @@ function renderOverview(data) {
     .join('')
 
   const a = data.abandonedCarts
-  $('#abandoned').innerHTML = `
-    <div class="stat"><div class="label">Carts abandoned</div><div class="value">${num(a.abandoned)}</div></div>
-    <div class="stat"><div class="label">Recovered by email</div><div class="value">${num(a.recovered)}</div></div>
+  const abandonedNote = $('#abandoned-note')
+  if (abandonedNote) {
+    abandonedNote.textContent = a.synced
+      ? 'Synced from Shopify checkouts. Zeros mean no abandoned/recovered carts in that pull (store is still early).'
+      : 'Not synced yet — run Data → Sync Shopify.'
+  }
+  $('#abandoned').innerHTML = a.synced
+    ? `<div class="stat"><div class="label">Carts abandoned</div><div class="value">${num(a.abandoned)}</div></div>
+    <div class="stat"><div class="label">Recovered</div><div class="value">${num(a.recovered)}</div></div>
     <div class="stat"><div class="label">Recovered revenue</div><div class="value">${money(a.recoveredRevenue)}</div></div>
-    <div class="stat"><div class="label">Orders from returning</div><div class="value">${pct(a.returningCustomerShare, 0)}</div></div>`
+    <div class="stat"><div class="label">Returning order share</div><div class="value">${pct(a.returningCustomerShare, 0)}</div></div>`
+    : `<p class="muted">No Shopify abandoned-checkout sync on file.</p>`
 }
 
 function renderPnL(data) {
@@ -283,12 +412,20 @@ function campaignBlurb(platform, campaign) {
   return 'Paid acquisition for this channel.'
 }
 
-function roasTone(roas) {
-  if (roas == null) return { cls: '', label: 'No sales reported' }
+function roasTone(roas, status) {
+  if (status === 'not_connected') return { cls: 'warn', label: 'Not connected' }
+  if (status === 'no_conversion_value') return { cls: 'warn', label: 'Spend only — no conversion value yet' }
+  if (status === 'unattributed') return { cls: 'warn', label: 'Sales unattributed on site orders' }
+  if (roas == null) return { cls: '', label: '—' }
   if (roas >= BREAK_EVEN_ROAS * 1.4) return { cls: 'up', label: 'Strong vs break-even' }
   if (roas >= BREAK_EVEN_ROAS) return { cls: 'up', label: 'Above break-even' }
   if (roas >= 1) return { cls: 'warn', label: 'Above 1x, below break-even' }
   return { cls: 'down', label: 'Below 1x' }
+}
+
+function moneyOrDash(value, available) {
+  if (!available) return '—'
+  return moneyExact(value)
 }
 
 function renderCampaigns(platforms) {
@@ -303,7 +440,8 @@ function renderCampaigns(platforms) {
     .map((p) => {
       const rows = (p.campaigns || [])
         .map((c) => {
-          const tone = roasTone(c.platformRoas)
+          const salesReady = c.platformReportedSales > 0
+          const tone = roasTone(c.platformRoas, salesReady ? 'ok' : p.salesStatus)
           const cpa = c.platformReportedOrders > 0 ? c.spend / c.platformReportedOrders : null
           const roasLabel = c.platformRoas == null ? '—' : `${c.platformRoas.toFixed(2)}x`
           return `<div class="campaign-row">
@@ -317,8 +455,8 @@ function renderCampaigns(platforms) {
               <div class="muted">${pct(c.shareOfPlatformSpend, 0)} of platform</div>
             </div>
             <div>
-              <div>${moneyExact(c.platformReportedSales)}</div>
-              <div class="muted">${num(c.platformReportedOrders)} orders</div>
+              <div>${moneyOrDash(c.platformReportedSales, salesReady)}</div>
+              <div class="muted">${salesReady ? `${num(c.platformReportedOrders)} orders` : 'No conv. value'}</div>
             </div>
             <div>
               <div><strong>${roasLabel}</strong></div>
@@ -344,25 +482,36 @@ function renderCampaigns(platforms) {
 }
 
 function renderRoas(payload, syncs) {
+  const platforms = payload.platforms || []
+  const notes = platforms.map((p) => p.note).filter(Boolean)
+  const noteEl = $('#roas-note')
+  if (noteEl) {
+    noteEl.textContent = notes[0] || ''
+  }
+
   $('#roas-table tbody').innerHTML =
-    payload.platforms
-      .map(
-        (p) => `<tr>
-        <td>${escapeHtml(p.platform)}</td>
-        <td>${moneyExact(p.spend)}</td>
-        <td>${moneyExact(p.platformReportedSales)}</td>
+    platforms
+      .map((p) => {
+        // Em dash = data missing / not connected. $0 = real zero when status is ok.
+        const platformSalesReady =
+          p.connected && (p.salesStatus === 'ok' || p.salesStatus === 'unattributed')
+        const siteSalesReady = p.connected && p.salesStatus === 'ok'
+        return `<tr>
+        <td>${escapeHtml(p.platform)}${p.connected ? '' : ' <span class="muted">(offline)</span>'}</td>
+        <td>${p.connected ? moneyExact(p.spend) : '—'}</td>
+        <td>${moneyOrDash(p.platformReportedSales, platformSalesReady)}</td>
         <td>${p.platformRoas == null ? '—' : `${p.platformRoas.toFixed(1)}x`}</td>
-        <td>${moneyExact(p.siteObservedSales)}</td>
+        <td>${moneyOrDash(p.siteObservedSales, siteSalesReady)}</td>
         <td>${p.siteRoas == null ? '—' : `${p.siteRoas.toFixed(1)}x`}</td>
-      </tr>`,
-      )
+      </tr>`
+      })
       .join('') || `<tr><td colspan="6">No ad spend synced yet.</td></tr>`
 
-  renderCampaigns(payload.platforms || [])
+  renderCampaigns(platforms.filter((p) => p.connected))
 
   $('#sync-status').innerHTML =
     syncs.length === 0
-      ? `<p class="muted">No sync runs yet. Seed demo data or import the Sales Tracker sheet.</p>`
+      ? `<p class="muted">No sync runs yet. Import Sales Tracker or sync GA4 / Shopify from Data.</p>`
       : syncs
           .map(
             (s) => `<div class="row"><span>${escapeHtml(s.source)}</span><strong>${escapeHtml(s.status)}${s.finishedAt ? ` · ${new Date(s.finishedAt).toLocaleString()}` : ''}</strong></div>
@@ -574,7 +723,7 @@ function bind() {
     btn.addEventListener('click', () => {
       state.series = btn.dataset.series
       for (const b of document.querySelectorAll('#chart-series button')) b.classList.toggle('active', b === btn)
-      if (state.overview) renderBars(state.overview.revenueByDay, state.series)
+      if (state.overview) renderTrendChart(state.overview.revenueByDay, state.series)
     })
   }
   $('#pnl-refresh').addEventListener('click', () => loadPnL().catch(showError))

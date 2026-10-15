@@ -56,6 +56,9 @@ export type OverviewResponse = {
     recovered: number
     recoveredRevenue: number
     returningCustomerShare: number
+    /** True when a Shopify abandoned-checkout sync has written a stats row. */
+    synced: boolean
+    source: 'shopify' | 'none'
   }
 }
 
@@ -304,6 +307,8 @@ export function buildOverview(input: {
       recovered: abandoned?.recovered ?? 0,
       recoveredRevenue: abandoned?.recoveredRevenue ?? 0,
       returningCustomerShare: orderCount ? (returning / orderCount) * 100 : 0,
+      synced: Boolean(abandoned),
+      source: abandoned ? 'shopify' : 'none',
     },
   }
 }
@@ -518,6 +523,17 @@ export type RoasPlatform = {
   siteObservedSales: number
   siteRoas: number | null
   campaigns: RoasCampaign[]
+  /** True when this platform has a live spend sync configured. */
+  connected: boolean
+  /**
+   * Why sales/ROAS may be blank:
+   * - ok: real numbers (including true zero sales with spend)
+   * - no_conversion_value: spend synced but GA4/Ads has no purchase revenue
+   * - unattributed: orders exist but lack ad-source tags
+   * - not_connected: platform token/sync missing
+   */
+  salesStatus: 'ok' | 'no_conversion_value' | 'unattributed' | 'not_connected'
+  note: string | null
 }
 
 export function buildRoas(input: {
@@ -563,36 +579,46 @@ export function buildRoas(input: {
       .map((o) => o.revenue),
   )
 
-  const siteFor = (platform: string): number => {
+  const siteFor = (platform: string): { sales: number; matched: boolean } => {
     const p = platform.toLowerCase()
     if (p.includes('google')) {
-      return sum(
-        ordersIn(input.orders, input.range.start, input.range.end)
-          .filter((o) => isWebsiteChannel(o.channel) && /google\s*ads/i.test(o.trafficSource ?? ''))
-          .map((o) => o.revenue),
+      const matched = ordersIn(input.orders, input.range.start, input.range.end).filter(
+        (o) => isWebsiteChannel(o.channel) && /google/i.test(o.trafficSource ?? ''),
       )
+      return { sales: sum(matched.map((o) => o.revenue)), matched: matched.length > 0 }
     }
     if (p.includes('meta') || p.includes('facebook')) {
-      return sum(
-        ordersIn(input.orders, input.range.start, input.range.end)
-          .filter((o) => isWebsiteChannel(o.channel) && /social|instagram|facebook|meta/i.test(o.trafficSource ?? ''))
-          .map((o) => o.revenue),
+      const matched = ordersIn(input.orders, input.range.start, input.range.end).filter(
+        (o) =>
+          isWebsiteChannel(o.channel) && /social|instagram|facebook|meta|ig\b|fb\b/i.test(o.trafficSource ?? ''),
       )
+      return { sales: sum(matched.map((o) => o.revenue)), matched: matched.length > 0 }
     }
-    if (p.includes('etsy')) return etsySales
-    if (p.includes('ebay')) return ebaySales
-    return websiteSales
+    if (p.includes('etsy')) return { sales: etsySales, matched: etsySales > 0 }
+    if (p.includes('ebay')) return { sales: ebaySales, matched: ebaySales > 0 }
+    return { sales: websiteSales, matched: websiteSales > 0 }
   }
 
-  return [...platforms.entries()]
-    .map(([platform, v]) => {
-      const siteObservedSales = siteFor(platform)
+  const rows: RoasPlatform[] = [...platforms.entries()]
+    .map(([platform, v]): RoasPlatform => {
+      const site = siteFor(platform)
+      const hasConversionValue = v.reported > 0
+      let salesStatus: RoasPlatform['salesStatus'] = 'ok'
+      let note: string | null = null
+      if (v.spend > 0 && !hasConversionValue) {
+        salesStatus = 'no_conversion_value'
+        note =
+          'Spend is live from GA4/Ads. Platform sales/ROAS stay blank until purchase revenue lands in GA4 (Shopify ecommerce / Ads conversion value).'
+      } else if (v.spend > 0 && hasConversionValue && !site.matched) {
+        salesStatus = 'unattributed'
+        note = 'Platform sales available, but site orders are not tagged with this ad source yet.'
+      }
       const campaigns = [...v.campaigns.entries()]
         .map(([campaign, c]) => ({
           campaign,
           spend: c.spend,
           platformReportedSales: c.reported,
-          platformRoas: c.spend ? c.reported / c.spend : null,
+          platformRoas: c.spend > 0 && c.reported > 0 ? c.reported / c.spend : null,
           platformReportedOrders: c.orders,
           shareOfPlatformSpend: v.spend ? (c.spend / v.spend) * 100 : 0,
         }))
@@ -601,11 +627,32 @@ export function buildRoas(input: {
         platform,
         spend: v.spend,
         platformReportedSales: v.reported,
-        platformRoas: v.spend ? v.reported / v.spend : null,
-        siteObservedSales,
-        siteRoas: v.spend ? siteObservedSales / v.spend : null,
+        platformRoas: v.spend > 0 && v.reported > 0 ? v.reported / v.spend : null,
+        siteObservedSales: site.sales,
+        siteRoas: v.spend > 0 && site.sales > 0 ? site.sales / v.spend : null,
         campaigns,
+        connected: true,
+        salesStatus,
+        note,
       }
     })
     .sort((a, b) => b.spend - a.spend)
+
+  const hasMeta = rows.some((r) => /meta|facebook/i.test(r.platform))
+  if (!hasMeta) {
+    rows.push({
+      platform: 'Meta',
+      spend: 0,
+      platformReportedSales: 0,
+      platformRoas: null,
+      siteObservedSales: 0,
+      siteRoas: null,
+      campaigns: [],
+      connected: false,
+      salesStatus: 'not_connected',
+      note: 'Not connected — add META_ACCESS_TOKEN to sync Meta ad spend.',
+    })
+  }
+
+  return rows
 }
