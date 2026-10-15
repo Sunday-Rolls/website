@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS analytics_orders (
   id uuid PRIMARY KEY,
   external_id text NOT NULL,
   channel text NOT NULL,
+  source text NOT NULL DEFAULT 'sales-tracker',
   ordered_at timestamptz NOT NULL,
   revenue numeric(12,2) NOT NULL,
   fees numeric(12,2) NOT NULL DEFAULT 0,
@@ -33,6 +34,8 @@ CREATE TABLE IF NOT EXISTS analytics_orders (
 );
 CREATE INDEX IF NOT EXISTS analytics_orders_ordered_at_idx ON analytics_orders (ordered_at);
 CREATE INDEX IF NOT EXISTS analytics_orders_channel_idx ON analytics_orders (channel);
+ALTER TABLE analytics_orders
+  ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'sales-tracker';
 
 CREATE TABLE IF NOT EXISTS analytics_order_lines (
   id uuid PRIMARY KEY,

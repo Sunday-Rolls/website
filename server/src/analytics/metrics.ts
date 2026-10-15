@@ -1,3 +1,4 @@
+import { orderSourceCounts, preferLiveOrders } from './orders.js'
 import { inRange, isWebsiteChannel, monthKey, type DateRange } from './period.js'
 import type {
   AbandonedCartStats,
@@ -60,6 +61,19 @@ export type OverviewResponse = {
     synced: boolean
     source: 'shopify' | 'none'
   }
+  /** Provenance counts after Shopify-preferred dedupe (for UI notes). */
+  orderSources: {
+    salesTracker: number
+    shopify: number
+    manual: number
+    note: string
+  }
+  /**
+   * How “Placed order” in the funnel was derived:
+   * - ga4: ecommerce purchases from GA4
+   * - orders: fallback to counted orders (tracker/Shopify/manual) when GA4 purchases are 0
+   */
+  funnelOrderSource: 'ga4' | 'orders'
 }
 
 export type PnLResponse = {
@@ -139,7 +153,8 @@ export function buildOverview(input: {
   abandoned: AbandonedCartStats | null
   productViews?: DailyProductView[]
 }): OverviewResponse {
-  const { range, orders, traffic, keywords, abandoned, productViews: productViewRows = [] } = input
+  const { range, traffic, keywords, abandoned, productViews: productViewRows = [] } = input
+  const orders = preferLiveOrders(input.orders)
   const curOrders = ordersIn(orders, range.start, range.end)
   const prevOrders = ordersIn(orders, range.prevStart, range.prevEnd)
   const curTraffic = trafficIn(traffic, range.start, range.end)
@@ -180,7 +195,19 @@ export function buildOverview(input: {
   const productViews = sum(curTraffic.map((t) => t.productViews))
   const addToCarts = sum(curTraffic.map((t) => t.addToCarts))
   const checkouts = sum(curTraffic.map((t) => t.checkouts))
-  const purchases = sum(curTraffic.map((t) => t.purchases)) || orderCount
+  const ga4Purchases = sum(curTraffic.map((t) => t.purchases))
+  const funnelOrderSource: OverviewResponse['funnelOrderSource'] = ga4Purchases > 0 ? 'ga4' : 'orders'
+  const purchases = ga4Purchases || orderCount
+  const sourceCounts = orderSourceCounts(curOrders)
+  const orderSources = {
+    salesTracker: sourceCounts['sales-tracker'] ?? 0,
+    shopify: sourceCounts.shopify ?? 0,
+    manual: sourceCounts.manual ?? 0,
+    note:
+      (sourceCounts.shopify ?? 0) > 0
+        ? 'Shopify Admin is the live order source. Sales Tracker history is kept for other channels; sheet Shopify rows are ignored when live Shopify data exists.'
+        : 'Orders are from Sales Tracker history and/or manual uploads. Sync Shopify to take over the shopify channel.',
+  }
   const funnelSteps = [
     { step: 'Site visits', count: visits },
     { step: 'Viewed a product', count: productViews },
@@ -310,6 +337,8 @@ export function buildOverview(input: {
       synced: Boolean(abandoned),
       source: abandoned ? 'shopify' : 'none',
     },
+    orderSources,
+    funnelOrderSource,
   }
 }
 
@@ -339,7 +368,8 @@ export function buildPnL(input: {
   /** Unit manufacturing cost used for per-unit profit when line COGS unavailable. */
   unitCogs?: number
 }): PnLResponse {
-  const { year, month, orders, expenses, cashForecast } = input
+  const { year, month, expenses, cashForecast } = input
+  const orders = preferLiveOrders(input.orders)
   const unitCogs = input.unitCogs ?? 15
 
   const ytdOrders = orders.filter((o) => o.orderedAt.startsWith(String(year)))
@@ -541,6 +571,7 @@ export function buildRoas(input: {
   adSpend: DailyAdSpend[]
   orders: Order[]
 }): RoasPlatform[] {
+  const orders = preferLiveOrders(input.orders)
   const spendRows = input.adSpend.filter((r) => r.date >= input.range.start && r.date <= input.range.end)
   const platforms = new Map<
     string,
@@ -564,17 +595,17 @@ export function buildRoas(input: {
   }
 
   const websiteSales = sum(
-    ordersIn(input.orders, input.range.start, input.range.end)
+    ordersIn(orders, input.range.start, input.range.end)
       .filter((o) => isWebsiteChannel(o.channel))
       .map((o) => o.revenue),
   )
   const etsySales = sum(
-    ordersIn(input.orders, input.range.start, input.range.end)
+    ordersIn(orders, input.range.start, input.range.end)
       .filter((o) => o.channel === 'etsy')
       .map((o) => o.revenue),
   )
   const ebaySales = sum(
-    ordersIn(input.orders, input.range.start, input.range.end)
+    ordersIn(orders, input.range.start, input.range.end)
       .filter((o) => o.channel === 'ebay')
       .map((o) => o.revenue),
   )
@@ -582,13 +613,13 @@ export function buildRoas(input: {
   const siteFor = (platform: string): { sales: number; matched: boolean } => {
     const p = platform.toLowerCase()
     if (p.includes('google')) {
-      const matched = ordersIn(input.orders, input.range.start, input.range.end).filter(
+      const matched = ordersIn(orders, input.range.start, input.range.end).filter(
         (o) => isWebsiteChannel(o.channel) && /google/i.test(o.trafficSource ?? ''),
       )
       return { sales: sum(matched.map((o) => o.revenue)), matched: matched.length > 0 }
     }
     if (p.includes('meta') || p.includes('facebook')) {
-      const matched = ordersIn(input.orders, input.range.start, input.range.end).filter(
+      const matched = ordersIn(orders, input.range.start, input.range.end).filter(
         (o) =>
           isWebsiteChannel(o.channel) && /social|instagram|facebook|meta|ig\b|fb\b/i.test(o.trafficSource ?? ''),
       )

@@ -81,11 +81,11 @@
                 <div id="trend-summary" class="trend-summary"></div>
                 <div id="revenue-chart" class="line-chart" role="img" aria-label="Trend chart"></div>
               </article>
-              <article class="panel">
-                <h2>Sales by product</h2>
-                <p class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
-                <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
-              </article>
+            <article class="panel">
+              <h2>Sales by product</h2>
+              <p id="products-note" class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
+              <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
+            </article>
               <article class="panel">
                 <h2>Views by product</h2>
                 <p class="muted">GA4 product page views for this range.</p>
@@ -95,7 +95,7 @@
             <aside class="overview-rail">
               <article class="panel">
                 <h2>Purchase funnel</h2>
-                <p class="muted">Cart/checkout steps need Shopify ecommerce tagging in GA4.</p>
+                <p id="funnel-note" class="muted">Cart/checkout steps need Shopify ecommerce tagging in GA4.</p>
                 <div id="funnel"></div>
               </article>
               <article class="panel">
@@ -194,8 +194,9 @@
               </div>
             </article>
             <article class="panel">
-              <h2>Shopify orders</h2>
+              <h2>Shopify (live orders)</h2>
               <p id="shopify-status" class="muted">Checking connection…</p>
+              <p class="muted">Source of truth for website sales after cutover. Sync removes any Sales Tracker Shopify rows so nothing double-counts.</p>
               <div class="sync-actions">
                 <button type="button" id="sync-shopify-btn" class="btn btn-primary">Sync Shopify</button>
               </div>
@@ -203,8 +204,8 @@
           </div>
 
           <article class="panel">
-            <h2>Sales Tracker</h2>
-            <p class="muted">Pick a Google Sheet / Excel file from Drive, paste a link, or upload an .xlsx.</p>
+            <h2>Historical Sales Tracker</h2>
+            <p class="muted">One-time (or occasional) import of Etsy / Squarespace / eBay / expense / cash history. Shopify Sales-tab rows are skipped by default — use live Shopify sync instead.</p>
             <div class="sync-actions">
               <button type="button" id="drive-refresh-btn" class="btn btn-secondary">Refresh Drive files</button>
               <button type="button" id="sync-tracker-btn" class="btn btn-primary">Import selected file</button>
@@ -218,6 +219,43 @@
             </label>
             <div class="sync-actions">
               <button type="button" id="upload-tracker-btn" class="btn btn-secondary">Upload &amp; import</button>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Manual uploads</h2>
+            <p class="muted">Fill gaps after cutover: leftover marketplace revenue, expenses, and cash. CSV with a header row.</p>
+            <div class="manual-upload-grid">
+              <div>
+                <h3>Revenue streams</h3>
+                <p class="muted">Columns: date, channel, revenue [, fees, shipping, marketing, product, external_id]. Channel: etsy, squarespace, shopify, ebay, other.</p>
+                <label class="stack-label">CSV file
+                  <input id="revenue-upload" type="file" accept=".csv,text/csv" />
+                </label>
+                <div class="sync-actions">
+                  <button type="button" id="upload-revenue-btn" class="btn btn-secondary">Upload revenue</button>
+                </div>
+              </div>
+              <div>
+                <h3>Expenses</h3>
+                <p class="muted">Columns: date, category, amount [, bucket=cogs|sga, explanation, product_line].</p>
+                <label class="stack-label">CSV file
+                  <input id="expense-upload" type="file" accept=".csv,text/csv" />
+                </label>
+                <div class="sync-actions">
+                  <button type="button" id="upload-expense-btn" class="btn btn-secondary">Upload expenses</button>
+                </div>
+              </div>
+              <div>
+                <h3>Cash</h3>
+                <p class="muted">Columns: month_end, ending_balance [, beginning_balance, collections, freight_and_fees, marketing, website, manufacturing].</p>
+                <label class="stack-label">CSV file
+                  <input id="cash-upload" type="file" accept=".csv,text/csv" />
+                </label>
+                <div class="sync-actions">
+                  <button type="button" id="upload-cash-btn" class="btn btn-secondary">Upload cash</button>
+                </div>
+              </div>
             </div>
           </article>
 

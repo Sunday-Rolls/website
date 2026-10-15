@@ -92,7 +92,7 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
     holes.push({
       area: 'Orders / revenue',
       severity: 'critical',
-      detail: 'No orders in Postgres. Import Sales Tracker and/or sync Shopify after real checkouts.',
+      detail: 'No orders in Postgres. Import Sales Tracker history, sync Shopify, or upload a revenue CSV.',
     })
   } else if (demoOrders > 0) {
     holes.push({

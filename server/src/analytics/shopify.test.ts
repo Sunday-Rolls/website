@@ -23,6 +23,7 @@ describe('mapShopifyOrder', () => {
     expect(order.revenue).toBe(89)
     expect(order.shippingCost).toBe(5)
     expect(order.state).toBe('MN')
+    expect(order.source).toBe('shopify')
     expect(order.lines[0]).toMatchObject({
       productName: 'Morning Dew - Center Shafted',
       category: 'Morning Dew',

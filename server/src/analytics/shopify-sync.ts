@@ -53,6 +53,7 @@ export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
     id: randomUUID(),
     externalId: `shopify:${raw.id}`,
     channel: 'shopify',
+    source: 'shopify',
     orderedAt: new Date(raw.created_at).toISOString(),
     revenue,
     fees: 0,
@@ -96,6 +97,13 @@ export async function syncShopifyToStore(
       .filter((o) => !(o.tags || '').toLowerCase().includes('analytics-test'))
       .map(mapShopifyOrder)
     const count = await store.upsertOrders(mapped)
+    // Drop any Sales Tracker Shopify rows so history cannot double-count live Admin orders.
+    const removedTracker = await store.deleteOrders({
+      channel: 'shopify',
+      source: 'sales-tracker',
+      start,
+      end,
+    })
 
     const checkouts = await fetchShopifyAbandonedCheckouts(creds, {
       createdAtMin: start ?? undefined,
@@ -114,8 +122,10 @@ export async function syncShopifyToStore(
     }
     await store.replaceAbandoned(abandonedStats)
 
-    const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders, ${abandonedOnly.length} abandoned, ${recovered.length} recovered`
-    await store.finishSync(sync.id, 'ok', message, count + checkouts.length)
+    const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders, ${abandonedOnly.length} abandoned, ${recovered.length} recovered${
+      removedTracker ? `, removed ${removedTracker} tracker Shopify rows` : ''
+    }`
+    await store.finishSync(sync.id, 'ok', message, count + checkouts.length + removedTracker)
     return {
       start,
       end,

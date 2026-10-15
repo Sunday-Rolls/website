@@ -15,6 +15,11 @@ export type SalesTrackerSyncOptions = {
   replaceAll?: boolean
   /** Include cash forecast rows (default true when no date filter). */
   includeCash?: boolean
+  /**
+   * When true (default), do not import Sales-tab Shopify rows — Admin API owns that channel.
+   * Set false only if you need sheet Shopify lines before a live sync exists.
+   */
+  skipShopifyChannel?: boolean
 }
 
 export type SalesTrackerSyncResult = {
@@ -35,7 +40,9 @@ export async function syncSalesTrackerFromBuffer(
 ): Promise<SalesTrackerSyncResult> {
   const sync = await store.startSync('sales-tracker')
   try {
-    const parsed = await parseWorkbookBuffer(buffer)
+    const parsed = await parseWorkbookBuffer(buffer, {
+      skipShopifyChannel: options.skipShopifyChannel,
+    })
     const start = options.start || null
     const end = options.end || null
     const orders = filterOrdersByDate(parsed.orders, start, end)

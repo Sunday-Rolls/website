@@ -5,6 +5,9 @@ export type WebsiteChannel = 'website'
 
 export type OrderChannel = SalesChannel | WebsiteChannel
 
+/** Where an order row came from — used to prefer live Shopify over sheet history. */
+export type OrderSource = 'sales-tracker' | 'shopify' | 'manual'
+
 export type DashboardUser = {
   id: string
   email: string
@@ -32,6 +35,8 @@ export type Order = {
   id: string
   externalId: string
   channel: SalesChannel
+  /** Provenance for cutover / dedupe. Defaults to sales-tracker for legacy rows. */
+  source: OrderSource
   orderedAt: string
   revenue: number
   fees: number

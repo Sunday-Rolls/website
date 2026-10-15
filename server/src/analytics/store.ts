@@ -10,10 +10,18 @@ import type {
   DashboardUser,
   Expense,
   Order,
+  OrderSource,
   PublicUser,
   SearchKeyword,
   SyncRun,
 } from './types.js'
+
+export type DeleteOrdersFilter = {
+  channel?: Order['channel']
+  source?: OrderSource
+  start?: string | null
+  end?: string | null
+}
 
 type Queryable = {
   query: (text: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
@@ -34,6 +42,8 @@ export type AnalyticsStore = {
   replaceOrders(orders: Order[]): Promise<number>
   /** Insert or update by (channel, externalId). Leaves other orders untouched. */
   upsertOrders(orders: Order[]): Promise<number>
+  /** Delete orders matching filter (used to drop tracker Shopify after live sync). */
+  deleteOrders(filter: DeleteOrdersFilter): Promise<number>
   listOrders(): Promise<Order[]>
   replaceTraffic(rows: DailyTraffic[]): Promise<number>
   /** Merge traffic rows by (date, channel); leaves other days untouched. */
@@ -150,6 +160,12 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       for (const order of next) map.set(`${order.channel}|${order.externalId}`, order)
       orders = [...map.values()]
       return next.length
+    },
+
+    async deleteOrders(filter) {
+      const before = orders.length
+      orders = orders.filter((o) => !orderMatchesFilter(o, filter))
+      return before - orders.length
     },
 
     async listOrders() {
@@ -403,11 +419,12 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           await db.query(`DELETE FROM analytics_order_lines WHERE order_id = $1`, [existingId])
           await db.query(
             `UPDATE analytics_orders SET
-               ordered_at = $2, revenue = $3, fees = $4, shipping_cost = $5, marketing_cost = $6,
-               state = $7, customer_email = $8, is_returning = $9, traffic_source = $10
+               source = $2, ordered_at = $3, revenue = $4, fees = $5, shipping_cost = $6, marketing_cost = $7,
+               state = $8, customer_email = $9, is_returning = $10, traffic_source = $11
              WHERE id = $1`,
             [
               existingId,
+              order.source || 'sales-tracker',
               order.orderedAt,
               order.revenue,
               order.fees,
@@ -443,6 +460,33 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       return orders.length
     },
 
+    async deleteOrders(filter) {
+      const clauses: string[] = []
+      const params: unknown[] = []
+      if (filter.channel) {
+        params.push(filter.channel)
+        clauses.push(`channel = $${params.length}`)
+      }
+      if (filter.source) {
+        params.push(filter.source)
+        clauses.push(`source = $${params.length}`)
+      }
+      if (filter.start) {
+        params.push(filter.start)
+        clauses.push(`ordered_at::date >= $${params.length}::date`)
+      }
+      if (filter.end) {
+        params.push(filter.end)
+        clauses.push(`ordered_at::date <= $${params.length}::date`)
+      }
+      if (clauses.length === 0) return 0
+      const { rows } = await db.query(
+        `DELETE FROM analytics_orders WHERE ${clauses.join(' AND ')} RETURNING id`,
+        params,
+      )
+      return rows.length
+    },
+
     async listOrders() {
       const { rows: orderRows } = await db.query(
         `SELECT * FROM analytics_orders ORDER BY ordered_at DESC`,
@@ -466,6 +510,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         id: str(row.id),
         externalId: str(row.external_id),
         channel: str(row.channel) as Order['channel'],
+        source: (str(row.source || 'sales-tracker') as Order['source']) || 'sales-tracker',
         orderedAt: toIso(row.ordered_at),
         revenue: num(row.revenue),
         fees: num(row.fees),
@@ -847,15 +892,25 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
   }
 }
 
+function orderMatchesFilter(order: Order, filter: DeleteOrdersFilter): boolean {
+  if (filter.channel && order.channel !== filter.channel) return false
+  if (filter.source && (order.source || 'sales-tracker') !== filter.source) return false
+  const day = order.orderedAt.slice(0, 10)
+  if (filter.start && day < filter.start) return false
+  if (filter.end && day > filter.end) return false
+  return Boolean(filter.channel || filter.source || filter.start || filter.end)
+}
+
 async function insertOrder(db: Queryable, order: Order) {
   await db.query(
     `INSERT INTO analytics_orders
-      (id, external_id, channel, ordered_at, revenue, fees, shipping_cost, marketing_cost, state, customer_email, is_returning, traffic_source)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+      (id, external_id, channel, source, ordered_at, revenue, fees, shipping_cost, marketing_cost, state, customer_email, is_returning, traffic_source)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
     [
       order.id,
       order.externalId,
       order.channel,
+      order.source || 'sales-tracker',
       order.orderedAt,
       order.revenue,
       order.fees,

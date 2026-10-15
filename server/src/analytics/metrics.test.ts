@@ -27,6 +27,8 @@ describe('buildOverview', () => {
     expect(overview.abandonedCarts.abandoned).toBe(117)
     expect(overview.abandonedCarts.synced).toBe(true)
     expect(overview.abandonedCarts.source).toBe('shopify')
+    expect(overview.orderSources.salesTracker).toBeGreaterThan(0)
+    expect(overview.funnelOrderSource).toMatch(/ga4|orders/)
     expect(overview.revenueByDay).toHaveLength(30)
   })
 })

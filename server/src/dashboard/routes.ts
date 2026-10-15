@@ -17,6 +17,7 @@ import { buildDataAudit } from '../analytics/data-audit.js'
 import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { loadGscCredentialsFromEnv, syncGscToStore } from '../analytics/gsc-sync.js'
+import { parseCashCsv, parseExpenseCsv, parseRevenueCsv } from '../analytics/manual-import.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
@@ -300,6 +301,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
         end,
         replaceAll: body.replaceAll === true,
         includeCash: body.includeCash !== false,
+        skipShopifyChannel: body.includeShopify !== true,
       })
       return c.json({ ok: true, data: result })
     } catch (error) {
@@ -379,6 +381,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
         end,
         replaceAll: body.replaceAll === 'true',
         includeCash: body.includeCash !== 'false',
+        skipShopifyChannel: body.includeShopify !== 'true',
       })
       return c.json({ ok: true, data: result })
     } catch (error) {
@@ -389,7 +392,91 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     }
   })
 
+  app.post('/api/import/revenue', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const text = await readUploadText(c)
+    if (!text) return c.json({ ok: false, error: 'Upload a CSV as field "file" or JSON { csv }' }, 400)
+    const sync = await store.startSync('manual-revenue')
+    try {
+      const parsed = parseRevenueCsv(text)
+      if (!parsed.rows.length) {
+        await store.finishSync(sync.id, 'error', parsed.warnings[0] || 'No revenue rows', 0)
+        return c.json({ ok: false, error: parsed.warnings[0] || 'No revenue rows', warnings: parsed.warnings }, 400)
+      }
+      const n = await store.upsertOrders(parsed.rows)
+      await store.finishSync(sync.id, 'ok', `Manual revenue: ${n} rows`, n)
+      return c.json({ ok: true, data: { rows: n, warnings: parsed.warnings } })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Revenue import failed'
+      await store.finishSync(sync.id, 'error', message, 0)
+      return c.json({ ok: false, error: message }, 502)
+    }
+  })
+
+  app.post('/api/import/expenses', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const text = await readUploadText(c)
+    if (!text) return c.json({ ok: false, error: 'Upload a CSV as field "file" or JSON { csv }' }, 400)
+    const sync = await store.startSync('manual-expenses')
+    try {
+      const parsed = parseExpenseCsv(text)
+      if (!parsed.rows.length) {
+        await store.finishSync(sync.id, 'error', parsed.warnings[0] || 'No expense rows', 0)
+        return c.json({ ok: false, error: parsed.warnings[0] || 'No expense rows', warnings: parsed.warnings }, 400)
+      }
+      const n = await store.upsertExpenses(parsed.rows)
+      await store.finishSync(sync.id, 'ok', `Manual expenses: ${n} rows`, n)
+      return c.json({ ok: true, data: { rows: n, warnings: parsed.warnings } })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Expense import failed'
+      await store.finishSync(sync.id, 'error', message, 0)
+      return c.json({ ok: false, error: message }, 502)
+    }
+  })
+
+  app.post('/api/import/cash', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const text = await readUploadText(c)
+    if (!text) return c.json({ ok: false, error: 'Upload a CSV as field "file" or JSON { csv }' }, 400)
+    const sync = await store.startSync('manual-cash')
+    try {
+      const parsed = parseCashCsv(text)
+      if (!parsed.rows.length) {
+        await store.finishSync(sync.id, 'error', parsed.warnings[0] || 'No cash rows', 0)
+        return c.json({ ok: false, error: parsed.warnings[0] || 'No cash rows', warnings: parsed.warnings }, 400)
+      }
+      const n = await store.upsertCashForecast(parsed.rows)
+      await store.finishSync(sync.id, 'ok', `Manual cash: ${n} rows`, n)
+      return c.json({ ok: true, data: { rows: n, warnings: parsed.warnings } })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Cash import failed'
+      await store.finishSync(sync.id, 'error', message, 0)
+      return c.json({ ok: false, error: message }, 502)
+    }
+  })
+
   return app
+}
+
+async function readUploadText(c: Context): Promise<string | null> {
+  const contentType = c.req.header('content-type') || ''
+  if (contentType.includes('application/json')) {
+    const body = await c.req.json().catch(() => null)
+    if (body && typeof body === 'object' && typeof (body as { csv?: unknown }).csv === 'string') {
+      return (body as { csv: string }).csv
+    }
+    return null
+  }
+  const body = await c.req.parseBody()
+  const file = body.file
+  if (file && typeof file !== 'string') {
+    return await file.text()
+  }
+  if (typeof body.csv === 'string') return body.csv
+  return null
 }
 
 async function currentUser(c: Context, store: AnalyticsStore) {
