@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  averageRating,
   createSiteReview,
   inferProductHandleFromListing,
   mergeReviews,
   productReviewUrl,
+  ratingHistogram,
+  reviewsForProduct,
   sortReviewsForProduct,
   withInferredProductHandle,
 } from '@/lib/reviews'
@@ -94,5 +97,33 @@ describe('productReviewUrl', () => {
     expect(productReviewUrl('https://sunday-rolls.github.io/website', 'retro-roller-grey', '/website')).toBe(
       'https://sunday-rolls.github.io/website/products/retro-roller-grey?review=1',
     )
+    expect(productReviewUrl('https://www.sundayrollsgolf.com', 'the-doodle', '/')).toBe(
+      'https://www.sundayrollsgolf.com/products/the-doodle?review=1',
+    )
+  })
+})
+
+describe('reviewsForProduct', () => {
+  it('keeps only matching product reviews', () => {
+    const reviews: ProductReview[] = [
+      { author: 'A', rating: 5, text: 'other', productHandle: 'sunday-stripes' },
+      { author: 'B', rating: 5, text: 'match', productHandle: 'retro-roller-grey' },
+      { author: 'C', rating: 4, text: 'untagged' },
+    ]
+
+    expect(reviewsForProduct(reviews, 'retro-roller-grey').map((r) => r.author)).toEqual(['B'])
+  })
+})
+
+describe('averageRating and ratingHistogram', () => {
+  it('summarizes star ratings', () => {
+    const reviews: ProductReview[] = [
+      { author: 'A', rating: 5, text: 'a' },
+      { author: 'B', rating: 4, text: 'b' },
+      { author: 'C', rating: 5, text: 'c' },
+    ]
+
+    expect(averageRating(reviews)).toBe(4.7)
+    expect(ratingHistogram(reviews)).toEqual([0, 0, 0, 1, 2])
   })
 })

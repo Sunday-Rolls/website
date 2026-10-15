@@ -7,8 +7,6 @@ interface ImportMetaEnv {
   readonly VITE_GTM_ID?: string
   readonly VITE_CONTACT_API_URL?: string
   readonly VITE_CONTACT_API_KEY?: string
-  /** Optional webhook (e.g. Formspree) that receives site-submitted product reviews as JSON. */
-  readonly VITE_REVIEW_WEBHOOK_URL?: string
 }
 
 interface ImportMeta {

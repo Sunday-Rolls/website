@@ -83,6 +83,42 @@ export function sortReviewsForProduct(
   return [...matching, ...others]
 }
 
+/** Only reviews tied to this product (Amazon / Google style product pages). */
+export function reviewsForProduct(
+  reviews: ProductReview[],
+  handle: string,
+): ProductReview[] {
+  return reviews.filter((review) => isReviewForProduct(review, handle))
+}
+
+export function averageRating(reviews: ProductReview[]): number {
+  if (reviews.length === 0) return 0
+  const total = reviews.reduce((sum, review) => sum + review.rating, 0)
+  return Math.round((total / reviews.length) * 10) / 10
+}
+
+/** Counts of 1–5 star ratings for a histogram. Index 0 = 1★, index 4 = 5★. */
+export function ratingHistogram(reviews: ProductReview[]): number[] {
+  const counts = [0, 0, 0, 0, 0]
+  for (const review of reviews) {
+    if (review.rating >= 1 && review.rating <= 5) {
+      counts[review.rating - 1] += 1
+    }
+  }
+  return counts
+}
+
+export function formatReviewDate(iso?: string): string | undefined {
+  if (!iso) return undefined
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return undefined
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 function canUseLocalStorage(): boolean {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
 }
