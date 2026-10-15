@@ -200,7 +200,7 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
     holes.push({
       area: 'Expenses (P&L)',
       severity: 'gap',
-      detail: 'No expenses — import Sales Tracker Expense Tracker tab.',
+      detail: 'No expenses — import Sales Tracker or upload an expenses CSV on Data.',
     })
   } else {
     holes.push({
@@ -214,7 +214,7 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
     holes.push({
       area: 'Cash forecast',
       severity: 'gap',
-      detail: 'No cash rows — import Sales Tracker Cash tab.',
+      detail: 'No cash rows — import Sales Tracker Cash tab or upload a cash CSV on Data.',
     })
   }
 
