@@ -383,16 +383,35 @@ function renderPnL(data) {
 
   const months = data.monthlyRevenueByChannel
   const max = Math.max(...months.map((m) => m.total), 1)
-  const colors = { etsy: '#c45c26', squarespace: '#2f6b45', shopify: '#95bf47', ebay: '#0064d2', other: '#6b7280' }
+  const channelMeta = [
+    { key: 'etsy', label: 'Etsy', color: '#c45c26' },
+    { key: 'squarespace', label: 'Squarespace', color: '#2f6b45' },
+    { key: 'shopify', label: 'Shopify', color: '#95bf47' },
+    { key: 'ebay', label: 'eBay', color: '#0064d2' },
+    { key: 'other', label: 'Other', color: '#6b7280' },
+  ]
+  const legend = $('#monthly-channel-legend')
+  if (legend) {
+    legend.innerHTML = channelMeta
+      .map((c) => `<span><i style="background:${c.color}"></i>${escapeHtml(c.label)}</span>`)
+      .join('')
+  }
   $('#monthly-channels').innerHTML = months
     .map((m) => {
-      const parts = ['etsy', 'squarespace', 'shopify', 'ebay', 'other']
-        .map((k) => {
-          const h = Math.round((m[k] / max) * 180)
-          return h ? `<i style="height:${h}px;background:${colors[k]}" title="${k}: ${m[k]}"></i>` : ''
+      const stackH = Math.max(4, Math.round((m.total / max) * 180))
+      const parts = channelMeta
+        .map((c) => {
+          const share = m.total ? m[c.key] / m.total : 0
+          const h = Math.round(share * stackH)
+          if (!h || !m[c.key]) return ''
+          return `<i style="height:${h}px;background:${c.color}" title="${c.label}: ${money(m[c.key])}"></i>`
         })
         .join('')
-      return `<div class="stack" title="${m.month}: ${money(m.total)}">${parts}</div>`
+      const label = m.month.slice(2) // YY-MM compact
+      return `<div class="stack" title="${m.month}: ${money(m.total)}">
+        <div class="stack-fill" style="height:${stackH}px">${parts}</div>
+        <span>${escapeHtml(label)}</span>
+      </div>`
     })
     .join('')
 
