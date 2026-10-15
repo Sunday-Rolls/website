@@ -57,6 +57,7 @@ export function createApp({ config, sendContactEmail, reviews, analytics }: AppD
         cutoverAt: config.websiteCutoverAt ?? null,
       }),
     )
+    app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))
   }
 
   app.post('/contact', async (c) => {
