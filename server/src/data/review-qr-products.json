@@ -2,67 +2,118 @@
   "products": [
     {
       "handle": "retro-roller-grey",
-      "title": "Retro Roller - Grey"
+      "title": "Retro Roller - Grey",
+      "category": "headcovers"
     },
     {
       "handle": "retro-roller-purple",
-      "title": "Retro Roller - Purple"
+      "title": "Retro Roller - Purple",
+      "category": "headcovers"
     },
     {
       "handle": "retro-roller-yellow",
-      "title": "Retro Roller - Yellow"
+      "title": "Retro Roller - Yellow",
+      "category": "headcovers"
     },
     {
       "handle": "flagstick-fuel",
-      "title": "Flagstick Fuel"
+      "title": "Flagstick Fuel",
+      "category": "headcovers"
     },
     {
       "handle": "the-corduroy",
-      "title": "The Corduroy"
+      "title": "The Corduroy",
+      "category": "headcovers"
     },
     {
       "handle": "sunday-stripes",
-      "title": "Sunday Stripes"
+      "title": "Sunday Stripes",
+      "category": "headcovers"
     },
     {
       "handle": "the-birdie-machine",
-      "title": "The Birdie Machine"
+      "title": "The Birdie Machine",
+      "category": "headcovers"
     },
     {
       "handle": "the-breakfast-roller",
-      "title": "The Breakfast Roller"
+      "title": "The Breakfast Roller",
+      "category": "headcovers"
     },
     {
       "handle": "mallet-retro-roller-white",
-      "title": "Mallet - Retro Roller White"
+      "title": "Mallet - Retro Roller White",
+      "category": "headcovers"
     },
     {
       "handle": "mallet-retro-roller-grey",
-      "title": "Mallet - Retro Roller Grey"
+      "title": "Mallet - Retro Roller Grey",
+      "category": "headcovers"
     },
     {
       "handle": "mallet-sunday-stripes",
-      "title": "Mallet - Sunday Stripes"
+      "title": "Mallet - Sunday Stripes",
+      "category": "headcovers"
     },
     {
       "handle": "mallet-the-corduroy",
-      "title": "Mallet - The Corduroy"
+      "title": "Mallet - The Corduroy",
+      "category": "headcovers"
     },
     {
       "handle": "sunny-side-up",
-      "title": "Sunny Side Up"
+      "title": "Sunny Side Up",
+      "category": "headcovers"
     },
     {
       "handle": "coin-collector",
-      "title": "Coin Collector"
+      "title": "Coin Collector",
+      "category": "headcovers"
     },
     {
       "handle": "the-doodle",
-      "title": "The Doodle"
+      "title": "The Doodle",
+      "category": "headcovers"
     },
     {
       "handle": "morning-dew",
-      "title": "Morning Dew"
+      "title": "Morning Dew",
+      "category": "headcovers"
+    },
+    {
+      "handle": "golf-towel-green-stripe",
+      "title": "Golf Towel - Green Stripe",
+      "category": "towels"
+    },
+    {
+      "handle": "golf-towel-blue-stripe",
+      "title": "Golf Towel - Blue Stripe",
+      "category": "towels"
+    },
+    {
+      "handle": "golf-towel-red-stripe",
+      "title": "Golf Towel - Red Stripe",
+      "category": "towels"
+    },
+    {
+      "handle": "golf-towel-black-stripe",
+      "title": "Golf Towel - Black Stripe",
+      "category": "towels"
+    },
+    {
+      "handle": "golf-towel-red-blue-stripe",
+      "title": "Golf Towel - Red & Blue Stripe",
+      "category": "towels"
+    },
+    {
+      "handle": "golf-towel-solid-blue",
+      "title": "Golf Towel - Solid Blue",
+      "category": "towels"
+    },
+    {
+      "handle": "golf-towel-solid-black",
+      "title": "Golf Towel - Solid Black",
+      "category": "towels"
     }
   ]
 }

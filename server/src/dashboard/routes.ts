@@ -37,7 +37,7 @@ import { clientIp } from '../app.js'
 import type { RateLimiter } from '../rate-limit.js'
 import {
   buildReviewQrPdf,
-  listReviewQrProducts,
+  loadReviewQrProducts,
   parseReviewQrTarget,
   REVIEW_QR_SITE_TARGETS,
 } from '../review-qr-pdf.js'
@@ -426,13 +426,15 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const target = parseReviewQrTarget(c.req.query('target'))
     const site = REVIEW_QR_SITE_TARGETS[target]
+    const { products, source } = await loadReviewQrProducts()
     return c.json({
       ok: true,
       data: {
         target,
         label: site.label,
         siteUrl: site.url,
-        count: listReviewQrProducts().length,
+        count: products.length,
+        source,
         downloadPath: `/dashboard/api/review-qrs.pdf?target=${target}`,
       },
     })
@@ -444,7 +446,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
 
     const target = parseReviewQrTarget(c.req.query('target'))
     try {
-      const pdf = await buildReviewQrPdf(target)
+      const { pdf } = await buildReviewQrPdf(target)
       const filename =
         target === 'live'
           ? 'sunday-rolls-review-qrs-live.pdf'

@@ -18,7 +18,7 @@
  *   SITE_TARGET=live npm run reviews:qr
  *   SITE_URL=… SITE_BASE_PATH=… npm run reviews:qr   # custom override
  *   DRY_RUN=1 npm run reviews:qr
- *   HEADCOVERS_ONLY=0 npm run reviews:qr   # include towels / all products
+ *   HEADCOVERS_ONLY=1 npm run reviews:qr   # headcovers only (default: all products)
  */
 import { createWriteStream, mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -104,7 +104,7 @@ loadDotEnv()
 
 const API_VERSION = process.env.VITE_SHOPIFY_API_VERSION || process.env.SHOPIFY_API_VERSION || '2025-01'
 const DRY_RUN = process.env.DRY_RUN === '1'
-const HEADCOVERS_ONLY = process.env.HEADCOVERS_ONLY !== '0'
+const HEADCOVERS_ONLY = process.env.HEADCOVERS_ONLY === '1'
 const site = resolveSiteTarget()
 const SITE_URL = site.url
 const SITE_BASE_PATH = site.basePath

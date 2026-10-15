@@ -89,7 +89,7 @@ export function ProductReviews({ product }: ProductReviewsProps) {
     }
   }, [formOpen])
 
-  if (!reviews || product.category !== 'headcovers') return null
+  if (!reviews) return null
 
   function clearReviewQuery() {
     if (!searchParams.get(REVIEW_QUERY_PARAM)) return

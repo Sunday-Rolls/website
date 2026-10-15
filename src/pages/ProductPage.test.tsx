@@ -104,7 +104,7 @@ describe('ProductPage', () => {
     expect(await screen.findByRole('button', { name: 'Add to Cart' })).toBeInTheDocument()
   })
 
-  it('renders a towel product page without headcover reviews', async () => {
+  it('renders a towel product page with reviews', async () => {
     renderWithRouter(<ProductPage />, {
       route: '/products/golf-towel-green-stripe',
       path: '/products/:handle',
@@ -120,8 +120,8 @@ describe('ProductPage', () => {
       '/assets/products/golf-towel-green-stripe.jpg',
     )
     expect(
-      screen.queryByRole('heading', { level: 2, name: productContent.reviews.heading }),
-    ).not.toBeInTheDocument()
+      await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
+    ).toBeInTheDocument()
   })
 
   it('shows not found state for unknown handles', async () => {

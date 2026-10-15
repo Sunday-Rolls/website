@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildReviewQrPdf,
-  listReviewQrProducts,
+  listCatalogReviewQrProducts,
   parseReviewQrTarget,
   reviewQrLandingUrl,
 } from './review-qr-pdf.js'
@@ -21,14 +21,19 @@ describe('review QR PDF helpers', () => {
     )
   })
 
-  it('lists catalog headcovers', () => {
-    const products = listReviewQrProducts()
-    expect(products.length).toBeGreaterThan(0)
+  it('includes towels and headcovers in the catalog fallback', () => {
+    const products = listCatalogReviewQrProducts()
+    expect(products.length).toBeGreaterThanOrEqual(20)
     expect(products.some((p) => p.handle === 'retro-roller-grey')).toBe(true)
+    expect(products.some((p) => p.handle.includes('towel') || p.title.toLowerCase().includes('towel'))).toBe(
+      true,
+    )
   })
 
-  it('builds a PDF buffer', async () => {
-    const pdf = await buildReviewQrPdf('pages')
+  it('builds a PDF buffer for all catalog products', async () => {
+    const { pdf, count, source } = await buildReviewQrPdf('pages')
+    expect(source).toBe('catalog')
+    expect(count).toBe(listCatalogReviewQrProducts().length)
     expect(pdf.subarray(0, 4).toString('utf8')).toBe('%PDF')
     expect(pdf.byteLength).toBeGreaterThan(1000)
   })
