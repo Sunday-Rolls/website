@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
-import type { Order } from './types.js'
+import type { AbandonedCartStats, Order } from './types.js'
 import {
+  fetchShopifyAbandonedCheckouts,
   fetchShopifyOrders,
   loadShopifyCredentialsFromEnv,
   type ShopifyCredentials,
@@ -12,6 +13,8 @@ export type ShopifySyncResult = {
   start: string | null
   end: string | null
   orders: number
+  abandoned: number
+  recovered: number
 }
 
 function num(value: string | undefined | null): number {
@@ -74,7 +77,7 @@ export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
   }
 }
 
-/** Pull Shopify orders into analytics (upsert by channel + external id). */
+/** Pull Shopify orders + abandoned checkouts into analytics. */
 export async function syncShopifyToStore(
   store: AnalyticsStore,
   creds: ShopifyCredentials,
@@ -87,20 +90,53 @@ export async function syncShopifyToStore(
     const createdAtMin = start ? `${start}T00:00:00Z` : undefined
     const createdAtMax = end ? `${end}T23:59:59Z` : undefined
     const raw = await fetchShopifyOrders(creds, { createdAtMin, createdAtMax })
-    // Prefer paid / partially_paid / authorized / pending test checkouts; skip voided/refunded-only later if needed
     const mapped = raw
       .filter((o) => !o.cancelled_at && o.financial_status !== 'voided')
       .filter((o) => !(o.tags || '').toLowerCase().includes('analytics-test'))
       .map(mapShopifyOrder)
     const count = await store.upsertOrders(mapped)
-    const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders (${raw.length} fetched)`
-    await store.finishSync(sync.id, 'ok', message, count)
-    return { start, end, orders: count }
+
+    const checkouts = await fetchShopifyAbandonedCheckouts(creds, {
+      createdAtMin: start ?? undefined,
+      createdAtMax: end ?? undefined,
+    })
+    const recovered = checkouts.filter((c) => c.completedAt)
+    const abandonedOnly = checkouts.filter((c) => !c.completedAt)
+    const periodStart = start ?? minDate(checkouts.map((c) => c.createdAt.slice(0, 10))) ?? new Date().toISOString().slice(0, 10)
+    const periodEnd = end ?? maxDate(checkouts.map((c) => c.createdAt.slice(0, 10))) ?? periodStart
+    const abandonedStats: AbandonedCartStats = {
+      periodStart,
+      periodEnd,
+      abandoned: abandonedOnly.length,
+      recovered: recovered.length,
+      recoveredRevenue: recovered.reduce((s, c) => s + c.total, 0),
+    }
+    await store.replaceAbandoned(abandonedStats)
+
+    const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders, ${abandonedOnly.length} abandoned, ${recovered.length} recovered`
+    await store.finishSync(sync.id, 'ok', message, count + checkouts.length)
+    return {
+      start,
+      end,
+      orders: count,
+      abandoned: abandonedOnly.length,
+      recovered: recovered.length,
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Shopify sync failed'
     await store.finishSync(sync.id, 'error', message, 0)
     throw error
   }
+}
+
+function minDate(values: string[]): string | null {
+  const sorted = values.filter(Boolean).sort()
+  return sorted[0] ?? null
+}
+
+function maxDate(values: string[]): string | null {
+  const sorted = values.filter(Boolean).sort()
+  return sorted[sorted.length - 1] ?? null
 }
 
 export { loadShopifyCredentialsFromEnv }

@@ -158,6 +158,18 @@ function renderOverview(data) {
     )
     .join('')
 
+  const geoMode = data.stateBreakdownMode || 'orders'
+  const statesTitle = $('#states-title')
+  const statesNote = $('#states-note')
+  if (statesTitle) {
+    statesTitle.textContent = geoMode === 'visitors' ? 'Visitors by state' : 'Orders by state'
+  }
+  if (statesNote) {
+    statesNote.textContent =
+      geoMode === 'visitors'
+        ? 'GA4 US sessions by region (Sales Tracker has no ship-to state). Switches to order states when Shopify fills them in.'
+        : 'Ship-to state from order data.'
+  }
   const states = data.ordersByState.slice(0, 5)
   const other = data.ordersByState.slice(5)
   const otherOrders = other.reduce((a, b) => a + b.orders, 0)
@@ -580,8 +592,11 @@ function bind() {
             )
           : 90
       const { data } = await api('/sync-ga4', { method: 'POST', body: JSON.stringify({ days }) })
+      const gsc = data.searchConsole
+        ? ` · GSC ${data.searchConsole.keywords} keywords`
+        : ''
       setSyncFeedback(
-        `GA4 synced: ${data.trafficRows} traffic days, ${data.productViewRows} product rows, ${data.adSpendRows} ad spend rows`,
+        `GA4 synced: ${data.trafficRows} traffic days, ${data.productViewRows} product rows, ${data.adSpendRows} ad spend rows${gsc}`,
       )
       loadDataPage().catch(showError)
     } catch (err) {
@@ -596,7 +611,9 @@ function bind() {
         method: 'POST',
         body: JSON.stringify(syncPayload()),
       })
-      setSyncFeedback(`Shopify synced: ${data.orders} orders`)
+      setSyncFeedback(
+        `Shopify synced: ${data.orders} orders · ${data.abandoned ?? 0} abandoned · ${data.recovered ?? 0} recovered`,
+      )
       loadDataPage().catch(showError)
     } catch (err) {
       setSyncFeedback(err.message, true)

@@ -175,3 +175,93 @@ export async function pingShopifyShop(creds: ShopifyCredentials): Promise<{
     myshopifyDomain: data.shop.myshopify_domain,
   }
 }
+
+export type ShopifyAbandonedCheckout = {
+  id: string
+  createdAt: string
+  completedAt: string | null
+  total: number
+  provinceCode: string | null
+}
+
+/** Abandoned checkouts via Admin GraphQL (includes recovered when completedAt is set). */
+export async function fetchShopifyAbandonedCheckouts(
+  creds: ShopifyCredentials,
+  options?: { createdAtMin?: string; createdAtMax?: string; maxPages?: number },
+): Promise<ShopifyAbandonedCheckout[]> {
+  const { accessToken } = await createShopifyAccessToken(creds)
+  const host = shopHost(creds.shop)
+  const version = creds.apiVersion || '2025-01'
+  const filters: string[] = []
+  if (options?.createdAtMin) filters.push(`created_at:>=${options.createdAtMin}`)
+  if (options?.createdAtMax) filters.push(`created_at:<=${options.createdAtMax}`)
+  const queryFilter = filters.length ? `, query: ${JSON.stringify(filters.join(' '))}` : ''
+
+  const out: ShopifyAbandonedCheckout[] = []
+  let cursor: string | null = null
+  let pages = 0
+  const maxPages = options?.maxPages ?? 20
+
+  while (pages < maxPages) {
+    pages += 1
+    const after = cursor ? `, after: ${JSON.stringify(cursor)}` : ''
+    const gql = `{
+      abandonedCheckouts(first: 100${after}${queryFilter}) {
+        pageInfo { hasNextPage endCursor }
+        edges {
+          node {
+            id
+            createdAt
+            completedAt
+            totalPriceSet { shopMoney { amount } }
+            shippingAddress { provinceCode province }
+          }
+        }
+      }
+    }`
+    const res = await fetch(`https://${host}/admin/api/${version}/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: gql }),
+    })
+    const data = (await res.json()) as {
+      errors?: Array<{ message?: string }>
+      data?: {
+        abandonedCheckouts?: {
+          pageInfo?: { hasNextPage?: boolean; endCursor?: string | null }
+          edges?: Array<{
+            node?: {
+              id?: string
+              createdAt?: string
+              completedAt?: string | null
+              totalPriceSet?: { shopMoney?: { amount?: string } }
+              shippingAddress?: { provinceCode?: string | null; province?: string | null } | null
+            }
+          }>
+        }
+      }
+    }
+    if (!res.ok || data.errors?.length) {
+      throw new Error(data.errors?.[0]?.message || `Shopify abandoned checkouts failed (${res.status})`)
+    }
+    const edges = data.data?.abandonedCheckouts?.edges ?? []
+    for (const edge of edges) {
+      const node = edge.node
+      if (!node?.id || !node.createdAt) continue
+      out.push({
+        id: node.id,
+        createdAt: node.createdAt,
+        completedAt: node.completedAt ?? null,
+        total: Number(node.totalPriceSet?.shopMoney?.amount ?? 0) || 0,
+        provinceCode: node.shippingAddress?.provinceCode || node.shippingAddress?.province || null,
+      })
+    }
+    if (!data.data?.abandonedCheckouts?.pageInfo?.hasNextPage) break
+    cursor = data.data.abandonedCheckouts.pageInfo.endCursor ?? null
+    if (!cursor) break
+  }
+  return out
+}

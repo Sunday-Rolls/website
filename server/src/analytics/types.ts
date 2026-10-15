@@ -54,6 +54,8 @@ export type DailyTraffic = {
   checkouts: number
   purchases: number
   sourceBreakdown: Record<string, number>
+  /** GA4 region (US state / territory) → sessions for the day. */
+  regionBreakdown?: Record<string, number>
 }
 
 /** Per-product page views for a single UTC day (GA4 item views, etc.). */

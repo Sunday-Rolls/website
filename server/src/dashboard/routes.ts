@@ -16,6 +16,7 @@ import {
 import { buildDataAudit } from '../analytics/data-audit.js'
 import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
+import { loadGscCredentialsFromEnv, syncGscToStore } from '../analytics/gsc-sync.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
@@ -213,9 +214,38 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     )
     try {
       const result = await syncGa4ToStore(store, creds, { days })
-      return c.json({ ok: true, data: result })
+      let gsc: Awaited<ReturnType<typeof syncGscToStore>> | null = null
+      const gscCreds = loadGscCredentialsFromEnv()
+      if (gscCreds) {
+        try {
+          gsc = await syncGscToStore(store, gscCreds, { days })
+        } catch (error) {
+          console.error('Search Console sync failed:', error instanceof Error ? error.message : error)
+        }
+      }
+      return c.json({ ok: true, data: { ...result, searchConsole: gsc } })
     } catch (error) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : 'GA4 sync failed' }, 502)
+    }
+  })
+
+  app.post('/api/sync/search-console', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const creds = loadGscCredentialsFromEnv()
+    if (!creds) {
+      return c.json({ ok: false, error: 'GOOGLE_SERVICE_ACCOUNT_JSON / SEARCH_CONSOLE_SITE_URL missing' }, 503)
+    }
+    const body = await c.req.json().catch(() => ({} as Record<string, unknown>))
+    const days = Math.max(1, Math.min(Number(body.days ?? 90) || 90, 365))
+    try {
+      const result = await syncGscToStore(store, creds, { days })
+      return c.json({ ok: true, data: result })
+    } catch (error) {
+      return c.json(
+        { ok: false, error: error instanceof Error ? error.message : 'Search Console sync failed' },
+        502,
+      )
     }
   })
 
