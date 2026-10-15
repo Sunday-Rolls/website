@@ -89,7 +89,8 @@ export async function syncShopifyToStore(
     const raw = await fetchShopifyOrders(creds, { createdAtMin, createdAtMax })
     // Prefer paid / partially_paid / authorized / pending test checkouts; skip voided/refunded-only later if needed
     const mapped = raw
-      .filter((o) => o.financial_status !== 'voided')
+      .filter((o) => !o.cancelled_at && o.financial_status !== 'voided')
+      .filter((o) => !(o.tags || '').toLowerCase().includes('analytics-test'))
       .map(mapShopifyOrder)
     const count = await store.upsertOrders(mapped)
     const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders (${raw.length} fetched)`

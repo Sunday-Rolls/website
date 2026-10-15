@@ -9,6 +9,7 @@ export type ShopifyOrderRaw = {
   id: number
   name: string
   created_at: string
+  cancelled_at?: string | null
   financial_status: string | null
   total_price: string
   total_discounts?: string
