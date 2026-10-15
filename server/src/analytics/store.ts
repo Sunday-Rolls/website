@@ -32,12 +32,16 @@ export type AnalyticsStore = {
   replaceOrders(orders: Order[]): Promise<number>
   listOrders(): Promise<Order[]>
   replaceTraffic(rows: DailyTraffic[]): Promise<number>
+  /** Merge traffic rows by (date, channel); leaves other days untouched. */
+  upsertTraffic(rows: DailyTraffic[]): Promise<number>
   listTraffic(): Promise<DailyTraffic[]>
   replaceAdSpend(rows: DailyAdSpend[]): Promise<number>
+  upsertAdSpend(rows: DailyAdSpend[]): Promise<number>
   listAdSpend(): Promise<DailyAdSpend[]>
   replaceKeywords(rows: SearchKeyword[]): Promise<number>
   listKeywords(): Promise<SearchKeyword[]>
   replaceProductViews(rows: DailyProductView[]): Promise<number>
+  upsertProductViews(rows: DailyProductView[]): Promise<number>
   listProductViews(): Promise<DailyProductView[]>
   replaceExpenses(rows: Expense[]): Promise<number>
   listExpenses(): Promise<Expense[]>
@@ -132,12 +136,26 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       return rows.length
     },
 
+    async upsertTraffic(rows) {
+      const map = new Map(traffic.map((r) => [`${r.date}|${r.channel}`, r]))
+      for (const row of rows) map.set(`${row.date}|${row.channel}`, row)
+      traffic = [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
+      return rows.length
+    },
+
     async listTraffic() {
       return traffic
     },
 
     async replaceAdSpend(rows) {
       adSpend = rows
+      return rows.length
+    },
+
+    async upsertAdSpend(rows) {
+      const map = new Map(adSpend.map((r) => [`${r.date}|${r.platform}|${r.campaign}`, r]))
+      for (const row of rows) map.set(`${row.date}|${row.platform}|${row.campaign}`, row)
+      adSpend = [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
       return rows.length
     },
 
@@ -156,6 +174,13 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
 
     async replaceProductViews(rows) {
       productViews = rows
+      return rows.length
+    },
+
+    async upsertProductViews(rows) {
+      const map = new Map(productViews.map((r) => [`${r.date}|${r.productName}`, r]))
+      for (const row of rows) map.set(`${row.date}|${row.productName}`, row)
+      productViews = [...map.values()].sort((a, b) => a.date.localeCompare(b.date))
       return rows.length
     },
 
@@ -391,6 +416,36 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       return rows.length
     },
 
+    async upsertTraffic(rows) {
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_daily_traffic
+            (date, channel, visits, unique_visitors, product_views, add_to_carts, checkouts, purchases, source_breakdown)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+           ON CONFLICT (date, channel) DO UPDATE SET
+             visits = EXCLUDED.visits,
+             unique_visitors = EXCLUDED.unique_visitors,
+             product_views = EXCLUDED.product_views,
+             add_to_carts = EXCLUDED.add_to_carts,
+             checkouts = EXCLUDED.checkouts,
+             purchases = EXCLUDED.purchases,
+             source_breakdown = EXCLUDED.source_breakdown`,
+          [
+            row.date,
+            row.channel,
+            row.visits,
+            row.uniqueVisitors,
+            row.productViews,
+            row.addToCarts,
+            row.checkouts,
+            row.purchases,
+            JSON.stringify(row.sourceBreakdown),
+          ],
+        )
+      }
+      return rows.length
+    },
+
     async listTraffic() {
       const { rows } = await db.query(`SELECT * FROM analytics_daily_traffic ORDER BY date`)
       return rows.map((row) => ({
@@ -416,6 +471,29 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           `INSERT INTO analytics_daily_ad_spend
             (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders)
            VALUES ($1,$2,$3,$4,$5,$6)`,
+          [
+            row.date,
+            row.platform,
+            row.campaign ?? '',
+            row.spend,
+            row.platformReportedSales,
+            row.platformReportedOrders,
+          ],
+        )
+      }
+      return rows.length
+    },
+
+    async upsertAdSpend(rows) {
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_daily_ad_spend
+            (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders)
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT (date, platform, campaign) DO UPDATE SET
+             spend = EXCLUDED.spend,
+             platform_reported_sales = EXCLUDED.platform_reported_sales,
+             platform_reported_orders = EXCLUDED.platform_reported_orders`,
           [
             row.date,
             row.platform,
@@ -469,6 +547,20 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         await db.query(
           `INSERT INTO analytics_daily_product_views (date, product_name, category, views)
            VALUES ($1,$2,$3,$4)`,
+          [row.date, row.productName, row.category, row.views],
+        )
+      }
+      return rows.length
+    },
+
+    async upsertProductViews(rows) {
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_daily_product_views (date, product_name, category, views)
+           VALUES ($1,$2,$3,$4)
+           ON CONFLICT (date, product_name) DO UPDATE SET
+             category = EXCLUDED.category,
+             views = EXCLUDED.views`,
           [row.date, row.productName, row.category, row.views],
         )
       }

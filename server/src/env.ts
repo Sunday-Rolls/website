@@ -43,6 +43,10 @@ export function loadConfig() {
     dashboardBootstrapUsers: bootstrap,
     analyticsSeedDemoOnBoot: optional('ANALYTICS_SEED_DEMO_ON_BOOT', 'false') === 'true',
     websiteCutoverAt: optional('WEBSITE_CUTOVER_AT') || null,
+    googleServiceAccountJson: optional('GOOGLE_SERVICE_ACCOUNT_JSON') || null,
+    ga4PropertyResource: optional('GA4_PROPERTY_RESOURCE') || null,
+    ga4SyncOnBoot: optional('GA4_SYNC_ON_BOOT', 'false') === 'true',
+    ga4SyncDays: Math.max(1, Math.min(Number(optional('GA4_SYNC_DAYS', '90')) || 90, 365)),
   }
 }
 
