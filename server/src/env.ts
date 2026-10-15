@@ -47,6 +47,8 @@ export function loadConfig() {
     ga4PropertyResource: optional('GA4_PROPERTY_RESOURCE') || null,
     ga4SyncOnBoot: optional('GA4_SYNC_ON_BOOT', 'false') === 'true',
     ga4SyncDays: Math.max(1, Math.min(Number(optional('GA4_SYNC_DAYS', '90')) || 90, 365)),
+    salesTrackerDriveFileId: optional('SALES_TRACKER_DRIVE_FILE_ID') || null,
+    salesTrackerDriveFolderId: optional('SALES_TRACKER_DRIVE_FOLDER_ID') || null,
   }
 }
 

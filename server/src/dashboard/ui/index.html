@@ -40,6 +40,7 @@
             <button type="button" data-page="overview" class="active">Overview</button>
             <button type="button" data-page="pnl">P&amp;L</button>
             <button type="button" data-page="roas">ROAS</button>
+            <button type="button" data-page="data">Data</button>
           </nav>
           <div class="top-actions">
             <span id="user-name"></span>
@@ -155,8 +156,55 @@
             <div id="roas-campaigns"></div>
           </article>
           <article class="panel">
-            <h2>Data sources</h2>
+            <h2>Last sync runs</h2>
             <div id="sync-status"></div>
+          </article>
+        </div>
+
+        <div id="data-page" class="page hidden">
+          <article class="panel">
+            <h2>Sync range</h2>
+            <p class="muted">Choose dates for historic pulls, or leave blank for full available history / last 90 days (GA4).</p>
+            <div class="date-range sync-range">
+              <label>From <input id="sync-start" type="date" /></label>
+              <label>To <input id="sync-end" type="date" /></label>
+            </div>
+            <p id="sync-feedback" class="muted" aria-live="polite"></p>
+          </article>
+
+          <div class="grid-2">
+            <article class="panel">
+              <h2>Google Analytics</h2>
+              <p class="muted">Sessions, sources, product page views, Google Ads cost.</p>
+              <button type="button" id="sync-ga4-btn">Sync GA4</button>
+            </article>
+            <article class="panel">
+              <h2>Shopify orders</h2>
+              <p id="shopify-status" class="muted">Checking connection…</p>
+              <button type="button" id="sync-shopify-btn">Sync Shopify</button>
+            </article>
+          </div>
+
+          <article class="panel">
+            <h2>Sales Tracker</h2>
+            <p class="muted">Pick a Google Sheet / Excel file from Drive, paste a link, or upload an .xlsx.</p>
+            <div class="sync-actions">
+              <button type="button" id="drive-refresh-btn" class="ghost">Refresh Drive files</button>
+              <button type="button" id="sync-tracker-btn">Import selected file</button>
+            </div>
+            <label class="stack-label">Drive file or URL
+              <input id="drive-file-id" type="text" placeholder="Spreadsheet URL or file id" />
+            </label>
+            <div id="drive-files" class="file-list"></div>
+            <label class="stack-label">Or upload .xlsx
+              <input id="tracker-upload" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </label>
+            <button type="button" id="upload-tracker-btn" class="ghost">Upload &amp; import</button>
+          </article>
+
+          <article class="panel">
+            <h2>Sync history</h2>
+            <div id="data-sync-status"></div>
           </article>
         </div>
       </section>

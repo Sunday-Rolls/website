@@ -13,10 +13,14 @@ import {
   sessionExpiry,
   verifyPassword,
 } from '../analytics/auth.js'
+import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
+import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
+import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
+import { pingShopifyShop } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey } from '../analytics/types.js'
 import { clientIp } from '../app.js'
@@ -187,12 +191,156 @@ export function createDashboardRoutes(deps: DashboardDeps) {
         503,
       )
     }
-    const days = Math.max(1, Math.min(Number(c.req.query('days') ?? 90) || 90, 365))
+    const body = await c.req.json().catch(() => ({} as Record<string, unknown>))
+    const days = Math.max(
+      1,
+      Math.min(Number(body.days ?? c.req.query('days') ?? 90) || 90, 365),
+    )
     try {
       const result = await syncGa4ToStore(store, creds, { days })
       return c.json({ ok: true, data: result })
     } catch (error) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : 'GA4 sync failed' }, 502)
+    }
+  })
+
+  app.get('/api/drive/files', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const sa = process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim()
+    if (!sa) {
+      return c.json({ ok: false, error: 'GOOGLE_SERVICE_ACCOUNT_JSON not configured' }, 503)
+    }
+    const folderId = (c.req.query('folderId') || process.env.SALES_TRACKER_DRIVE_FOLDER_ID || '').trim() || null
+    const defaultFileId = (process.env.SALES_TRACKER_DRIVE_FILE_ID || '').trim() || null
+    try {
+      const files = await listDriveWorkbooks(sa, { folderId })
+      return c.json({
+        ok: true,
+        data: {
+          files,
+          defaultFileId,
+          folderId,
+        },
+      })
+    } catch (error) {
+      return c.json(
+        { ok: false, error: error instanceof Error ? error.message : 'Drive list failed' },
+        502,
+      )
+    }
+  })
+
+  app.post('/api/sync/sales-tracker', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const sa = process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim()
+    if (!sa) {
+      return c.json({ ok: false, error: 'GOOGLE_SERVICE_ACCOUNT_JSON not configured' }, 503)
+    }
+    const body = await c.req.json().catch(() => ({} as Record<string, unknown>))
+    const rawId = String(body.fileId || body.fileUrl || process.env.SALES_TRACKER_DRIVE_FILE_ID || '').trim()
+    const fileId = extractDriveFileId(rawId)
+    if (!fileId) {
+      return c.json({ ok: false, error: 'Provide a Drive file id or spreadsheet URL' }, 400)
+    }
+    const start = typeof body.start === 'string' && body.start ? body.start : null
+    const end = typeof body.end === 'string' && body.end ? body.end : null
+    if (start && end && end < start) {
+      return c.json({ ok: false, error: 'End date must be on or after start date' }, 400)
+    }
+    try {
+      const result = await syncSalesTrackerFromDrive(store, sa, fileId, {
+        start,
+        end,
+        replaceAll: body.replaceAll === true,
+        includeCash: body.includeCash !== false,
+      })
+      return c.json({ ok: true, data: result })
+    } catch (error) {
+      return c.json(
+        { ok: false, error: error instanceof Error ? error.message : 'Sales Tracker sync failed' },
+        502,
+      )
+    }
+  })
+
+  app.post('/api/sync/shopify', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const creds = loadShopifyCredentialsFromEnv()
+    if (!creds) {
+      return c.json(
+        {
+          ok: false,
+          error: 'Shopify not configured (need SHOPIFY_SHOP + SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET)',
+        },
+        503,
+      )
+    }
+    const body = await c.req.json().catch(() => ({} as Record<string, unknown>))
+    const start = typeof body.start === 'string' && body.start ? body.start : null
+    const end = typeof body.end === 'string' && body.end ? body.end : null
+    if (start && end && end < start) {
+      return c.json({ ok: false, error: 'End date must be on or after start date' }, 400)
+    }
+    try {
+      const result = await syncShopifyToStore(store, creds, { start, end })
+      return c.json({ ok: true, data: result })
+    } catch (error) {
+      return c.json(
+        { ok: false, error: error instanceof Error ? error.message : 'Shopify sync failed' },
+        502,
+      )
+    }
+  })
+
+  app.get('/api/shopify/status', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const creds = loadShopifyCredentialsFromEnv()
+    if (!creds) return c.json({ ok: true, data: { configured: false } })
+    try {
+      const shop = await pingShopifyShop(creds)
+      return c.json({ ok: true, data: { configured: true, shop } })
+    } catch (error) {
+      return c.json({
+        ok: true,
+        data: {
+          configured: true,
+          error: error instanceof Error ? error.message : 'Shopify ping failed',
+        },
+      })
+    }
+  })
+
+  app.post('/api/sync/sales-tracker/upload', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const body = await c.req.parseBody()
+    const file = body.file
+    if (!file || typeof file === 'string') {
+      return c.json({ ok: false, error: 'Upload an .xlsx file as field "file"' }, 400)
+    }
+    const start = typeof body.start === 'string' && body.start ? body.start : null
+    const end = typeof body.end === 'string' && body.end ? body.end : null
+    if (start && end && end < start) {
+      return c.json({ ok: false, error: 'End date must be on or after start date' }, 400)
+    }
+    try {
+      const ab = await file.arrayBuffer()
+      const result = await syncSalesTrackerFromBuffer(store, Buffer.from(ab), file.name || 'upload.xlsx', {
+        start,
+        end,
+        replaceAll: body.replaceAll === 'true',
+        includeCash: body.includeCash !== 'false',
+      })
+      return c.json({ ok: true, data: result })
+    } catch (error) {
+      return c.json(
+        { ok: false, error: error instanceof Error ? error.message : 'Upload import failed' },
+        502,
+      )
     }
   })
 
