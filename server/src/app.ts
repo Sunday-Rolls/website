@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import type { AnalyticsStore } from './analytics/store.js'
 import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
+import type { ContactStore } from './contact-store.js'
 import type { ContactPayload } from './mail.js'
 import { createRateLimiter } from './rate-limit.js'
 import { isValidHandle, parseReviewBody, REVIEW_LIMITS, type ReviewStore } from './reviews.js'
@@ -13,12 +14,14 @@ export type AppDeps = {
     websiteCutoverAt?: string | null
   }
   sendContactEmail: (payload: ContactPayload) => Promise<void>
+  /** Persists contact form submissions (Postgres). Preferred path on Railway Hobby. */
+  contacts?: ContactStore
   /** Omitted when DATABASE_URL is not set; review routes then answer 503. */
   reviews?: ReviewStore
   analytics?: AnalyticsStore
 }
 
-export function createApp({ config, sendContactEmail, reviews, analytics }: AppDeps) {
+export function createApp({ config, sendContactEmail, contacts, reviews, analytics }: AppDeps) {
   const app = new Hono()
   const checkRateLimit = createRateLimiter()
   const allowlist = new Set(config.corsOrigins)
@@ -90,14 +93,30 @@ export function createApp({ config, sendContactEmail, reviews, analytics }: AppD
       return c.json({ ok: false, error: parsed.error }, 400)
     }
 
+    let emailDelivered = false
     try {
       await sendContactEmail(parsed.value)
+      emailDelivered = true
     } catch (error) {
       console.error('Failed to send contact email', error)
-      return c.json({ ok: false, error: 'Failed to send message' }, 502)
     }
 
-    return c.json({ ok: true })
+    if (contacts) {
+      try {
+        await contacts.create(parsed.value, emailDelivered)
+        return c.json({ ok: true, emailed: emailDelivered })
+      } catch (error) {
+        console.error('Failed to store contact message', error)
+        if (emailDelivered) return c.json({ ok: true, emailed: true })
+        return c.json({ ok: false, error: 'Failed to send message' }, 502)
+      }
+    }
+
+    if (emailDelivered) {
+      return c.json({ ok: true, emailed: true })
+    }
+
+    return c.json({ ok: false, error: 'Failed to send message' }, 502)
   })
 
   app.get('/reviews', async (c) => {

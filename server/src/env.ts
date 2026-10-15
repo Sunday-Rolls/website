@@ -1,11 +1,3 @@
-function required(name: string): string {
-  const value = process.env[name]?.trim()
-  if (!value) {
-    throw new Error(`Missing required env var: ${name}`)
-  }
-  return value
-}
-
 function optional(name: string, fallback = ''): string {
   return process.env[name]?.trim() ?? fallback
 }
@@ -32,8 +24,10 @@ export function loadConfig() {
     requireBrowserOrigin: optional('REQUIRE_BROWSER_ORIGIN', 'true') !== 'false',
     contactApiKey: optional('CONTACT_API_KEY'),
     contactToEmail: optional('CONTACT_TO_EMAIL', 'sundayrollsdevops@gmail.com'),
-    smtpUser: required('SMTP_USER'),
-    smtpPass: required('SMTP_PASS'),
+    // Prefer RESEND_API_KEY on Railway Hobby (outbound SMTP ports are blocked).
+    resendApiKey: optional('RESEND_API_KEY'),
+    smtpUser: optional('SMTP_USER'),
+    smtpPass: optional('SMTP_PASS'),
     smtpHost: optional('SMTP_HOST', 'smtp.gmail.com'),
     smtpPort: Number(optional('SMTP_PORT', '465')) || 465,
     databaseUrl: optional('DATABASE_URL'),

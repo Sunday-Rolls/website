@@ -6,16 +6,24 @@ import { seedDemoStore } from './analytics/seed.js'
 import { createApp } from './app.js'
 import { ensureBootstrapUsers } from './dashboard/routes.js'
 import { loadConfig } from './env.js'
+import { createPgContactStore } from './contact-store.js'
 import { createMailer } from './mail.js'
 import { createPgReviewStore } from './reviews.js'
 
 const config = loadConfig()
 const { sendContactEmail } = createMailer(config)
 
+if (!config.resendApiKey && !(config.smtpUser && config.smtpPass)) {
+  console.warn(
+    'No email transport configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS). Contact forms will still save to Postgres when DATABASE_URL is set.',
+  )
+}
+
 const pool = config.databaseUrl
   ? new pg.Pool({ connectionString: config.databaseUrl, max: 5 })
   : undefined
 
+let contacts: ReturnType<typeof createPgContactStore> | undefined
 let reviews: ReturnType<typeof createPgReviewStore> | undefined
 let analytics: AnalyticsStore | undefined
 
@@ -62,6 +70,9 @@ async function setupDashboard(store: AnalyticsStore, label: string) {
 }
 
 if (pool) {
+  contacts = createPgContactStore(pool)
+  await contacts.migrate()
+
   reviews = createPgReviewStore(pool)
   await reviews.migrate()
 
@@ -74,12 +85,13 @@ if (pool) {
   await setupDashboard(analytics, 'memory')
   console.warn('DATABASE_URL unset — dashboard running in-memory (data lost on restart)')
 } else {
-  console.warn('DATABASE_URL is not set; /reviews and /dashboard will be unavailable')
+  console.warn('DATABASE_URL is not set; /reviews, contact persistence, and /dashboard will be unavailable')
 }
 
 const app = createApp({
   config,
   sendContactEmail,
+  contacts,
   reviews,
   analytics,
 })

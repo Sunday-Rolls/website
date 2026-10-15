@@ -10,9 +10,13 @@ type ApiReview = {
   createdAt: string
 }
 
+const DEFAULT_API_URL = 'https://contact-api-production-9af6.up.railway.app'
+
 function reviewsBaseUrl(): string | null {
-  const baseUrl = import.meta.env.VITE_CONTACT_API_URL?.replace(/\/$/, '')
-  return baseUrl || null
+  const configured = import.meta.env.VITE_CONTACT_API_URL?.replace(/\/$/, '')
+  if (configured) return configured
+  if (import.meta.env.PROD) return DEFAULT_API_URL
+  return null
 }
 
 function toProductReview(review: ApiReview): ProductReview {
