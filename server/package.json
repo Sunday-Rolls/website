@@ -11,7 +11,8 @@
     "test": "vitest run",
     "user:set-password": "tsx src/scripts/set-password.ts",
     "analytics:seed-demo": "tsx src/scripts/seed-demo.ts",
-    "analytics:import-sheet": "tsx src/scripts/import-sheet.ts"
+    "analytics:import-sheet": "tsx src/scripts/import-sheet.ts",
+    "analytics:sync-ga4": "tsx src/scripts/sync-ga4.ts"
   },
   "engines": {
     "node": ">=20"
@@ -20,6 +21,7 @@
     "@hono/node-server": "^1.14.4",
     "bcryptjs": "^3.0.3",
     "exceljs": "^4.4.0",
+    "google-auth-library": "^11.3.0",
     "hono": "^4.8.3",
     "nodemailer": "^7.0.5",
     "pg": "^8.16.3"

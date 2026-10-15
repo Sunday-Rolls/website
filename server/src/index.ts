@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server'
 import pg from 'pg'
+import { loadGa4CredentialsFromEnv, syncGa4ToStore } from './analytics/ga4-sync.js'
 import { createMemoryAnalyticsStore, createPgAnalyticsStore, type AnalyticsStore } from './analytics/store.js'
 import { seedDemoStore } from './analytics/seed.js'
 import { createApp } from './app.js'
@@ -44,6 +45,19 @@ async function setupDashboard(store: AnalyticsStore, label: string) {
   if (config.analyticsSeedDemoOnBoot) {
     await seedDemoStore(store)
     console.log(`Seeded analytics demo data on ${label}`)
+  }
+  const ga4Creds = loadGa4CredentialsFromEnv()
+  if (config.ga4SyncOnBoot && ga4Creds) {
+    try {
+      const result = await syncGa4ToStore(store, ga4Creds, { days: config.ga4SyncDays })
+      console.log(
+        `GA4 sync on boot (${label}): ${result.trafficRows} traffic days, ${result.productViewRows} product rows, ${result.adSpendRows} ad spend rows`,
+      )
+    } catch (error) {
+      console.error('GA4 sync on boot failed:', error instanceof Error ? error.message : error)
+    }
+  } else if (config.ga4SyncOnBoot && !ga4Creds) {
+    console.warn('GA4_SYNC_ON_BOOT set but GOOGLE_SERVICE_ACCOUNT_JSON / GA4_PROPERTY_RESOURCE missing')
   }
 }
 

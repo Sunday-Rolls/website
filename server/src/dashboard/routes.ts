@@ -13,6 +13,7 @@ import {
   sessionExpiry,
   verifyPassword,
 } from '../analytics/auth.js'
+import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
@@ -170,6 +171,29 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     await seedDemoStore(store)
     return c.json({ ok: true })
+  })
+
+  /** Pull live GA4 traffic / product pageviews / Google Ads cost into Postgres. */
+  app.post('/api/sync-ga4', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const creds = loadGa4CredentialsFromEnv()
+    if (!creds) {
+      return c.json(
+        {
+          ok: false,
+          error: 'GA4 not configured (need GOOGLE_SERVICE_ACCOUNT_JSON + GA4_PROPERTY_RESOURCE)',
+        },
+        503,
+      )
+    }
+    const days = Math.max(1, Math.min(Number(c.req.query('days') ?? 90) || 90, 365))
+    try {
+      const result = await syncGa4ToStore(store, creds, { days })
+      return c.json({ ok: true, data: result })
+    } catch (error) {
+      return c.json({ ok: false, error: error instanceof Error ? error.message : 'GA4 sync failed' }, 502)
+    }
   })
 
   return app
