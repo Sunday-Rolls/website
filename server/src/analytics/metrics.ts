@@ -440,24 +440,49 @@ export function buildPnL(input: {
   }
 }
 
-export function buildRoas(input: {
-  range: DateRange
-  adSpend: DailyAdSpend[]
-  orders: Order[]
-}): Array<{
+export type RoasCampaign = {
+  campaign: string
+  spend: number
+  platformReportedSales: number
+  platformRoas: number | null
+  platformReportedOrders: number
+  shareOfPlatformSpend: number
+}
+
+export type RoasPlatform = {
   platform: string
   spend: number
   platformReportedSales: number
   platformRoas: number | null
   siteObservedSales: number
   siteRoas: number | null
-}> {
+  campaigns: RoasCampaign[]
+}
+
+export function buildRoas(input: {
+  range: DateRange
+  adSpend: DailyAdSpend[]
+  orders: Order[]
+}): RoasPlatform[] {
   const spendRows = input.adSpend.filter((r) => r.date >= input.range.start && r.date <= input.range.end)
-  const platforms = new Map<string, { spend: number; reported: number }>()
+  const platforms = new Map<
+    string,
+    { spend: number; reported: number; campaigns: Map<string, { spend: number; reported: number; orders: number }> }
+  >()
   for (const row of spendRows) {
-    const cur = platforms.get(row.platform) ?? { spend: 0, reported: 0 }
+    const cur = platforms.get(row.platform) ?? {
+      spend: 0,
+      reported: 0,
+      campaigns: new Map(),
+    }
     cur.spend += row.spend
     cur.reported += row.platformReportedSales
+    const campaignName = row.campaign?.trim() || 'Unassigned'
+    const camp = cur.campaigns.get(campaignName) ?? { spend: 0, reported: 0, orders: 0 }
+    camp.spend += row.spend
+    camp.reported += row.platformReportedSales
+    camp.orders += row.platformReportedOrders
+    cur.campaigns.set(campaignName, camp)
     platforms.set(row.platform, cur)
   }
 
@@ -498,15 +523,28 @@ export function buildRoas(input: {
     return websiteSales
   }
 
-  return [...platforms.entries()].map(([platform, v]) => {
-    const siteObservedSales = siteFor(platform)
-    return {
-      platform,
-      spend: v.spend,
-      platformReportedSales: v.reported,
-      platformRoas: v.spend ? v.reported / v.spend : null,
-      siteObservedSales,
-      siteRoas: v.spend ? siteObservedSales / v.spend : null,
-    }
-  })
+  return [...platforms.entries()]
+    .map(([platform, v]) => {
+      const siteObservedSales = siteFor(platform)
+      const campaigns = [...v.campaigns.entries()]
+        .map(([campaign, c]) => ({
+          campaign,
+          spend: c.spend,
+          platformReportedSales: c.reported,
+          platformRoas: c.spend ? c.reported / c.spend : null,
+          platformReportedOrders: c.orders,
+          shareOfPlatformSpend: v.spend ? (c.spend / v.spend) * 100 : 0,
+        }))
+        .sort((a, b) => b.spend - a.spend)
+      return {
+        platform,
+        spend: v.spend,
+        platformReportedSales: v.reported,
+        platformRoas: v.spend ? v.reported / v.spend : null,
+        siteObservedSales,
+        siteRoas: v.spend ? siteObservedSales / v.spend : null,
+        campaigns,
+      }
+    })
+    .sort((a, b) => b.spend - a.spend)
 }

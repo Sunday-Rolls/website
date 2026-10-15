@@ -36,9 +36,23 @@ export function rangeForPeriod(period: PeriodKey, asOf?: string, now = new Date(
     period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : daysInYearToDate(end)
 
   const start = addUtcDays(end, -(days - 1))
+  return rangeFromBounds(start, end)
+}
+
+/** Custom inclusive UTC date range with a matching previous period for deltas. */
+export function rangeForCustom(startIso: string, endIso: string): DateRange {
+  const start = parseUtcDate(startIso)
+  const end = parseUtcDate(endIso)
+  if (end.getTime() < start.getTime()) {
+    throw new Error('End date must be on or after start date')
+  }
+  return rangeFromBounds(start, end)
+}
+
+function rangeFromBounds(start: Date, end: Date): DateRange {
+  const days = Math.floor((end.getTime() - start.getTime()) / 86_400_000) + 1
   const prevEnd = addUtcDays(start, -1)
   const prevStart = addUtcDays(prevEnd, -(days - 1))
-
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   const label = `${months[start.getUTCMonth()]} ${start.getUTCDate()} – ${months[end.getUTCMonth()]} ${end.getUTCDate()}, ${end.getUTCFullYear()}`
 

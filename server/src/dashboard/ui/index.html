@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/dashboard/styles.css" />
@@ -16,8 +16,7 @@
     <div id="app">
       <section id="login-view" class="login-view hidden">
         <div class="login-card">
-          <p class="brand-mark">SR</p>
-          <h1>Sunday Rolls</h1>
+          <img class="login-logo" src="/dashboard/logo.svg" alt="Sunday Rolls" />
           <p class="login-sub">Store analytics</p>
           <form id="login-form">
             <label>Email <input id="login-email" type="email" autocomplete="username" required /></label>
@@ -31,17 +30,13 @@
 
       <section id="dash-view" class="dash-view hidden">
         <header class="top">
-          <div class="brand">
-            <span class="brand-mark">SR</span>
-            <div>
-              <strong>Sunday Rolls</strong>
-              <span id="page-subtitle">Store analytics</span>
-            </div>
-          </div>
-          <nav id="nav" class="nav">
+          <a class="brand" href="/dashboard" aria-label="Sunday Rolls analytics home">
+            <img class="brand-logo" src="/dashboard/logo.svg" alt="Sunday Rolls" />
+          </a>
+          <nav id="nav" class="nav" aria-label="Dashboard sections">
             <button type="button" data-page="overview" class="active">Overview</button>
             <button type="button" data-page="pnl">P&amp;L</button>
-            <button type="button" data-page="roas">Ad ROAS</button>
+            <button type="button" data-page="roas">ROAS</button>
           </nav>
           <div class="top-actions">
             <span id="user-name"></span>
@@ -51,11 +46,18 @@
 
         <div id="overview-page" class="page">
           <div class="toolbar">
-            <div id="period-pills" class="pills">
-              <button type="button" data-period="7d">7 days</button>
-              <button type="button" data-period="30d" class="active">30 days</button>
-              <button type="button" data-period="90d">90 days</button>
-              <button type="button" data-period="year">Year</button>
+            <div class="range-controls">
+              <div id="period-pills" class="pills">
+                <button type="button" data-period="7d">7 days</button>
+                <button type="button" data-period="30d" class="active">30 days</button>
+                <button type="button" data-period="90d">90 days</button>
+                <button type="button" data-period="year">Year</button>
+              </div>
+              <div class="date-range">
+                <label>From <input id="range-start" type="date" /></label>
+                <label>To <input id="range-end" type="date" /></label>
+                <button type="button" id="range-apply">Apply</button>
+              </div>
             </div>
             <p id="range-label" class="muted"></p>
           </div>
@@ -142,6 +144,11 @@
             <h2>Return on ad spend</h2>
             <p class="muted">Platform-reported vs site-observed. Break-even ≈ 1.25x.</p>
             <table id="roas-table"><thead><tr><th>Platform</th><th>Spend</th><th>Platform sales</th><th>Platform ROAS</th><th>Site sales</th><th>Site ROAS</th></tr></thead><tbody></tbody></table>
+          </article>
+          <article class="panel">
+            <h2>Campaigns</h2>
+            <p class="muted">Spend mix and reported return by campaign within each platform.</p>
+            <div id="roas-campaigns"></div>
           </article>
           <article class="panel">
             <h2>Data sources</h2>

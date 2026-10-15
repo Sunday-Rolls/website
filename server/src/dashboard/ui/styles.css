@@ -14,7 +14,6 @@
   --shadow: 0 18px 50px rgba(8, 16, 10, 0.28);
   --radius: 18px;
   --font: 'DM Sans', system-ui, sans-serif;
-  --display: 'Instrument Serif', Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -33,18 +32,6 @@ body {
 .error { color: var(--down); font-size: 0.9rem; }
 .hint { color: var(--muted); font-size: 0.85rem; }
 
-.brand-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 0.7rem;
-  background: var(--accent);
-  color: #f7f3e8;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .login-view {
   min-height: 100vh;
   display: grid;
@@ -58,11 +45,11 @@ body {
   padding: 2rem;
   box-shadow: var(--shadow);
 }
-.login-card h1 {
-  font-family: var(--display);
-  font-weight: 400;
-  font-size: 2.6rem;
-  margin: 0.6rem 0 0.2rem;
+.login-logo {
+  display: block;
+  width: min(220px, 100%);
+  height: auto;
+  margin-bottom: 0.35rem;
 }
 .login-sub { margin: 0 0 1.5rem; color: var(--muted); }
 .login-card label {
@@ -71,14 +58,14 @@ body {
   margin-bottom: 0.9rem;
   font-size: 0.9rem;
 }
-.login-card input, .toolbar input {
+.login-card input, .toolbar input, .date-range input {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.7rem 0.8rem;
   font: inherit;
   background: #fff;
 }
-.login-card button, .pills button, .toolbar button, .ghost {
+.login-card button, .pills button, .toolbar button, .ghost, .date-range button {
   font: inherit;
   border: 0;
   border-radius: 999px;
@@ -103,16 +90,57 @@ body {
   color: #f4f0e4;
   margin-bottom: 1.25rem;
 }
-.brand { display: flex; gap: 0.75rem; align-items: center; }
-.brand strong { display: block; font-size: 1.05rem; }
-.brand span { color: rgba(244, 240, 228, 0.7); font-size: 0.85rem; }
-.nav { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.nav button, .ghost {
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  min-width: 0;
+}
+.brand-logo {
+  display: block;
+  height: 2.35rem;
+  width: auto;
+  max-width: min(210px, 42vw);
+  filter: brightness(0) invert(1);
+  opacity: 0.96;
+}
+.nav {
+  display: inline-flex;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  padding: 0.28rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.nav button {
+  border: 0;
+  background: transparent;
+  color: rgba(244, 240, 228, 0.72);
+  border-radius: 10px;
+  padding: 0.55rem 1.15rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.nav button:hover {
+  color: #f4f0e4;
+  background: rgba(255, 255, 255, 0.08);
+}
+.nav button.active {
+  background: #f4f0e4;
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+.ghost {
   background: rgba(255,255,255,0.08);
   color: #f4f0e4;
   border: 1px solid rgba(255,255,255,0.12);
 }
-.nav button.active { background: #f4f0e4; color: var(--ink); }
 .top-actions { display: flex; gap: 0.75rem; align-items: center; }
 
 .page {
@@ -130,6 +158,38 @@ body {
   align-items: center;
   margin-bottom: 1rem;
   color: #f4f0e4;
+}
+.range-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+.date-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+.date-range label {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.85rem;
+  color: rgba(244, 240, 228, 0.8);
+}
+.date-range input {
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.96);
+  color: var(--ink);
+}
+.date-range button {
+  background: #f4f0e4;
+  color: var(--ink);
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
 }
 .pills { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 .pills button {
@@ -157,15 +217,20 @@ body {
   padding: 1rem 1.1rem;
   box-shadow: var(--shadow);
 }
-.kpi .label { color: var(--muted); font-size: 0.82rem; }
+.kpi .label { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
 .kpi .value {
-  font-family: var(--display);
-  font-size: 2rem;
-  margin: 0.15rem 0;
+  font-family: var(--font);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+  margin: 0.2rem 0;
+  line-height: 1.15;
 }
 .kpi .delta { font-size: 0.85rem; }
-.kpi .delta.up { color: var(--up); }
-.kpi .delta.down { color: var(--down); }
+.kpi .delta.up, .up { color: var(--up); }
+.kpi .delta.down, .down { color: var(--down); }
+.warn { color: var(--warn); }
 
 .grid-2, .grid-3 {
   display: grid;
@@ -229,7 +294,7 @@ body {
 }
 .bars.stacked i { display: block; width: 100%; }
 
-#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status {
+#funnel, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status, #roas-campaigns {
   display: grid;
   gap: 0.55rem;
 }
@@ -253,6 +318,41 @@ body {
   background: var(--accent);
 }
 .funnel-step .meta { color: var(--muted); font-size: 0.8rem; }
+
+.campaign-block {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.campaign-block:last-child { border-bottom: 0; padding-bottom: 0; }
+.campaign-block:first-child { padding-top: 0; }
+.campaign-block h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+.campaign-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 0.7fr));
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.88rem;
+  padding: 0.35rem 0;
+}
+.campaign-row.head {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+.campaign-row strong { font-weight: 600; }
+.campaign-name { min-width: 0; }
+.campaign-name .bar-wrap { margin-top: 0.35rem; }
+.campaign-blurb {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 0.15rem;
+}
 
 table {
   width: 100%;
@@ -282,15 +382,21 @@ tr.section td {
   gap: 0.75rem;
 }
 .abandoned .stat .value {
-  font-family: var(--display);
-  font-size: 1.8rem;
+  font-family: var(--font);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 1.55rem;
+  letter-spacing: -0.02em;
 }
 
 @media (max-width: 1100px) {
   .kpi-row, .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; }
+  .campaign-row { grid-template-columns: 1fr 1fr; }
+  .campaign-row.head { display: none; }
 }
 @media (max-width: 720px) {
   .kpi-row, .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .dash-view { padding: 0.75rem; }
   .page { padding: 0.75rem; border-radius: 18px; }
+  .brand-logo { height: 1.9rem; }
 }

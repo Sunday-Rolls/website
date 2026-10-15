@@ -132,9 +132,54 @@ export function buildDemoDataset(asOf = '2026-10-11') {
   for (let i = 0; i < 28; i++) {
     const date = formatUtcDate(addUtcDays(end, -i))
     adSpend.push(
-      { date, platform: 'Google Ads', spend: 53, platformReportedSales: 91, platformReportedOrders: 1 },
-      { date, platform: 'Meta Ads', spend: i < 7 ? 28 : 0, platformReportedSales: i < 7 ? 77 : 0, platformReportedOrders: i < 7 ? 1 : 0 },
-      { date, platform: 'Etsy Ads', spend: 10, platformReportedSales: 8, platformReportedOrders: 0 },
+      {
+        date,
+        platform: 'Google Ads',
+        campaign: 'Brand Search',
+        spend: 18,
+        platformReportedSales: 52,
+        platformReportedOrders: 1,
+      },
+      {
+        date,
+        platform: 'Google Ads',
+        campaign: 'Shopping · Headcovers',
+        spend: 22,
+        platformReportedSales: 28,
+        platformReportedOrders: 0,
+      },
+      {
+        date,
+        platform: 'Google Ads',
+        campaign: 'Performance Max',
+        spend: 13,
+        platformReportedSales: 11,
+        platformReportedOrders: 0,
+      },
+      {
+        date,
+        platform: 'Meta Ads',
+        campaign: 'Prospecting · Lookalike',
+        spend: i < 7 ? 16 : 0,
+        platformReportedSales: i < 7 ? 40 : 0,
+        platformReportedOrders: i < 7 ? 1 : 0,
+      },
+      {
+        date,
+        platform: 'Meta Ads',
+        campaign: 'Retargeting · Site visitors',
+        spend: i < 7 ? 12 : 0,
+        platformReportedSales: i < 7 ? 37 : 0,
+        platformReportedOrders: 0,
+      },
+      {
+        date,
+        platform: 'Etsy Ads',
+        campaign: 'Offsite Ads',
+        spend: 10,
+        platformReportedSales: 8,
+        platformReportedOrders: 0,
+      },
     )
   }
 
