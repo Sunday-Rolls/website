@@ -23,6 +23,7 @@ describe('parseSalesRows', () => {
     expect(orders[0].channel).toBe('etsy')
     expect(orders[0].revenue).toBe(93.45)
     expect(orders[1].channel).toBe('squarespace')
+    expect(orders[0].source).toBe('sales-tracker')
     expect(orders[0].lines[0].productName).toBe('Headcover')
   })
 })

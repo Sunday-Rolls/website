@@ -2,7 +2,15 @@ import ExcelJS from 'exceljs'
 import { parseCashRows, parseExpenseRows, parseSalesRows, type SheetImportResult } from './sheet-import.js'
 import type { CashForecastRow, Expense, Order } from './types.js'
 
-export async function parseWorkbookBuffer(buffer: Buffer): Promise<SheetImportResult> {
+export type ParseWorkbookOptions = {
+  /** Default true — live Shopify sync owns shopify channel after cutover. */
+  skipShopifyChannel?: boolean
+}
+
+export async function parseWorkbookBuffer(
+  buffer: Buffer,
+  options: ParseWorkbookOptions = {},
+): Promise<SheetImportResult> {
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.load(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer)
 
@@ -21,7 +29,9 @@ export async function parseWorkbookBuffer(buffer: Buffer): Promise<SheetImportRe
   }
 
   const warnings: string[] = []
-  const orders = parseSalesRows(sheetRows('Sales') as never, warnings)
+  const orders = parseSalesRows(sheetRows('Sales') as never, warnings, {
+    skipShopifyChannel: options.skipShopifyChannel,
+  })
   const expenses = parseExpenseRows(sheetRows('Expense Tracker.') as never, warnings)
   if (!workbook.getWorksheet('Sales')) warnings.push('Missing "Sales" tab')
   if (!workbook.getWorksheet('Expense Tracker.')) warnings.push('Missing "Expense Tracker." tab')

@@ -10,8 +10,21 @@ export type SheetImportResult = {
 
 type Cell = string | number | boolean | Date | null | undefined | { result?: unknown; text?: string; richText?: unknown; formula?: string }
 
+export type ParseSalesOptions = {
+  /**
+   * When true (default), skip Sales-tab Shopify rows so live Admin sync owns that channel.
+   * Set false only for a one-time full history dump that still needs sheet Shopify lines.
+   */
+  skipShopifyChannel?: boolean
+}
+
 /** Pure parsers used by the CLI importer and tests (no exceljs dependency here). */
-export function parseSalesRows(rows: Cell[][], warnings: string[] = []): Order[] {
+export function parseSalesRows(
+  rows: Cell[][],
+  warnings: string[] = [],
+  options: ParseSalesOptions = {},
+): Order[] {
+  const skipShopify = options.skipShopifyChannel !== false
   if (rows.length < 2) return []
   const header = normalizeHeader(rows[0])
   const idx = {
@@ -30,6 +43,7 @@ export function parseSalesRows(rows: Cell[][], warnings: string[] = []): Order[]
   }
 
   const orders: Order[] = []
+  let skippedShopify = 0
   for (let r = 1; r < rows.length; r++) {
     const row = rows[r]
     if (!row || row.every((c) => unwrapCell(c) == null || unwrapCell(c) === '')) continue
@@ -38,6 +52,10 @@ export function parseSalesRows(rows: Cell[][], warnings: string[] = []): Order[]
     const channel = mapChannel(platform)
     if (!channel) {
       warnings.push(`Unknown platform "${platform}" on Sales row ${r + 1}`)
+      continue
+    }
+    if (skipShopify && channel === 'shopify') {
+      skippedShopify += 1
       continue
     }
     const orderedAt = toIsoDate(unwrapCell(row[idx.date]) as Cell)
@@ -50,6 +68,7 @@ export function parseSalesRows(rows: Cell[][], warnings: string[] = []): Order[]
       id: randomUUID(),
       externalId: `${channel}:${externalId}`,
       channel,
+      source: 'sales-tracker',
       orderedAt,
       revenue,
       fees: Math.abs(toNumber(unwrapCell(row[idx.fee]) as Cell)),
@@ -70,6 +89,9 @@ export function parseSalesRows(rows: Cell[][], warnings: string[] = []): Order[]
         },
       ],
     })
+  }
+  if (skippedShopify > 0) {
+    warnings.push(`Skipped ${skippedShopify} Shopify Sales-tab rows (live Shopify sync owns that channel)`)
   }
   return orders
 }

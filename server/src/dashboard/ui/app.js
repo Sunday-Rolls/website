@@ -232,6 +232,13 @@ function renderOverview(data) {
   renderKpis(data.kpis)
   renderTrendChart(data.revenueByDay, state.series)
 
+  const funnelNote = $('#funnel-note')
+  if (funnelNote) {
+    funnelNote.textContent =
+      data.funnelOrderSource === 'orders'
+        ? 'Cart/checkout need GA4 ecommerce. “Placed order” is falling back to counted orders (Shopify / tracker / manual), not GA4 purchases.'
+        : 'Cart/checkout/purchase from GA4 ecommerce. Wire Shopify purchase events for a complete funnel.'
+  }
   $('#funnel').innerHTML = data.funnel
     .map((step, i) => {
       const meta = i === 0 ? 'Starting point' : `${pct(step.pctOfPrevious ?? 0)} of previous step`
@@ -258,6 +265,11 @@ function renderOverview(data) {
       : `<p class="muted">No per-product view data for this range yet.</p>`
   }
 
+  const productsNote = $('#products-note')
+  if (productsNote && data.orderSources) {
+    const s = data.orderSources
+    productsNote.textContent = `${s.note} In range: ${s.shopify} Shopify · ${s.salesTracker} tracker · ${s.manual} manual. Tracker history is category-level; Shopify uses listing/variant names.`
+  }
   const tbody = $('#products-table tbody')
   tbody.innerHTML = data.products
     .slice(0, 8)
@@ -809,13 +821,45 @@ function bind() {
       if (!res.ok) throw new Error(json.error || 'Upload failed')
       const data = json.data
       setSyncFeedback(
-        `Uploaded: ${data.orders} orders, ${data.expenses} expenses, ${data.cashRows} cash rows`,
+        `Uploaded: ${data.orders} orders, ${data.expenses} expenses, ${data.cashRows} cash rows${
+          data.warnings?.length ? ` · ${data.warnings[0]}` : ''
+        }`,
       )
       loadDataPage().catch(showError)
     } catch (err) {
       setSyncFeedback(err.message, true)
     }
   })
+
+  async function uploadCsv(inputId, endpoint, label) {
+    const file = $(inputId)?.files?.[0]
+    if (!file) {
+      setSyncFeedback(`Choose a ${label} CSV first`, true)
+      return
+    }
+    setSyncFeedback(`Uploading ${file.name}…`)
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      const res = await fetch(`/dashboard/api${endpoint}`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        body,
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || `${label} upload failed`)
+      setSyncFeedback(
+        `${label}: ${json.data.rows} rows${json.data.warnings?.length ? ` · ${json.data.warnings[0]}` : ''}`,
+      )
+      loadDataPage().catch(showError)
+    } catch (err) {
+      setSyncFeedback(err.message, true)
+    }
+  }
+
+  $('#upload-revenue-btn')?.addEventListener('click', () => uploadCsv('#revenue-upload', '/import/revenue', 'Revenue'))
+  $('#upload-expense-btn')?.addEventListener('click', () => uploadCsv('#expense-upload', '/import/expenses', 'Expenses'))
+  $('#upload-cash-btn')?.addEventListener('click', () => uploadCsv('#cash-upload', '/import/cash', 'Cash'))
 
   $('#export-pnl').addEventListener('click', () => {
     if (!state.pnl) return
