@@ -61,7 +61,8 @@ export function initGtm(): void {
 
   if (sendDirect && ga4MeasurementId) {
     window.gtag = function gtag(...args: unknown[]) {
-      window.dataLayer.push(args)
+      // GA4 expects the Arguments-like object pushed onto dataLayer
+      window.dataLayer.push(args as unknown as Record<string, unknown>)
     }
     window.gtag('js', new Date())
     window.gtag('config', ga4MeasurementId, { send_page_view: false })

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { parseCashCsv, parseExpenseCsv, parseRevenueCsv } from './manual-import.js'
+import {
+  CSV_TEMPLATES,
+  orderFromManualRevenue,
+  parseCashCsv,
+  parseExpenseCsv,
+  parseRevenueCsv,
+} from './manual-import.js'
 import { preferLiveOrders } from './orders.js'
 import type { Order } from './types.js'
 
@@ -34,6 +40,31 @@ describe('manual CSV import', () => {
       monthEnd: '2026-10-31',
       beginningBalance: 10000,
       endingBalance: 12000,
+    })
+  })
+})
+
+describe('CSV templates', () => {
+  it('parses the shipped revenue template', () => {
+    const { rows, warnings } = parseRevenueCsv(CSV_TEMPLATES.revenue.body)
+    expect(warnings).toHaveLength(0)
+    expect(rows.length).toBeGreaterThanOrEqual(2)
+    expect(rows.every((r) => r.source === 'manual')).toBe(true)
+  })
+
+  it('builds a single manual order for the quick-add form', () => {
+    const order = orderFromManualRevenue({
+      date: '2026-10-01',
+      channel: 'Etsy',
+      revenue: 92.5,
+      product: 'Headcover',
+      externalId: 'etsy-1',
+    })
+    expect(order).toMatchObject({
+      source: 'manual',
+      channel: 'etsy',
+      externalId: 'manual:etsy:etsy-1',
+      revenue: 92.5,
     })
   })
 })

@@ -55,7 +55,46 @@ export default defineRailway(() => {
     },
   })
 
+  /** Storefront SPA — custom domain / DNS cutover target (apex + www). */
+  const website = service('website', {
+    source: github('Sunday-Rolls/website', {
+      branch: 'main',
+      rootDirectory: '/',
+    }),
+    build: {
+      builder: 'RAILPACK',
+      buildCommand: 'npm ci && npm run build:railway',
+      watchPatterns: [
+        '/src/**',
+        '/public/**',
+        '/index.html',
+        '/package.json',
+        '/package-lock.json',
+        '/vite.config.ts',
+        '/tsconfig.json',
+        '/tsconfig.app.json',
+        '/tsconfig.node.json',
+        '/scripts/serve-spa.mjs',
+      ],
+    },
+    start: 'npm run start:spa',
+    healthcheck: '/health',
+    replicas: { sfo: 1 },
+    env: {
+      // Build-time Vite vars (set live values in Railway before cutover)
+      VITE_BASE_PATH: '/',
+      VITE_GTM_ID: preserve(),
+      VITE_GA4_MEASUREMENT_ID: preserve(),
+      VITE_GA4_SEND_DIRECT: preserve(),
+      VITE_CONTACT_API_URL: preserve(),
+      VITE_CONTACT_API_KEY: preserve(),
+      VITE_SHOPIFY_STORE_DOMAIN: preserve(),
+      VITE_SHOPIFY_STOREFRONT_TOKEN: preserve(),
+      VITE_SHOPIFY_API_VERSION: preserve(),
+    },
+  })
+
   return project('sunday-rolls-contact', {
-    resources: [Postgres, contactApi, postgresVolume],
+    resources: [Postgres, contactApi, website, postgresVolume],
   })
 })

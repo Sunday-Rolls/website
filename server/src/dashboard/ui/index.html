@@ -224,40 +224,87 @@
           </article>
 
           <article class="panel">
-            <h2>Manual uploads</h2>
-            <p class="muted">Fill gaps after cutover: leftover marketplace revenue, expenses, and cash. CSV with a header row.</p>
+            <h2>Manual data (non-API channels)</h2>
+            <p class="muted">
+              Etsy, eBay, wholesale, in-person, and other streams without a live API. Rows write into the same Postgres
+              orders / expenses / cash tables Overview and P&amp;L use (<code>source=manual</code>). Same
+              <code>external_id</code> upserts — safe to re-upload corrections.
+            </p>
+
+            <h3 class="manual-section-title">Add one revenue row</h3>
+            <form id="manual-revenue-form" class="manual-form">
+              <label>Date <input name="date" type="date" required /></label>
+              <label>Channel
+                <select name="channel" required>
+                  <option value="etsy">Etsy</option>
+                  <option value="ebay">eBay</option>
+                  <option value="squarespace">Squarespace</option>
+                  <option value="other">Other / in person</option>
+                  <option value="shopify">Shopify (manual only if needed)</option>
+                </select>
+              </label>
+              <label>Revenue <input name="revenue" type="number" min="0.01" step="0.01" required /></label>
+              <label>Fees <input name="fees" type="number" min="0" step="0.01" value="0" /></label>
+              <label>Shipping <input name="shipping" type="number" min="0" step="0.01" value="0" /></label>
+              <label>Marketing <input name="marketing" type="number" min="0" step="0.01" value="0" /></label>
+              <label>Product <input name="product" type="text" placeholder="Headcover" /></label>
+              <label>External id <input name="externalId" type="text" placeholder="etsy order # (for upserts)" /></label>
+              <div class="sync-actions">
+                <button type="submit" class="btn btn-primary">Save to database</button>
+              </div>
+            </form>
+
+            <h3 class="manual-section-title">Bulk CSV upload</h3>
+            <p class="muted">Download a template, fill rows in Sheets/Excel, upload. All three feed the dashboard database of record.</p>
             <div class="manual-upload-grid">
               <div>
                 <h3>Revenue streams</h3>
-                <p class="muted">Columns: date, channel, revenue [, fees, shipping, marketing, product, external_id]. Channel: etsy, squarespace, shopify, ebay, other.</p>
+                <p class="muted">date, channel, revenue [, fees, shipping, marketing, product, external_id]</p>
+                <div class="sync-actions">
+                  <a class="btn btn-secondary" href="/dashboard/api/import/templates/revenue" download>Download template</a>
+                </div>
                 <label class="stack-label">CSV file
                   <input id="revenue-upload" type="file" accept=".csv,text/csv" />
                 </label>
                 <div class="sync-actions">
-                  <button type="button" id="upload-revenue-btn" class="btn btn-secondary">Upload revenue</button>
+                  <button type="button" id="upload-revenue-btn" class="btn btn-primary">Upload revenue CSV</button>
                 </div>
               </div>
               <div>
                 <h3>Expenses</h3>
-                <p class="muted">Columns: date, category, amount [, bucket=cogs|sga, explanation, product_line].</p>
+                <p class="muted">date, category, amount [, bucket, explanation, product_line]</p>
+                <div class="sync-actions">
+                  <a class="btn btn-secondary" href="/dashboard/api/import/templates/expenses" download>Download template</a>
+                </div>
                 <label class="stack-label">CSV file
                   <input id="expense-upload" type="file" accept=".csv,text/csv" />
                 </label>
                 <div class="sync-actions">
-                  <button type="button" id="upload-expense-btn" class="btn btn-secondary">Upload expenses</button>
+                  <button type="button" id="upload-expense-btn" class="btn btn-primary">Upload expenses CSV</button>
                 </div>
               </div>
               <div>
                 <h3>Cash</h3>
-                <p class="muted">Columns: month_end, ending_balance [, beginning_balance, collections, freight_and_fees, marketing, website, manufacturing].</p>
+                <p class="muted">month_end, ending_balance [, beginning_balance, collections, …]</p>
+                <div class="sync-actions">
+                  <a class="btn btn-secondary" href="/dashboard/api/import/templates/cash" download>Download template</a>
+                </div>
                 <label class="stack-label">CSV file
                   <input id="cash-upload" type="file" accept=".csv,text/csv" />
                 </label>
                 <div class="sync-actions">
-                  <button type="button" id="upload-cash-btn" class="btn btn-secondary">Upload cash</button>
+                  <button type="button" id="upload-cash-btn" class="btn btn-primary">Upload cash CSV</button>
                 </div>
               </div>
             </div>
+
+            <h3 class="manual-section-title">Recent manual revenue <span id="manual-order-count" class="muted"></span></h3>
+            <table id="manual-orders-table">
+              <thead>
+                <tr><th>Date</th><th>Channel</th><th>Product</th><th>Revenue</th><th>External id</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </article>
 
           <article class="panel">

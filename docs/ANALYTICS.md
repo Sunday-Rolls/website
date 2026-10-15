@@ -9,14 +9,15 @@ Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY
 
 ## Environments
 
-| | GitHub Pages (now) | Live cutover (later) |
+| | GitHub Pages (now) | Live cutover (Railway) |
 |--|--------------------|----------------------|
-| Site | `https://sunday-rolls.github.io/website/` | Custom domain / Railway static (or Pages → apex) |
+| Site | `https://sunday-rolls.github.io/website/` | Railway `website` + DNS → `www.sundayrollsgolf.com` ([RAILWAY_CUTOVER.md](./RAILWAY_CUTOVER.md)) |
 | Contact API | Railway `contact-api` | same |
 | `VITE_GTM_ID` | `GTM-PQSG4NXT` | `GTM-PPTR6V3B` (live) |
-| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` |
+| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YKOBBOTPM4` (confirm in GA4 Admin) |
+| `VITE_BASE_PATH` | `/website/` | `/` |
 | GA4 property | Demo / devops | `properties/513898453` |
-| Shopify pixel ID | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` |
+| Shopify pixel ID | `G-ET6SXZWE8E` | same as live measurement ID |
 | Dashboard sync | Railway Postgres ← GA4 property `513898453` | same (live property) |
 
 > Dashboard Overview funnel reads **production** GA4 (`513898453`). Demo site events land in `G-ET6SXZWE8E`. To validate funnel metrics on the dashboard before cutover, either point the site at the live measurement ID in a preview, or confirm events in the demo GA4 Realtime first.

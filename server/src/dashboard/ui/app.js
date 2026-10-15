@@ -655,10 +655,29 @@ async function loadShopifyStatus() {
   }
 }
 
+async function loadManualOrders() {
+  const tbody = $('#manual-orders-table tbody')
+  const countEl = $('#manual-order-count')
+  if (!tbody) return
+  try {
+    const { data } = await api('/import/manual-orders')
+    if (countEl) countEl.textContent = data.count ? `(${num(data.count)} in database)` : ''
+    tbody.innerHTML =
+      (data.recent || [])
+        .map(
+          (r) =>
+            `<tr><td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.channel)}</td><td>${escapeHtml(r.product)}</td><td>${moneyExact(r.revenue)}</td><td class="muted">${escapeHtml(r.externalId)}</td></tr>`,
+        )
+        .join('') || `<tr><td colspan="5" class="muted">No manual revenue rows yet.</td></tr>`
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">${escapeHtml(err.message)}</td></tr>`
+  }
+}
+
 async function loadDataPage() {
   const sync = await api('/sync-status')
   renderSyncList('#data-sync-status', sync.data || [])
-  await Promise.all([loadDriveFiles(), loadShopifyStatus()])
+  await Promise.all([loadDriveFiles(), loadShopifyStatus(), loadManualOrders()])
 }
 
 function setPage(page) {
@@ -882,6 +901,33 @@ function bind() {
   $('#upload-revenue-btn')?.addEventListener('click', () => uploadCsv('#revenue-upload', '/import/revenue', 'Revenue'))
   $('#upload-expense-btn')?.addEventListener('click', () => uploadCsv('#expense-upload', '/import/expenses', 'Expenses'))
   $('#upload-cash-btn')?.addEventListener('click', () => uploadCsv('#cash-upload', '/import/cash', 'Cash'))
+
+  $('#manual-revenue-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const form = event.currentTarget
+    const fd = new FormData(form)
+    setSyncFeedback('Saving revenue row…')
+    try {
+      const { data } = await api('/import/revenue', {
+        method: 'POST',
+        body: JSON.stringify({
+          date: fd.get('date'),
+          channel: fd.get('channel'),
+          revenue: Number(fd.get('revenue')),
+          fees: Number(fd.get('fees') || 0),
+          shipping: Number(fd.get('shipping') || 0),
+          marketing: Number(fd.get('marketing') || 0),
+          product: String(fd.get('product') || '').trim() || undefined,
+          externalId: String(fd.get('externalId') || '').trim() || undefined,
+        }),
+      })
+      setSyncFeedback(`Saved ${data.rows} revenue row to the database`)
+      form.reset()
+      loadDataPage().catch(showError)
+    } catch (err) {
+      setSyncFeedback(err.message, true)
+    }
+  })
 
   $('#export-pnl').addEventListener('click', () => {
     if (!state.pnl) return
