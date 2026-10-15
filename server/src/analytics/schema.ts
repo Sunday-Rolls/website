@@ -56,8 +56,11 @@ CREATE TABLE IF NOT EXISTS analytics_daily_traffic (
   checkouts integer NOT NULL DEFAULT 0,
   purchases integer NOT NULL DEFAULT 0,
   source_breakdown jsonb NOT NULL DEFAULT '{}'::jsonb,
+  region_breakdown jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (date, channel)
 );
+ALTER TABLE analytics_daily_traffic
+  ADD COLUMN IF NOT EXISTS region_breakdown jsonb NOT NULL DEFAULT '{}'::jsonb;
 
 CREATE TABLE IF NOT EXISTS analytics_daily_ad_spend (
   date date NOT NULL,

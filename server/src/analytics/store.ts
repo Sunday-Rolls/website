@@ -484,8 +484,8 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       for (const row of rows) {
         await db.query(
           `INSERT INTO analytics_daily_traffic
-            (date, channel, visits, unique_visitors, product_views, add_to_carts, checkouts, purchases, source_breakdown)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+            (date, channel, visits, unique_visitors, product_views, add_to_carts, checkouts, purchases, source_breakdown, region_breakdown)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
           [
             row.date,
             row.channel,
@@ -496,6 +496,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
             row.checkouts,
             row.purchases,
             JSON.stringify(row.sourceBreakdown),
+            JSON.stringify(row.regionBreakdown ?? {}),
           ],
         )
       }
@@ -506,8 +507,8 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       for (const row of rows) {
         await db.query(
           `INSERT INTO analytics_daily_traffic
-            (date, channel, visits, unique_visitors, product_views, add_to_carts, checkouts, purchases, source_breakdown)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+            (date, channel, visits, unique_visitors, product_views, add_to_carts, checkouts, purchases, source_breakdown, region_breakdown)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
            ON CONFLICT (date, channel) DO UPDATE SET
              visits = EXCLUDED.visits,
              unique_visitors = EXCLUDED.unique_visitors,
@@ -515,7 +516,8 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
              add_to_carts = EXCLUDED.add_to_carts,
              checkouts = EXCLUDED.checkouts,
              purchases = EXCLUDED.purchases,
-             source_breakdown = EXCLUDED.source_breakdown`,
+             source_breakdown = EXCLUDED.source_breakdown,
+             region_breakdown = EXCLUDED.region_breakdown`,
           [
             row.date,
             row.channel,
@@ -526,6 +528,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
             row.checkouts,
             row.purchases,
             JSON.stringify(row.sourceBreakdown),
+            JSON.stringify(row.regionBreakdown ?? {}),
           ],
         )
       }
@@ -547,6 +550,10 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           typeof row.source_breakdown === 'string'
             ? (JSON.parse(row.source_breakdown) as Record<string, number>)
             : ((row.source_breakdown as Record<string, number>) ?? {}),
+        regionBreakdown:
+          typeof row.region_breakdown === 'string'
+            ? (JSON.parse(row.region_breakdown) as Record<string, number>)
+            : ((row.region_breakdown as Record<string, number>) ?? {}),
       }))
     },
 

@@ -172,7 +172,13 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
     holes.push({
       area: 'Search keywords',
       severity: 'gap',
-      detail: 'Empty — GA4 searchTerm unused; needs Search Console sync.',
+      detail: 'Empty — run Search Console sync (or GA4 sync, which pulls GSC too).',
+    })
+  } else {
+    holes.push({
+      area: 'Search keywords',
+      severity: 'ok',
+      detail: `${keywords.length} queries from Search Console.`,
     })
   }
 
@@ -180,7 +186,13 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
     holes.push({
       area: 'Abandoned carts',
       severity: 'gap',
-      detail: 'No abandoned-cart stats. Needs Shopify checkouts sync.',
+      detail: 'No abandoned-cart stats. Run Shopify sync.',
+    })
+  } else {
+    holes.push({
+      area: 'Abandoned carts',
+      severity: 'ok',
+      detail: `${abandoned.abandoned} abandoned · ${abandoned.recovered} recovered (Shopify).`,
     })
   }
 
@@ -207,11 +219,27 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
   }
 
   const ordersWithState = orders.filter((o) => o.state).length
-  if (orders.length && ordersWithState / orders.length < 0.2) {
+  const regionSessions = traffic.reduce(
+    (s, t) => s + Object.values(t.regionBreakdown || {}).reduce((a, b) => a + b, 0),
+    0,
+  )
+  if (orders.length && ordersWithState / orders.length >= 0.2) {
     holes.push({
-      area: 'Orders by state',
+      area: 'Geo by state',
+      severity: 'ok',
+      detail: `${ordersWithState}/${orders.length} orders have ship-to state.`,
+    })
+  } else if (regionSessions > 0) {
+    holes.push({
+      area: 'Geo by state',
+      severity: 'ok',
+      detail: `Using GA4 US region sessions (${regionSessions}) — Sales Tracker has no state column; Shopify orders will switch this to ship-to state.`,
+    })
+  } else {
+    holes.push({
+      area: 'Geo by state',
       severity: 'gap',
-      detail: `Only ${ordersWithState}/${orders.length} orders have state — Sales Tracker rarely has it; Shopify does.`,
+      detail: 'No order states and no GA4 region breakdown yet — re-run GA4 sync.',
     })
   }
 

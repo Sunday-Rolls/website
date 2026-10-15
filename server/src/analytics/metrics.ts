@@ -44,7 +44,12 @@ export type OverviewResponse = {
     share: number
   }>
   trafficSources: Array<{ source: string; visits: number; share: number }>
+  /**
+   * Geographic breakdown. Uses order shipping state when enough orders have it;
+   * otherwise falls back to GA4 US region sessions (Sales Tracker has no state).
+   */
   ordersByState: Array<{ state: string; orders: number; share: number }>
+  stateBreakdownMode: 'orders' | 'visitors'
   searchKeywords: Array<{ query: string; visits: number }>
   abandonedCarts: {
     abandoned: number
@@ -236,14 +241,37 @@ export function buildOverview(input: {
     .map(([source, v]) => ({ source, visits: v, share: sourceVisits ? (v / sourceVisits) * 100 : 0 }))
     .sort((a, b) => b.visits - a.visits)
 
-  const stateMap = new Map<string, number>()
-  for (const o of curOrders) {
-    const state = o.state?.trim() || 'Unknown'
-    stateMap.set(state, (stateMap.get(state) ?? 0) + 1)
+  const ordersWithState = curOrders.filter((o) => o.state?.trim())
+  const useOrderStates = orderCount > 0 && ordersWithState.length / orderCount >= 0.2
+  let stateBreakdownMode: 'orders' | 'visitors' = 'orders'
+  let ordersByState: Array<{ state: string; orders: number; share: number }>
+
+  if (useOrderStates) {
+    const stateMap = new Map<string, number>()
+    for (const o of curOrders) {
+      const state = o.state?.trim() || 'Unknown'
+      stateMap.set(state, (stateMap.get(state) ?? 0) + 1)
+    }
+    ordersByState = [...stateMap.entries()]
+      .map(([state, n]) => ({ state, orders: n, share: orderCount ? (n / orderCount) * 100 : 0 }))
+      .sort((a, b) => b.orders - a.orders)
+  } else {
+    stateBreakdownMode = 'visitors'
+    const regionMap = new Map<string, number>()
+    for (const t of curTraffic) {
+      for (const [region, count] of Object.entries(t.regionBreakdown || {})) {
+        regionMap.set(region, (regionMap.get(region) ?? 0) + count)
+      }
+    }
+    const regionTotal = sum([...regionMap.values()])
+    ordersByState = [...regionMap.entries()]
+      .map(([state, n]) => ({
+        state,
+        orders: n,
+        share: regionTotal ? (n / regionTotal) * 100 : 0,
+      }))
+      .sort((a, b) => b.orders - a.orders)
   }
-  const ordersByState = [...stateMap.entries()]
-    .map(([state, n]) => ({ state, orders: n, share: orderCount ? (n / orderCount) * 100 : 0 }))
-    .sort((a, b) => b.orders - a.orders)
 
   const returning = curOrders.filter((o) => o.isReturning).length
 
@@ -263,6 +291,7 @@ export function buildOverview(input: {
     products,
     trafficSources,
     ordersByState,
+    stateBreakdownMode,
     searchKeywords: keywords
       .filter((k) => k.periodEnd >= range.start && k.periodStart <= range.end)
       .sort((a, b) => b.visits - a.visits)

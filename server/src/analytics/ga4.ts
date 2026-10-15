@@ -17,6 +17,7 @@ export type Ga4DailyTrafficRow = {
   checkouts: number
   purchases: number
   sourceBreakdown: Record<string, number>
+  regionBreakdown: Record<string, number>
 }
 
 export type Ga4ProductViewRow = {
@@ -146,7 +147,7 @@ export async function fetchGa4TrafficBundle(
   const token = await createGa4AccessToken(creds.serviceAccountJson)
   const range = { startDate, endDate }
 
-  const [daily, sources, productPages, ads] = await Promise.all([
+  const [daily, sources, regions, productPages, ads] = await Promise.all([
     runGa4Report(token, property, {
       dateRanges: [range],
       dimensions: [{ name: 'date' }],
@@ -165,6 +166,18 @@ export async function fetchGa4TrafficBundle(
       dateRanges: [range],
       dimensions: [{ name: 'date' }, { name: 'sessionSource' }],
       metrics: [{ name: 'sessions' }],
+      limit: 50_000,
+    }),
+    runGa4Report(token, property, {
+      dateRanges: [range],
+      dimensions: [{ name: 'date' }, { name: 'region' }, { name: 'country' }],
+      metrics: [{ name: 'sessions' }],
+      dimensionFilter: {
+        filter: {
+          fieldName: 'country',
+          stringFilter: { matchType: 'EXACT', value: 'United States' },
+        },
+      },
       limit: 50_000,
     }),
     runGa4Report(token, property, {
@@ -200,6 +213,7 @@ export async function fetchGa4TrafficBundle(
       checkouts: num(row.metrics[4]),
       purchases: num(row.metrics[5]),
       sourceBreakdown: {},
+      regionBreakdown: {},
     })
   }
 
@@ -210,6 +224,15 @@ export async function fetchGa4TrafficBundle(
     const cur = byDate.get(date)
     if (!cur || sessions <= 0) continue
     cur.sourceBreakdown[source] = (cur.sourceBreakdown[source] ?? 0) + sessions
+  }
+
+  for (const row of regions.rows) {
+    const date = gaDateToIso(row.dims[0])
+    const region = (row.dims[1] || '').trim()
+    const sessions = num(row.metrics[0])
+    const cur = byDate.get(date)
+    if (!cur || !region || region === '(not set)' || sessions <= 0) continue
+    cur.regionBreakdown[region] = (cur.regionBreakdown[region] ?? 0) + sessions
   }
 
   const productViews: Ga4ProductViewRow[] = []

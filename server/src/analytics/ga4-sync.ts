@@ -35,6 +35,7 @@ export async function syncGa4ToStore(
       checkouts: row.checkouts,
       purchases: row.purchases,
       sourceBreakdown: row.sourceBreakdown,
+      regionBreakdown: row.regionBreakdown,
     }))
 
     // Aggregate same product/day (multiple path variants)
