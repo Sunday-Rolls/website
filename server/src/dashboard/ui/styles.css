@@ -339,16 +339,62 @@ body {
   font-size: 1.15rem;
   font-weight: 600;
 }
-.bars.stacked { min-height: 220px; }
+.bars.stacked {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.45rem;
+  min-height: 220px;
+  padding-top: 0.35rem;
+}
 .bars.stacked .stack {
   flex: 1;
   display: flex;
   flex-direction: column-reverse;
+  align-items: stretch;
   min-width: 0;
   border-radius: 6px 6px 2px 2px;
   overflow: hidden;
+  position: relative;
 }
-.bars.stacked i { display: block; width: 100%; }
+.bars.stacked .stack-fill {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  min-height: 4px;
+  border-radius: 6px 6px 2px 2px;
+  overflow: hidden;
+}
+.bars.stacked i {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+}
+.bars.stacked .stack > span {
+  display: block;
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-top: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.channel-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.channel-legend i {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 2px;
+  margin-right: 0.3rem;
+  vertical-align: -0.05rem;
+}
 
 #funnel, #product-views, #sources, #states, #keywords, #channel-rev, #unit-profit, #sync-status, #data-sync-status {
   display: grid;
