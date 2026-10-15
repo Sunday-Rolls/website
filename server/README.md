@@ -9,6 +9,7 @@ Hono service on Railway: contact form email, product reviews, and the internal a
 - `GET|POST /reviews` — product reviews (requires `DATABASE_URL`)
 - `GET /dashboard/` — analytics UI (requires `DATABASE_URL`)
 - `POST /dashboard/api/login|logout`, `GET /dashboard/api/overview|pnl|roas|sync-status`
+- `GET /dashboard/api/review-qrs.pdf?target=pages|live` — printable review QR PDF (Data page → Export PDF)
 
 ## Contact email (Resend free plan)
 

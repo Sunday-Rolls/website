@@ -1,0 +1,68 @@
+{
+  "products": [
+    {
+      "handle": "retro-roller-grey",
+      "title": "Retro Roller - Grey"
+    },
+    {
+      "handle": "retro-roller-purple",
+      "title": "Retro Roller - Purple"
+    },
+    {
+      "handle": "retro-roller-yellow",
+      "title": "Retro Roller - Yellow"
+    },
+    {
+      "handle": "flagstick-fuel",
+      "title": "Flagstick Fuel"
+    },
+    {
+      "handle": "the-corduroy",
+      "title": "The Corduroy"
+    },
+    {
+      "handle": "sunday-stripes",
+      "title": "Sunday Stripes"
+    },
+    {
+      "handle": "the-birdie-machine",
+      "title": "The Birdie Machine"
+    },
+    {
+      "handle": "the-breakfast-roller",
+      "title": "The Breakfast Roller"
+    },
+    {
+      "handle": "mallet-retro-roller-white",
+      "title": "Mallet - Retro Roller White"
+    },
+    {
+      "handle": "mallet-retro-roller-grey",
+      "title": "Mallet - Retro Roller Grey"
+    },
+    {
+      "handle": "mallet-sunday-stripes",
+      "title": "Mallet - Sunday Stripes"
+    },
+    {
+      "handle": "mallet-the-corduroy",
+      "title": "Mallet - The Corduroy"
+    },
+    {
+      "handle": "sunny-side-up",
+      "title": "Sunny Side Up"
+    },
+    {
+      "handle": "coin-collector",
+      "title": "Coin Collector"
+    },
+    {
+      "handle": "the-doodle",
+      "title": "The Doodle"
+    },
+    {
+      "handle": "morning-dew",
+      "title": "Morning Dew"
+    }
+  ]
+}

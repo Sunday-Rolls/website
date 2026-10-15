@@ -21,13 +21,18 @@ Output lands in `output/product-review-qrs/` (gitignored):
 | `sunday-rolls-review-qrs.pdf` | All codes in one letter-size PDF |
 | `manifest.json` | Handles, titles, and landing URLs |
 
-## Export PDF
+## Export PDF (dashboard — preferred)
 
-1. Run `npm run reviews:qr:pages` (or `:live`).
-2. Open `output/product-review-qrs/print-sheet.html` in a browser.
-3. Click **Export PDF** to download `sunday-rolls-review-qrs.pdf`.
+1. Open the analytics dashboard → **Data**.
+2. Under **Review QR codes**, pick **GitHub Pages** or **Live site**.
+3. Click **Export PDF**.
 
-You can also open/print the PDF file directly without the HTML sheet.
+Requires a logged-in dashboard session. Endpoint: `GET /dashboard/api/review-qrs.pdf?target=pages|live`.
+
+## Export PDF (local CLI)
+
+1. Run `npm run reviews:qr:pages` (or `:live`) from the repo root.
+2. Open `output/product-review-qrs/print-sheet.html` and click **Export PDF**, or use `sunday-rolls-review-qrs.pdf` directly.
 
 ## Targets
 

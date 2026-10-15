@@ -297,6 +297,24 @@
           </article>
 
           <article class="panel">
+            <h2>Review QR codes</h2>
+            <p class="muted">
+              Download a printable PDF of every headcover QR. Codes open the product page with the leave-a-review form
+              (<code>?review=1</code>). Use GitHub Pages now; switch to Live after the cutover domain is live.
+            </p>
+            <label class="stack-label">Landing site
+              <select id="review-qr-target">
+                <option value="pages" selected>GitHub Pages (sunday-rolls.github.io/website)</option>
+                <option value="live">Live site (www.sundayrollsgolf.com)</option>
+              </select>
+            </label>
+            <p id="review-qr-meta" class="muted" aria-live="polite"></p>
+            <div class="sync-actions">
+              <button type="button" id="export-review-qr-pdf" class="btn btn-primary">Export PDF</button>
+            </div>
+          </article>
+
+          <article class="panel">
             <h2>Sync history</h2>
             <p class="muted">Manual revenue, expenses, and cash uploads live on the P&amp;L page (template download + upload icons on each section).</p>
             <div id="data-sync-status"></div>
