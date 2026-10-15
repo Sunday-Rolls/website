@@ -29,9 +29,10 @@ export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
     const quantity = line.quantity ?? 1
     const unitPrice = num(line.price)
     return {
-      productName: (line.title || line.name || 'Product').trim() || 'Product',
+      // Prefer `name` (includes variant, e.g. "Retro Roller Grey - DF3") over bare product title.
+      productName: (line.name || line.title || 'Product').trim() || 'Product',
       productSku: line.sku?.trim() || null,
-      category: null,
+      category: line.title?.trim() || null,
       quantity,
       unitPrice,
       lineRevenue: Math.round(unitPrice * quantity * 100) / 100,
