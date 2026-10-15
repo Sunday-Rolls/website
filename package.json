@@ -21,7 +21,9 @@
     "assets:scrape": "python3 scripts/scrape-sundayrolls-assets.py",
     "reviews:scrape": "node scripts/scrape-etsy-reviews.mjs",
     "reviews:tag-handles": "node scripts/tag-review-product-handles.mjs",
-    "reviews:qr": "node scripts/generate-product-review-qrs.mjs"
+    "reviews:qr": "node scripts/generate-product-review-qrs.mjs",
+    "reviews:qr:pages": "SITE_TARGET=pages node scripts/generate-product-review-qrs.mjs",
+    "reviews:qr:live": "SITE_TARGET=live node scripts/generate-product-review-qrs.mjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
@@ -41,6 +43,7 @@
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24.13.3",
+    "@types/pdfkit": "^0.17.6",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
@@ -48,6 +51,7 @@
     "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^29.1.1",
     "oxlint": "^1.79.0",
+    "pdfkit": "^0.20.2",
     "qrcode": "^1.5.4",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",

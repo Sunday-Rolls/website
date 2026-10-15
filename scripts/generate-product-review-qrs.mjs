@@ -2,7 +2,8 @@
  * Generate product review QR codes from Shopify products.
  *
  * Each QR links to the website product page with ?review=1 so the leave-a-review
- * form opens automatically. Also writes a print-ready HTML sheet.
+ * form opens automatically. Writes PNGs, a print-ready HTML sheet (with Export PDF
+ * button), and a multi-page PDF of every code.
  *
  * Auth (first match wins) — same pattern as port-catalog-to-shopify.mjs:
  * 1. SHOPIFY_ADMIN_ACCESS_TOKEN
@@ -11,20 +12,38 @@
  * Fallback: Storefront API (VITE_SHOPIFY_STOREFRONT_TOKEN) or local catalog.
  *
  * Usage:
- *   npm run reviews:qr
- *   SITE_URL=https://www.sundayrollsgolf.com SITE_BASE_PATH=/ npm run reviews:qr
- *   SITE_URL=https://sunday-rolls.github.io/website SITE_BASE_PATH=/website npm run reviews:qr
+ *   npm run reviews:qr              # GitHub Pages target (default)
+ *   npm run reviews:qr:pages        # https://sunday-rolls.github.io/website
+ *   npm run reviews:qr:live         # https://www.sundayrollsgolf.com (after cutover)
+ *   SITE_TARGET=live npm run reviews:qr
+ *   SITE_URL=… SITE_BASE_PATH=… npm run reviews:qr   # custom override
  *   DRY_RUN=1 npm run reviews:qr
  *   HEADCOVERS_ONLY=0 npm run reviews:qr   # include towels / all products
  */
-import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
+import { createWriteStream, mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { homedir } from 'node:os'
+import { finished } from 'node:stream/promises'
+import PDFDocument from 'pdfkit'
 import QRCode from 'qrcode'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '..')
+
+/** Presets for QR landing URLs — flip SITE_TARGET when the live site is up. */
+const SITE_TARGETS = {
+  pages: {
+    label: 'GitHub Pages',
+    url: 'https://sunday-rolls.github.io/website',
+    basePath: '/website',
+  },
+  live: {
+    label: 'Live site',
+    url: 'https://www.sundayrollsgolf.com',
+    basePath: '/',
+  },
+}
 
 function inferBasePath(siteUrl) {
   try {
@@ -56,16 +75,43 @@ function loadDotEnv() {
   }
 }
 
+function resolveSiteTarget() {
+  const rawTarget = (process.env.SITE_TARGET || 'pages').toLowerCase()
+  const preset = SITE_TARGETS[rawTarget]
+  if (process.env.SITE_URL) {
+    const url = process.env.SITE_URL.replace(/\/$/, '')
+    return {
+      target: rawTarget,
+      label: preset?.label || 'Custom',
+      url,
+      basePath: process.env.SITE_BASE_PATH ?? inferBasePath(url),
+    }
+  }
+  if (!preset) {
+    throw new Error(
+      `Unknown SITE_TARGET="${rawTarget}". Use: ${Object.keys(SITE_TARGETS).join(', ')}`,
+    )
+  }
+  return {
+    target: rawTarget,
+    label: preset.label,
+    url: preset.url.replace(/\/$/, ''),
+    basePath: process.env.SITE_BASE_PATH ?? preset.basePath,
+  }
+}
+
 loadDotEnv()
 
 const API_VERSION = process.env.VITE_SHOPIFY_API_VERSION || process.env.SHOPIFY_API_VERSION || '2025-01'
 const DRY_RUN = process.env.DRY_RUN === '1'
 const HEADCOVERS_ONLY = process.env.HEADCOVERS_ONLY !== '0'
-const SITE_URL = (process.env.SITE_URL || 'https://www.sundayrollsgolf.com').replace(/\/$/, '')
-const SITE_BASE_PATH = process.env.SITE_BASE_PATH ?? inferBasePath(SITE_URL)
+const site = resolveSiteTarget()
+const SITE_URL = site.url
+const SITE_BASE_PATH = site.basePath
 const OUT_DIR = process.env.QR_OUT_DIR
   ? resolve(process.env.QR_OUT_DIR)
   : join(root, 'output', 'product-review-qrs')
+const PDF_FILE = 'sunday-rolls-review-qrs.pdf'
 
 function shopDomain() {
   const shop = process.env.SHOPIFY_SHOP?.replace(/\.myshopify\.com$/, '')
@@ -370,17 +416,29 @@ function writePrintSheet(manifest) {
       color: #555;
     }
     .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       padding: 12px 32px 0;
       font-family: system-ui, sans-serif;
     }
+    .actions a,
     .actions button {
       appearance: none;
       border: 1px solid var(--green);
       background: var(--green);
       color: #fff;
-      padding: 8px 14px;
+      padding: 10px 16px;
       font: inherit;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .actions button.secondary,
+    .actions a.secondary {
+      background: #fff;
+      color: var(--green);
     }
     .sheet {
       display: grid;
@@ -435,10 +493,11 @@ function writePrintSheet(manifest) {
 <body>
   <header>
     <h1>Sunday Rolls — Review QR codes</h1>
-    <p>Each code opens the product page with the review form ready. Print and cut along the dashed lines.</p>
+    <p>Target: <strong>${escapeHtml(site.label)}</strong> · ${escapeHtml(SITE_URL)} · ${manifest.length} products. Each code opens the product page with the review form ready.</p>
   </header>
   <div class="actions">
-    <button type="button" onclick="window.print()">Print sheet</button>
+    <a href="${escapeHtml(PDF_FILE)}" download="${escapeHtml(PDF_FILE)}">Export PDF</a>
+    <button type="button" class="secondary" onclick="window.print()">Print HTML sheet</button>
   </div>
   <main class="sheet">
     ${cards}
@@ -450,6 +509,92 @@ function writePrintSheet(manifest) {
   writeFileSync(join(OUT_DIR, 'print-sheet.html'), html)
 }
 
+async function writePdf(manifest) {
+  const pdfPath = join(OUT_DIR, PDF_FILE)
+  const doc = new PDFDocument({
+    size: 'LETTER',
+    margin: 36,
+    info: {
+      Title: 'Sunday Rolls — Product review QR codes',
+      Author: 'Sunday Rolls',
+      Subject: `Review QR codes for ${site.label} (${SITE_URL})`,
+    },
+  })
+  const stream = createWriteStream(pdfPath)
+  doc.pipe(stream)
+
+  const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right
+  const cols = 3
+  const gap = 16
+  const cellWidth = (pageWidth - gap * (cols - 1)) / cols
+  const qrSize = Math.min(140, cellWidth - 16)
+  const cellHeight = qrSize + 72
+  let x = doc.page.margins.left
+  let y = doc.page.margins.top
+
+  doc
+    .fillColor('#1b3a2f')
+    .font('Times-Bold')
+    .fontSize(18)
+    .text('Sunday Rolls — Review QR codes', { width: pageWidth })
+  doc
+    .fillColor('#555555')
+    .font('Helvetica')
+    .fontSize(9)
+    .text(`${site.label} · ${SITE_URL}`, { width: pageWidth })
+  doc
+    .fontSize(8)
+    .text('Scan to open the product page with the leave-a-review form. Cut along the dashed boxes.', {
+      width: pageWidth,
+    })
+  y = doc.y + 16
+
+  for (let index = 0; index < manifest.length; index += 1) {
+    const item = manifest[index]
+    const col = index % cols
+
+    if (col === 0 && index > 0) {
+      y += cellHeight + gap
+    }
+    if (y + cellHeight > doc.page.height - doc.page.margins.bottom) {
+      doc.addPage()
+      y = doc.page.margins.top
+    }
+
+    x = doc.page.margins.left + col * (cellWidth + gap)
+
+    doc
+      .save()
+      .lineWidth(0.75)
+      .dash(3, { space: 2 })
+      .strokeColor('#c9bfa8')
+      .rect(x, y, cellWidth, cellHeight)
+      .stroke()
+      .undash()
+      .restore()
+
+    const imgX = x + (cellWidth - qrSize) / 2
+    const imgY = y + 10
+    doc.image(join(OUT_DIR, item.file), imgX, imgY, { width: qrSize, height: qrSize })
+
+    const textTop = imgY + qrSize + 8
+    doc
+      .fillColor('#1b3a2f')
+      .font('Times-Bold')
+      .fontSize(9)
+      .text(item.title, x + 6, textTop, { width: cellWidth - 12, align: 'center', height: 28, ellipsis: true })
+    doc
+      .fillColor('#666666')
+      .font('Helvetica')
+      .fontSize(7)
+      .text(item.handle, x + 6, textTop + 30, { width: cellWidth - 12, align: 'center' })
+  }
+
+  doc.end()
+  await finished(stream)
+  return pdfPath
+}
+
 async function main() {
   const shop = shopDomain()
   const products = await loadProducts(shop)
@@ -457,6 +602,8 @@ async function main() {
   if (!products.length) {
     throw new Error('No products found')
   }
+
+  console.log(`QR target: ${site.label} (${SITE_URL}, base ${SITE_BASE_PATH || '/'})`)
 
   mkdirSync(OUT_DIR, { recursive: true })
 
@@ -494,10 +641,13 @@ async function main() {
       `${JSON.stringify(
         {
           generatedAt: new Date().toISOString(),
+          siteTarget: site.target,
+          siteLabel: site.label,
           siteUrl: SITE_URL,
           siteBasePath: SITE_BASE_PATH,
           shop,
           headcoversOnly: HEADCOVERS_ONLY,
+          pdf: PDF_FILE,
           count: manifest.length,
           products: manifest,
         },
@@ -506,13 +656,14 @@ async function main() {
       )}\n`,
     )
     writePrintSheet(manifest)
+    const pdfPath = await writePdf(manifest)
+    console.log(`Wrote ${PDF_FILE}`)
+    console.log(
+      `Generated ${manifest.length} QR codes → ${OUT_DIR}\nPrint sheet: ${join(OUT_DIR, 'print-sheet.html')}\nPDF: ${pdfPath}`,
+    )
+  } else {
+    console.log(`Dry run: ${manifest.length} QR URLs for ${shop}`)
   }
-
-  console.log(
-    DRY_RUN
-      ? `Dry run: ${manifest.length} QR URLs for ${shop}`
-      : `Generated ${manifest.length} QR codes → ${OUT_DIR}\nPrint sheet: ${join(OUT_DIR, 'print-sheet.html')}`,
-  )
 }
 
 main().catch((error) => {
