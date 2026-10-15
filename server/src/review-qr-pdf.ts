@@ -1,10 +1,15 @@
 import { createRequire } from 'node:module'
 import PDFDocument from 'pdfkit'
 import QRCode from 'qrcode'
+import {
+  fetchShopifyActiveProducts,
+  loadShopifyCredentialsFromEnv,
+  type ShopifyActiveProduct,
+} from './analytics/shopify.js'
 
 const require = createRequire(import.meta.url)
 const catalog = require('./data/review-qr-products.json') as {
-  products: Array<{ handle: string; title: string }>
+  products: Array<{ handle: string; title: string; category?: string | null }>
 }
 
 export type ReviewQrSiteTarget = 'pages' | 'live'
@@ -39,14 +44,43 @@ export function reviewQrLandingUrl(target: ReviewQrSiteTarget, handle: string): 
   return `${origin}${base}/products/${encodeURIComponent(handle)}?review=1`
 }
 
-export function listReviewQrProducts(): Array<{ handle: string; title: string }> {
-  return Array.isArray(catalog.products) ? catalog.products : []
+/** Fallback when Shopify is unavailable — full local catalog (all categories). */
+export function listCatalogReviewQrProducts(): ShopifyActiveProduct[] {
+  const products = Array.isArray(catalog.products) ? catalog.products : []
+  return products
+    .filter((p) => p.handle && p.title)
+    .map((p) => ({ handle: p.handle, title: p.title }))
+    .sort((a, b) => a.title.localeCompare(b.title))
 }
 
-export async function buildReviewQrPdf(target: ReviewQrSiteTarget): Promise<Buffer> {
-  const products = listReviewQrProducts()
+/** Prefer live Shopify active products; fall back to bundled catalog. */
+export async function loadReviewQrProducts(): Promise<{
+  products: ShopifyActiveProduct[]
+  source: 'shopify' | 'catalog'
+}> {
+  const creds = loadShopifyCredentialsFromEnv()
+  if (creds) {
+    try {
+      const products = await fetchShopifyActiveProducts(creds)
+      if (products.length) return { products, source: 'shopify' }
+    } catch (error) {
+      console.warn(
+        'Shopify product fetch for QR PDF failed; using catalog fallback',
+        error instanceof Error ? error.message : error,
+      )
+    }
+  }
+  return { products: listCatalogReviewQrProducts(), source: 'catalog' }
+}
+
+export async function buildReviewQrPdf(target: ReviewQrSiteTarget): Promise<{
+  pdf: Buffer
+  count: number
+  source: 'shopify' | 'catalog'
+}> {
+  const { products, source } = await loadReviewQrProducts()
   if (!products.length) {
-    throw new Error('No products configured for review QR export')
+    throw new Error('No products available for review QR export')
   }
 
   const site = REVIEW_QR_SITE_TARGETS[target]
@@ -84,7 +118,7 @@ export async function buildReviewQrPdf(target: ReviewQrSiteTarget): Promise<Buff
     .fillColor('#555555')
     .font('Helvetica')
     .fontSize(9)
-    .text(`${site.label} · ${site.url}`, { width: pageWidth })
+    .text(`${site.label} · ${site.url} · ${products.length} products`, { width: pageWidth })
   doc
     .fontSize(8)
     .text('Scan to open the product page with the leave-a-review form. Cut along the dashed boxes.', {
@@ -146,5 +180,6 @@ export async function buildReviewQrPdf(target: ReviewQrSiteTarget): Promise<Buff
   }
 
   doc.end()
-  return done
+  const pdf = await done
+  return { pdf, count: products.length, source }
 }

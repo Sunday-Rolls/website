@@ -45,5 +45,6 @@ Override with `SITE_URL` + `SITE_BASE_PATH` if needed. See `.env.example`.
 
 ## Notes
 
-- Headcovers only by default (`HEADCOVERS_ONLY=0` to include towels).
+- Includes **all active products** (headcovers, towels, etc.). Dashboard pulls from live Shopify when configured; CLI/catalog include the full catalog.
+- CLI: set `HEADCOVERS_ONLY=1` to limit to headcovers.
 - Codes hit the product review form on the site; submitted reviews go to Railway Postgres + Resend email ([CONTACT_EMAIL.md](./CONTACT_EMAIL.md)).

@@ -688,7 +688,7 @@ async function loadReviewQrMeta() {
   if (!meta || !select) return
   try {
     const { data } = await api(`/review-qrs?target=${encodeURIComponent(select.value || 'pages')}`)
-    meta.textContent = `${data.count} headcovers · ${data.label} · ${data.siteUrl}`
+    meta.textContent = `${data.count} products (${data.source || 'catalog'}) · ${data.label} · ${data.siteUrl}`
   } catch (err) {
     meta.textContent = err.message
   }

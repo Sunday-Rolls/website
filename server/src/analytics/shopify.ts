@@ -176,6 +176,63 @@ export async function pingShopifyShop(creds: ShopifyCredentials): Promise<{
   }
 }
 
+export type ShopifyActiveProduct = {
+  handle: string
+  title: string
+}
+
+/** Active (published) products from Admin GraphQL — all product types. */
+export async function fetchShopifyActiveProducts(
+  creds: ShopifyCredentials,
+): Promise<ShopifyActiveProduct[]> {
+  const { accessToken } = await createShopifyAccessToken(creds)
+  const host = shopHost(creds.shop)
+  const version = creds.apiVersion || '2025-01'
+  const products: ShopifyActiveProduct[] = []
+  let cursor: string | null = null
+
+  for (;;) {
+    const query = `#graphql
+      query ActiveProducts($cursor: String) {
+        products(first: 50, after: $cursor, query: "status:active") {
+          pageInfo { hasNextPage endCursor }
+          nodes { handle title status }
+        }
+      }`
+    const res = await fetch(`https://${host}/admin/api/${version}/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, variables: { cursor } }),
+    })
+    const json = (await res.json()) as {
+      errors?: Array<{ message?: string }>
+      data?: {
+        products?: {
+          pageInfo?: { hasNextPage?: boolean; endCursor?: string | null }
+          nodes?: Array<{ handle?: string; title?: string; status?: string }>
+        }
+      }
+    }
+    if (!res.ok || json.errors?.length) {
+      throw new Error(json.errors?.[0]?.message || `Shopify products failed (${res.status})`)
+    }
+    for (const node of json.data?.products?.nodes ?? []) {
+      if (!node?.handle || !node.title) continue
+      if (node.status && node.status !== 'ACTIVE') continue
+      products.push({ handle: node.handle, title: node.title })
+    }
+    if (!json.data?.products?.pageInfo?.hasNextPage) break
+    cursor = json.data.products.pageInfo.endCursor ?? null
+    if (!cursor) break
+  }
+
+  products.sort((a, b) => a.title.localeCompare(b.title))
+  return products
+}
+
 export type ShopifyAbandonedCheckout = {
   id: string
   createdAt: string
