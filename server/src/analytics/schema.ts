@@ -93,6 +93,16 @@ CREATE TABLE IF NOT EXISTS analytics_search_keywords (
   PRIMARY KEY (query, period_start, period_end)
 );
 
+CREATE TABLE IF NOT EXISTS analytics_daily_product_views (
+  date date NOT NULL,
+  product_name text NOT NULL,
+  category text,
+  views integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (date, product_name)
+);
+CREATE INDEX IF NOT EXISTS analytics_daily_product_views_date_idx
+  ON analytics_daily_product_views (date);
+
 CREATE TABLE IF NOT EXISTS analytics_expenses (
   id uuid PRIMARY KEY,
   spent_at date NOT NULL,

@@ -13,6 +13,7 @@ describe('buildOverview', () => {
       traffic: demo.traffic,
       keywords: demo.keywords,
       abandoned: demo.abandoned,
+      productViews: demo.productViews,
     })
 
     expect(overview.kpis.orders.value).toBeGreaterThan(100)
@@ -20,6 +21,8 @@ describe('buildOverview', () => {
     expect(overview.funnel).toHaveLength(5)
     expect(overview.funnel[0].step).toBe('Site visits')
     expect(overview.products.length).toBeGreaterThan(0)
+    expect(overview.productViewsByProduct.length).toBeGreaterThan(1)
+    expect(overview.productViewsByProduct[0].views).toBeGreaterThan(0)
     expect(overview.abandonedCarts.abandoned).toBe(117)
     expect(overview.revenueByDay).toHaveLength(30)
   })

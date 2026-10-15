@@ -347,6 +347,35 @@ body {
   background: var(--accent);
 }
 .funnel-step .meta { color: var(--muted); font-size: 0.8rem; }
+.funnel-step.has-detail {
+  padding-bottom: 0.15rem;
+}
+.funnel-detail {
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.7rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(20, 32, 24, 0.04);
+  border: 1px solid var(--line);
+}
+.funnel-detail summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  list-style: none;
+}
+.funnel-detail summary::-webkit-details-marker { display: none; }
+.funnel-detail summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform 0.12s ease;
+}
+.funnel-detail[open] summary::before { transform: rotate(90deg); }
+.funnel-products {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
 
 .campaign-block {
   padding: 0 0 1rem;

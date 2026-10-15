@@ -56,6 +56,14 @@ export type DailyTraffic = {
   sourceBreakdown: Record<string, number>
 }
 
+/** Per-product page views for a single UTC day (GA4 item views, etc.). */
+export type DailyProductView = {
+  date: string
+  productName: string
+  category: string | null
+  views: number
+}
+
 export type DailyAdSpend = {
   date: string
   platform: string
