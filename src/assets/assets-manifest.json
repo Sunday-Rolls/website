@@ -4,13 +4,15 @@
   },
   "home": {
     "hero": "/assets/home/hero.jpg",
+    "heroWebp": "/assets/home/hero.webp",
     "crew": "/assets/home/crew.jpg",
     "lifestyle": "/assets/home/lifestyle.png",
     "heroVideo": "/assets/home/videos/hero-golf.mp4",
     "swingVideo": "/assets/home/videos/swing-golf.mp4"
   },
   "shop": {
-    "banner": "/assets/shop/banner.jpg"
+    "banner": "/assets/shop/banner.jpg",
+    "bannerWebp": "/assets/shop/banner.webp"
   },
   "products": {
     "retro-roller-grey": "/assets/products/retro-roller-grey.jpg",

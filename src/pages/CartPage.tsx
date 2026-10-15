@@ -7,6 +7,7 @@ import {
   usePageContent,
 } from '@/lib/content'
 import { trackBeginCheckout, trackViewCart } from '@/lib/gtm'
+import { applyPageMeta } from '@/lib/page-meta'
 import { isShopifyConfigured } from '@/lib/shopify'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
@@ -28,6 +29,14 @@ export function CartPage() {
   const cartSignature = cart
     ? `${cart.id}:${cart.totalQuantity}:${cart.total}:${lines.map((l) => `${l.id}:${l.quantity}`).join(',')}`
     : ''
+
+  useEffect(() => {
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+      path: '/cart',
+    })
+  }, [content.meta.title, content.meta.description])
 
   useEffect(() => {
     if (isLoading || isEmpty || !cart || lines.length === 0) return

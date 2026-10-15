@@ -69,7 +69,7 @@ export function ValueStrip({ items, className }: ValueStripProps) {
                 {iconPaths[item.icon]}
               </svg>
             ) : null}
-            <p className="font-display text-xl font-semibold uppercase tracking-wide text-soft-gold sm:text-2xl md:text-[1.75rem]">
+            <p className="font-display text-xl font-semibold uppercase tracking-wide text-soft-gold-bright sm:text-2xl md:text-[1.75rem]">
               {item.label}
             </p>
           </li>

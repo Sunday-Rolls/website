@@ -37,9 +37,10 @@ export async function fetchProductReviews(handle: string): Promise<ProductReview
     { headers: { Accept: 'application/json' } },
   )
 
-  let data: { ok?: boolean; reviews?: ApiReview[]; error?: string } | null = null
+  type ListResponse = { ok?: boolean; reviews?: ApiReview[]; error?: string }
+  let data: ListResponse | null = null
   try {
-    data = (await response.json()) as typeof data
+    data = (await response.json()) as ListResponse
   } catch {
     data = null
   }
@@ -80,9 +81,10 @@ export async function submitProductReview(input: {
     }),
   })
 
-  let data: { ok?: boolean; review?: ApiReview; error?: string } | null = null
+  type SubmitResponse = { ok?: boolean; review?: ApiReview; error?: string }
+  let data: SubmitResponse | null = null
   try {
-    data = (await response.json()) as typeof data
+    data = (await response.json()) as SubmitResponse
   } catch {
     data = null
   }

@@ -43,8 +43,11 @@ function parseMoney(value: string | number | undefined): number {
   return Number.isFinite(n) ? n : 0
 }
 
-export function initGtm(): void {
-  if (typeof window === 'undefined') return
+let analyticsBooted = false
+
+function loadAnalyticsScripts(): void {
+  if (analyticsBooted || typeof window === 'undefined') return
+  analyticsBooted = true
 
   window.dataLayer = window.dataLayer ?? []
 
@@ -70,6 +73,34 @@ export function initGtm(): void {
     script.async = true
     script.src = `https://www.googletagmanager.com/gtag/js?id=${ga4MeasurementId}`
     document.head.appendChild(script)
+  }
+}
+
+/**
+ * Defer GTM/gtag until after first paint / idle so they don't compete with LCP.
+ * Falls back to a short timeout so analytics still loads without interaction.
+ */
+export function initGtm(): void {
+  if (typeof window === 'undefined') return
+
+  window.dataLayer = window.dataLayer ?? []
+
+  const schedule =
+    typeof window.requestIdleCallback === 'function'
+      ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 3500 })
+      : (cb: () => void) => window.setTimeout(cb, 2000)
+
+  const boot = () => loadAnalyticsScripts()
+
+  if (document.readyState === 'complete') {
+    schedule(boot)
+  } else {
+    window.addEventListener('load', () => schedule(boot), { once: true })
+  }
+
+  // Earlier load if the user interacts before idle
+  for (const event of ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const) {
+    window.addEventListener(event, boot, { once: true, passive: true })
   }
 }
 

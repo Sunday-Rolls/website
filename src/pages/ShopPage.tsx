@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { trackViewItemList } from '@/lib/gtm'
+import { applyPageMeta } from '@/lib/page-meta'
 import {
   fetchProducts,
   filterProductsByCategory,
@@ -20,12 +21,17 @@ export function ShopPage() {
   const [products, setProducts] = useState<ShopifyProduct[]>(placeholderProducts)
 
   useEffect(() => {
-    document.title = content.meta.title
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+      path: '/shop',
+      image: '/assets/shop/banner.jpg',
+    })
 
     fetchProducts(50).then((items) => {
       if (items.length > 0) setProducts(items)
     })
-  }, [content.meta.title])
+  }, [content.meta.title, content.meta.description])
 
   const sections = useMemo(
     () =>

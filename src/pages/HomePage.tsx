@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { usePageContent } from '@/lib/content'
+import { applyPageMeta } from '@/lib/page-meta'
 import {
   fetchProducts,
   filterProductsByCategory,
@@ -20,12 +21,17 @@ export function HomePage() {
   const [products, setProducts] = useState<ShopifyProduct[]>(placeholderProducts)
 
   useEffect(() => {
-    document.title = content.meta.title
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+      path: '/',
+      image: '/assets/home/hero.jpg',
+    })
 
     fetchProducts(50).then((items) => {
       if (items.length > 0) setProducts(items)
     })
-  }, [content.meta.title])
+  }, [content.meta.title, content.meta.description])
 
   const blocks = useMemo(
     () =>

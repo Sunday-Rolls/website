@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { getButtonLabel } from '@/lib/content'
 import { trackSelectItem } from '@/lib/gtm'
+import { productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { cn } from '@/lib/utils'
 
@@ -35,10 +36,15 @@ export function ProductCard({
         <div className="aspect-[4/5] bg-warm-sand">
           {product.imageUrl ? (
             <img
-              src={product.imageUrl}
+              src={sizedImageUrl(product.imageUrl, 640) ?? product.imageUrl}
+              srcSet={productImageSrcSet(product.imageUrl)}
+              sizes="(min-width: 1100px) 25vw, (min-width: 640px) 33vw, 50vw"
               alt={product.imageAlt ?? product.title}
+              width={640}
+              height={800}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
+              decoding="async"
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-b from-warm-sand to-sand">

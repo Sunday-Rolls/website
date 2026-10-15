@@ -8,7 +8,7 @@ function StarRating({ rating }: { rating: number }) {
         <span
           key={index}
           aria-hidden="true"
-          className={index < rating ? 'text-soft-gold' : 'text-cream/30'}
+          className={index < rating ? 'text-soft-gold-bright' : 'text-cream/30'}
         >
           ★
         </span>
@@ -49,7 +49,7 @@ export function ReviewsMarquee() {
               <div className="mt-auto space-y-0.5 pt-2">
                 <p className="font-body text-body-small font-semibold text-white">{review.author}</p>
                 {review.location ? (
-                  <p className="font-body text-body-small text-soft-gold/90">{review.location}</p>
+                  <p className="font-body text-body-small text-soft-gold-bright/90">{review.location}</p>
                 ) : null}
               </div>
             </article>

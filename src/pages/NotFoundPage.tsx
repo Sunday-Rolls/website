@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { resolveLinkLabel, usePageContent } from '@/lib/content'
+import { applyPageMeta } from '@/lib/page-meta'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 
@@ -7,8 +8,11 @@ export function NotFoundPage() {
   const content = usePageContent('not-found')
 
   useEffect(() => {
-    document.title = content.meta.title
-  }, [content.meta.title])
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+    })
+  }, [content.meta.title, content.meta.description])
 
   return (
     <Container className="flex min-h-[60vh] flex-col items-center justify-center gap-6 py-section-y text-center">

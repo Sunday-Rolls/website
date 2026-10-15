@@ -50,7 +50,7 @@ export function Footer() {
         <div className="grid gap-8 sm:grid-cols-3">
           {columns.map((column) => (
             <div key={column.title} className="space-y-3">
-              <p className="font-body text-label text-soft-gold">{column.title}</p>
+              <p className="font-body text-label text-soft-gold-bright">{column.title}</p>
               <ul className="space-y-2">
                 {column.links.map((link) => (
                   <li key={link.href}>

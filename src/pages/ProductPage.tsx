@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { trackViewItem } from '@/lib/gtm'
+import { applyPageMeta } from '@/lib/page-meta'
 import {
   fetchProductByHandle,
   placeholderProducts,
@@ -20,16 +21,29 @@ export function ProductPage() {
   const [product, setProduct] = useState<ShopifyProduct | null | undefined>(undefined)
 
   useEffect(() => {
-    document.title = content.meta.title
-
     fetchProductByHandle(handle).then((item) => {
       setProduct(item ?? placeholderProducts.find((entry) => entry.handle === handle) ?? null)
     })
-  }, [content.meta.title, handle])
+  }, [handle])
 
   useEffect(() => {
-    if (product) trackViewItem(product)
-  }, [product])
+    if (product) {
+      applyPageMeta({
+        title: `${product.title} — Sunday Rolls`,
+        description: product.description || content.meta.description,
+        path: `/products/${product.handle}`,
+        image: product.imageUrl,
+        type: 'product',
+      })
+      trackViewItem(product)
+      return
+    }
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+      path: handle ? `/products/${handle}` : undefined,
+    })
+  }, [product, content.meta.title, content.meta.description, handle])
 
   if (product === undefined) {
     return (

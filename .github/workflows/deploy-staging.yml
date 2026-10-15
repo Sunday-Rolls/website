@@ -103,12 +103,16 @@ jobs:
 
       - name: Build production site
         if: ${{ steps.slug.outputs.kind == 'production' }}
+        env:
+          VITE_SITE_ORIGIN: https://sunday-rolls.github.io
         run: |
           VITE_BASE_PATH="${PAGES_BASE}/" npm run build:pages
           rsync -a --delete --exclude previews/ dist/ site/
 
       - name: Build preview site
         if: ${{ steps.slug.outputs.kind == 'preview' && !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
+        env:
+          VITE_SITE_ORIGIN: https://sunday-rolls.github.io
         run: |
           SLUG="${{ steps.slug.outputs.value }}"
           VITE_BASE_PATH="${PAGES_BASE}/previews/${SLUG}/" npm run build:pages

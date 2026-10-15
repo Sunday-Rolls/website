@@ -80,5 +80,9 @@ describe('ShopPage', () => {
 
     const banner = document.querySelector('img[src="/assets/shop/banner.jpg"]')
     expect(banner).not.toBeNull()
+    expect(document.querySelector('source[type="image/webp"]')).not.toBeNull()
+    expect(banner).toHaveAttribute('fetchPriority', 'high')
+    expect(banner).toHaveAttribute('width', '1200')
+    expect(banner).toHaveAttribute('height', '800')
   })
 })

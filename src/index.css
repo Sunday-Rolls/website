@@ -8,6 +8,8 @@
   --color-leather: #8a5a3b;
   --color-matte-black: #1a1a1a;
   --color-soft-gold: #b08d57;
+  /* Meets WCAG AA on heritage-green (≈5.2:1); soft-gold stays for light surfaces */
+  --color-soft-gold-bright: #c4a36a;
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;

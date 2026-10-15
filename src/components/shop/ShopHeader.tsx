@@ -8,12 +8,19 @@ export function ShopHeader() {
 
   return (
     <section className="relative overflow-hidden border-b border-sand bg-sand/40">
-      <img
-        src={shopAssets.headerBanner}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover opacity-60"
-      />
+      <picture>
+        <source srcSet={shopAssets.headerBannerWebp} type="image/webp" />
+        <img
+          src={shopAssets.headerBanner}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={800}
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-60"
+        />
+      </picture>
       <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/90 to-cream/70" />
 
       <Container className="relative py-12 md:py-16">

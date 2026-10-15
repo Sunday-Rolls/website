@@ -38,7 +38,7 @@ export function NewsletterSection() {
       <Container>
         <div className="mx-auto max-w-2xl space-y-6 text-center">
           {newsletter.eyebrow ? (
-            <p className="font-body text-label uppercase tracking-widest text-soft-gold">
+            <p className="font-body text-label uppercase tracking-widest text-soft-gold-bright">
               {newsletter.eyebrow}
             </p>
           ) : null}
@@ -70,7 +70,7 @@ export function NewsletterSection() {
               role="status"
               className={
                 status.tone === 'success'
-                  ? 'font-body text-body-small text-soft-gold'
+                  ? 'font-body text-body-small text-soft-gold-bright'
                   : 'font-body text-body-small text-canvas-tan'
               }
             >

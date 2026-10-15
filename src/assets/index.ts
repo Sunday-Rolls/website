@@ -8,6 +8,7 @@ export const brandAssets = {
 
 export const homeAssets = {
   hero: assetUrl(assetsManifest.home.hero),
+  heroWebp: assetUrl(assetsManifest.home.heroWebp),
   heroTexture: assetUrl('/assets/home/hero-texture.svg'),
   lifestyle: assetUrl(assetsManifest.home.lifestyle),
   crew: assetUrl(assetsManifest.home.crew),
@@ -23,6 +24,7 @@ export const homeAssets = {
 
 export const shopAssets = {
   headerBanner: assetUrl(assetsManifest.shop.banner),
+  headerBannerWebp: assetUrl(assetsManifest.shop.bannerWebp),
   products: Object.values(assetsManifest.products).map(assetUrl),
 } as const
 

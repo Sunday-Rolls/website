@@ -37,6 +37,8 @@ export function Header() {
             src={brandAssets.logoMark}
             alt=""
             aria-hidden="true"
+            width={24}
+            height={36}
             className="h-9 w-auto shrink-0"
           />
           <span className="font-display text-lg tracking-wide">{brand.name}</span>
@@ -75,6 +77,7 @@ export function Header() {
           >
             <CartIcon className="h-6 w-6" />
             <span
+              aria-hidden="true"
               className={cn(
                 'absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center',
                 'bg-heritage-green px-1 font-body text-[10px] leading-none text-cream',

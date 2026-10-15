@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { homeAssets } from '@/assets'
 import { assetUrl } from '@/lib/asset-url'
 import { usePageContent } from '@/lib/content'
+import { applyPageMeta } from '@/lib/page-meta'
 import { Container } from '@/components/ui/Container'
 
 export function AboutPage() {
@@ -9,8 +10,12 @@ export function AboutPage() {
   const { team } = content
 
   useEffect(() => {
-    document.title = content.meta.title
-  }, [content.meta.title])
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+      path: '/about',
+    })
+  }, [content.meta.title, content.meta.description])
 
   return (
     <>
@@ -74,7 +79,7 @@ export function AboutPage() {
                       <h3 className="font-display text-2xl leading-tight text-white">
                         {member.name}
                       </h3>
-                      <p className="font-body text-label uppercase tracking-widest text-soft-gold">
+                      <p className="font-body text-label uppercase tracking-widest text-soft-gold-bright">
                         {member.role}
                       </p>
                     </div>

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { getButtonLabel, usePageContent } from '@/lib/content'
 import { submitContactForm } from '@/lib/contact-api'
 import { pushEvent } from '@/lib/gtm'
+import { applyPageMeta } from '@/lib/page-meta'
 import { toastError, toastSuccess } from '@/lib/toast'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
@@ -27,8 +28,12 @@ export function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    document.title = content.meta.title
-  }, [content.meta.title])
+    applyPageMeta({
+      title: content.meta.title,
+      description: content.meta.description,
+      path: '/contact',
+    })
+  }, [content.meta.title, content.meta.description])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
