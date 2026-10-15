@@ -110,14 +110,36 @@ function renderOverview(data) {
   renderKpis(data.kpis)
   renderBars(data.revenueByDay, state.series)
 
+  const productViews = data.productViewsByProduct || []
   $('#funnel').innerHTML = data.funnel
-    .map(
-      (step, i) => `<div class="funnel-step">
-        <div class="row"><strong>${step.step}</strong><span>${num(step.count)} · ${pct(step.pctOfStart)}</span></div>
+    .map((step, i) => {
+      const isProductViews = step.step === 'Viewed a product'
+      const meta = i === 0 ? 'Starting point' : `${pct(step.pctOfPrevious ?? 0)} of previous step`
+      const detail =
+        isProductViews && productViews.length > 0
+          ? `<details class="funnel-detail" open>
+              <summary>Views by product</summary>
+              <div class="funnel-products">
+                ${productViews
+                  .map(
+                    (p) => `<div>
+                      <div class="row"><span><strong>${escapeHtml(p.name)}</strong><div class="muted">${escapeHtml(p.category || '')}</div></span><strong>${num(p.views)} · ${pct(p.share, 0)}</strong></div>
+                      <div class="meter"><i style="width:${Math.min(100, p.share)}%"></i></div>
+                    </div>`,
+                  )
+                  .join('')}
+              </div>
+            </details>`
+          : isProductViews
+            ? `<div class="meta">No per-product view data for this range yet.</div>`
+            : ''
+      return `<div class="funnel-step${isProductViews ? ' has-detail' : ''}">
+        <div class="row"><strong>${escapeHtml(step.step)}</strong><span>${num(step.count)} · ${pct(step.pctOfStart)}</span></div>
         <div class="meter"><i style="width:${Math.min(100, step.pctOfStart)}%"></i></div>
-        <div class="meta">${i === 0 ? 'Starting point' : `${pct(step.pctOfPrevious ?? 0)} of previous step`}</div>
-      </div>`,
-    )
+        <div class="meta">${meta}</div>
+        ${detail}
+      </div>`
+    })
     .join('')
 
   const tbody = $('#products-table tbody')

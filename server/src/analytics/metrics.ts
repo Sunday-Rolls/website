@@ -3,6 +3,7 @@ import type {
   AbandonedCartStats,
   CashForecastRow,
   DailyAdSpend,
+  DailyProductView,
   DailyTraffic,
   Expense,
   Order,
@@ -28,6 +29,13 @@ export type OverviewResponse = {
   }
   revenueByDay: Array<{ date: string; revenue: number; orders: number; visits: number }>
   funnel: Array<{ step: string; count: number; pctOfStart: number; pctOfPrevious: number | null }>
+  /** Product page views for the selected range (drills under “Viewed a product”). */
+  productViewsByProduct: Array<{
+    name: string
+    category: string | null
+    views: number
+    share: number
+  }>
   products: Array<{
     name: string
     category: string | null
@@ -121,8 +129,9 @@ export function buildOverview(input: {
   traffic: DailyTraffic[]
   keywords: SearchKeyword[]
   abandoned: AbandonedCartStats | null
+  productViews?: DailyProductView[]
 }): OverviewResponse {
-  const { range, orders, traffic, keywords, abandoned } = input
+  const { range, orders, traffic, keywords, abandoned, productViews: productViewRows = [] } = input
   const curOrders = ordersIn(orders, range.start, range.end)
   const prevOrders = ordersIn(orders, range.prevStart, range.prevEnd)
   const curTraffic = trafficIn(traffic, range.start, range.end)
@@ -196,6 +205,26 @@ export function buildOverview(input: {
     .sort((a, b) => b.revenue - a.revenue)
     .map((p) => ({ ...p, share: revenue ? (p.revenue / revenue) * 100 : 0 }))
 
+  const viewMap = new Map<string, { name: string; category: string | null; views: number }>()
+  for (const row of productViewRows) {
+    if (row.date < range.start || row.date > range.end) continue
+    const existing = viewMap.get(row.productName) ?? {
+      name: row.productName,
+      category: row.category,
+      views: 0,
+    }
+    existing.views += row.views
+    if (!existing.category && row.category) existing.category = row.category
+    viewMap.set(row.productName, existing)
+  }
+  const viewsTotal = sum([...viewMap.values()].map((p) => p.views)) || productViews
+  const productViewsByProduct = [...viewMap.values()]
+    .sort((a, b) => b.views - a.views)
+    .map((p) => ({
+      ...p,
+      share: viewsTotal ? (p.views / viewsTotal) * 100 : 0,
+    }))
+
   const sourceMap = new Map<string, number>()
   for (const t of curTraffic) {
     for (const [source, count] of Object.entries(t.sourceBreakdown)) {
@@ -230,6 +259,7 @@ export function buildOverview(input: {
     },
     revenueByDay: [...dayMap.entries()].map(([date, v]) => ({ date, ...v })),
     funnel,
+    productViewsByProduct,
     products,
     trafficSources,
     ordersByState,

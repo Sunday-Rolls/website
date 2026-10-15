@@ -5,6 +5,7 @@ import type {
   AbandonedCartStats,
   CashForecastRow,
   DailyAdSpend,
+  DailyProductView,
   DailyTraffic,
   Expense,
   Order,
@@ -111,6 +112,27 @@ export function buildDemoDataset(asOf = '2026-10-11') {
   // Fix rounding drift on first day
   traffic[0].visits += 7150 - traffic.reduce((a, t) => a + t.visits, 0)
   void sourceTotal
+
+  // Distribute daily product views across catalog (browse interest ≠ sales mix)
+  const viewWeights = [34, 22, 18, 14, 12]
+  const weightTotal = viewWeights.reduce((a, b) => a + b, 0)
+  const productViewsDaily: DailyProductView[] = []
+  for (const day of traffic) {
+    let assigned = 0
+    products.forEach((product, idx) => {
+      const views =
+        idx === products.length - 1
+          ? day.productViews - assigned
+          : Math.round((day.productViews * viewWeights[idx]) / weightTotal)
+      assigned += views
+      productViewsDaily.push({
+        date: day.date,
+        productName: product.name,
+        category: product.category,
+        views: Math.max(0, views),
+      })
+    })
+  }
 
   const keywords: SearchKeyword[] = [
     { query: 'lab df3 headcover', visits: 214, periodStart: formatUtcDate(addUtcDays(end, -29)), periodEnd: asOf },
@@ -229,7 +251,7 @@ export function buildDemoDataset(asOf = '2026-10-11') {
     { monthEnd: '2027-01-31', beginningBalance: 26410, collections: 7300, freightAndFees: -1850, marketing: -1100, website: 0, manufacturing: 0, endingBalance: 30760 },
   ]
 
-  return { orders, traffic, keywords, abandoned, adSpend, expenses, cashForecast }
+  return { orders, traffic, keywords, productViews: productViewsDaily, abandoned, adSpend, expenses, cashForecast }
 }
 
 function weightedPick(items: string[], weights: number[], salt: number): string {
@@ -249,6 +271,7 @@ export async function seedDemoStore(store: AnalyticsStore, asOf = '2026-10-11'):
     await store.replaceOrders(data.orders)
     await store.replaceTraffic(data.traffic)
     await store.replaceKeywords(data.keywords)
+    await store.replaceProductViews(data.productViews)
     await store.replaceAbandoned(data.abandoned)
     await store.replaceAdSpend(data.adSpend)
     await store.replaceExpenses(data.expenses)

@@ -4,6 +4,7 @@ import type {
   AbandonedCartStats,
   CashForecastRow,
   DailyAdSpend,
+  DailyProductView,
   DailyTraffic,
   DashboardSession,
   DashboardUser,
@@ -36,6 +37,8 @@ export type AnalyticsStore = {
   listAdSpend(): Promise<DailyAdSpend[]>
   replaceKeywords(rows: SearchKeyword[]): Promise<number>
   listKeywords(): Promise<SearchKeyword[]>
+  replaceProductViews(rows: DailyProductView[]): Promise<number>
+  listProductViews(): Promise<DailyProductView[]>
   replaceExpenses(rows: Expense[]): Promise<number>
   listExpenses(): Promise<Expense[]>
   replaceCashForecast(rows: CashForecastRow[]): Promise<number>
@@ -66,6 +69,7 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let traffic: DailyTraffic[] = []
   let adSpend: DailyAdSpend[] = []
   let keywords: SearchKeyword[] = []
+  let productViews: DailyProductView[] = []
   let expenses: Expense[] = []
   let cash: CashForecastRow[] = []
   let abandoned: AbandonedCartStats[] = []
@@ -148,6 +152,15 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
 
     async listKeywords() {
       return keywords
+    },
+
+    async replaceProductViews(rows) {
+      productViews = rows
+      return rows.length
+    },
+
+    async listProductViews() {
+      return productViews
     },
 
     async replaceExpenses(rows) {
@@ -447,6 +460,30 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         visits: num(row.visits),
         periodStart: toDateOnly(row.period_start),
         periodEnd: toDateOnly(row.period_end),
+      }))
+    },
+
+    async replaceProductViews(rows) {
+      await db.query(`DELETE FROM analytics_daily_product_views`)
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_daily_product_views (date, product_name, category, views)
+           VALUES ($1,$2,$3,$4)`,
+          [row.date, row.productName, row.category, row.views],
+        )
+      }
+      return rows.length
+    },
+
+    async listProductViews() {
+      const { rows } = await db.query(
+        `SELECT * FROM analytics_daily_product_views ORDER BY date, product_name`,
+      )
+      return rows.map((row) => ({
+        date: toDateOnly(row.date),
+        productName: str(row.product_name),
+        category: optionalStr(row.category),
+        views: num(row.views),
       }))
     },
 

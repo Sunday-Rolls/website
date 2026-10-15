@@ -52,6 +52,8 @@ describe('dashboard auth + overview', () => {
     expect(body.ok).toBe(true)
     expect(body.data.kpis.orders.value).toBeGreaterThan(0)
     expect(body.data.funnel).toHaveLength(5)
+    expect(body.data.productViewsByProduct.length).toBeGreaterThan(1)
+    expect(body.data.productViewsByProduct[0].name).toBeTruthy()
   })
 
   it('returns P&L income statement rows', async () => {
