@@ -66,55 +66,57 @@
             <p id="range-label" class="muted"></p>
           </div>
           <div id="kpi-row" class="kpi-row"></div>
-          <div class="grid-2 mosaic-pair">
-            <article class="panel">
-              <div class="panel-head">
-                <h2 id="trend-title">Revenue trend</h2>
-                <p id="trend-grain" class="muted"></p>
-              </div>
-              <div id="chart-series" class="pills small">
-                <button type="button" data-series="revenue" class="active">Revenue</button>
-                <button type="button" data-series="orders">Orders</button>
-                <button type="button" data-series="visits">Visits</button>
-              </div>
-              <div id="trend-summary" class="trend-summary"></div>
-              <div id="revenue-chart" class="line-chart" role="img" aria-label="Trend chart"></div>
-            </article>
-            <article class="panel">
-              <h2>Purchase funnel</h2>
-              <p class="muted">Cart/checkout steps need Shopify ecommerce tagging in GA4.</p>
-              <div id="funnel"></div>
-            </article>
-          </div>
-          <div class="mosaic">
-            <article class="panel">
-              <h2>Views by product</h2>
-              <p class="muted">GA4 product page views for this range.</p>
-              <div id="product-views"></div>
-            </article>
-            <article class="panel">
-              <h2 id="states-title">Visitors by state</h2>
-              <p id="states-note" class="muted"></p>
-              <div id="states"></div>
-            </article>
-            <article class="panel">
-              <h2>Top search keywords</h2>
-              <div id="keywords"></div>
-            </article>
-            <article class="panel">
-              <h2>Abandoned carts</h2>
-              <p id="abandoned-note" class="muted"></p>
-              <div id="abandoned" class="abandoned"></div>
-            </article>
-            <article class="panel">
-              <h2>Sales by product</h2>
-              <p class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
-              <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
-            </article>
-            <article class="panel">
-              <h2>Traffic sources</h2>
-              <div id="sources"></div>
-            </article>
+          <div class="overview-shell">
+            <div class="overview-main">
+              <article class="panel">
+                <div class="panel-head">
+                  <h2 id="trend-title">Revenue trend</h2>
+                  <p id="trend-grain" class="muted"></p>
+                </div>
+                <div id="chart-series" class="pills small">
+                  <button type="button" data-series="revenue" class="active">Revenue</button>
+                  <button type="button" data-series="orders">Orders</button>
+                  <button type="button" data-series="visits">Visits</button>
+                </div>
+                <div id="trend-summary" class="trend-summary"></div>
+                <div id="revenue-chart" class="line-chart" role="img" aria-label="Trend chart"></div>
+              </article>
+              <article class="panel">
+                <h2>Sales by product</h2>
+                <p class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
+                <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
+              </article>
+              <article class="panel">
+                <h2>Views by product</h2>
+                <p class="muted">GA4 product page views for this range.</p>
+                <div id="product-views"></div>
+              </article>
+            </div>
+            <aside class="overview-rail">
+              <article class="panel">
+                <h2>Purchase funnel</h2>
+                <p class="muted">Cart/checkout steps need Shopify ecommerce tagging in GA4.</p>
+                <div id="funnel"></div>
+              </article>
+              <article class="panel">
+                <h2>Traffic sources</h2>
+                <div id="sources"></div>
+              </article>
+              <article class="panel">
+                <h2>Top search keywords</h2>
+                <div id="keywords"></div>
+              </article>
+              <article class="panel">
+                <h2 id="states-title">Visitors by state</h2>
+                <p id="states-note" class="muted"></p>
+                <div id="states"></div>
+              </article>
+              <article class="panel">
+                <h2>Abandoned carts</h2>
+                <p id="abandoned-note" class="muted"></p>
+                <div id="abandoned" class="abandoned"></div>
+              </article>
+            </aside>
           </div>
         </div>
 

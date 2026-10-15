@@ -258,22 +258,19 @@ body {
 }
 .grid-2 { grid-template-columns: 1.2fr 1fr; }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.mosaic-pair > .panel {
-  height: auto;
-  align-self: start;
+/* Main column + stacked rail — no row-height coupling between neighbors. */
+.overview-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(17rem, 0.9fr);
+  gap: 0.9rem;
+  align-items: start;
 }
-/* Column masonry: short tiles pack under neighbors instead of stretching a row. */
-.mosaic {
-  columns: 3;
-  column-gap: 0.9rem;
-}
-.mosaic > .panel {
-  display: inline-block;
-  width: 100%;
-  margin: 0 0 0.9rem;
-  break-inside: avoid;
-  page-break-inside: avoid;
-  -webkit-column-break-inside: avoid;
+.overview-main,
+.overview-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
 }
 .panel {
   background: var(--panel);
@@ -551,13 +548,12 @@ tr.section td {
 
 @media (max-width: 1100px) {
   .kpi-row, #pnl-kpis, .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; }
-  .mosaic { columns: 2; }
+  .overview-shell { grid-template-columns: 1fr; }
   .campaign-row { grid-template-columns: 1fr 1fr; }
   .campaign-row.head { display: none; }
 }
 @media (max-width: 720px) {
   .kpi-row, #pnl-kpis, .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .mosaic { columns: 1; }
   .dash-view { padding: 0.75rem; }
   .page { padding: 0.75rem; border-radius: 18px; gap: 0.75rem; }
   .brand-logo { height: 1.9rem; }
