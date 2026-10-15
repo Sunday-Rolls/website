@@ -31,7 +31,8 @@ export default defineRailway(() => {
     build: {
       builder: 'RAILPACK',
       buildCommand: 'npm install && npm run build',
-      watchPatterns: ['/**'],
+      // Repo-root paths (not relative to rootDirectory) — `/**` was skipping all deploys
+      watchPatterns: ['/server/**'],
     },
     start: 'npm start',
     healthcheck: '/health',
