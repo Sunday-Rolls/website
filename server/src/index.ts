@@ -13,9 +13,15 @@ import { createPgReviewStore } from './reviews.js'
 const config = loadConfig()
 const { sendContactEmail } = createMailer(config)
 
-if (!config.resendApiKey && !(config.smtpUser && config.smtpPass)) {
+if (config.resendApiKey) {
+  console.log(`Contact email: Resend (from ${config.resendFromEmail})`)
+} else if (config.smtpUser && config.smtpPass) {
   console.warn(
-    'No email transport configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS). Contact forms will still save to Postgres when DATABASE_URL is set.',
+    'Contact email: SMTP — only works on Railway Pro+. Prefer RESEND_API_KEY on Hobby (free plan: 3k/mo).',
+  )
+} else {
+  console.warn(
+    'No email transport configured (set RESEND_API_KEY). Contact forms still save to Postgres when DATABASE_URL is set.',
   )
 }
 

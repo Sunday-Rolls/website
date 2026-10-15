@@ -24,8 +24,14 @@ export function loadConfig() {
     requireBrowserOrigin: optional('REQUIRE_BROWSER_ORIGIN', 'true') !== 'false',
     contactApiKey: optional('CONTACT_API_KEY'),
     contactToEmail: optional('CONTACT_TO_EMAIL', 'sundayrollsdevops@gmail.com'),
-    // Prefer RESEND_API_KEY on Railway Hobby (outbound SMTP ports are blocked).
+    // Preferred mail transport on Railway Hobby (SMTP ports are blocked).
+    // Free Resend plan: 3,000 emails/month, 100/day — enough for contact form.
     resendApiKey: optional('RESEND_API_KEY'),
+    resendFromEmail: optional(
+      'RESEND_FROM_EMAIL',
+      'Sunday Rolls Contact <onboarding@resend.dev>',
+    ),
+    // Legacy Gmail SMTP — only works on Railway Pro+ (not Hobby).
     smtpUser: optional('SMTP_USER'),
     smtpPass: optional('SMTP_PASS'),
     smtpHost: optional('SMTP_HOST', 'smtp.gmail.com'),

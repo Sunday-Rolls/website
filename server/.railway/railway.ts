@@ -48,6 +48,7 @@ export default defineRailway(() => {
       DATABASE_URL: preserve(),
       REQUIRE_BROWSER_ORIGIN: preserve(),
       RESEND_API_KEY: preserve(),
+      RESEND_FROM_EMAIL: preserve(),
       SMTP_CONNECTION_TIMEOUT_MS: preserve(),
       SMTP_HOST: preserve(),
       SMTP_PASS: preserve(),

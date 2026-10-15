@@ -12,7 +12,7 @@ Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY
 | | GitHub Pages (now) | Live cutover (Railway) |
 |--|--------------------|----------------------|
 | Site | `https://sunday-rolls.github.io/website/` | Railway `website` + DNS → `www.sundayrollsgolf.com` ([RAILWAY_CUTOVER.md](./RAILWAY_CUTOVER.md)) |
-| Contact API | Railway `contact-api` | same |
+| Contact API | Railway `contact-api` (Resend free plan for email) | same |
 | `VITE_GTM_ID` | `GTM-PQSG4NXT` | `GTM-PPTR6V3B` (live) |
 | `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YKOBBOTPM4` (confirm in GA4 Admin) |
 | `VITE_BASE_PATH` | `/website/` | `/` |
@@ -32,6 +32,8 @@ VITE_CONTACT_API_URL=https://contact-api-production-9af6.up.railway.app
 ```
 
 Keep Shopify storefront tokens pointed at the production shop.
+
+Contact form email is **not** a Vite env: `contact-api` sends via **Resend free plan** (`RESEND_API_KEY` on Railway — 3k/mo, 100/day). See [server/README.md](../server/README.md).
 
 ## Demo property (`sundayrollsdevops@gmail.com`)
 
