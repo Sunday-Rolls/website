@@ -200,9 +200,24 @@ body {
   border: 1px solid rgba(255,255,255,0.12);
   padding: 0.45rem 0.85rem;
 }
-.pills button.active, .pills.small button.active {
+.pills button.active {
   background: #f4f0e4;
   color: var(--ink);
+}
+/* Chart series etc. sit inside light panels — use ink contrast */
+.panel .pills button {
+  background: rgba(20, 32, 24, 0.05);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-weight: 600;
+}
+.panel .pills button:hover {
+  background: rgba(20, 32, 24, 0.09);
+}
+.panel .pills button.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 .pills.small { margin-bottom: 0.75rem; }
 .inline { display: flex; gap: 0.4rem; align-items: center; color: #f4f0e4; font-size: 0.9rem; }
