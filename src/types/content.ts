@@ -161,6 +161,12 @@ export interface ProductContent {
     heading: string
     empty: string
     leaveCta: string
+    summary: {
+      outOf: string
+      countOne: string
+      countMany: string
+      histogramLabel: string
+    }
     form: {
       title: string
       nameLabel: string
@@ -174,6 +180,7 @@ export interface ProductContent {
       cancelLabel: string
       success: string
       error: string
+      submitError: string
     }
     items: ProductReview[]
   }

@@ -2,7 +2,7 @@
  * Generate product review QR codes from Shopify products.
  *
  * Each QR links to the website product page with ?review=1 so the leave-a-review
- * form opens automatically.
+ * form opens automatically. Also writes a print-ready HTML sheet.
  *
  * Auth (first match wins) — same pattern as port-catalog-to-shopify.mjs:
  * 1. SHOPIFY_ADMIN_ACCESS_TOKEN
@@ -12,8 +12,10 @@
  *
  * Usage:
  *   npm run reviews:qr
+ *   SITE_URL=https://www.sundayrollsgolf.com SITE_BASE_PATH=/ npm run reviews:qr
  *   SITE_URL=https://sunday-rolls.github.io/website SITE_BASE_PATH=/website npm run reviews:qr
  *   DRY_RUN=1 npm run reviews:qr
+ *   HEADCOVERS_ONLY=0 npm run reviews:qr   # include towels / all products
  */
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -23,13 +25,6 @@ import QRCode from 'qrcode'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '..')
-const API_VERSION = process.env.VITE_SHOPIFY_API_VERSION || process.env.SHOPIFY_API_VERSION || '2025-01'
-const DRY_RUN = process.env.DRY_RUN === '1'
-const SITE_URL = (process.env.SITE_URL || 'https://sunday-rolls.github.io/website').replace(/\/$/, '')
-const SITE_BASE_PATH = process.env.SITE_BASE_PATH ?? inferBasePath(SITE_URL)
-const OUT_DIR = process.env.QR_OUT_DIR
-  ? resolve(process.env.QR_OUT_DIR)
-  : join(root, 'output', 'product-review-qrs')
 
 function inferBasePath(siteUrl) {
   try {
@@ -60,6 +55,17 @@ function loadDotEnv() {
     if (!(key in process.env)) process.env[key] = value
   }
 }
+
+loadDotEnv()
+
+const API_VERSION = process.env.VITE_SHOPIFY_API_VERSION || process.env.SHOPIFY_API_VERSION || '2025-01'
+const DRY_RUN = process.env.DRY_RUN === '1'
+const HEADCOVERS_ONLY = process.env.HEADCOVERS_ONLY !== '0'
+const SITE_URL = (process.env.SITE_URL || 'https://www.sundayrollsgolf.com').replace(/\/$/, '')
+const SITE_BASE_PATH = process.env.SITE_BASE_PATH ?? inferBasePath(SITE_URL)
+const OUT_DIR = process.env.QR_OUT_DIR
+  ? resolve(process.env.QR_OUT_DIR)
+  : join(root, 'output', 'product-review-qrs')
 
 function shopDomain() {
   const shop = process.env.SHOPIFY_SHOP?.replace(/\.myshopify\.com$/, '')
@@ -129,7 +135,14 @@ async function fetchProductsFromAdmin(shop, token) {
       query Products($cursor: String) {
         products(first: 50, after: $cursor) {
           pageInfo { hasNextPage endCursor }
-          nodes { id handle title status }
+          nodes {
+            id
+            handle
+            title
+            status
+            productType
+            tags
+          }
         }
       }`
 
@@ -154,7 +167,14 @@ async function fetchProductsFromAdmin(shop, token) {
     const connection = json.data?.products
     for (const node of connection?.nodes ?? []) {
       if (node.status && node.status !== 'ACTIVE') continue
-      products.push({ handle: node.handle, title: node.title, id: node.id })
+      products.push({
+        handle: node.handle,
+        title: node.title,
+        id: node.id,
+        productType: node.productType,
+        tags: node.tags,
+        category: inferCategory(node),
+      })
     }
 
     if (!connection?.pageInfo?.hasNextPage) break
@@ -162,6 +182,19 @@ async function fetchProductsFromAdmin(shop, token) {
   }
 
   return products
+}
+
+function inferCategory(product) {
+  if (product.category === 'headcovers' || product.category === 'towels') {
+    return product.category
+  }
+  const type = String(product.productType || '').toLowerCase()
+  const tags = Array.isArray(product.tags)
+    ? product.tags.map((tag) => String(tag).toLowerCase())
+    : []
+  const haystack = [type, ...tags, String(product.handle || '').toLowerCase()].join(' ')
+  if (haystack.includes('towel')) return 'towels'
+  return 'headcovers'
 }
 
 async function fetchProductsFromStorefront(shop) {
@@ -200,7 +233,12 @@ async function fetchProductsFromStorefront(shop) {
 
     const connection = json.data?.products
     for (const node of connection?.nodes ?? []) {
-      products.push({ handle: node.handle, title: node.title, id: node.id })
+      products.push({
+        handle: node.handle,
+        title: node.title,
+        id: node.id,
+        category: inferCategory(node),
+      })
     }
 
     if (!connection?.pageInfo?.hasNextPage) break
@@ -220,7 +258,33 @@ function productsFromCatalog() {
       handle: item.handle,
       title: item.title,
       id: item.handle,
+      category: item.category || inferCategory(item),
     }))
+}
+
+function catalogCategoryByHandle() {
+  try {
+    const catalogPath = join(root, 'src/data/product-catalog.json')
+    const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'))
+    const items = Array.isArray(catalog) ? catalog : catalog.products ?? []
+    return new Map(
+      items
+        .filter((item) => item.handle)
+        .map((item) => [item.handle, item.category || inferCategory(item)]),
+    )
+  } catch {
+    return new Map()
+  }
+}
+
+function filterReviewProducts(products) {
+  if (!HEADCOVERS_ONLY) return products
+  const categories = catalogCategoryByHandle()
+  return products.filter((product) => {
+    const fromCatalog = categories.get(product.handle)
+    if (fromCatalog) return fromCatalog === 'headcovers'
+    return inferCategory(product) === 'headcovers'
+  })
 }
 
 async function loadProducts(shop) {
@@ -229,7 +293,7 @@ async function loadProducts(shop) {
     try {
       const products = await fetchProductsFromAdmin(shop, adminToken)
       console.log('Source: Shopify Admin API')
-      return products
+      return filterReviewProducts(products)
     } catch (error) {
       console.warn('Admin fetch failed:', error.message)
     }
@@ -239,18 +303,154 @@ async function loadProducts(shop) {
     const storefront = await fetchProductsFromStorefront(shop)
     if (storefront?.length) {
       console.log('Source: Shopify Storefront API')
-      return storefront
+      return filterReviewProducts(storefront)
     }
   } catch (error) {
     console.warn('Storefront fetch failed:', error.message)
   }
 
   console.log('Source: local product-catalog.json (Shopify unavailable)')
-  return productsFromCatalog()
+  return filterReviewProducts(productsFromCatalog())
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+}
+
+function writePrintSheet(manifest) {
+  const cards = manifest
+    .map(
+      (item) => `
+      <article class="card">
+        <img src="${escapeHtml(item.file)}" alt="QR code for ${escapeHtml(item.title)}" width="180" height="180" />
+        <h2>${escapeHtml(item.title)}</h2>
+        <p class="handle">${escapeHtml(item.handle)}</p>
+        <p class="cta">Scan to leave a review</p>
+      </article>`,
+    )
+    .join('\n')
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sunday Rolls — Product review QR codes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1a1a1a;
+      --green: #1b3a2f;
+      --sand: #ede3cb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    header {
+      padding: 24px 32px 8px;
+      border-bottom: 1px solid var(--sand);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--green);
+    }
+    header p {
+      margin: 8px 0 0;
+      font-family: system-ui, sans-serif;
+      font-size: 0.875rem;
+      color: #555;
+    }
+    .actions {
+      padding: 12px 32px 0;
+      font-family: system-ui, sans-serif;
+    }
+    .actions button {
+      appearance: none;
+      border: 1px solid var(--green);
+      background: var(--green);
+      color: #fff;
+      padding: 8px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .sheet {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      padding: 24px 32px 40px;
+    }
+    .card {
+      break-inside: avoid;
+      border: 1px dashed #c9bfa8;
+      padding: 16px 12px 18px;
+      text-align: center;
+    }
+    .card img {
+      width: 180px;
+      height: 180px;
+      display: block;
+      margin: 0 auto 12px;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.3;
+      color: var(--green);
+    }
+    .card .handle {
+      margin: 6px 0 0;
+      font-family: system-ui, sans-serif;
+      font-size: 0.75rem;
+      color: #666;
+    }
+    .card .cta {
+      margin: 10px 0 0;
+      font-family: system-ui, sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    @media print {
+      .actions { display: none; }
+      header { border: 0; padding-bottom: 0; }
+      .sheet { padding-top: 12px; }
+      .card { border-color: #bbb; }
+      @page { size: letter; margin: 0.5in; }
+    }
+    @media (max-width: 800px) {
+      .sheet { grid-template-columns: repeat(2, 1fr); padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sunday Rolls — Review QR codes</h1>
+    <p>Each code opens the product page with the review form ready. Print and cut along the dashed lines.</p>
+  </header>
+  <div class="actions">
+    <button type="button" onclick="window.print()">Print sheet</button>
+  </div>
+  <main class="sheet">
+    ${cards}
+  </main>
+</body>
+</html>
+`
+
+  writeFileSync(join(OUT_DIR, 'print-sheet.html'), html)
 }
 
 async function main() {
-  loadDotEnv()
   const shop = shopDomain()
   const products = await loadProducts(shop)
 
@@ -297,6 +497,7 @@ async function main() {
           siteUrl: SITE_URL,
           siteBasePath: SITE_BASE_PATH,
           shop,
+          headcoversOnly: HEADCOVERS_ONLY,
           count: manifest.length,
           products: manifest,
         },
@@ -304,12 +505,13 @@ async function main() {
         2,
       )}\n`,
     )
+    writePrintSheet(manifest)
   }
 
   console.log(
     DRY_RUN
       ? `Dry run: ${manifest.length} QR URLs for ${shop}`
-      : `Generated ${manifest.length} QR codes → ${OUT_DIR}`,
+      : `Generated ${manifest.length} QR codes → ${OUT_DIR}\nPrint sheet: ${join(OUT_DIR, 'print-sheet.html')}`,
   )
 }
 

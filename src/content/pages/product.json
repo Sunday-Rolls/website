@@ -19,22 +19,29 @@
     "description": "Lightweight. Balanced. Designed for every round."
   },
   "reviews": {
-    "heading": "Reviews",
-    "empty": "Reviews coming soon—be the first to share your round.",
-    "leaveCta": "Leave a review",
+    "heading": "Customer reviews",
+    "empty": "No reviews yet—be the first to share your round.",
+    "leaveCta": "Write a review",
+    "summary": {
+      "outOf": "out of 5",
+      "countOne": "1 review",
+      "countMany": "{count} reviews",
+      "histogramLabel": "{stars} star"
+    },
     "form": {
-      "title": "Share your round",
+      "title": "Write a review",
       "nameLabel": "Name",
       "namePlaceholder": "Your name",
       "locationLabel": "Location (optional)",
       "locationPlaceholder": "City, State",
-      "ratingLabel": "Rating",
-      "reviewLabel": "Review",
+      "ratingLabel": "Overall rating",
+      "reviewLabel": "Your review",
       "reviewPlaceholder": "How’s it playing?",
       "submitLabel": "Submit review",
       "cancelLabel": "Cancel",
       "success": "Thanks — your review is live on this product.",
-      "error": "Please add your name, a rating, and a short review."
+      "error": "Please add your name, a rating, and a short review.",
+      "submitError": "We couldn’t save your review. Please try again."
     },
     "items": []
   }
