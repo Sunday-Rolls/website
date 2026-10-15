@@ -1,39 +1,45 @@
 # Analytics setup (GTM + GA4)
 
-The site pushes events to `window.dataLayer` via [`src/lib/gtm.ts`](../src/lib/gtm.ts). Google Tag Manager (`VITE_GTM_ID`) loads on boot and should forward events to GA4.
+The site pushes events via [`src/lib/gtm.ts`](../src/lib/gtm.ts):
+
+1. **GTM** (`VITE_GTM_ID`) — container tags / triggers  
+2. **Direct GA4** (`VITE_GA4_MEASUREMENT_ID` + `VITE_GA4_SEND_DIRECT`) — ecommerce events also go straight to GA4 so Realtime works even before GTM event tags are perfect
+
+Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY_WEB_PIXEL.md).
+
+## Environments
+
+| | GitHub Pages (now) | Live cutover (later) |
+|--|--------------------|----------------------|
+| Site | `https://sunday-rolls.github.io/website/` | Custom domain / Railway static (or Pages → apex) |
+| Contact API | Railway `contact-api` | same |
+| `VITE_GTM_ID` | `GTM-PQSG4NXT` | `GTM-PPTR6V3B` (live) |
+| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` |
+| GA4 property | Demo / devops | `properties/513898453` |
+| Shopify pixel ID | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` |
+| Dashboard sync | Railway Postgres ← GA4 property `513898453` | same (live property) |
+
+> Dashboard Overview funnel reads **production** GA4 (`513898453`). Demo site events land in `G-ET6SXZWE8E`. To validate funnel metrics on the dashboard before cutover, either point the site at the live measurement ID in a preview, or confirm events in the demo GA4 Realtime first.
+
+### Cutover env (GitHub Actions secrets / host)
+
+```bash
+VITE_GTM_ID=GTM-PPTR6V3B
+VITE_GA4_MEASUREMENT_ID=G-YK0BB0TPM4
+VITE_GA4_SEND_DIRECT=true
+VITE_CONTACT_API_URL=https://contact-api-production-9af6.up.railway.app
+```
+
+Keep Shopify storefront tokens pointed at the production shop.
 
 ## Demo property (`sundayrollsdevops@gmail.com`)
 
 | Piece | Value |
 |-------|-------|
 | GTM container | `GTM-PQSG4NXT` |
-| GA4 stream | **test environment** |
+| GA4 stream | test / GitHub Pages |
 | Stream URL | `https://sunday-rolls.github.io/website/` |
-| Stream ID | `15833170805` |
 | Measurement ID | `G-ET6SXZWE8E` |
-
-### Site install (already in the app)
-
-1. `VITE_GTM_ID=GTM-PQSG4NXT` in local `.env` and GitHub Actions secrets
-2. JS bootstrap via `initGtm()` in [`src/main.tsx`](../src/main.tsx)
-3. Noscript iframe in [`index.html`](../index.html)
-
-### GTM → GA4 wiring (do this in Tag Manager UI)
-
-Without these tags, the site can load GTM while **GA4 Realtime stays empty**.
-
-1. Open [tagmanager.google.com](https://tagmanager.google.com/) → container **GTM-PQSG4NXT**
-2. **Tags → New → Google Analytics: GA4 Configuration**
-   - Measurement ID: `G-ET6SXZWE8E`
-   - Trigger: **Initialization - All Pages** (or All Pages)
-3. For each custom event below, add a **GA4 Event** tag:
-   - Event name = the `event` string from `dataLayer`
-   - Trigger = Custom Event with that same name
-   - Optional: map ecommerce / params as needed
-4. **Submit → Publish** the container
-5. Verify:
-   - GTM **Preview** connected to `https://sunday-rolls.github.io/website/`
-   - GA4 **Reports → Realtime** while you click around
 
 ## Events the app fires
 
@@ -41,29 +47,31 @@ Without these tags, the site can load GTM while **GA4 Realtime stays empty**.
 |-------|------|
 | `page_view` | Client route changes |
 | `cta_click` | Home hero CTA |
-| `view_item_list` | Shop grid with products |
+| `view_item_list` | Shop grid |
 | `select_item` | Product card click |
 | `view_item` | Product page |
 | `add_to_cart` | Add to cart |
-| `view_cart` | Cart page with lines |
-| `begin_checkout` | Checkout button (before Shopify redirect) |
+| `view_cart` | Cart page |
+| `begin_checkout` | Checkout click (before Shopify redirect); stashes cart for thank-you |
+| `purchase` | Thank-you page and/or Shopify web pixel |
 | `newsletter_subscribe` | Newsletter success |
 | `contact_submit` | Contact form success |
 
 ## Purchase
 
-Checkout completes on **Shopify**, so this SPA cannot reliably fire `purchase`. For demos:
+1. **Preferred:** [Shopify Customer events pixel](./SHOPIFY_WEB_PIXEL.md) on `checkout_completed`
+2. **SPA helper:** `/order/thank-you?transaction_id=…&value=…` for manual validation
 
-1. Keep `begin_checkout` from the cart (already implemented).
-2. In Shopify Admin → Settings → Customer events (or a custom pixel), send `purchase` to `G-ET6SXZWE8E` / GTM.
+## Local / Pages testing
 
-## Local testing
+1. Set in `.env`:
 
-In DevTools on the live site:
-
-```js
-window.dataLayer
-// expect gtm.js / page_view entries after load + navigation
+```bash
+VITE_GTM_ID=GTM-PQSG4NXT
+VITE_GA4_MEASUREMENT_ID=G-ET6SXZWE8E
+VITE_GA4_SEND_DIRECT=true
 ```
 
-Network tab: request to `googletagmanager.com/gtm.js?id=GTM-PQSG4NXT` should be **200**.
+2. DevTools → Network: `gtag/js?id=G-ET6SXZWE8E` and `collect`/`g/collect` on add-to-cart  
+3. GA4 Admin for that property → **Realtime** while you shop on the demo site  
+4. Dashboard **Data → Sync GA4** after events age into the API (often near-realtime for today)
