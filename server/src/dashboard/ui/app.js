@@ -1,10 +1,14 @@
 const state = {
   user: null,
   period: '30d',
+  start: null,
+  end: null,
   series: 'revenue',
   overview: null,
   pnl: null,
 }
+
+const BREAK_EVEN_ROAS = 1.25
 
 const $ = (sel) => document.querySelector(sel)
 const money = (n) =>
@@ -30,10 +34,33 @@ function show(view) {
   $('#dash-view').classList.toggle('hidden', view !== 'dash')
 }
 
+function overviewQuery() {
+  if (state.start && state.end) {
+    return `?start=${encodeURIComponent(state.start)}&end=${encodeURIComponent(state.end)}`
+  }
+  return `?period=${state.period}`
+}
+
+function syncRangeInputs(range) {
+  if (!range?.start || !range?.end) return
+  const startEl = $('#range-start')
+  const endEl = $('#range-end')
+  if (startEl) startEl.value = range.start
+  if (endEl) endEl.value = range.end
+}
+
+function setPeriodPills(activePeriod) {
+  for (const btn of document.querySelectorAll('#period-pills button')) {
+    btn.classList.toggle('active', activePeriod != null && btn.dataset.period === activePeriod)
+  }
+}
+
 function deltaHtml(metric, asPts = false) {
   if (!metric) return ''
   const change = asPts ? metric.changePts : metric.changePct
-  if (change == null) return `<span class="delta">vs ${asPts ? pct(metric.previous, 2) : money(metric.previous)}</span>`
+  if (change == null) {
+    return `<span class="delta">vs ${asPts ? pct(metric.previous, 2) : money(metric.previous)}</span>`
+  }
   const up = change >= 0
   const label = asPts
     ? `${up ? '▲' : '▼'} ${Math.abs(change).toFixed(1)} pt`
@@ -59,7 +86,8 @@ function renderKpis(kpis) {
   ]
   $('#kpi-row').innerHTML = items
     .map(
-      (item) => `<div class="kpi"><div class="label">${item.label}</div><div class="value">${item.value}</div><div>${item.delta}</div></div>`,
+      (item) =>
+        `<div class="kpi"><div class="label">${item.label}</div><div class="value">${item.value}</div><div>${item.delta}</div></div>`,
     )
     .join('')
 }
@@ -78,6 +106,7 @@ function renderBars(rows, key) {
 function renderOverview(data) {
   state.overview = data
   $('#range-label').textContent = `${data.range.label} · compared with previous period`
+  syncRangeInputs(data.range)
   renderKpis(data.kpis)
   renderBars(data.revenueByDay, state.series)
 
@@ -95,13 +124,15 @@ function renderOverview(data) {
   tbody.innerHTML = data.products
     .slice(0, 8)
     .map(
-      (p) => `<tr><td><strong>${escapeHtml(p.name)}</strong><div class="muted">${escapeHtml(p.category || '')}</div></td><td>${num(p.units)}</td><td>${money(p.revenue)}</td><td>${pct(p.share)}</td></tr>`,
+      (p) =>
+        `<tr><td><strong>${escapeHtml(p.name)}</strong><div class="muted">${escapeHtml(p.category || '')}</div></td><td>${num(p.units)}</td><td>${money(p.revenue)}</td><td>${pct(p.share)}</td></tr>`,
     )
     .join('')
 
   $('#sources').innerHTML = data.trafficSources
     .map(
-      (s) => `<div><div class="row"><span>${escapeHtml(s.source)}</span><strong>${num(s.visits)} · ${pct(s.share, 0)}</strong></div><div class="meter"><i style="width:${s.share}%"></i></div></div>`,
+      (s) =>
+        `<div><div class="row"><span>${escapeHtml(s.source)}</span><strong>${num(s.visits)} · ${pct(s.share, 0)}</strong></div><div class="meter"><i style="width:${s.share}%"></i></div></div>`,
     )
     .join('')
 
@@ -109,7 +140,13 @@ function renderOverview(data) {
   const other = data.ordersByState.slice(5)
   const otherOrders = other.reduce((a, b) => a + b.orders, 0)
   const stateRows = [...states]
-  if (otherOrders) stateRows.push({ state: 'All other states', orders: otherOrders, share: other.reduce((a, b) => a + b.share, 0) })
+  if (otherOrders) {
+    stateRows.push({
+      state: 'All other states',
+      orders: otherOrders,
+      share: other.reduce((a, b) => a + b.share, 0),
+    })
+  }
   $('#states').innerHTML = stateRows
     .map((s) => `<div class="row"><span>${escapeHtml(s.state)}</span><strong>${num(s.orders)} · ${pct(s.share, 0)}</strong></div>`)
     .join('')
@@ -134,7 +171,10 @@ function renderPnL(data) {
     { label: 'Net income, YTD', value: money(data.kpis.netIncomeYtd.value), delta: deltaHtml(data.kpis.netIncomeYtd) },
     { label: 'Cash on hand', value: money(data.kpis.cashOnHand), delta: '<span class="muted">from forecast</span>' },
   ]
-    .map((item) => `<div class="kpi"><div class="label">${item.label}</div><div class="value">${item.value}</div><div>${item.delta}</div></div>`)
+    .map(
+      (item) =>
+        `<div class="kpi"><div class="label">${item.label}</div><div class="value">${item.value}</div><div>${item.delta}</div></div>`,
+    )
     .join('')
 
   let lastSection = ''
@@ -164,7 +204,8 @@ function renderPnL(data) {
 
   $('#unit-profit').innerHTML = data.revenueByChannel
     .map(
-      (c) => `<div class="row"><span>${escapeHtml(c.channel)}</span><strong>$${c.revenuePerUnit.toFixed(0)} sale · $${c.profitPerUnit.toFixed(2)} profit</strong></div>`,
+      (c) =>
+        `<div class="row"><span>${escapeHtml(c.channel)}</span><strong>$${c.revenuePerUnit.toFixed(0)} sale · $${c.profitPerUnit.toFixed(2)} profit</strong></div>`,
     )
     .join('')
 
@@ -194,10 +235,85 @@ function renderPnL(data) {
     .join('')
 }
 
+function campaignBlurb(platform, campaign) {
+  const name = campaign.toLowerCase()
+  const p = platform.toLowerCase()
+  if (name.includes('brand')) return 'Captures people already searching for Sunday Rolls.'
+  if (name.includes('shopping')) return 'Product-feed ads on Google Shopping and partner sites.'
+  if (name.includes('performance max') || name.includes('pmax')) return 'Google automated placements across Search, Shopping, YouTube, and Display.'
+  if (name.includes('lookalike') || name.includes('prospect')) return 'Finds new buyers similar to past purchasers.'
+  if (name.includes('retarget') || name.includes('remarket')) return 'Reaches people who visited the site but did not buy.'
+  if (name.includes('offsite')) return 'Etsy promotes listings outside the marketplace.'
+  if (p.includes('meta')) return 'Paid social on Instagram and Facebook.'
+  if (p.includes('google')) return 'Paid search and shopping traffic.'
+  return 'Paid acquisition for this channel.'
+}
+
+function roasTone(roas) {
+  if (roas == null) return { cls: '', label: 'No sales reported' }
+  if (roas >= BREAK_EVEN_ROAS * 1.4) return { cls: 'up', label: 'Strong vs break-even' }
+  if (roas >= BREAK_EVEN_ROAS) return { cls: 'up', label: 'Above break-even' }
+  if (roas >= 1) return { cls: 'warn', label: 'Above 1x, below break-even' }
+  return { cls: 'down', label: 'Below 1x' }
+}
+
+function renderCampaigns(platforms) {
+  const root = $('#roas-campaigns')
+  const withCampaigns = platforms.filter((p) => (p.campaigns || []).length > 0)
+  if (withCampaigns.length === 0) {
+    root.innerHTML = `<p class="muted">No campaign-level spend yet. Platform totals still appear above when available.</p>`
+    return
+  }
+
+  root.innerHTML = withCampaigns
+    .map((p) => {
+      const rows = (p.campaigns || [])
+        .map((c) => {
+          const tone = roasTone(c.platformRoas)
+          const cpa = c.platformReportedOrders > 0 ? c.spend / c.platformReportedOrders : null
+          const roasLabel = c.platformRoas == null ? '—' : `${c.platformRoas.toFixed(2)}x`
+          return `<div class="campaign-row">
+            <div class="campaign-name">
+              <strong>${escapeHtml(c.campaign)}</strong>
+              <div class="muted campaign-blurb">${escapeHtml(campaignBlurb(p.platform, c.campaign))}</div>
+              <div class="bar-wrap"><div class="meter"><i style="width:${Math.min(100, c.shareOfPlatformSpend)}%"></i></div></div>
+            </div>
+            <div>
+              <div>${moneyExact(c.spend)}</div>
+              <div class="muted">${pct(c.shareOfPlatformSpend, 0)} of platform</div>
+            </div>
+            <div>
+              <div>${moneyExact(c.platformReportedSales)}</div>
+              <div class="muted">${num(c.platformReportedOrders)} orders</div>
+            </div>
+            <div>
+              <div><strong>${roasLabel}</strong></div>
+              <div class="muted ${tone.cls}">${escapeHtml(tone.label)}</div>
+            </div>
+            <div>
+              <div>${cpa == null ? '—' : moneyExact(cpa)}</div>
+              <div class="muted">cost / order</div>
+            </div>
+          </div>`
+        })
+        .join('')
+
+      return `<div class="campaign-block">
+        <h3>${escapeHtml(p.platform)}</h3>
+        <div class="campaign-row head">
+          <div>Campaign</div><div>Spend</div><div>Platform sales</div><div>ROAS</div><div>CPA</div>
+        </div>
+        ${rows}
+      </div>`
+    })
+    .join('')
+}
+
 function renderRoas(payload, syncs) {
-  $('#roas-table tbody').innerHTML = payload.platforms
-    .map(
-      (p) => `<tr>
+  $('#roas-table tbody').innerHTML =
+    payload.platforms
+      .map(
+        (p) => `<tr>
         <td>${escapeHtml(p.platform)}</td>
         <td>${moneyExact(p.spend)}</td>
         <td>${moneyExact(p.platformReportedSales)}</td>
@@ -205,8 +321,10 @@ function renderRoas(payload, syncs) {
         <td>${moneyExact(p.siteObservedSales)}</td>
         <td>${p.siteRoas == null ? '—' : `${p.siteRoas.toFixed(1)}x`}</td>
       </tr>`,
-    )
-    .join('') || `<tr><td colspan="6">No ad spend synced yet.</td></tr>`
+      )
+      .join('') || `<tr><td colspan="6">No ad spend synced yet.</td></tr>`
+
+  renderCampaigns(payload.platforms || [])
 
   $('#sync-status').innerHTML =
     syncs.length === 0
@@ -228,7 +346,7 @@ function escapeHtml(value) {
 }
 
 async function loadOverview() {
-  const { data } = await api(`/overview?period=${state.period}`)
+  const { data } = await api(`/overview${overviewQuery()}`)
   renderOverview(data)
 }
 
@@ -240,7 +358,7 @@ async function loadPnL() {
 }
 
 async function loadRoas() {
-  const [{ data }, sync] = await Promise.all([api('/roas?period=30d'), api('/sync-status')])
+  const [{ data }, sync] = await Promise.all([api(`/roas${overviewQuery()}`), api('/sync-status')])
   renderRoas(data, sync.data || [])
 }
 
@@ -251,8 +369,6 @@ function setPage(page) {
   $('#overview-page').classList.toggle('hidden', page !== 'overview')
   $('#pnl-page').classList.toggle('hidden', page !== 'pnl')
   $('#roas-page').classList.toggle('hidden', page !== 'roas')
-  $('#page-subtitle').textContent =
-    page === 'pnl' ? 'Profit & loss · all sales channels' : page === 'roas' ? 'Ad efficiency' : 'Store analytics · sundayrollsgolf.com'
   if (page === 'overview') loadOverview().catch(showError)
   if (page === 'pnl') loadPnL().catch(showError)
   if (page === 'roas') loadRoas().catch(showError)
@@ -264,6 +380,21 @@ function showError(err) {
     state.user = null
     show('login')
   }
+}
+
+function applyCustomRange() {
+  const start = $('#range-start').value
+  const end = $('#range-end').value
+  if (!start || !end) return
+  if (end < start) {
+    $('#range-label').textContent = 'End date must be on or after start date'
+    return
+  }
+  state.start = start
+  state.end = end
+  state.period = 'custom'
+  setPeriodPills(null)
+  loadOverview().catch(showError)
 }
 
 function bind() {
@@ -300,8 +431,19 @@ function bind() {
   for (const btn of document.querySelectorAll('#period-pills button')) {
     btn.addEventListener('click', () => {
       state.period = btn.dataset.period
-      for (const b of document.querySelectorAll('#period-pills button')) b.classList.toggle('active', b === btn)
+      state.start = null
+      state.end = null
+      setPeriodPills(state.period)
       loadOverview().catch(showError)
+    })
+  }
+  $('#range-apply')?.addEventListener('click', applyCustomRange)
+  for (const id of ['range-start', 'range-end']) {
+    $(`#${id}`)?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        applyCustomRange()
+      }
     })
   }
   for (const btn of document.querySelectorAll('#chart-series button')) {

@@ -69,4 +69,31 @@ describe('dashboard auth + overview', () => {
     const body = await pnl.json()
     expect(body.data.incomeStatement.some((r: { label: string }) => r.label === 'Net income')).toBe(true)
   })
+
+  it('supports custom overview range and ROAS campaigns', async () => {
+    const { app } = await setup()
+    const login = await app.request('/dashboard/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'sam@example.com', password: 'test-password-123' }),
+    })
+    const cookie = login.headers.get('set-cookie')!.split(';')[0]
+
+    const overview = await app.request('/dashboard/api/overview?start=2026-09-01&end=2026-09-30', {
+      headers: { Cookie: cookie },
+    })
+    expect(overview.status).toBe(200)
+    const overviewBody = await overview.json()
+    expect(overviewBody.data.range.start).toBe('2026-09-01')
+    expect(overviewBody.data.range.end).toBe('2026-09-30')
+
+    const roas = await app.request('/dashboard/api/roas?period=30d&asOf=2026-10-11', {
+      headers: { Cookie: cookie },
+    })
+    expect(roas.status).toBe(200)
+    const roasBody = await roas.json()
+    const google = roasBody.data.platforms.find((p: { platform: string }) => p.platform === 'Google Ads')
+    expect(google?.campaigns?.length).toBeGreaterThan(1)
+    expect(google.campaigns.some((c: { campaign: string }) => c.campaign === 'Brand Search')).toBe(true)
+  })
 })

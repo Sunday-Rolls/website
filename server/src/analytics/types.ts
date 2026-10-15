@@ -59,6 +59,8 @@ export type DailyTraffic = {
 export type DailyAdSpend = {
   date: string
   platform: string
+  /** Campaign / ad set name when available; empty string for platform rollups. */
+  campaign: string
   spend: number
   platformReportedSales: number
   platformReportedOrders: number

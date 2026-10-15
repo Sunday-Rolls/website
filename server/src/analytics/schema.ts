@@ -62,11 +62,28 @@ CREATE TABLE IF NOT EXISTS analytics_daily_traffic (
 CREATE TABLE IF NOT EXISTS analytics_daily_ad_spend (
   date date NOT NULL,
   platform text NOT NULL,
+  campaign text NOT NULL DEFAULT '',
   spend numeric(12,2) NOT NULL DEFAULT 0,
   platform_reported_sales numeric(12,2) NOT NULL DEFAULT 0,
   platform_reported_orders integer NOT NULL DEFAULT 0,
-  PRIMARY KEY (date, platform)
+  PRIMARY KEY (date, platform, campaign)
 );
+
+-- Upgrade older installs that used (date, platform) only
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'analytics_daily_ad_spend' AND column_name = 'platform'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'analytics_daily_ad_spend' AND column_name = 'campaign'
+  ) THEN
+    ALTER TABLE analytics_daily_ad_spend ADD COLUMN campaign text NOT NULL DEFAULT '';
+    ALTER TABLE analytics_daily_ad_spend DROP CONSTRAINT analytics_daily_ad_spend_pkey;
+    ALTER TABLE analytics_daily_ad_spend ADD PRIMARY KEY (date, platform, campaign);
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS analytics_search_keywords (
   query text NOT NULL,

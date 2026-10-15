@@ -14,7 +14,7 @@ import {
   verifyPassword,
 } from '../analytics/auth.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
-import { rangeForPeriod } from '../analytics/period.js'
+import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey } from '../analytics/types.js'
@@ -38,6 +38,8 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   app.get('/', async (c) => file(c, 'index.html', 'text/html; charset=utf-8'))
   app.get('/styles.css', async (c) => file(c, 'styles.css', 'text/css; charset=utf-8'))
   app.get('/app.js', async (c) => file(c, 'app.js', 'text/javascript; charset=utf-8'))
+  app.get('/logo.svg', async (c) => file(c, 'logo.svg', 'image/svg+xml'))
+  app.get('/mark.svg', async (c) => file(c, 'mark.svg', 'image/svg+xml'))
 
   app.get('/api/me', async (c) => {
     const user = await currentUser(c, store)
@@ -97,9 +99,12 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
 
-    const period = parsePeriod(c.req.query('period'))
-    const asOf = c.req.query('asOf') ?? undefined
-    const range = rangeForPeriod(period, asOf)
+    let range
+    try {
+      range = resolveRange(c.req.query('period'), c.req.query('start'), c.req.query('end'), c.req.query('asOf'))
+    } catch (error) {
+      return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
+    }
     const [orders, traffic, keywords, abandoned] = await Promise.all([
       store.listOrders(),
       store.listTraffic(),
@@ -132,8 +137,17 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   app.get('/api/roas', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
-    const period = parsePeriod(c.req.query('period') ?? '30d')
-    const range = rangeForPeriod(period, c.req.query('asOf') ?? undefined)
+    let range
+    try {
+      range = resolveRange(
+        c.req.query('period') ?? '30d',
+        c.req.query('start'),
+        c.req.query('end'),
+        c.req.query('asOf'),
+      )
+    } catch (error) {
+      return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
+    }
     const [orders, adSpend] = await Promise.all([store.listOrders(), store.listAdSpend()])
     return c.json({ ok: true, data: { range, platforms: buildRoas({ range, orders, adSpend }) } })
   })
@@ -170,9 +184,19 @@ function parsePeriod(value: string | undefined): PeriodKey {
   return '30d'
 }
 
+function resolveRange(
+  period: string | undefined,
+  start: string | undefined,
+  end: string | undefined,
+  asOf: string | undefined,
+) {
+  if (start && end) return rangeForCustom(start, end)
+  return rangeForPeriod(parsePeriod(period), asOf ?? undefined)
+}
+
 async function file(c: Context, name: string, contentType: string) {
   try {
-    const body = await readFile(join(UI_DIR, name), 'utf8')
+    const body = await readFile(join(UI_DIR, name))
     return c.body(body, 200, { 'Content-Type': contentType })
   } catch {
     return c.text('Not found', 404)

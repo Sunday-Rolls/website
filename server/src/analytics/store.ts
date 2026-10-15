@@ -401,19 +401,27 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       for (const row of rows) {
         await db.query(
           `INSERT INTO analytics_daily_ad_spend
-            (date, platform, spend, platform_reported_sales, platform_reported_orders)
-           VALUES ($1,$2,$3,$4,$5)`,
-          [row.date, row.platform, row.spend, row.platformReportedSales, row.platformReportedOrders],
+            (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders)
+           VALUES ($1,$2,$3,$4,$5,$6)`,
+          [
+            row.date,
+            row.platform,
+            row.campaign ?? '',
+            row.spend,
+            row.platformReportedSales,
+            row.platformReportedOrders,
+          ],
         )
       }
       return rows.length
     },
 
     async listAdSpend() {
-      const { rows } = await db.query(`SELECT * FROM analytics_daily_ad_spend ORDER BY date`)
+      const { rows } = await db.query(`SELECT * FROM analytics_daily_ad_spend ORDER BY date, platform, campaign`)
       return rows.map((row) => ({
         date: toDateOnly(row.date),
         platform: str(row.platform),
+        campaign: str(row.campaign ?? ''),
         spend: num(row.spend),
         platformReportedSales: num(row.platform_reported_sales),
         platformReportedOrders: num(row.platform_reported_orders),
