@@ -124,4 +124,59 @@ describe('preferLiveOrders', () => {
     const preferred = preferLiveOrders(orders)
     expect(preferred.map((o) => o.id).sort()).toEqual(['2', '3'])
   })
+
+  it('drops sales-tracker squarespace rows when manual Squarespace CSV exists', () => {
+    const orders: Order[] = [
+      {
+        id: 't1',
+        externalId: 'squarespace:sheet-1',
+        channel: 'squarespace',
+        source: 'sales-tracker',
+        orderedAt: '2026-10-01T00:00:00.000Z',
+        revenue: 80,
+        fees: 0,
+        shippingCost: 0,
+        marketingCost: 0,
+        state: null,
+        customerEmail: null,
+        isReturning: false,
+        trafficSource: null,
+        lines: [],
+      },
+      {
+        id: 'm1',
+        externalId: 'squarespace:00457',
+        channel: 'squarespace',
+        source: 'manual',
+        orderedAt: '2026-10-02T00:00:00.000Z',
+        revenue: 80,
+        fees: 0,
+        shippingCost: 12,
+        marketingCost: 0,
+        state: 'NY',
+        customerEmail: 'b@example.com',
+        isReturning: false,
+        trafficSource: null,
+        lines: [],
+      },
+      {
+        id: 'e1',
+        externalId: 'etsy:1',
+        channel: 'etsy',
+        source: 'sales-tracker',
+        orderedAt: '2026-10-01T00:00:00.000Z',
+        revenue: 90,
+        fees: 0,
+        shippingCost: 0,
+        marketingCost: 0,
+        state: null,
+        customerEmail: null,
+        isReturning: false,
+        trafficSource: null,
+        lines: [],
+      },
+    ]
+    const preferred = preferLiveOrders(orders)
+    expect(preferred.map((o) => o.id).sort()).toEqual(['e1', 'm1'])
+  })
 })

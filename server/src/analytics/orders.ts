@@ -1,15 +1,24 @@
 import type { Order } from './types.js'
 
 /**
- * Prefer live Shopify Admin rows over Sales Tracker shopify channel history
- * so the same sale is never counted twice after cutover.
- * Etsy / Squarespace / eBay / other tracker rows are kept for history.
- * Manual uploads always win for their own external ids (separate upsert key).
+ * Prefer authoritative channel sources over Sales Tracker history so the same
+ * sale is never counted twice after cutover / CSV backfill.
+ * - Shopify Admin (`source: shopify`) beats tracker Shopify rows
+ * - Manual Squarespace CSV backfill beats tracker Squarespace rows
+ * Etsy / eBay / other tracker rows stay unless a stronger source exists.
  */
 export function preferLiveOrders(orders: Order[]): Order[] {
   const hasLiveShopify = orders.some((o) => o.channel === 'shopify' && o.source === 'shopify')
-  if (!hasLiveShopify) return orders
-  return orders.filter((o) => !(o.channel === 'shopify' && o.source === 'sales-tracker'))
+  const hasManualSquarespace = orders.some(
+    (o) => o.channel === 'squarespace' && o.source === 'manual',
+  )
+  return orders.filter((o) => {
+    if (hasLiveShopify && o.channel === 'shopify' && o.source === 'sales-tracker') return false
+    if (hasManualSquarespace && o.channel === 'squarespace' && o.source === 'sales-tracker') {
+      return false
+    }
+    return true
+  })
 }
 
 export function orderSourceCounts(orders: Order[]): Record<string, number> {
