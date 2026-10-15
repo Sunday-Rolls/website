@@ -40,6 +40,8 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   app.get('/app.js', async (c) => file(c, 'app.js', 'text/javascript; charset=utf-8'))
   app.get('/logo.svg', async (c) => file(c, 'logo.svg', 'image/svg+xml'))
   app.get('/mark.svg', async (c) => file(c, 'mark.svg', 'image/svg+xml'))
+  app.get('/favicon.svg', async (c) => file(c, 'favicon.svg', 'image/svg+xml'))
+  app.get('/favicon.png', async (c) => file(c, 'favicon.png', 'image/png'))
 
   app.get('/api/me', async (c) => {
     const user = await currentUser(c, store)
