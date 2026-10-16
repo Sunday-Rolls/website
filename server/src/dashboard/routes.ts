@@ -25,6 +25,11 @@ import {
   parseRevenueCsv,
   type ManualImportKind,
 } from '../analytics/manual-import.js'
+import {
+  applyManualWorkbook,
+  buildManualWorkbook,
+  parseManualWorkbook,
+} from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
@@ -419,6 +424,59 @@ export function createDashboardRoutes(deps: DashboardDeps) {
         'Cache-Control': 'no-store',
       },
     })
+  })
+
+  /** Full editable workbook: Revenue + Expenses + Cash (Shopify excluded — live sync). */
+  app.get('/api/workbook', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    try {
+      const xlsx = await buildManualWorkbook(store)
+      const stamp = new Date().toISOString().slice(0, 10)
+      return new Response(new Uint8Array(xlsx), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename="sunday-rolls-dashboard-${stamp}.xlsx"`,
+          'Cache-Control': 'no-store',
+        },
+      })
+    } catch (error) {
+      console.error('Workbook export failed', error)
+      return c.json({ ok: false, error: 'Failed to build workbook' }, 502)
+    }
+  })
+
+  app.post('/api/workbook', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+
+    const sync = await store.startSync('manual-workbook')
+    try {
+      const body = await c.req.parseBody()
+      const file = body.file
+      if (!file || typeof file === 'string') {
+        await store.finishSync(sync.id, 'error', 'Expected .xlsx file', 0)
+        return c.json({ ok: false, error: 'Upload an .xlsx workbook file' }, 400)
+      }
+      const buffer = Buffer.from(await file.arrayBuffer())
+      const parsed = await parseManualWorkbook(buffer)
+      const result = await applyManualWorkbook(store, parsed)
+      const rows =
+        result.upsertedOrders + result.expenses + result.cash
+      await store.finishSync(
+        sync.id,
+        'ok',
+        `Workbook applied: ${result.upsertedOrders} revenue rows, ${result.expenses} expenses, ${result.cash} cash months` +
+          (result.warnings.length ? ` (${result.warnings.length} warnings)` : ''),
+        rows,
+      )
+      return c.json({ ok: true, data: result })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Workbook import failed'
+      await store.finishSync(sync.id, 'error', message, 0)
+      return c.json({ ok: false, error: message }, 502)
+    }
   })
 
   app.get('/api/review-qrs', async (c) => {

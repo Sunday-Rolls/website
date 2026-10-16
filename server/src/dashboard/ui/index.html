@@ -131,39 +131,40 @@
             </div>
             <p id="pnl-feedback" class="muted" aria-live="polite"></p>
           </div>
+
+          <article class="panel workbook-panel">
+            <div class="panel-head">
+              <h2>Dashboard data workbook</h2>
+              <div class="panel-actions">
+                <button type="button" id="workbook-download" class="btn btn-primary">Download workbook</button>
+                <button type="button" id="workbook-upload-btn" class="btn btn-secondary">Upload workbook</button>
+                <input id="workbook-upload" class="file-hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+              </div>
+            </div>
+            <p class="muted">
+              One Excel file with everything you can edit: <strong>Revenue</strong>, <strong>Expenses</strong>, and <strong>Cash</strong>.
+              Download → change or delete rows → upload. Upload replaces the editable data from the file
+              (deleted rows are removed). Shopify website sales stay on live sync and are not in this file.
+            </p>
+          </article>
+
           <div id="pnl-kpis" class="kpi-row"></div>
           <article class="panel">
             <div class="panel-head">
               <h2>Income statement</h2>
               <div class="panel-actions">
-                <a class="icon-btn" href="/dashboard/api/import/templates/expenses" download title="Download expenses CSV template" aria-label="Download expenses template">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </a>
-                <button type="button" id="pnl-upload-expenses" class="icon-btn" title="Upload expenses CSV" aria-label="Upload expenses CSV">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9m0 0 4 4m-4-4-4 4M5 3h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <input id="expense-upload" class="file-hidden" type="file" accept=".csv,text/csv" />
-                <button type="button" id="export-pnl" class="ghost">Export CSV</button>
+                <button type="button" id="export-pnl" class="ghost">Export statement CSV</button>
               </div>
             </div>
-            <p class="muted">COGS / SG&amp;A lines come from expense imports. Upload a CSV (or download the template) to add non-API costs.</p>
+            <p class="muted">COGS / SG&amp;A come from the Expenses sheet in the workbook above.</p>
             <table id="pnl-table"><thead><tr><th>Line item</th><th>Month</th><th>% rev</th><th>YTD</th><th>% rev</th></tr></thead><tbody></tbody></table>
           </article>
           <div class="grid-2">
             <article class="panel">
               <div class="panel-head">
                 <h2>Revenue by channel, YTD</h2>
-                <div class="panel-actions">
-                  <a class="icon-btn" href="/dashboard/api/import/templates/revenue" download title="Download revenue CSV template" aria-label="Download revenue template">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </a>
-                  <button type="button" id="pnl-upload-revenue" class="icon-btn" title="Upload revenue CSV" aria-label="Upload revenue CSV">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9m0 0 4 4m-4-4-4 4M5 3h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
-                  <input id="revenue-upload" class="file-hidden" type="file" accept=".csv,text/csv" />
-                </div>
               </div>
-              <p class="muted">Shopify syncs live. Add Etsy / eBay / other streams via template upload (stored as <code>manual</code> in Postgres).</p>
+              <p class="muted">Shopify syncs live. Etsy / eBay / other history is edited in the workbook Revenue sheet (or quick-add below).</p>
               <div id="channel-rev"></div>
               <details class="manual-details">
                 <summary>Add one revenue row</summary>
@@ -213,19 +214,12 @@
             <div class="panel-head">
               <h2>Cash forecast</h2>
               <div class="panel-actions">
-                <a class="icon-btn" href="/dashboard/api/import/templates/cash" download title="Download cash CSV template" aria-label="Download cash template">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </a>
-                <button type="button" id="pnl-upload-cash" class="icon-btn" title="Upload cash CSV" aria-label="Upload cash CSV">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9m0 0 4 4m-4-4-4 4M5 3h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <input id="cash-upload" class="file-hidden" type="file" accept=".csv,text/csv" />
                 <button type="button" id="pnl-refresh-cash" class="icon-btn" title="Refresh P&amp;L" aria-label="Refresh P&amp;L">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.2M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
               </div>
             </div>
-            <p class="muted">Upload month-end cash rows when you’re not importing the Sales Tracker Cash tab.</p>
+            <p class="muted">Edit month-end cash in the workbook Cash sheet, then re-upload.</p>
             <table id="cash-table"><thead><tr><th>Month ending</th><th>Beginning</th><th>Collections</th><th>Freight &amp; fees</th><th>Marketing</th><th>Website</th><th>Manufacturing</th><th>Ending</th></tr></thead><tbody></tbody></table>
           </article>
         </div>
@@ -318,7 +312,7 @@
 
           <article class="panel">
             <h2>Sync history</h2>
-            <p class="muted">Manual revenue, expenses, and cash uploads live on the P&amp;L page (template download + upload icons on each section).</p>
+            <p class="muted">Manual revenue, expenses, and cash: use <strong>P&amp;L → Download / Upload workbook</strong> (one Excel file, replace-on-upload).</p>
             <div id="data-sync-status"></div>
           </article>
         </div>
