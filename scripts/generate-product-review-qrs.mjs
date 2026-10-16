@@ -493,7 +493,7 @@ function writePrintSheet(manifest) {
 <body>
   <header>
     <h1>Sunday Rolls — Review QR codes</h1>
-    <p>Target: <strong>${escapeHtml(site.label)}</strong> · ${escapeHtml(SITE_URL)} · ${manifest.length} products. Each code opens the product page with the review form ready.</p>
+    <p>Target: <strong>${escapeHtml(site.label)}</strong> · ${escapeHtml(SITE_URL)} · ${manifest.length} products. The PDF has <strong>one page per product</strong> (a full sheet of identical cutouts). Each code opens the product page with the review form ready.</p>
   </header>
   <div class="actions">
     <a href="${escapeHtml(PDF_FILE)}" download="${escapeHtml(PDF_FILE)}">Export PDF</a>
@@ -509,6 +509,34 @@ function writePrintSheet(manifest) {
   writeFileSync(join(OUT_DIR, 'print-sheet.html'), html)
 }
 
+function drawCutoutCell(doc, { x, y, cellWidth, cellHeight, qrSize, imagePath, title, handle }) {
+  doc
+    .save()
+    .lineWidth(0.75)
+    .dash(3, { space: 2 })
+    .strokeColor('#c9bfa8')
+    .rect(x, y, cellWidth, cellHeight)
+    .stroke()
+    .undash()
+    .restore()
+
+  const imgX = x + (cellWidth - qrSize) / 2
+  const imgY = y + 10
+  doc.image(imagePath, imgX, imgY, { width: qrSize, height: qrSize })
+
+  const textTop = imgY + qrSize + 8
+  doc
+    .fillColor('#1b3a2f')
+    .font('Times-Bold')
+    .fontSize(9)
+    .text(title, x + 6, textTop, { width: cellWidth - 12, align: 'center', height: 28, ellipsis: true })
+  doc
+    .fillColor('#666666')
+    .font('Helvetica')
+    .fontSize(7)
+    .text(handle, x + 6, textTop + 30, { width: cellWidth - 12, align: 'center' })
+}
+
 async function writePdf(manifest) {
   const pdfPath = join(OUT_DIR, PDF_FILE)
   const doc = new PDFDocument({
@@ -517,77 +545,55 @@ async function writePdf(manifest) {
     info: {
       Title: 'Sunday Rolls — Product review QR codes',
       Author: 'Sunday Rolls',
-      Subject: `Review QR codes for ${site.label} (${SITE_URL})`,
+      Subject: `One page per product · ${site.label} (${SITE_URL})`,
     },
   })
   const stream = createWriteStream(pdfPath)
   doc.pipe(stream)
 
-  const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right
   const cols = 3
-  const gap = 16
-  const cellWidth = (pageWidth - gap * (cols - 1)) / cols
-  const qrSize = Math.min(140, cellWidth - 16)
-  const cellHeight = qrSize + 72
-  let x = doc.page.margins.left
-  let y = doc.page.margins.top
-
-  doc
-    .fillColor('#1b3a2f')
-    .font('Times-Bold')
-    .fontSize(18)
-    .text('Sunday Rolls — Review QR codes', { width: pageWidth })
-  doc
-    .fillColor('#555555')
-    .font('Helvetica')
-    .fontSize(9)
-    .text(`${site.label} · ${SITE_URL}`, { width: pageWidth })
-  doc
-    .fontSize(8)
-    .text('Scan to open the product page with the leave-a-review form. Cut along the dashed boxes.', {
-      width: pageWidth,
-    })
-  y = doc.y + 16
+  const rows = 3
+  const gap = 12
 
   for (let index = 0; index < manifest.length; index += 1) {
     const item = manifest[index]
-    const col = index % cols
+    if (index > 0) doc.addPage()
 
-    if (col === 0 && index > 0) {
-      y += cellHeight + gap
-    }
-    if (y + cellHeight > doc.page.height - doc.page.margins.bottom) {
-      doc.addPage()
-      y = doc.page.margins.top
-    }
-
-    x = doc.page.margins.left + col * (cellWidth + gap)
-
-    doc
-      .save()
-      .lineWidth(0.75)
-      .dash(3, { space: 2 })
-      .strokeColor('#c9bfa8')
-      .rect(x, y, cellWidth, cellHeight)
-      .stroke()
-      .undash()
-      .restore()
-
-    const imgX = x + (cellWidth - qrSize) / 2
-    const imgY = y + 10
-    doc.image(join(OUT_DIR, item.file), imgX, imgY, { width: qrSize, height: qrSize })
-
-    const textTop = imgY + qrSize + 8
+    const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right
     doc
       .fillColor('#1b3a2f')
       .font('Times-Bold')
-      .fontSize(9)
-      .text(item.title, x + 6, textTop, { width: cellWidth - 12, align: 'center', height: 28, ellipsis: true })
+      .fontSize(16)
+      .text(item.title, doc.page.margins.left, doc.page.margins.top, { width: pageWidth })
     doc
-      .fillColor('#666666')
+      .fillColor('#555555')
       .font('Helvetica')
-      .fontSize(7)
-      .text(item.handle, x + 6, textTop + 30, { width: cellWidth - 12, align: 'center' })
+      .fontSize(8)
+      .text(
+        `${item.handle} · ${site.label} · Scan → leave a review · Cut along dashed lines`,
+        { width: pageWidth },
+      )
+
+    const headerBottom = doc.y + 10
+    const gridHeight = doc.page.height - doc.page.margins.bottom - headerBottom
+    const cellWidth = (pageWidth - gap * (cols - 1)) / cols
+    const cellHeight = (gridHeight - gap * (rows - 1)) / rows
+    const qrSize = Math.min(150, cellWidth - 16, cellHeight - 56)
+
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < cols; col += 1) {
+        drawCutoutCell(doc, {
+          x: doc.page.margins.left + col * (cellWidth + gap),
+          y: headerBottom + row * (cellHeight + gap),
+          cellWidth,
+          cellHeight,
+          qrSize,
+          imagePath: join(OUT_DIR, item.file),
+          title: item.title,
+          handle: item.handle,
+        })
+      }
+    }
   }
 
   doc.end()
