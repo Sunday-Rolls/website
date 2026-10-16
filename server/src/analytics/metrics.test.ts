@@ -74,5 +74,31 @@ describe('buildPnL', () => {
     expect(pnl.cashForecast).toHaveLength(5)
     expect(pnl.kpis.cashOnHand).toBe(30760)
     expect(pnl.revenueByChannel.length).toBeGreaterThan(0)
+    expect(pnl.monthlyRevenueByChannel.every((m) => m.month.startsWith('2026'))).toBe(true)
+  })
+
+  it('uses the month year when year query disagrees so the Month column is not empty', () => {
+    const demo = buildDemoDataset('2026-10-11')
+    const matched = buildPnL({
+      year: 2026,
+      month: '2026-09',
+      orders: demo.orders,
+      expenses: demo.expenses,
+      cashForecast: demo.cashForecast,
+    })
+    const mismatched = buildPnL({
+      year: 2025,
+      month: '2026-09',
+      orders: demo.orders,
+      expenses: demo.expenses,
+      cashForecast: demo.cashForecast,
+    })
+
+    const total = (pnl: typeof matched) =>
+      pnl.incomeStatement.find((r) => r.label === 'Total revenue')!.monthAmount
+
+    expect(mismatched.year).toBe(2026)
+    expect(total(mismatched)).toBe(total(matched))
+    expect(total(mismatched)).toBeGreaterThan(0)
   })
 })
