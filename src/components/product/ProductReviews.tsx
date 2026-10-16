@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
+import { getCatalogProductByHandle } from '@/lib/product-catalog'
 import { fetchProductReviews, submitProductReview } from '@/lib/reviews-api'
 import {
   REVIEW_QUERY_PARAM,
@@ -9,7 +10,9 @@ import {
   mergeReviews,
   ratingHistogram,
   reviewsForProduct,
+  similarProductReviews,
 } from '@/lib/reviews'
+import { sitePath } from '@/lib/site-path'
 import type { ShopifyProduct } from '@/lib/shopify'
 import type { ProductReview } from '@/types/content'
 import { Button } from '@/components/ui/Button'
@@ -42,6 +45,49 @@ function StarRating({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'md
   )
 }
 
+function ReviewItem({
+  review,
+  productTitle,
+  productHref,
+}: {
+  review: ProductReview
+  productTitle?: string
+  productHref?: string
+}) {
+  const dateLabel = formatReviewDate(review.createdAt)
+
+  return (
+    <li className="space-y-3 py-6 first:pt-0">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <StarRating rating={review.rating} />
+        {dateLabel ? (
+          <time dateTime={review.createdAt} className="font-body text-body-small text-leather">
+            {dateLabel}
+          </time>
+        ) : null}
+      </div>
+      {review.text ? (
+        <p className="font-body text-body text-matte-black/85">{review.text}</p>
+      ) : null}
+      <div className="space-y-0.5">
+        <p className="font-body text-body-small font-semibold text-heritage-green">{review.author}</p>
+        {productTitle && productHref ? (
+          <Link
+            to={productHref}
+            className="font-body text-body-small text-leather hover:text-heritage-green"
+          >
+            {productTitle}
+          </Link>
+        ) : review.location ? (
+          <p className="font-body text-body-small text-leather">{review.location}</p>
+        ) : review.listing ? (
+          <p className="font-body text-body-small text-leather">{review.listing}</p>
+        ) : null}
+      </div>
+    </li>
+  )
+}
+
 export function ProductReviews({ product }: ProductReviewsProps) {
   const content = usePageContent('product')
   const reviews = content.reviews
@@ -59,8 +105,11 @@ export function ProductReviews({ product }: ProductReviewsProps) {
 
   const formOpen = manualFormOpen || searchParams.get(REVIEW_QUERY_PARAM) === '1'
 
-  const curatedForProduct = reviewsForProduct(reviews?.items ?? [], product.handle)
-  const items = reviewsForProduct(mergeReviews(curatedForProduct, remoteReviews), product.handle)
+  const curated = mergeReviews(mergeReviews(reviews?.items ?? []), remoteReviews)
+  const items = reviewsForProduct(curated, product.handle)
+  const similar = similarProductReviews(curated, product.handle)
+  const similarCopy =
+    product.category === 'towels' ? reviews?.similar?.towels : reviews?.similar?.headcovers
   const avg = averageRating(items)
   const histogram = ratingHistogram(items)
   const maxBucket = Math.max(...histogram, 1)
@@ -333,46 +382,41 @@ export function ProductReviews({ product }: ProductReviewsProps) {
           <p className="font-body text-body text-matte-black/70">{reviews.empty}</p>
         ) : (
           <ul className="divide-y divide-sand">
-            {items.map((review) => {
-              const dateLabel = formatReviewDate(review.createdAt)
-
-              return (
-                <li
-                  key={
-                    review.id ??
-                    `${review.author}-${review.rating}-${review.text.slice(0, 24) || review.listing?.slice(0, 24) || 'stars'}`
-                  }
-                  className="space-y-3 py-6 first:pt-0"
-                >
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <StarRating rating={review.rating} />
-                    {dateLabel ? (
-                      <time
-                        dateTime={review.createdAt}
-                        className="font-body text-body-small text-leather"
-                      >
-                        {dateLabel}
-                      </time>
-                    ) : null}
-                  </div>
-                  {review.text ? (
-                    <p className="font-body text-body text-matte-black/85">{review.text}</p>
-                  ) : null}
-                  <div className="space-y-0.5">
-                    <p className="font-body text-body-small font-semibold text-heritage-green">
-                      {review.author}
-                    </p>
-                    {review.location ? (
-                      <p className="font-body text-body-small text-leather">{review.location}</p>
-                    ) : review.listing ? (
-                      <p className="font-body text-body-small text-leather">{review.listing}</p>
-                    ) : null}
-                  </div>
-                </li>
-              )
-            })}
+            {items.map((review) => (
+              <ReviewItem key={review.id ?? `${review.author}-${review.text.slice(0, 24)}`} review={review} />
+            ))}
           </ul>
         )}
+
+        {similar.length > 0 && reviews.similar ? (
+          <div className="space-y-4 border-t border-sand pt-10">
+            <div className="space-y-2">
+              <h3 id="similar-reviews-heading" className="font-display text-section-title text-heritage-green">
+                {reviews.similar.heading}
+              </h3>
+              {similarCopy ? (
+                <p className="font-body text-body-small text-leather">{similarCopy}</p>
+              ) : null}
+            </div>
+            <ul className="divide-y divide-sand" aria-labelledby="similar-reviews-heading">
+              {similar.map((review) => {
+                const catalogProduct = review.productHandle
+                  ? getCatalogProductByHandle(review.productHandle)
+                  : undefined
+                return (
+                  <ReviewItem
+                    key={review.id ?? `${review.author}-${review.productHandle}-${review.text.slice(0, 24)}`}
+                    review={review}
+                    productTitle={catalogProduct?.title ?? review.listing}
+                    productHref={
+                      review.productHandle ? sitePath(`/products/${review.productHandle}`) : undefined
+                    }
+                  />
+                )
+              })}
+            </ul>
+          </div>
+        ) : null}
       </Container>
     </section>
   )

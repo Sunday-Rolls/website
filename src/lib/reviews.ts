@@ -1,4 +1,9 @@
+import { getCatalogProductByHandle, getPublishedCatalogProducts } from '@/lib/product-catalog'
+import type { ProductCategory } from '@/lib/shopify'
 import type { ProductReview } from '@/types/content'
+
+const SIMILAR_REVIEW_LIMIT = 6
+const SIMILAR_GROUPS = new Set<ProductCategory>(['headcovers', 'towels'])
 
 export const REVIEW_QUERY_PARAM = 'review'
 export const LOCAL_REVIEWS_STORAGE_KEY = 'sunday-rolls.product-reviews'
@@ -89,6 +94,57 @@ export function reviewsForProduct(
   handle: string,
 ): ProductReview[] {
   return reviews.filter((review) => isReviewForProduct(review, handle))
+}
+
+function isSharedHeadcoverReview(review: ProductReview): boolean {
+  if (review.productHandle) return false
+  const listing = review.listing?.toLowerCase() ?? ''
+  return listing.includes('putter') || listing.includes('headcover')
+}
+
+/**
+ * Reviews from the rest of this product's group (putter covers, towels),
+ * spread across sibling products so one listing doesn't fill the section.
+ */
+export function similarProductReviews(
+  reviews: ProductReview[],
+  handle: string,
+): ProductReview[] {
+  const product = getCatalogProductByHandle(handle)
+  if (!product || !SIMILAR_GROUPS.has(product.category)) return []
+
+  const siblingHandles = new Set(
+    getPublishedCatalogProducts()
+      .filter((entry) => entry.category === product.category && entry.handle !== handle)
+      .map((entry) => entry.handle),
+  )
+
+  const buckets = new Map<string, ProductReview[]>()
+  for (const review of reviews) {
+    const key = review.productHandle
+    const inGroup = key ? siblingHandles.has(key) : product.category === 'headcovers' && isSharedHeadcoverReview(review)
+    if (!inGroup) continue
+    const bucketKey = key ?? '__shared__'
+    const bucket = buckets.get(bucketKey) ?? []
+    bucket.push(review)
+    buckets.set(bucketKey, bucket)
+  }
+
+  const picked: ProductReview[] = []
+  const keys = [...buckets.keys()]
+  let added = true
+  while (picked.length < SIMILAR_REVIEW_LIMIT && added) {
+    added = false
+    for (const key of keys) {
+      const next = buckets.get(key)?.shift()
+      if (!next) continue
+      picked.push(next)
+      added = true
+      if (picked.length >= SIMILAR_REVIEW_LIMIT) break
+    }
+  }
+
+  return picked
 }
 
 export function averageRating(reviews: ProductReview[]): number {
@@ -208,7 +264,7 @@ export function productReviewUrl(siteOrigin: string, handle: string, basePath = 
   const origin = siteOrigin.replace(/\/$/, '')
   const base = basePath === '/' ? '' : basePath.replace(/\/$/, '')
   if (base && (origin.endsWith(base) || origin.endsWith(`${base}/`))) {
-    return `${origin}/products/${encodeURIComponent(handle)}?${REVIEW_QUERY_PARAM}=1`
+    return `${origin}/products/${encodeURIComponent(handle)}/?${REVIEW_QUERY_PARAM}=1`
   }
-  return `${origin}${base}/products/${encodeURIComponent(handle)}?${REVIEW_QUERY_PARAM}=1`
+  return `${origin}${base}/products/${encodeURIComponent(handle)}/?${REVIEW_QUERY_PARAM}=1`
 }

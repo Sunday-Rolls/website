@@ -6,9 +6,14 @@ declare global {
 }
 
 const gtmId = (import.meta.env.VITE_GTM_ID as string | undefined)?.trim()
-/** When set, also load gtag.js and send ecommerce events directly (validates GA4 without waiting on GTM tags). */
+/** Used when GTM is absent. When GTM is set, its GA4 tag loads gtag.js instead. */
 const ga4MeasurementId = (import.meta.env.VITE_GA4_MEASUREMENT_ID as string | undefined)?.trim()
+/**
+ * GTM's GA4 tag already loads gtag.js. A second direct snippet downloads the
+ * same library again, so direct gtag runs only when GTM is not configured.
+ */
 const sendDirect =
+  !gtmId &&
   (import.meta.env.VITE_GA4_SEND_DIRECT as string | undefined)?.trim() !== 'false' &&
   Boolean(ga4MeasurementId)
 

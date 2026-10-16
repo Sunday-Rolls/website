@@ -1,14 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
+import { PageLoader } from '@/components/ui/PageLoader'
 import { restoreSpaPathFromRedirect } from '@/lib/spa-path-restore'
-import { AboutPage } from '@/pages/AboutPage'
-import { CartPage } from '@/pages/CartPage'
-import { ContactPage } from '@/pages/ContactPage'
-import { HomePage } from '@/pages/HomePage'
+import { routeModules } from '@/lib/preload-route'
 import { NotFoundPage } from '@/pages/NotFoundPage'
-import { OrderThankYouPage } from '@/pages/OrderThankYouPage'
-import { ProductPage } from '@/pages/ProductPage'
-import { ShopPage } from '@/pages/ShopPage'
 
 restoreSpaPathFromRedirect()
 
@@ -21,13 +16,41 @@ export const router = createBrowserRouter(
       element: <Layout />,
       errorElement: <NotFoundPage />,
       children: [
-        { index: true, element: <HomePage /> },
-        { path: 'shop', element: <ShopPage /> },
-        { path: 'products/:handle', element: <ProductPage /> },
-        { path: 'about', element: <AboutPage /> },
-        { path: 'contact', element: <ContactPage /> },
-        { path: 'cart', element: <CartPage /> },
-        { path: 'order/thank-you', element: <OrderThankYouPage /> },
+        {
+          index: true,
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.home()).HomePage }),
+        },
+        {
+          path: 'shop',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.shop()).ShopPage }),
+        },
+        {
+          path: 'products/:handle',
+          hydrateFallbackElement: <PageLoader label="Loading product…" />,
+          lazy: async () => ({ Component: (await routeModules.product()).ProductPage }),
+        },
+        {
+          path: 'about',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.about()).AboutPage }),
+        },
+        {
+          path: 'contact',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.contact()).ContactPage }),
+        },
+        {
+          path: 'cart',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.cart()).CartPage }),
+        },
+        {
+          path: 'order/thank-you',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.thankYou()).OrderThankYouPage }),
+        },
         { path: '*', element: <NotFoundPage /> },
       ],
     },

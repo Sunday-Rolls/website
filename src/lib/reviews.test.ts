@@ -7,6 +7,7 @@ import {
   productReviewUrl,
   ratingHistogram,
   reviewsForProduct,
+  similarProductReviews,
   sortReviewsForProduct,
   withInferredProductHandle,
 } from '@/lib/reviews'
@@ -95,11 +96,31 @@ describe('mergeReviews', () => {
 describe('productReviewUrl', () => {
   it('builds QR landing URLs with review query', () => {
     expect(productReviewUrl('https://sunday-rolls.github.io/website', 'retro-roller-grey', '/website')).toBe(
-      'https://sunday-rolls.github.io/website/products/retro-roller-grey?review=1',
+      'https://sunday-rolls.github.io/website/products/retro-roller-grey/?review=1',
     )
     expect(productReviewUrl('https://www.sundayrollsgolf.com', 'the-doodle', '/')).toBe(
-      'https://www.sundayrollsgolf.com/products/the-doodle?review=1',
+      'https://www.sundayrollsgolf.com/products/the-doodle/?review=1',
     )
+  })
+})
+
+describe('similarProductReviews', () => {
+  it('fills a putter cover page with reviews from other covers', () => {
+    const reviews = [
+      { author: 'Grey', rating: 5, text: 'grey cover', productHandle: 'retro-roller-grey' },
+      { author: 'Mallet', rating: 5, text: 'mallet cover', productHandle: 'mallet-retro-roller-grey' },
+      { author: 'Towel', rating: 5, text: 'towel', productHandle: 'golf-towel-solid-black' },
+      {
+        author: 'Shared',
+        rating: 5,
+        text: 'multi color',
+        listing: 'Grey, Purple, Yellow Putter Cover',
+      },
+    ]
+
+    const similar = similarProductReviews(reviews, 'the-birdie-machine')
+    expect(similar.map((review) => review.author)).toEqual(['Grey', 'Mallet', 'Shared'])
+    expect(similarProductReviews(reviews, 'golf-towel-solid-black')).toEqual([])
   })
 })
 

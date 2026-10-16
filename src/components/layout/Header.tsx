@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { brandAssets } from '@/assets'
 import { useCart } from '@/lib/cart'
 import { getButtonLabel, useSiteContent } from '@/lib/content'
+import { prefetchHandlers } from '@/lib/preload-route'
+import { sitePath } from '@/lib/site-path'
 import { cn } from '@/lib/utils'
 import { Container } from '@/components/ui/Container'
 
@@ -32,7 +34,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-sand bg-cream/95 backdrop-blur-sm">
       <Container className="flex h-16 items-center justify-between gap-6">
-        <Link to="/" className="flex items-center gap-3 text-heritage-green">
+        <Link to="/" className="flex items-center gap-3 text-heritage-green" {...prefetchHandlers('/')}>
           <img
             src={brandAssets.logoMark}
             alt=""
@@ -50,11 +52,12 @@ export function Header() {
               {navigation.primary.map((item) => (
                 <li key={item.href}>
                   <Link
-                    to={item.href}
+                    to={sitePath(item.href)}
                     className={cn(
                       'font-body text-nav uppercase tracking-widest text-heritage-green',
                       'transition-colors hover:text-forest-green',
                     )}
+                    {...prefetchHandlers(sitePath(item.href))}
                   >
                     {item.label}
                   </Link>

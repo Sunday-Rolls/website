@@ -30,5 +30,8 @@ output/
 *.sln
 *.sw?
 
+# Generated from public/assets/products during dev and build
+public/assets/products/w800/
+
 # local python venv for SA probes
 server/.venv/

@@ -1,4 +1,5 @@
 import { getSiteContent } from '@/lib/content'
+import { sitePath } from '@/lib/site-path'
 
 const DEFAULT_DESCRIPTION = 'Premium vintage-inspired golf goods. Find your pace.'
 
@@ -34,7 +35,9 @@ function siteOrigin(): string {
 
 function absoluteUrl(path: string): string {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '')
-  const normalized = path.startsWith('/') ? path : `/${path}`
+  const raw = path.startsWith('/') ? path : `/${path}`
+  const looksLikeFile = /\.[a-z0-9]+$/i.test(raw.split(/[?#]/)[0] ?? raw)
+  const normalized = looksLikeFile ? raw : sitePath(raw)
   const origin = siteOrigin()
   return `${origin}${base}${normalized}`
 }

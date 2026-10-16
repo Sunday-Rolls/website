@@ -8,6 +8,7 @@ import {
 } from '@/lib/content'
 import { trackBeginCheckout, trackViewCart } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
+import { sitePath } from '@/lib/site-path'
 import { isShopifyConfigured } from '@/lib/shopify'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
@@ -104,7 +105,7 @@ export function CartPage() {
       <div className="space-y-3">
         <PageHeader title={content.header.title} />
         <Link
-          to={content.header.continueShoppingHref}
+          to={sitePath(content.header.continueShoppingHref)}
           className="inline-block font-body text-body-small text-heritage-green hover:text-forest-green"
         >
           ← {getButtonLabel(content.header.continueShoppingKey)}
@@ -140,7 +141,7 @@ export function CartPage() {
             <div className="space-y-3">
               <div>
                 <Link
-                  to={`/products/${item.handle}`}
+                  to={sitePath(`/products/${item.handle}`)}
                   className="font-display text-xl text-heritage-green hover:text-forest-green"
                 >
                   {item.title}

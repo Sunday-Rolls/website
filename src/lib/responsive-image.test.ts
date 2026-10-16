@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
+import { optimizedImageUrl, productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
 
 describe('sizedImageUrl', () => {
   it('adds width for Shopify CDN URLs', () => {
@@ -17,7 +17,24 @@ describe('sizedImageUrl', () => {
 describe('productImageSrcSet', () => {
   it('builds a srcset for Shopify images', () => {
     const srcset = productImageSrcSet('https://cdn.shopify.com/s/files/1/x/p.jpg')
-    expect(srcset).toContain('320w')
-    expect(srcset).toContain('640w')
+    expect(srcset).toContain('480w')
+    expect(srcset).toContain('800w')
+  })
+
+  it('skips a srcset when the file cannot be resized', () => {
+    expect(productImageSrcSet('/assets/products/the-doodle.jpg')).toBeUndefined()
+  })
+})
+
+describe('optimizedImageUrl', () => {
+  it('points local product photos at the 800px file', () => {
+    expect(optimizedImageUrl('/assets/products/golf-towel-solid-black.jpg')).toBe(
+      '/assets/products/w800/golf-towel-solid-black.jpg',
+    )
+  })
+
+  it('adds a Shopify width near the gallery slot', () => {
+    const url = 'https://cdn.shopify.com/s/files/1/x/golf-towel-solid-black.jpg'
+    expect(optimizedImageUrl(url)).toContain('width=800')
   })
 })

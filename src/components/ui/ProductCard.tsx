@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { getButtonLabel } from '@/lib/content'
 import { trackSelectItem } from '@/lib/gtm'
+import { prefetchHandlers } from '@/lib/preload-route'
+import { sitePath } from '@/lib/site-path'
 import { productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { cn } from '@/lib/utils'
@@ -21,6 +23,9 @@ export function ProductCard({
   listName = 'Shop',
   compact = false,
 }: ProductCardProps) {
+  const productPath = sitePath(`/products/${product.handle}`)
+  const preload = prefetchHandlers(productPath)
+
   function handleSelect() {
     trackSelectItem(product, listId, listName)
   }
@@ -32,7 +37,7 @@ export function ProductCard({
         className,
       )}
     >
-      <Link to={`/products/${product.handle}`} className="block" onClick={handleSelect}>
+      <Link to={productPath} className="block" onClick={handleSelect} {...preload}>
         <div className="aspect-[4/5] bg-warm-sand">
           {product.imageUrl ? (
             <img
@@ -55,7 +60,7 @@ export function ProductCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <Link to={`/products/${product.handle}`} onClick={handleSelect}>
+        <Link to={productPath} onClick={handleSelect} {...preload}>
           <h3 className="font-display text-xl text-heritage-green">{product.title}</h3>
         </Link>
         <p className="font-body text-body-small text-matte-black/70">{product.price}</p>
@@ -64,9 +69,10 @@ export function ProductCard({
         ) : null}
         {!compact ? (
           <Link
-            to={`/products/${product.handle}`}
+            to={productPath}
             className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors hover:text-forest-green"
             onClick={handleSelect}
+            {...preload}
           >
             {getButtonLabel('viewDetails')} →
           </Link>

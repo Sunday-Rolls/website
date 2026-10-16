@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { prefetchHandlers } from '@/lib/preload-route'
+import { sitePath } from '@/lib/site-path'
 import { cn } from '@/lib/utils'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost'
@@ -61,8 +63,15 @@ export function Button({
       )
     }
 
+    const to = sitePath(href)
+
     return (
-      <Link to={href} onClick={onClick} className={cn('inline-block', className)}>
+      <Link
+        to={to}
+        onClick={onClick}
+        className={cn('inline-block', className)}
+        {...prefetchHandlers(to)}
+      >
         <ButtonInner variant={variant}>{children}</ButtonInner>
       </Link>
     )

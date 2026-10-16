@@ -14,16 +14,44 @@ import { ProductReviews } from '@/components/product/ProductReviews'
 import { ProductStory } from '@/components/product/ProductStory'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 export function ProductPage() {
   const { handle = '' } = useParams()
   const content = usePageContent('product')
-  const [product, setProduct] = useState<ShopifyProduct | null | undefined>(undefined)
+  const [product, setProduct] = useState<ShopifyProduct | null | undefined>(() =>
+    placeholderProducts.find((entry) => entry.handle === handle),
+  )
 
   useEffect(() => {
+    let cancelled = false
+    const known = placeholderProducts.find((entry) => entry.handle === handle)
+    setProduct(known)
+
     fetchProductByHandle(handle).then((item) => {
-      setProduct(item ?? placeholderProducts.find((entry) => entry.handle === handle) ?? null)
+      if (cancelled) return
+      if (item && known) {
+        setProduct({
+          ...item,
+          imageUrl: known.imageUrl ?? item.imageUrl,
+          imageAlt: known.imageAlt ?? item.imageAlt,
+          images: known.images?.length ? known.images : item.images,
+          description: item.description || known.description,
+          material: known.material ?? item.material,
+          category: known.category ?? item.category,
+          subcategory: known.subcategory ?? item.subcategory,
+          keyFeatures: known.keyFeatures ?? item.keyFeatures,
+          features: known.features ?? item.features,
+          dimensionsDisplay: known.dimensionsDisplay ?? item.dimensionsDisplay,
+        })
+        return
+      }
+      setProduct(item ?? known ?? null)
     })
+
+    return () => {
+      cancelled = true
+    }
   }, [handle])
 
   useEffect(() => {
@@ -47,8 +75,8 @@ export function ProductPage() {
 
   if (product === undefined) {
     return (
-      <Container className="py-section-y">
-        <p className="font-body text-body">{content.loading}</p>
+      <Container>
+        <PageLoader label={content.loading} />
       </Container>
     )
   }

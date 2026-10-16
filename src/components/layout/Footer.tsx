@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { formatCopyright, useSiteContent } from '@/lib/content'
+import { prefetchHandlers } from '@/lib/preload-route'
+import { sitePath } from '@/lib/site-path'
 import { Container } from '@/components/ui/Container'
 import { SocialLinks } from '@/components/ui/SocialLinks'
 
@@ -55,8 +57,9 @@ export function Footer() {
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
-                      to={link.href}
+                      to={sitePath(link.href)}
                       className="font-body text-body-small text-cream/85 transition-colors hover:text-white"
+                      {...prefetchHandlers(sitePath(link.href))}
                     >
                       {link.label}
                     </Link>

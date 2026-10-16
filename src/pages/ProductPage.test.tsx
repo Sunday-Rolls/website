@@ -69,6 +69,10 @@ describe('ProductPage', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: productContent.reviews.leaveCta })).toBeInTheDocument()
     expect(screen.getByText(greyReview!.author)).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: productContent.reviews.similar.heading }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(productContent.reviews.similar.headcovers)).toBeInTheDocument()
   })
 
   it('opens the leave-a-review form from the QR query param', async () => {
@@ -117,7 +121,7 @@ describe('ProductPage', () => {
     expect(screen.getByText('Towel')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Golf Towel - Green Stripe' })).toHaveAttribute(
       'src',
-      '/assets/products/golf-towel-green-stripe.jpg',
+      '/assets/products/w800/golf-towel-green-stripe.jpg',
     )
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
@@ -144,7 +148,7 @@ describe('ProductPage', () => {
 
     await waitFor(() => {
       const gallery = screen.getByRole('img', { name: 'Retro Roller - Grey' })
-      expect(gallery).toHaveAttribute('src', '/assets/products/retro-roller-grey.jpg')
+      expect(gallery).toHaveAttribute('src', '/assets/products/w800/retro-roller-grey.jpg')
     })
   })
 })

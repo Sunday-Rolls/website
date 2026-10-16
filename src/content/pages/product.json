@@ -43,6 +43,11 @@
       "error": "Please add your name, a rating, and a short review.",
       "submitError": "We couldn’t save your review. Please try again."
     },
+    "similar": {
+      "heading": "Similar reviews",
+      "headcovers": "From other putter covers",
+      "towels": "From other golf towels"
+    },
     "items": []
   }
 }

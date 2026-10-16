@@ -184,6 +184,11 @@ export interface ProductContent {
       error: string
       submitError: string
     }
+    similar?: {
+      heading: string
+      headcovers: string
+      towels: string
+    }
     items: ProductReview[]
   }
 }

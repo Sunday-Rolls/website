@@ -4,6 +4,7 @@ import homeContent from '@/content/pages/home.json'
 import siteContent from '@/content/site.json'
 import reviewsData from '@/data/reviews.json'
 import { fitsMarqueeCard } from '@/lib/marquee-reviews'
+import { sitePath } from '@/lib/site-path'
 import { HomePage } from '@/pages/HomePage'
 import { renderWithRouter } from '@/test/test-utils'
 
@@ -52,7 +53,7 @@ describe('HomePage', () => {
       expect(section).not.toBeNull()
       expect(within(section!).getByRole('link', { name: block.shopAll.label })).toHaveAttribute(
         'href',
-        block.shopAll.href,
+        sitePath(block.shopAll.href),
       )
     }
   })
@@ -121,7 +122,7 @@ describe('HomePage', () => {
     expect(heroSection).not.toBeNull()
 
     const shopLink = within(heroSection!).getByRole('link', { name: 'Shop Collection' })
-    expect(shopLink).toHaveAttribute('href', '/shop')
+    expect(shopLink).toHaveAttribute('href', '/shop/')
   })
 
   it('uses a prioritized hero poster before mounting video', () => {

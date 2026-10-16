@@ -462,9 +462,27 @@ function mergeCatalogOnlyProducts(live: ShopifyProduct[]): ShopifyProduct[] {
   return [...live, ...extras]
 }
 
+const productByHandleCache = new Map<string, Promise<ShopifyProduct | null>>()
+
+export function prefetchProductByHandle(handle: string): void {
+  void fetchProductByHandle(handle)
+}
+
 export async function fetchProductByHandle(
   handle: string,
 ): Promise<ShopifyProduct | null> {
+  const cached = productByHandleCache.get(handle)
+  if (cached) return cached
+
+  const request = requestProductByHandle(handle).then((product) => {
+    if (!product) productByHandleCache.delete(handle)
+    return product
+  })
+  productByHandleCache.set(handle, request)
+  return request
+}
+
+async function requestProductByHandle(handle: string): Promise<ShopifyProduct | null> {
   if (!shopifyClient) return null
 
   const { data, errors } = await shopifyClient.request(PRODUCT_BY_HANDLE_QUERY, {

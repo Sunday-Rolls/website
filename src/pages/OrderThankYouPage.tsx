@@ -66,7 +66,7 @@ export function OrderThankYouPage() {
         }
       />
       <Link
-        to="/shop"
+        to="/shop/"
         className="inline-block font-body text-body text-heritage-green hover:text-forest-green"
       >
         Continue shopping

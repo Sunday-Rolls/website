@@ -5,6 +5,8 @@ import {
   type ProductImage,
   type ShopifyProduct,
 } from '@/lib/shopify'
+import imageDimensions from '@/data/product-image-dimensions.json'
+import { optimizedImageUrl, productImageSrcSet } from '@/lib/responsive-image'
 import { cn } from '@/lib/utils'
 
 interface ProductGalleryProps {
@@ -57,6 +59,9 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
   }, [product.handle])
 
   const active = images[Math.min(activeIndex, images.length - 1)] ?? images[0]
+  const activeSrc = optimizedImageUrl(active.url, 800) ?? active.url
+  const dimensionKey = active.url.split('/').pop()?.split('?')[0] ?? ''
+  const dimensions = (imageDimensions as Record<string, { width: number; height: number }>)[dimensionKey]
 
   function goTo(index: number) {
     setActiveIndex((index + images.length) % images.length)
@@ -66,14 +71,25 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
     <div className={cn('space-y-4', className)}>
       <div className="overflow-hidden rounded-sm border border-sand bg-cream">
         <img
-          src={active.url}
+          src={activeSrc}
+          srcSet={productImageSrcSet(active.url)}
+          sizes="(min-width: 1024px) 50vw, 100vw"
           alt={active.alt ?? product.title}
+          width={dimensions?.width ?? 800}
+          height={dimensions?.height ?? 800}
           className="block h-auto w-full"
+          style={
+            dimensions
+              ? { aspectRatio: `${dimensions.width} / ${dimensions.height}` }
+              : { aspectRatio: '1 / 1' }
+          }
+          fetchPriority={activeIndex === 0 ? 'high' : 'auto'}
+          decoding="async"
         />
       </div>
 
       <div className="space-y-2">
-        <p className="font-body text-label uppercase tracking-[0.12em] text-matte-black/55">
+        <p className="font-body text-label uppercase tracking-[0.12em] text-matte-black/75">
           More views
         </p>
         <ul
