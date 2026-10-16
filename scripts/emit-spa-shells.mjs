@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 /**
- * Copy the Vite SPA shell into known route folders so GitHub Pages serves
- * HTTP 200 (no 404 → redirect) for deep links like /shop and /products/:handle.
+ * Copy the Vite SPA shell onto each route so GitHub Pages returns HTTP 200
+ * for deep links like /shop and /products/:handle.
+ *
+ * A folder index (/shop/index.html) is what /shop/ serves. GitHub Pages 301s
+ * /shop to /shop/ when that is the only file, and Lighthouse treats that
+ * redirect as a failed load. A sibling /shop.html is served at /shop with no
+ * redirect, so both forms load directly.
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -124,9 +129,12 @@ function baseFromHtml(html) {
 }
 
 async function writeShell(relativePath, html) {
-  const target = join(distDir, relativePath, 'index.html')
-  await mkdir(dirname(target), { recursive: true })
-  await writeFile(target, html)
+  const indexTarget = join(distDir, relativePath, 'index.html')
+  const extensionTarget = join(distDir, `${relativePath}.html`)
+  await mkdir(dirname(indexTarget), { recursive: true })
+  await mkdir(dirname(extensionTarget), { recursive: true })
+  await writeFile(indexTarget, html)
+  await writeFile(extensionTarget, html)
 }
 
 const ROUTE_CHUNKS = {
