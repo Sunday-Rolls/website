@@ -568,26 +568,16 @@ function setPnLFeedback(message, isError = false) {
   el.classList.toggle('error', isError)
 }
 
-function syncPnLPeriodControls(source) {
-  const yearEl = $('#pnl-year')
-  const monthEl = $('#pnl-month')
-  if (!yearEl || !monthEl) return
-  if (source === 'month' && /^\d{4}-\d{2}$/.test(monthEl.value)) {
-    yearEl.value = monthEl.value.slice(0, 4)
-  } else if (source === 'year' && yearEl.value) {
-    const mm = /^\d{4}-\d{2}$/.test(monthEl.value) ? monthEl.value.slice(5, 7) : '01'
-    monthEl.value = `${yearEl.value}-${mm}`
-  }
+function currentPnLPeriod() {
+  const now = new Date()
+  const year = now.getUTCFullYear()
+  const month = `${year}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+  return { year, month }
 }
 
 async function loadPnL() {
-  const monthEl = $('#pnl-month')
-  const yearEl = $('#pnl-year')
-  const month = monthEl?.value || ''
-  const year =
-    /^\d{4}-\d{2}$/.test(month) ? month.slice(0, 4) : yearEl?.value || String(new Date().getFullYear())
-  if (yearEl && yearEl.value !== year) yearEl.value = year
-  const { data } = await api(`/pnl?year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`)
+  const { year, month } = currentPnLPeriod()
+  const { data } = await api(`/pnl?year=${year}&month=${encodeURIComponent(month)}`)
   renderPnL(data)
   await loadManualOrders()
 }
@@ -843,17 +833,6 @@ function bind() {
   }
   $('#pnl-refresh')?.addEventListener('click', () => loadPnL().catch(showError))
   $('#pnl-refresh-cash')?.addEventListener('click', () => loadPnL().catch(showError))
-
-  let pnlPeriodTimer = null
-  function onPnLPeriodChange(source) {
-    syncPnLPeriodControls(source)
-    clearTimeout(pnlPeriodTimer)
-    pnlPeriodTimer = setTimeout(() => loadPnL().catch(showError), 80)
-  }
-  for (const eventName of ['change', 'input']) {
-    $('#pnl-year')?.addEventListener(eventName, () => onPnLPeriodChange('year'))
-    $('#pnl-month')?.addEventListener(eventName, () => onPnLPeriodChange('month'))
-  }
 
   $('#sync-ga4-btn')?.addEventListener('click', async () => {
     setSyncFeedback('Syncing GA4…')
