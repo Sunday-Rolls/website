@@ -99,6 +99,7 @@ export function ShopPage() {
               products={sectionProducts}
               listId={`shop_${section.id}`}
               listName={`Shop — ${section.title}`}
+              priorityCount={index === 0 ? 1 : 0}
             />
           </Container>
         </section>

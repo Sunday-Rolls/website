@@ -26,6 +26,31 @@ function productImages(): Plugin {
   }
 }
 
+/** Vite rewrites href, not imagesrcset, so GitHub Pages base paths need a pass. */
+function prefixImageSrcSet(): Plugin {
+  return {
+    name: 'prefix-image-srcset',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        const base = basePath.endsWith('/') ? basePath : `${basePath}/`
+        if (base === '/') return html
+        return html.replace(/imagesrcset="([^"]+)"/g, (_match, value: string) => {
+          const next = value
+            .split(',')
+            .map((part) => {
+              const [url, ...descriptor] = part.trim().split(/\s+/)
+              if (!url.startsWith('/') || url.startsWith(base)) return part.trim()
+              return [`${base.slice(0, -1)}${url}`, ...descriptor].join(' ')
+            })
+            .join(', ')
+          return `imagesrcset="${next}"`
+        })
+      },
+    },
+  }
+}
+
 /** The built stylesheet is ~10 KiB and otherwise blocks first paint. */
 function inlineCss(): Plugin {
   return {
@@ -59,7 +84,7 @@ export default defineConfig({
   build: {
     manifest: true,
   },
-  plugins: [react(), tailwindcss(), productImages(), inlineCss()],
+  plugins: [react(), tailwindcss(), productImages(), prefixImageSrcSet(), inlineCss()],
   resolve: {
     alias: {
       '@': path.resolve(rootDir, './src'),

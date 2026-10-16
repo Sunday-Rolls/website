@@ -200,6 +200,7 @@ export function ProductCarouselBlock({
                   <ProductCard
                     product={product}
                     compact
+                    imageSizes="(min-width: 1100px) 22vw, (min-width: 860px) 30vw, (min-width: 560px) 45vw, 75vw"
                     className="h-full border-sand/80 bg-white/90"
                   />
                 </div>
@@ -222,6 +223,7 @@ export function ProductCarouselBlock({
                     <ProductCard
                       product={product}
                       compact
+                      imageSizes="(min-width: 1100px) 22vw, (min-width: 860px) 30vw, (min-width: 560px) 45vw, 75vw"
                       className="h-full border-sand/80 bg-white/90"
                     />
                   </div>

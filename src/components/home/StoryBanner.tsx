@@ -32,11 +32,18 @@ export function StoryBanner() {
             </Button>
           </div>
 
-          <img
-            src={homeAssets.crew}
-            alt="The Sunday Rolls crew"
-            className="aspect-[5/4] w-full object-cover object-[center_74%]"
-          />
+          <picture>
+            <source srcSet={homeAssets.crewWebp} type="image/webp" />
+            <img
+              src={homeAssets.crew}
+              alt="The Sunday Rolls crew"
+              width={768}
+              height={1024}
+              loading="lazy"
+              decoding="async"
+              className="aspect-[5/4] w-full object-cover object-[center_74%]"
+            />
+          </picture>
         </div>
       </Container>
     </section>

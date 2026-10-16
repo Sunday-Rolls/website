@@ -7,9 +7,9 @@ describe('sizedImageUrl', () => {
     expect(sizedImageUrl(url, 640)).toContain('width=640')
   })
 
-  it('leaves local asset URLs unchanged', () => {
+  it('points local product photos at a generated WebP', () => {
     expect(sizedImageUrl('/assets/products/the-doodle.jpg', 640)).toBe(
-      '/assets/products/the-doodle.jpg',
+      '/assets/products/w640/the-doodle.webp',
     )
   })
 })
@@ -21,15 +21,22 @@ describe('productImageSrcSet', () => {
     expect(srcset).toContain('800w')
   })
 
-  it('skips a srcset when the file cannot be resized', () => {
-    expect(productImageSrcSet('/assets/products/the-doodle.jpg')).toBeUndefined()
+  it('builds a WebP srcset for local product photos', () => {
+    expect(productImageSrcSet('/assets/products/the-doodle.jpg')).toBe(
+      [
+        '/assets/products/w320/the-doodle.webp 320w',
+        '/assets/products/w480/the-doodle.webp 480w',
+        '/assets/products/w640/the-doodle.webp 640w',
+        '/assets/products/w800/the-doodle.webp 800w',
+      ].join(', '),
+    )
   })
 })
 
 describe('optimizedImageUrl', () => {
-  it('points local product photos at the 800px file', () => {
+  it('points local product photos at the 800px WebP', () => {
     expect(optimizedImageUrl('/assets/products/golf-towel-solid-black.jpg')).toBe(
-      '/assets/products/w800/golf-towel-solid-black.jpg',
+      '/assets/products/w800/golf-towel-solid-black.webp',
     )
   })
 

@@ -30,8 +30,19 @@ output/
 *.sln
 *.sw?
 
-# Generated from public/assets/products during dev and build
+# Generated during dev and build from source photos
+public/assets/products/w320/
+public/assets/products/w480/
+public/assets/products/w640/
 public/assets/products/w800/
+public/assets/home/crew.webp
+public/assets/home/videos/hero-poster-960.webp
+public/assets/home/videos/hero-poster-1280.webp
+public/assets/home/videos/course-poster-960.webp
+public/assets/home/videos/course-poster-1280.webp
+public/assets/shop/banner-640.webp
+public/assets/shop/banner-960.webp
+public/assets/shop/banner-1200.webp
 
 # local python venv for SA probes
 server/.venv/

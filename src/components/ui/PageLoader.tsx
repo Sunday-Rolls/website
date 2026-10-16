@@ -7,7 +7,7 @@ interface PageLoaderProps {
 export function PageLoader({ label }: PageLoaderProps) {
   return (
     <div
-      className="flex min-h-[52vh] flex-col items-center justify-center gap-5 py-section-y"
+      className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-5 py-section-y"
       role="status"
       aria-live="polite"
     >

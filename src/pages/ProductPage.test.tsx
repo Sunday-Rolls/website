@@ -122,7 +122,7 @@ describe('ProductPage', () => {
     expect(screen.getByText('Towel')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Golf Towel - Green Stripe' })).toHaveAttribute(
       'src',
-      '/assets/products/w800/golf-towel-green-stripe.jpg',
+      '/assets/products/w800/golf-towel-green-stripe.webp',
     )
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
@@ -172,11 +172,11 @@ describe('ProductPage', () => {
     expect(thumbnails).toHaveLength(2)
     expect(thumbnails[0].querySelector('img')).toHaveAttribute(
       'src',
-      'https://cdn.shopify.com/grey-front.jpg',
+      'https://cdn.shopify.com/grey-front.jpg?width=160',
     )
     expect(thumbnails[1].querySelector('img')).toHaveAttribute(
       'src',
-      'https://cdn.shopify.com/grey-back.jpg',
+      'https://cdn.shopify.com/grey-back.jpg?width=160',
     )
   })
 
@@ -188,7 +188,7 @@ describe('ProductPage', () => {
 
     await waitFor(() => {
       const gallery = screen.getByRole('img', { name: 'Retro Roller - Grey' })
-      expect(gallery).toHaveAttribute('src', '/assets/products/w800/retro-roller-grey.jpg')
+      expect(gallery).toHaveAttribute('src', '/assets/products/w800/retro-roller-grey.webp')
     })
   })
 })

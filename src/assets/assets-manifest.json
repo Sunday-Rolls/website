@@ -5,7 +5,10 @@
   "home": {
     "hero": "/assets/home/hero.jpg",
     "heroWebp": "/assets/home/hero.webp",
-    "heroPosterWebp": "/assets/home/videos/hero-poster.webp",
+    "heroPosterWebp": "/assets/home/videos/hero-poster-1280.webp",
+    "heroPosterSrcSet": "/assets/home/videos/hero-poster-960.webp 960w, /assets/home/videos/hero-poster-1280.webp 1280w",
+    "coursePosterSrcSet": "/assets/home/videos/course-poster-960.webp 960w, /assets/home/videos/course-poster-1280.webp 1280w",
+    "crewWebp": "/assets/home/crew.webp",
     "crew": "/assets/home/crew.jpg",
     "lifestyle": "/assets/home/lifestyle.png",
     "heroVideo": "/assets/home/videos/hero-golf.mp4",
@@ -13,7 +16,8 @@
   },
   "shop": {
     "banner": "/assets/shop/banner.jpg",
-    "bannerWebp": "/assets/shop/banner.webp"
+    "bannerWebp": "/assets/shop/banner-1200.webp",
+    "bannerSrcSet": "/assets/shop/banner-640.webp 640w, /assets/shop/banner-960.webp 960w, /assets/shop/banner-1200.webp 1200w"
   },
   "products": {
     "retro-roller-grey": "/assets/products/retro-roller-grey.jpg",

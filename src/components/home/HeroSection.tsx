@@ -1,6 +1,6 @@
 import { resolveLinkLabel, usePageContent } from '@/lib/content'
 import { trackCtaClick } from '@/lib/gtm'
-import { assetUrl } from '@/lib/asset-url'
+import { assetSrcSet, assetUrl } from '@/lib/asset-url'
 import { homeAssets } from '@/assets'
 import { DeferredBackgroundVideo } from '@/components/home/DeferredBackgroundVideo'
 import { Button } from '@/components/ui/Button'
@@ -13,6 +13,9 @@ export function HeroSection() {
   const posterWebpSrc = content.hero.posterWebp
     ? assetUrl(content.hero.posterWebp)
     : homeAssets.heroPosterWebp
+  const posterWebpSrcSet = content.hero.posterWebpSrcSet
+    ? assetSrcSet(content.hero.posterWebpSrcSet)
+    : homeAssets.heroPosterSrcSet
 
   return (
     <section className="relative overflow-hidden bg-heritage-green text-cream">
@@ -20,6 +23,7 @@ export function HeroSection() {
         videoSrc={videoSrc}
         posterSrc={posterSrc}
         posterWebpSrc={posterWebpSrc}
+        posterWebpSrcSet={posterWebpSrcSet}
         prioritizePoster
         rootMargin="0px"
         videoClassName="object-bottom"

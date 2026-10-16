@@ -1,4 +1,4 @@
-import { assetUrl } from '@/lib/asset-url'
+import { assetSrcSet, assetUrl } from '@/lib/asset-url'
 import { homeAssets } from '@/assets'
 import { usePageContent } from '@/lib/content'
 import { DeferredBackgroundVideo } from '@/components/home/DeferredBackgroundVideo'
@@ -13,6 +13,9 @@ export function MediaBreak() {
   const posterWebpSrc = mediaBreak.posterWebp
     ? assetUrl(mediaBreak.posterWebp)
     : undefined
+  const posterWebpSrcSet = mediaBreak.posterWebpSrcSet
+    ? assetSrcSet(mediaBreak.posterWebpSrcSet)
+    : homeAssets.coursePosterSrcSet
 
   return (
     <section className="relative overflow-hidden bg-matte-black">
@@ -22,6 +25,7 @@ export function MediaBreak() {
           videoSrc={videoSrc}
           posterSrc={posterSrc}
           posterWebpSrc={posterWebpSrc}
+          posterWebpSrcSet={posterWebpSrcSet}
           rootMargin="300px"
           videoClassName="object-center"
         />

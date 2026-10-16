@@ -14,6 +14,9 @@ interface ProductCardProps {
   listName?: string
   /** Hides the material line and "View details" link for shorter cards. */
   compact?: boolean
+  /** Load immediately. Use for the image that can be the largest paint. */
+  priority?: boolean
+  imageSizes?: string
 }
 
 export function ProductCard({
@@ -22,6 +25,8 @@ export function ProductCard({
   listId = 'shop',
   listName = 'Shop',
   compact = false,
+  priority = false,
+  imageSizes = '(min-width: 1100px) 25vw, (min-width: 640px) 33vw, 50vw',
 }: ProductCardProps) {
   const productPath = sitePath(`/products/${product.handle}`)
   const preload = prefetchHandlers(productPath)
@@ -43,12 +48,13 @@ export function ProductCard({
             <img
               src={sizedImageUrl(product.imageUrl, 640) ?? product.imageUrl}
               srcSet={productImageSrcSet(product.imageUrl)}
-              sizes="(min-width: 1100px) 25vw, (min-width: 640px) 33vw, 50vw"
+              sizes={imageSizes}
               alt={product.imageAlt ?? product.title}
               width={640}
               height={800}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-              loading="lazy"
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'auto'}
               decoding="async"
             />
           ) : (

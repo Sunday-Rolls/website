@@ -134,7 +134,7 @@ describe('HomePage', () => {
     expect(poster).not.toBeNull()
     expect(poster).toHaveAttribute('fetchPriority', 'high')
     expect(
-      document.querySelector('source[type="image/webp"][srcset="/assets/home/videos/hero-poster.webp"]'),
-    ).not.toBeNull()
+      document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
+    ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
 })

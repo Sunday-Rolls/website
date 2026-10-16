@@ -9,7 +9,7 @@ export function ShopHeader() {
   return (
     <section className="relative overflow-hidden border-b border-sand bg-sand/40">
       <picture>
-        <source srcSet={shopAssets.headerBannerWebp} type="image/webp" />
+        <source srcSet={shopAssets.headerBannerSrcSet} sizes="100vw" type="image/webp" />
         <img
           src={shopAssets.headerBanner}
           alt=""

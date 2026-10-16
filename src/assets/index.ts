@@ -1,5 +1,5 @@
 import assetsManifest from './assets-manifest.json'
-import { assetUrl } from '@/lib/asset-url'
+import { assetSrcSet, assetUrl } from '@/lib/asset-url'
 
 export const brandAssets = {
   logo: assetUrl(assetsManifest.brand.logo),
@@ -10,6 +10,9 @@ export const homeAssets = {
   hero: assetUrl(assetsManifest.home.hero),
   heroWebp: assetUrl(assetsManifest.home.heroWebp),
   heroPosterWebp: assetUrl(assetsManifest.home.heroPosterWebp),
+  heroPosterSrcSet: assetSrcSet(assetsManifest.home.heroPosterSrcSet),
+  coursePosterSrcSet: assetSrcSet(assetsManifest.home.coursePosterSrcSet),
+  crewWebp: assetUrl(assetsManifest.home.crewWebp),
   heroTexture: assetUrl('/assets/home/hero-texture.svg'),
   lifestyle: assetUrl(assetsManifest.home.lifestyle),
   crew: assetUrl(assetsManifest.home.crew),
@@ -26,6 +29,7 @@ export const homeAssets = {
 export const shopAssets = {
   headerBanner: assetUrl(assetsManifest.shop.banner),
   headerBannerWebp: assetUrl(assetsManifest.shop.bannerWebp),
+  headerBannerSrcSet: assetSrcSet(assetsManifest.shop.bannerSrcSet),
   products: Object.values(assetsManifest.products).map(assetUrl),
 } as const
 

@@ -5,6 +5,7 @@ type DeferredBackgroundVideoProps = {
   videoSrc: string
   posterSrc: string
   posterWebpSrc?: string
+  posterWebpSrcSet?: string
   posterWidth?: number
   posterHeight?: number
   /** Eager poster fetch for above-the-fold LCP. */
@@ -23,6 +24,7 @@ export function DeferredBackgroundVideo({
   videoSrc,
   posterSrc,
   posterWebpSrc,
+  posterWebpSrcSet,
   posterWidth = 1280,
   posterHeight = 720,
   prioritizePoster = false,
@@ -88,7 +90,13 @@ export function DeferredBackgroundVideo({
   return (
     <div ref={containerRef} className={cn('absolute inset-0', className)}>
       <picture>
-        {posterWebpSrc ? <source srcSet={posterWebpSrc} type="image/webp" /> : null}
+        {posterWebpSrcSet || posterWebpSrc ? (
+          <source
+            srcSet={posterWebpSrcSet ?? posterWebpSrc}
+            {...(posterWebpSrcSet ? { sizes: '100vw' } : {})}
+            type="image/webp"
+          />
+        ) : null}
         <img
           src={posterSrc}
           alt=""

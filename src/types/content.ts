@@ -66,6 +66,7 @@ export interface HomeContent {
     video?: string
     poster?: string
     posterWebp?: string
+    posterWebpSrcSet?: string
   }
   values: {
     items: Array<{ label: string; icon?: ValueIcon }>
@@ -79,6 +80,7 @@ export interface HomeContent {
     video: string
     poster?: string
     posterWebp?: string
+    posterWebpSrcSet?: string
     caption?: string
   }
   reviews: {

@@ -6,12 +6,15 @@ interface ProductGridProps {
   products: ShopifyProduct[]
   listId?: string
   listName?: string
+  /** First N cards load immediately so an in-view photo is not deferred. */
+  priorityCount?: number
 }
 
 export function ProductGrid({
   products,
   listId = 'shop',
   listName = 'Shop',
+  priorityCount = 0,
 }: ProductGridProps) {
   const content = usePageContent('shop')
 
@@ -30,12 +33,14 @@ export function ProductGrid({
 
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {products.map((product) => (
+      {products.map((product, index) => (
         <ProductCard
           key={product.id}
           product={product}
           listId={listId}
           listName={listName}
+          priority={index < priorityCount}
+          imageSizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         />
       ))}
     </div>

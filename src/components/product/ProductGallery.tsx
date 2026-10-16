@@ -5,8 +5,9 @@ import {
   type ProductImage,
   type ShopifyProduct,
 } from '@/lib/shopify'
+import { getCatalogProductByHandle } from '@/lib/product-catalog'
 import imageDimensions from '@/data/product-image-dimensions.json'
-import { optimizedImageUrl, productImageSrcSet } from '@/lib/responsive-image'
+import { optimizedImageUrl, productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
 import { cn } from '@/lib/utils'
 
 interface ProductGalleryProps {
@@ -50,6 +51,16 @@ function resolveImages(product: ShopifyProduct): ProductImage[] {
   return images
 }
 
+function dimensionsFor(url: string, handle: string) {
+  const fileName = url.split('/').pop()?.split('?')[0] ?? ''
+  const direct = (imageDimensions as Record<string, { width: number; height: number }>)[fileName]
+  if (direct) return direct
+
+  const catalogFile = getCatalogProductByHandle(handle)?.images?.[0]?.split('/').pop()
+  if (!catalogFile) return undefined
+  return (imageDimensions as Record<string, { width: number; height: number }>)[catalogFile]
+}
+
 export function ProductGallery({ product, className }: ProductGalleryProps) {
   const images = resolveImages(product)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -60,8 +71,7 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
 
   const active = images[Math.min(activeIndex, images.length - 1)] ?? images[0]
   const activeSrc = optimizedImageUrl(active.url, 800) ?? active.url
-  const dimensionKey = active.url.split('/').pop()?.split('?')[0] ?? ''
-  const dimensions = (imageDimensions as Record<string, { width: number; height: number }>)[dimensionKey]
+  const dimensions = dimensionsFor(active.url, product.handle)
 
   function goTo(index: number) {
     setActiveIndex((index + images.length) % images.length)
@@ -77,7 +87,7 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
           alt={active.alt ?? product.title}
           width={dimensions?.width ?? 800}
           height={dimensions?.height ?? 800}
-          className="block h-auto w-full"
+          className="block h-auto w-full object-cover"
           style={
             dimensions
               ? { aspectRatio: `${dimensions.width} / ${dimensions.height}` }
@@ -113,8 +123,10 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
                   )}
                 >
                   <img
-                    src={image.url}
+                    src={sizedImageUrl(image.url, 160) ?? image.url}
                     alt=""
+                    width={160}
+                    height={160}
                     className="h-full w-full object-cover"
                   />
                 </button>

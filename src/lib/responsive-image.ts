@@ -1,4 +1,5 @@
 const SHOPIFY_WIDTHS = [480, 640, 800]
+const LOCAL_WIDTHS = [320, 480, 640, 800]
 
 function isShopifyCdn(url: string): boolean {
   try {
@@ -8,33 +9,66 @@ function isShopifyCdn(url: string): boolean {
   }
 }
 
-/** Resize Shopify CDN images; pass through other hosts unchanged. */
-export function sizedImageUrl(url: string | undefined, width: number): string | undefined {
-  if (!url || !isShopifyCdn(url)) return url
-  try {
-    const parsed = new URL(url)
-    parsed.searchParams.set('width', String(width))
-    return parsed.toString()
-  } catch {
-    return url
+function nearestWidth(widths: number[], target: number): number {
+  const fit = widths.find((width) => width >= target)
+  return fit ?? widths[widths.length - 1]
+}
+
+/** Local catalog photo, including one that already points at a generated size. */
+function localProductBase(url: string): { prefix: string; name: string } | undefined {
+  const marker = '/assets/products/'
+  const index = url.indexOf(marker)
+  if (index === -1) return undefined
+
+  let file = url.slice(index + marker.length).split(/[?#]/)[0]
+  const sized = file.match(/^w\d+\/(.+)$/)
+  if (sized) file = sized[1]
+  if (!/\.(jpe?g|png|webp)$/i.test(file)) return undefined
+
+  return {
+    prefix: url.slice(0, index),
+    name: file.replace(/\.(jpe?g|png|webp)$/i, ''),
   }
 }
 
-export function productImageSrcSet(url: string | undefined): string | undefined {
-  if (!url || !isShopifyCdn(url)) return undefined
-  return SHOPIFY_WIDTHS.map((width) => `${sizedImageUrl(url, width)} ${width}w`).join(', ')
+function localSizedUrl(url: string, width: number): string | undefined {
+  const local = localProductBase(url)
+  if (!local) return undefined
+  const chosen = nearestWidth(LOCAL_WIDTHS, width)
+  return `${local.prefix}/assets/products/w${chosen}/${local.name}.webp`
 }
 
-/** Gallery src: a Shopify width param, or the prebuilt 800px local file. */
+/** Resize Shopify CDN images and local product photos. */
+export function sizedImageUrl(url: string | undefined, width: number): string | undefined {
+  if (!url) return undefined
+  if (isShopifyCdn(url)) {
+    try {
+      const parsed = new URL(url)
+      parsed.searchParams.set('width', String(width))
+      return parsed.toString()
+    } catch {
+      return url
+    }
+  }
+  return localSizedUrl(url, width) ?? url
+}
+
+export function productImageSrcSet(url: string | undefined): string | undefined {
+  if (!url) return undefined
+  if (isShopifyCdn(url)) {
+    return SHOPIFY_WIDTHS.map((width) => `${sizedImageUrl(url, width)} ${width}w`).join(', ')
+  }
+
+  const local = localProductBase(url)
+  if (!local) return undefined
+  return LOCAL_WIDTHS.map(
+    (width) => `${local.prefix}/assets/products/w${width}/${local.name}.webp ${width}w`,
+  ).join(', ')
+}
+
+/** Gallery src: a Shopify width param, or the prebuilt local WebP nearest that width. */
 export function optimizedImageUrl(url: string | undefined, width = 800): string | undefined {
   if (!url) return undefined
   if (isShopifyCdn(url)) return sizedImageUrl(url, width)
-
-  const marker = '/assets/products/'
-  const index = url.indexOf(marker)
-  if (index === -1 || url.includes('/assets/products/w800/')) return url
-
-  const file = url.slice(index + marker.length).split(/[?#]/)[0]
-  if (!/\.(jpe?g|png)$/i.test(file)) return url
-  return `${url.slice(0, index)}/assets/products/w800/${file}`
+  return localSizedUrl(url, width) ?? url
 }

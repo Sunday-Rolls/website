@@ -23,8 +23,12 @@ const ROUTE_META = {
     title: 'Our Collection — Sunday Rolls',
     description: 'Timeless golf goods built for the walk.',
     preload: [
-      { href: 'assets/shop/banner.webp', type: 'image/webp' },
-      { href: 'assets/shop/banner.jpg', type: 'image/jpeg' },
+      {
+        srcSet:
+          'assets/shop/banner-640.webp 640w, assets/shop/banner-960.webp 960w, assets/shop/banner-1200.webp 1200w',
+        sizes: '100vw',
+        type: 'image/webp',
+      },
     ],
   },
   about: {
@@ -43,7 +47,7 @@ const ROUTE_META = {
 }
 
 function stripHeroPosterPreload(html) {
-  return html.replace(/\s*<link\b[^>]*hero-poster\.webp[^>]*\/?>\s*/gi, '\n')
+  return html.replace(/\s*<link\b[^>]*hero-poster[^>]*\/?>\s*/gi, '\n')
 }
 
 function withTrailingSlash(path) {
@@ -51,10 +55,26 @@ function withTrailingSlash(path) {
   return `${path}/`
 }
 
-function displayProductImage(imagePath, base) {
-  const file = imagePath?.split('/').pop()
-  if (!file || !/\.(jpe?g|png)$/i.test(file)) return null
-  return `${base}/assets/products/w800/${file}`.replace(/\/{2,}/g, '/').replace(':/', '://')
+function withBase(path, base) {
+  return `${base}/${path}`.replace(/\/{2,}/g, '/').replace(':/', '://')
+}
+
+function prefixSrcSet(srcSet, base) {
+  return srcSet
+    .split(',')
+    .map((part) => {
+      const [url, ...descriptor] = part.trim().split(/\s+/)
+      return [withBase(url, base), ...descriptor].join(' ')
+    })
+    .join(', ')
+}
+
+function displayProductSrcSet(imagePath, base) {
+  const file = imagePath?.split('/').pop()?.replace(/\.(jpe?g|png|webp)$/i, '')
+  if (!file) return null
+  return [480, 640, 800]
+    .map((width) => `${withBase(`assets/products/w${width}/${file}.webp`, base)} ${width}w`)
+    .join(', ')
 }
 
 function manifestChunk(manifest, sourceSuffix) {
@@ -105,6 +125,10 @@ function injectHead(html, { title, description, canonicalPath, preload = [], mod
   const links = [
     ...preload.map((asset) => {
       const typeAttr = asset.type ? ` type="${asset.type}"` : ''
+      if (asset.srcSet) {
+        const sizesAttr = asset.sizes ? ` imagesizes="${asset.sizes}"` : ''
+        return `<link rel="preload" as="image" imagesrcset="${asset.srcSet}"${sizesAttr}${typeAttr} fetchpriority="high" />`
+      }
       return `<link rel="preload" as="image" href="${asset.href}"${typeAttr} fetchpriority="high" />`
     }),
     ...modulePreload.map((href) => `<link rel="modulepreload" href="${href}" />`),
@@ -162,13 +186,54 @@ async function main() {
     return [`${base}/${file}`.replace(/\/{2,}/g, '/').replace(':/', '://')]
   }
 
+  let products = []
+  let shopContent = null
+  try {
+    const catalog = JSON.parse(await readFile(catalogPath, 'utf8'))
+    products = (Array.isArray(catalog) ? catalog : catalog.products ?? []).filter(
+      (product) => product.handle,
+    )
+  } catch {
+    products = []
+  }
+  try {
+    shopContent = JSON.parse(await readFile(join(root, 'src/content/pages/shop.json'), 'utf8'))
+  } catch {
+    shopContent = null
+  }
+
+  const headcoverSections = new Set(['center-shafted', 'mallet', 'oz-mezz'])
+  const firstSection = shopContent?.sections?.[0]
+  const firstShopProduct = firstSection
+    ? products.find((product) =>
+        headcoverSections.has(firstSection.id)
+          ? product.subcategory === firstSection.id
+          : product.category === firstSection.id,
+      )
+    : undefined
+  const firstShopSrcSet = firstShopProduct
+    ? displayProductSrcSet(firstShopProduct.images?.[0], base)
+    : null
+
   for (const route of STATIC_ROUTES) {
     const meta = ROUTE_META[route] ?? {}
     const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
-    const preload = (meta.preload ?? []).map((asset) => ({
-      ...asset,
-      href: `${base}/${asset.href}`.replace(/\/{2,}/g, '/').replace(':/', '://'),
-    }))
+    const preload = (meta.preload ?? []).map((asset) => {
+      if (asset.srcSet) {
+        return { ...asset, srcSet: prefixSrcSet(asset.srcSet, base) }
+      }
+      return {
+        ...asset,
+        href: withBase(asset.href, base),
+      }
+    })
+    if (route === 'shop' && firstShopSrcSet) {
+      preload.unshift({
+        srcSet: firstShopSrcSet,
+        sizes: '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
+        type: 'image/webp',
+      })
+    }
     const shell = injectHead(html, {
       title: meta.title,
       description: meta.description,
@@ -179,25 +244,17 @@ async function main() {
     await writeShell(route, shell)
   }
 
-  let products = []
-  try {
-    const catalog = JSON.parse(await readFile(catalogPath, 'utf8'))
-    products = (Array.isArray(catalog) ? catalog : catalog.products ?? []).filter(
-      (product) => product.handle,
-    )
-  } catch {
-    // Catalog optional for local experiments
-  }
-
   for (const product of products) {
     const route = `products/${product.handle}`
     const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
-    const imageHref = displayProductImage(product.images?.[0], base)
+    const imageSrcSet = displayProductSrcSet(product.images?.[0], base)
     const shell = injectHead(html, {
       title: `${product.title ?? product.handle.replace(/-/g, ' ')} — Sunday Rolls`,
       description: product.description,
       canonicalPath,
-      preload: imageHref ? [{ href: imageHref, type: 'image/jpeg' }] : [],
+      preload: imageSrcSet
+        ? [{ srcSet: imageSrcSet, sizes: '(min-width: 1024px) 50vw, 100vw', type: 'image/webp' }]
+        : [],
       modulePreload: modulePreloadFor('src/pages/ProductPage.tsx'),
     })
     await writeShell(route, shell)
