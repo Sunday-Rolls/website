@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '@/lib/cart'
 import { getButtonLabel, usePageContent } from '@/lib/content'
 import { trackAddToCart } from '@/lib/gtm'
-import {
-  fetchProductByHandle,
-  isShopifyConfigured,
-  type ShopifyProduct,
-} from '@/lib/shopify'
+import type { ShopifyProduct } from '@/lib/shopify'
 import { Button } from '@/components/ui/Button'
+
+const shopifyConfigured = Boolean(
+  import.meta.env.VITE_SHOPIFY_STORE_DOMAIN && import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
+)
 
 interface ProductDetailsProps {
   product: ShopifyProduct
@@ -30,7 +30,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         : []
 
   async function handleAddToCart() {
-    if (!isShopifyConfigured) {
+    if (!shopifyConfigured) {
       setError('Checkout isn’t available yet. Connect Shopify to enable cart.')
       return
     }
@@ -41,6 +41,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     try {
       let variantId = product.variantId
       if (!variantId) {
+        const { fetchProductByHandle } = await import('@/lib/shopify')
         const live = await fetchProductByHandle(product.handle)
         variantId = live?.variantId
       }

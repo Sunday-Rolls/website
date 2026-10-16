@@ -16,6 +16,8 @@ interface ProductCardProps {
   compact?: boolean
   /** Load immediately. Use for the image that can be the largest paint. */
   priority?: boolean
+  /** Skip the photo until the slide is near the viewport. The frame stays reserved. */
+  loadImage?: boolean
   imageSizes?: string
 }
 
@@ -26,6 +28,7 @@ export function ProductCard({
   listName = 'Shop',
   compact = false,
   priority = false,
+  loadImage = true,
   imageSizes = '(min-width: 1100px) 25vw, (min-width: 640px) 33vw, 50vw',
 }: ProductCardProps) {
   const productPath = sitePath(`/products/${product.handle}`)
@@ -44,7 +47,7 @@ export function ProductCard({
     >
       <Link to={productPath} className="block" onClick={handleSelect} {...preload}>
         <div className="aspect-[4/5] bg-warm-sand">
-          {product.imageUrl ? (
+          {loadImage && product.imageUrl ? (
             <img
               src={sizedImageUrl(product.imageUrl, 640) ?? product.imageUrl}
               srcSet={productImageSrcSet(product.imageUrl)}
@@ -55,7 +58,7 @@ export function ProductCard({
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               loading={priority ? 'eager' : 'lazy'}
               fetchPriority={priority ? 'high' : 'auto'}
-              decoding="async"
+              decoding={priority ? 'sync' : 'async'}
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-b from-warm-sand to-sand">

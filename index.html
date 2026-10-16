@@ -69,6 +69,27 @@
       ></iframe
     ></noscript>
     <!-- End Google Tag Manager (noscript) -->
+    <img
+      id="hero-lcp"
+      src="/assets/home/videos/hero-poster-960.webp"
+      srcset="/assets/home/videos/hero-poster-960.webp 960w, /assets/home/videos/hero-poster-1280.webp 1280w"
+      sizes="100vw"
+      alt=""
+      width="960"
+      height="540"
+      fetchpriority="high"
+      decoding="sync"
+      style="position:absolute;top:calc(4rem + 1px);left:0;width:100%;height:min(68vh,640px);object-fit:cover;object-position:bottom;pointer-events:none"
+    />
+    <script>
+      ;(function () {
+        var path = location.pathname.replace(/\/+$/, '') || '/'
+        if (path !== '/' && path !== '/website') {
+          var hero = document.getElementById('hero-lcp')
+          if (hero) hero.remove()
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

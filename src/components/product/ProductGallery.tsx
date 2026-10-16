@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
 import { productAssets } from '@/assets'
-import {
-  getPlaceholderProductImage,
-  type ProductImage,
-  type ShopifyProduct,
-} from '@/lib/shopify'
-import { getCatalogProductByHandle } from '@/lib/product-catalog'
+import { getCatalogProductByHandle, getPlaceholderProductImage } from '@/lib/product-catalog'
+import type { ProductImage, ShopifyProduct } from '@/lib/shopify'
 import imageDimensions from '@/data/product-image-dimensions.json'
 import { optimizedImageUrl, productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
 import { cn } from '@/lib/utils'
@@ -94,7 +90,7 @@ export function ProductGallery({ product, className }: ProductGalleryProps) {
               : { aspectRatio: '1 / 1' }
           }
           fetchPriority={activeIndex === 0 ? 'high' : 'auto'}
-          decoding="async"
+          decoding={activeIndex === 0 ? 'sync' : 'async'}
         />
       </div>
 

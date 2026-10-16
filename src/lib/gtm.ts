@@ -1,3 +1,5 @@
+import { scheduleAfterLoad } from '@/lib/schedule'
+
 declare global {
   interface Window {
     dataLayer: Record<string, unknown>[]
@@ -82,30 +84,24 @@ function loadAnalyticsScripts(): void {
 }
 
 /**
- * Defer GTM/gtag until after first paint / idle so they don't compete with LCP.
- * Falls back to a short timeout so analytics still loads without interaction.
+ * Defer GTM/gtag until the visitor interacts, or well after load.
+ * Loading them during the initial trace adds seconds of main-thread work.
+ * Events pushed before the script arrives stay queued on dataLayer.
  */
 export function initGtm(): void {
   if (typeof window === 'undefined') return
 
   window.dataLayer = window.dataLayer ?? []
 
-  const schedule =
-    typeof window.requestIdleCallback === 'function'
-      ? (cb: () => void) => window.requestIdleCallback(cb, { timeout: 3500 })
-      : (cb: () => void) => window.setTimeout(cb, 2000)
-
   const boot = () => loadAnalyticsScripts()
+  const cancelDelay = scheduleAfterLoad(boot, 15_000)
 
-  if (document.readyState === 'complete') {
-    schedule(boot)
-  } else {
-    window.addEventListener('load', () => schedule(boot), { once: true })
+  const onInteract = () => {
+    cancelDelay()
+    boot()
   }
-
-  // Earlier load if the user interacts before idle
-  for (const event of ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const) {
-    window.addEventListener(event, boot, { once: true, passive: true })
+  for (const event of ['pointerdown', 'keydown', 'touchstart'] as const) {
+    window.addEventListener(event, onInteract, { once: true, passive: true })
   }
 }
 

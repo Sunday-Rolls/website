@@ -18,6 +18,7 @@ function productImages(): Plugin {
   return {
     name: 'product-images',
     async buildStart() {
+      if (process.env.VITEST) return
       await resizeProducts()
     },
     async configureServer() {
@@ -35,17 +36,25 @@ function prefixImageSrcSet(): Plugin {
       handler(html) {
         const base = basePath.endsWith('/') ? basePath : `${basePath}/`
         if (base === '/') return html
-        return html.replace(/imagesrcset="([^"]+)"/g, (_match, value: string) => {
-          const next = value
+        const prefixSet = (value: string) =>
+          value
             .split(',')
-            .map((part) => {
+            .map((part: string) => {
               const [url, ...descriptor] = part.trim().split(/\s+/)
               if (!url.startsWith('/') || url.startsWith(base)) return part.trim()
               return [`${base.slice(0, -1)}${url}`, ...descriptor].join(' ')
             })
             .join(', ')
-          return `imagesrcset="${next}"`
-        })
+        return html
+          .replace(/imagesrcset="([^"]+)"/g, (_match, value: string) => {
+            return `imagesrcset="${prefixSet(value)}"`
+          })
+          .replace(/\ssrcset="([^"]+)"/g, (_match, value: string) => {
+            return ` srcset="${prefixSet(value)}"`
+          })
+          .replace(/(\s(?:src|href)=")(\/assets\/)/g, (_match, attr, path) => {
+            return `${attr}${base.slice(0, -1)}${path}`
+          })
       },
     },
   }

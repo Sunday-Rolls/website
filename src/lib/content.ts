@@ -6,41 +6,22 @@ import aboutContent from '@/content/pages/about.json'
 import contactContent from '@/content/pages/contact.json'
 import cartContent from '@/content/pages/cart.json'
 import notFoundContent from '@/content/pages/not-found.json'
-import reviewsData from '@/data/reviews.json'
 import theme from '@/theme/theme.json'
-import { withInferredProductHandle } from '@/lib/reviews'
 import type {
   HomeContent,
   PageContentMap,
   PageKey,
-  ProductReview,
   SiteContent,
 } from '@/types/content'
 import type { Theme } from '@/types/theme'
-
-const reviewItems = ((reviewsData.items ?? []) as ProductReview[]).map(
-  withInferredProductHandle,
-)
 
 const pageContent: PageContentMap = {
   home: {
     ...homeContent,
     values: homeContent.values as HomeContent['values'],
-    reviews: {
-      ...homeContent.reviews,
-      items: reviewItems,
-    },
   },
   shop: shopContent,
-  product: {
-    ...productContent,
-    reviews: productContent.reviews
-      ? {
-          ...productContent.reviews,
-          items: reviewItems,
-        }
-      : undefined,
-  },
+  product: productContent,
   about: aboutContent,
   contact: contactContent,
   cart: cartContent,
@@ -57,10 +38,6 @@ export function getPageContent<K extends PageKey>(page: K): PageContentMap[K] {
 
 export function getTheme(): Theme {
   return theme as Theme
-}
-
-export function getReviewItems(): ProductReview[] {
-  return reviewItems
 }
 
 export function getButtonLabel(key: string): string {

@@ -3,12 +3,9 @@ import { useSearchParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { trackViewItemList } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
-import {
-  fetchProducts,
-  filterProductsByCategory,
-  placeholderProducts,
-  type ShopifyProduct,
-} from '@/lib/shopify'
+import { filterProductsByCategory, placeholderProducts } from '@/lib/product-catalog'
+import { scheduleAfterLoad } from '@/lib/schedule'
+import type { ShopifyProduct } from '@/lib/shopify'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { ShopHeader } from '@/components/shop/ShopHeader'
 import { Container } from '@/components/ui/Container'
@@ -28,9 +25,13 @@ export function ShopPage() {
       image: '/assets/shop/banner.jpg',
     })
 
-    fetchProducts(50).then((items) => {
-      if (items.length > 0) setProducts(items)
-    })
+    return scheduleAfterLoad(() => {
+      void import('@/lib/shopify').then(({ fetchProducts }) =>
+        fetchProducts(50).then((items) => {
+          if (items.length > 0) setProducts(items)
+        }),
+      )
+    }, 8000)
   }, [content.meta.title, content.meta.description])
 
   const sections = useMemo(

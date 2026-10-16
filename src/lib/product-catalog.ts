@@ -152,6 +152,53 @@ export function buildPlaceholderProductsFromCatalog(): ShopifyProduct[] {
   return getPublishedCatalogProducts().map(catalogProductToShopifyProduct)
 }
 
+export const placeholderProducts: ShopifyProduct[] = buildPlaceholderProductsFromCatalog()
+
+const HEADCOVER_SUBCATEGORIES = new Set<string>(['center-shafted', 'mallet', 'oz-mezz'])
+
+/** Matches the order of the product blocks on the home page. */
+const HEADCOVER_SUBCATEGORY_ORDER: HeadcoverSubcategory[] = ['center-shafted', 'mallet', 'oz-mezz']
+
+function catalogIndex(handle: string): number {
+  const index = getCatalogProducts().findIndex((product) => product.handle === handle)
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index
+}
+
+function subcategoryRank(product: ShopifyProduct): number {
+  const rank = product.subcategory
+    ? HEADCOVER_SUBCATEGORY_ORDER.indexOf(product.subcategory)
+    : -1
+  return rank === -1 ? HEADCOVER_SUBCATEGORY_ORDER.length : rank
+}
+
+export function sortProductsBySubcategory(products: ShopifyProduct[]): ShopifyProduct[] {
+  return [...products].sort((a, b) => subcategoryRank(a) - subcategoryRank(b))
+}
+
+export function filterProductsByCategory(
+  products: ShopifyProduct[],
+  category: string,
+): ShopifyProduct[] {
+  if (category === 'all') return sortProductsBySubcategory(products)
+
+  if (HEADCOVER_SUBCATEGORIES.has(category)) {
+    return products.filter((product) => product.subcategory === category)
+  }
+
+  return products
+    .filter((product) => product.category === category)
+    .sort((a, b) => {
+      const rank = subcategoryRank(a) - subcategoryRank(b)
+      if (rank !== 0) return rank
+      return catalogIndex(a.handle) - catalogIndex(b.handle)
+    })
+}
+
+export function getPlaceholderProductImage(handle: string): string {
+  const product = placeholderProducts.find((item) => item.handle === handle)
+  return product?.imageUrl ?? getProductImage('retro-roller-grey')
+}
+
 export function validateProductsAgainstCatalog(
   siteProducts: ShopifyProduct[],
 ): ProductValidationResult {

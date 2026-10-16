@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { usePageContent } from '@/lib/content'
 import { applyPageMeta } from '@/lib/page-meta'
 import {
-  fetchProducts,
   filterProductsByCategory,
   placeholderProducts,
-  type ShopifyProduct,
-} from '@/lib/shopify'
+} from '@/lib/product-catalog'
+import { scheduleAfterLoad } from '@/lib/schedule'
+import type { ShopifyProduct } from '@/lib/shopify'
 import { HeroSection } from '@/components/home/HeroSection'
 import { MediaBreak } from '@/components/home/MediaBreak'
 import { NewsletterSection } from '@/components/home/NewsletterSection'
@@ -28,9 +28,13 @@ export function HomePage() {
       image: '/assets/home/videos/hero-poster.jpg',
     })
 
-    fetchProducts(50).then((items) => {
-      if (items.length > 0) setProducts(items)
-    })
+    return scheduleAfterLoad(() => {
+      void import('@/lib/shopify').then(({ fetchProducts }) =>
+        fetchProducts(50).then((items) => {
+          if (items.length > 0) setProducts(items)
+        }),
+      )
+    }, 8000)
   }, [content.meta.title, content.meta.description])
 
   const blocks = useMemo(
@@ -47,19 +51,30 @@ export function HomePage() {
     <>
       <HeroSection />
       <ValueStrip items={content.values.items} />
-      {blocks.map(({ block, products: blockProducts, tone }) => (
+      {blocks.map(({ block, products: blockProducts, tone }, index) => (
         <ProductCarouselBlock
           key={block.id}
           block={block}
           products={blockProducts}
           tone={tone}
+          className={index > 0 ? 'cv-auto' : undefined}
         />
       ))}
-      <MediaBreak />
-      <ReviewsMarquee />
-      <StoryBanner />
-      <SocialsBanner />
-      <NewsletterSection />
+      <div className="cv-auto">
+        <MediaBreak />
+      </div>
+      <div className="cv-auto">
+        <ReviewsMarquee />
+      </div>
+      <div className="cv-auto">
+        <StoryBanner />
+      </div>
+      <div className="cv-auto">
+        <SocialsBanner />
+      </div>
+      <div className="cv-auto">
+        <NewsletterSection />
+      </div>
     </>
   )
 }

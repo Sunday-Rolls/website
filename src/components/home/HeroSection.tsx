@@ -25,7 +25,6 @@ export function HeroSection() {
         posterWebpSrc={posterWebpSrc}
         posterWebpSrcSet={posterWebpSrcSet}
         prioritizePoster
-        rootMargin="0px"
         videoClassName="object-bottom"
       />
       <div className="absolute inset-0 bg-black/10" />

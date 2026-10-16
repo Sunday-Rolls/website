@@ -11,6 +11,7 @@ interface ProductCarouselBlockProps {
   block: HomeProductBlock
   products: ShopifyProduct[]
   tone?: 'cream' | 'sand'
+  className?: string
 }
 
 const MOBILE_BREAKPOINT = 560
@@ -26,6 +27,7 @@ export function ProductCarouselBlock({
   block,
   products,
   tone = 'cream',
+  className,
 }: ProductCarouselBlockProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const mobileScrollerRef = useRef<HTMLDivElement>(null)
@@ -130,6 +132,8 @@ export function ProductCarouselBlock({
   const canGoPrevious = isMobile ? activeIndex > 0 : page > 0
   const canGoNext = isMobile ? activeIndex < products.length - 1 : page < maxPage
   const itemWidthPercent = 100 / visibleCount
+  const imageStart = isMobile ? activeIndex - 1 : (page - 1) * visibleCount
+  const imageEnd = isMobile ? activeIndex + 1 : (page + 2) * visibleCount - 1
   const showControls = isMobile ? products.length > 1 : maxPage > 0
   const dotCount = isMobile ? products.length : maxPage + 1
   const activeDot = isMobile ? activeIndex : page
@@ -139,6 +143,7 @@ export function ProductCarouselBlock({
       className={cn(
         'py-10 md:py-14',
         tone === 'sand' ? 'bg-warm-sand/45' : 'bg-cream',
+        className,
       )}
     >
       <Container className="space-y-6">
@@ -190,7 +195,7 @@ export function ProductCarouselBlock({
               className="product-carousel-snap -mx-container-x flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[12.5%] pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               role="list"
             >
-              {products.map((product) => (
+              {products.map((product, index) => (
                 <div
                   key={product.id}
                   data-carousel-item
@@ -200,6 +205,7 @@ export function ProductCarouselBlock({
                   <ProductCard
                     product={product}
                     compact
+                    loadImage={index >= imageStart && index <= imageEnd}
                     imageSizes="(min-width: 1100px) 22vw, (min-width: 860px) 30vw, (min-width: 560px) 45vw, 75vw"
                     className="h-full border-sand/80 bg-white/90"
                   />
@@ -213,7 +219,7 @@ export function ProductCarouselBlock({
                 style={{ transform: `translateX(-${page * 100}%)` }}
                 role="list"
               >
-                {products.map((product) => (
+                {products.map((product, index) => (
                   <div
                     key={product.id}
                     role="listitem"
@@ -223,6 +229,7 @@ export function ProductCarouselBlock({
                     <ProductCard
                       product={product}
                       compact
+                      loadImage={index >= imageStart && index <= imageEnd}
                       imageSizes="(min-width: 1100px) 22vw, (min-width: 860px) 30vw, (min-width: 560px) 45vw, 75vw"
                       className="h-full border-sand/80 bg-white/90"
                     />

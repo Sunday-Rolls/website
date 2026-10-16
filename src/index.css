@@ -140,6 +140,11 @@
 }
 
 @layer utilities {
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 720px;
+  }
+
   .home-marquee {
     animation: home-marquee-scroll 45s linear infinite;
   }

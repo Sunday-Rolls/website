@@ -1,10 +1,8 @@
 import { createStorefrontApiClient } from '@shopify/storefront-api-client'
-import { productAssets } from '@/assets'
 import {
-  buildPlaceholderProductsFromCatalog,
   catalogProductToShopifyProduct,
   getCatalogProductByHandle,
-  getCatalogProducts,
+  placeholderProducts as catalogPlaceholders,
 } from '@/lib/product-catalog'
 
 const storeDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN
@@ -451,14 +449,29 @@ export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {
   }
 
   const live =
-    data?.products?.edges?.map((edge: { node: ProductNode }) => mapProduct(edge.node)) ?? []
+    data?.products?.edges?.map((edge: { node: ProductNode }) =>
+      withCatalogImages(mapProduct(edge.node)),
+    ) ?? []
   return mergeCatalogOnlyProducts(live)
+}
+
+/** Listing pages keep the sized local photo instead of swapping in the store CDN file. */
+function withCatalogImages(product: ShopifyProduct): ShopifyProduct {
+  const catalog = getCatalogProductByHandle(product.handle)
+  if (!catalog?.images?.length) return product
+  const local = catalogProductToShopifyProduct(catalog)
+  return {
+    ...product,
+    imageUrl: local.imageUrl ?? product.imageUrl,
+    imageAlt: local.imageAlt ?? product.imageAlt,
+    images: local.images ?? product.images,
+  }
 }
 
 /** Keep published catalog products on the site until they exist in Shopify. */
 function mergeCatalogOnlyProducts(live: ShopifyProduct[]): ShopifyProduct[] {
   const seen = new Set(live.map((product) => product.handle))
-  const extras = placeholderProducts.filter((product) => !seen.has(product.handle))
+  const extras = catalogPlaceholders.filter((product) => !seen.has(product.handle))
   return [...live, ...extras]
 }
 
@@ -595,53 +608,9 @@ export async function removeCartLines(
   return mapCart(payload.cart)
 }
 
-const HEADCOVER_SUBCATEGORIES = new Set<string>([
-  'center-shafted',
-  'mallet',
-  'oz-mezz',
-])
-
-/** Matches the order of the product blocks on the home page. */
-const HEADCOVER_SUBCATEGORY_ORDER: HeadcoverSubcategory[] = ['center-shafted', 'mallet', 'oz-mezz']
-
-function catalogIndex(handle: string): number {
-  const index = getCatalogProducts().findIndex((product) => product.handle === handle)
-  return index === -1 ? Number.MAX_SAFE_INTEGER : index
-}
-
-function subcategoryRank(product: ShopifyProduct): number {
-  const rank = product.subcategory
-    ? HEADCOVER_SUBCATEGORY_ORDER.indexOf(product.subcategory)
-    : -1
-  return rank === -1 ? HEADCOVER_SUBCATEGORY_ORDER.length : rank
-}
-
-export function sortProductsBySubcategory(products: ShopifyProduct[]): ShopifyProduct[] {
-  return [...products].sort((a, b) => subcategoryRank(a) - subcategoryRank(b))
-}
-
-export function filterProductsByCategory(
-  products: ShopifyProduct[],
-  category: string,
-): ShopifyProduct[] {
-  if (category === 'all') return sortProductsBySubcategory(products)
-
-  if (HEADCOVER_SUBCATEGORIES.has(category)) {
-    return products.filter((product) => product.subcategory === category)
-  }
-
-  return products
-    .filter((product) => product.category === category)
-    .sort((a, b) => {
-      const rank = subcategoryRank(a) - subcategoryRank(b)
-      if (rank !== 0) return rank
-      return catalogIndex(a.handle) - catalogIndex(b.handle)
-    })
-}
-
-export const placeholderProducts: ShopifyProduct[] = buildPlaceholderProductsFromCatalog()
-
-export function getPlaceholderProductImage(handle: string): string {
-  const product = placeholderProducts.find((item) => item.handle === handle)
-  return product?.imageUrl ?? productAssets.galleryFallback
-}
+export {
+  filterProductsByCategory,
+  getPlaceholderProductImage,
+  placeholderProducts,
+  sortProductsBySubcategory,
+} from '@/lib/product-catalog'

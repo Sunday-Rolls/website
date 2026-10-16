@@ -26,7 +26,6 @@ export function MediaBreak() {
           posterSrc={posterSrc}
           posterWebpSrc={posterWebpSrc}
           posterWebpSrcSet={posterWebpSrcSet}
-          rootMargin="300px"
           videoClassName="object-center"
         />
         {/* Keep text readable without washing the video soft */}

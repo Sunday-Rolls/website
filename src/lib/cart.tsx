@@ -7,15 +7,15 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import {
-  addCartLines,
-  createCart,
-  fetchCart,
-  isShopifyConfigured,
-  removeCartLines,
-  updateCartLines,
-  type ShopifyCart,
-} from '@/lib/shopify'
+import type { ShopifyCart } from '@/lib/shopify'
+
+const shopifyConfigured = Boolean(
+  import.meta.env.VITE_SHOPIFY_STORE_DOMAIN && import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
+)
+
+function loadShopify() {
+  return import('@/lib/shopify')
+}
 
 const CART_STORAGE_KEY = 'sunday-rolls-cart-id'
 
@@ -54,12 +54,18 @@ function writeStoredCartId(cartId: string | null): void {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<ShopifyCart | null>(null)
-  const [isLoading, setIsLoading] = useState(isShopifyConfigured)
+  const [isLoading, setIsLoading] = useState(shopifyConfigured)
   const [isUpdating, setIsUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!isShopifyConfigured) {
+    if (!shopifyConfigured) {
+      setIsLoading(false)
+      return
+    }
+
+    const cartId = readStoredCartId()
+    if (!cartId) {
       setIsLoading(false)
       return
     }
@@ -67,14 +73,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     let cancelled = false
 
     async function hydrate() {
-      const cartId = readStoredCartId()
-      if (!cartId) {
-        if (!cancelled) setIsLoading(false)
-        return
-      }
-
       try {
-        const existing = await fetchCart(cartId)
+        const { fetchCart } = await loadShopify()
+        const existing = await fetchCart(cartId!)
         if (cancelled) return
         if (existing) {
           setCart(existing)
@@ -104,7 +105,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     async (variantId: string, quantity = 1) => {
-      if (!isShopifyConfigured) {
+      if (!shopifyConfigured) {
         throw new Error('Shopify is not configured')
       }
 
@@ -112,6 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null)
 
       try {
+        const { addCartLines, createCart } = await loadShopify()
         const line = { merchandiseId: variantId, quantity }
         const next = cart
           ? await addCartLines(cart.id, [line])
@@ -136,6 +138,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null)
 
       try {
+        const { removeCartLines, updateCartLines } = await loadShopify()
         if (quantity <= 0) {
           persistCart(await removeCartLines(cart.id, [lineId]))
           return
@@ -161,6 +164,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null)
 
       try {
+        const { removeCartLines } = await loadShopify()
         persistCart(await removeCartLines(cart.id, [lineId]))
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unable to remove from cart'

@@ -50,6 +50,10 @@ function stripHeroPosterPreload(html) {
   return html.replace(/\s*<link\b[^>]*hero-poster[^>]*\/?>\s*/gi, '\n')
 }
 
+function stripHeroLcp(html) {
+  return html.replace(/\s*<img\b[^>]*id="hero-lcp"[^>]*>\s*/i, '\n')
+}
+
 function withTrailingSlash(path) {
   if (!path || path.endsWith('/')) return path
   return `${path}/`
@@ -75,12 +79,6 @@ function displayProductSrcSet(imagePath, base) {
   return [480, 640, 800]
     .map((width) => `${withBase(`assets/products/w${width}/${file}.webp`, base)} ${width}w`)
     .join(', ')
-}
-
-function manifestChunk(manifest, sourceSuffix) {
-  if (!manifest) return null
-  const entry = Object.entries(manifest).find(([key]) => key.endsWith(sourceSuffix))
-  return entry?.[1]?.file ?? null
 }
 
 function escapeHtml(value) {
@@ -170,7 +168,7 @@ const ROUTE_CHUNKS = {
 }
 
 async function main() {
-  const html = stripHeroPosterPreload(await readFile(join(distDir, 'index.html'), 'utf8'))
+  const html = stripHeroLcp(stripHeroPosterPreload(await readFile(join(distDir, 'index.html'), 'utf8')))
   const base = process.env.VITE_BASE_PATH?.replace(/\/$/, '') || baseFromHtml(html)
   const siteOrigin = (process.env.VITE_SITE_ORIGIN || '').replace(/\/$/, '')
   let manifest = null
@@ -180,11 +178,12 @@ async function main() {
     manifest = null
   }
 
-  function modulePreloadFor(sourceSuffix) {
-    const file = manifestChunk(manifest, sourceSuffix)
-    if (!file) return []
-    return [`${base}/${file}`.replace(/\/{2,}/g, '/').replace(':/', '://')]
-  }
+function modulePreloadFor(sourceSuffix) {
+  if (!manifest) return []
+  const entry = Object.entries(manifest).find(([key]) => key.endsWith(sourceSuffix))?.[1]
+  if (!entry?.file) return []
+  return [`${base}/${entry.file}`.replace(/\/{2,}/g, '/').replace(':/', '://')]
+}
 
   let products = []
   let shopContent = null

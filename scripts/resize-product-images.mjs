@@ -12,20 +12,23 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const sourceDir = join(root, 'public/assets/products')
 const dimensionsPath = join(root, 'src/data/product-image-dimensions.json')
 const PRODUCT_WIDTHS = [320, 480, 640, 800]
-const WEBP_QUALITY = 52
+const PRODUCT_WEBP_QUALITY = 40
+const POSTER_WEBP_QUALITY = 48
 
-async function writeWebp(input, dest, width) {
+async function writeWebp(input, dest, width, quality = PRODUCT_WEBP_QUALITY) {
   await mkdir(dirname(dest), { recursive: true })
   await sharp(input)
     .rotate()
     .resize({ width, withoutEnlargement: true, fit: 'inside' })
-    .webp({ quality: WEBP_QUALITY, effort: 4 })
+    .webp({ quality, effort: 4 })
     .toFile(dest)
 }
 
-async function writeVariantSet(inputPath, variants) {
+async function writeVariantSet(inputPath, variants, quality = POSTER_WEBP_QUALITY) {
   const input = await readFile(inputPath)
-  await Promise.all(variants.map(({ width, dest }) => writeWebp(input, dest, width)))
+  await Promise.all(
+    variants.map(({ width, dest }) => writeWebp(input, dest, width, quality)),
+  )
 }
 
 export async function resizeProductImages() {

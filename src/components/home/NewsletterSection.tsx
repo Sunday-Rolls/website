@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { usePageContent } from '@/lib/content'
 import { pushEvent } from '@/lib/gtm'
-import { subscribeToNewsletter } from '@/lib/shopify'
 import { toastError, toastSuccess } from '@/lib/toast'
 import { Container } from '@/components/ui/Container'
 import { EmailInput } from '@/components/ui/EmailInput'
@@ -16,6 +15,7 @@ export function NewsletterSection() {
     setStatus(null)
 
     try {
+      const { subscribeToNewsletter } = await import('@/lib/shopify')
       await subscribeToNewsletter(email)
       setStatus({ tone: 'success', message: newsletter.successMessage })
       toastSuccess(newsletter.successMessage)

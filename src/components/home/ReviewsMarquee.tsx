@@ -1,5 +1,6 @@
 import { usePageContent } from '@/lib/content'
 import { selectMarqueeReviews } from '@/lib/marquee-reviews'
+import { getReviewItems } from '@/lib/review-items'
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -19,7 +20,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export function ReviewsMarquee() {
   const { reviews } = usePageContent('home')
-  const writtenReviews = selectMarqueeReviews(reviews.items)
+  const writtenReviews = selectMarqueeReviews(getReviewItems())
   const loopItems = [...writtenReviews, ...writtenReviews]
 
   if (writtenReviews.length === 0) return null

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { scheduleAfterLoad } from '@/lib/schedule'
 import { cn } from '@/lib/utils'
 
 type DeferredBackgroundVideoProps = {
@@ -12,13 +13,17 @@ type DeferredBackgroundVideoProps = {
   prioritizePoster?: boolean
   className?: string
   videoClassName?: string
-  /** Start loading when within this margin of the viewport. */
-  rootMargin?: string
+  /**
+   * Wait this long after load before fetching the mp4.
+   * The hero is on screen immediately, so a short idle timeout still
+   * competes with Largest Contentful Paint.
+   */
+  delayMs?: number
 }
 
 /**
- * Renders a static poster as the paint/LCP surface, then mounts the video only
- * after the section is near the viewport (and after first paint for the hero).
+ * Renders a static poster as the paint/LCP surface, then mounts the video
+ * after the visitor interacts or well after load.
  */
 export function DeferredBackgroundVideo({
   videoSrc,
@@ -30,62 +35,35 @@ export function DeferredBackgroundVideo({
   prioritizePoster = false,
   className,
   videoClassName,
-  rootMargin = '200px',
+  delayMs,
 }: DeferredBackgroundVideoProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
+  const loadDelay = delayMs ?? (prioritizePoster ? 15_000 : 20_000)
 
   useEffect(() => {
-    const node = containerRef.current
-    if (!node || shouldLoadVideo) return
-
-    let idleId: number | undefined
-    let timeoutId: number | undefined
     let cancelled = false
-
-    const armLoad = () => {
-      if (cancelled || shouldLoadVideo) return
-      const start = () => {
-        if (!cancelled) setShouldLoadVideo(true)
-      }
-      if (typeof window.requestIdleCallback === 'function') {
-        idleId = window.requestIdleCallback(start, { timeout: 2500 })
-      } else {
-        timeoutId = window.setTimeout(start, 600)
-      }
+    const start = () => {
+      if (!cancelled) setShouldLoadVideo(true)
+    }
+    const cancelDelay = scheduleAfterLoad(start, loadDelay)
+    const onInteract = () => {
+      cancelDelay()
+      start()
     }
 
-    if (typeof IntersectionObserver === 'undefined') {
-      armLoad()
-      return () => {
-        cancelled = true
-        if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
-          window.cancelIdleCallback(idleId)
-        }
-        if (timeoutId !== undefined) window.clearTimeout(timeoutId)
-      }
+    for (const event of ['pointerdown', 'keydown'] as const) {
+      window.addEventListener(event, onInteract, { once: true, passive: true })
     }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          observer.disconnect()
-          armLoad()
-        }
-      },
-      { rootMargin },
-    )
-    observer.observe(node)
 
     return () => {
       cancelled = true
-      observer.disconnect()
-      if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleId)
+      cancelDelay()
+      for (const event of ['pointerdown', 'keydown'] as const) {
+        window.removeEventListener(event, onInteract)
       }
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId)
     }
-  }, [rootMargin, shouldLoadVideo])
+  }, [loadDelay])
 
   return (
     <div ref={containerRef} className={cn('absolute inset-0', className)}>
@@ -103,7 +81,7 @@ export function DeferredBackgroundVideo({
           aria-hidden="true"
           width={posterWidth}
           height={posterHeight}
-          decoding="async"
+          decoding={prioritizePoster ? 'sync' : 'async'}
           fetchPriority={prioritizePoster ? 'high' : 'low'}
           loading={prioritizePoster ? 'eager' : 'lazy'}
           className={cn('h-full w-full object-cover', videoClassName)}
@@ -120,8 +98,8 @@ export function DeferredBackgroundVideo({
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={posterSrc}
+          preload="none"
+          poster={posterWebpSrc ?? posterSrc}
           aria-hidden="true"
         >
           <source src={videoSrc} type="video/mp4" />

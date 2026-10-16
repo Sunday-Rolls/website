@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { getCatalogProductByHandle } from '@/lib/product-catalog'
+import { getReviewItems } from '@/lib/review-items'
 import { fetchProductReviews, submitProductReview } from '@/lib/reviews-api'
 import {
   REVIEW_QUERY_PARAM,
@@ -105,7 +106,7 @@ export function ProductReviews({ product }: ProductReviewsProps) {
 
   const formOpen = manualFormOpen || searchParams.get(REVIEW_QUERY_PARAM) === '1'
 
-  const curated = mergeReviews(mergeReviews(reviews?.items ?? []), remoteReviews)
+  const curated = mergeReviews(mergeReviews(getReviewItems()), remoteReviews)
   const items = reviewsForProduct(curated, product.handle)
   const similar = similarProductReviews(curated, product.handle)
   const similarCopy =
