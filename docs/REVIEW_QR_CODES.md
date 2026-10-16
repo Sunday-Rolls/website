@@ -18,7 +18,7 @@ Output lands in `output/product-review-qrs/` (gitignored):
 |------|---------|
 | `*.png` | Individual QR images |
 | `print-sheet.html` | Browser sheet with **Export PDF** button |
-| `sunday-rolls-review-qrs.pdf` | All codes in one letter-size PDF |
+| `sunday-rolls-review-qrs.pdf` | One letter page per product (3×3 identical cutouts) |
 | `manifest.json` | Handles, titles, and landing URLs |
 
 ## Export PDF (dashboard — preferred)
@@ -45,6 +45,7 @@ Override with `SITE_URL` + `SITE_BASE_PATH` if needed. See `.env.example`.
 
 ## Notes
 
+- **One product per page:** print a single page to get a sheet of cutouts for that SKU (e.g. Coin Collector × 9).
 - Includes **all active products** (headcovers, towels, etc.). Dashboard pulls from live Shopify when configured; CLI/catalog include the full catalog.
 - CLI: set `HEADCOVERS_ONLY=1` to limit to headcovers.
 - Codes hit the product review form on the site; submitted reviews go to Railway Postgres + Resend email ([CONTACT_EMAIL.md](./CONTACT_EMAIL.md)).

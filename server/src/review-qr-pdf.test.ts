@@ -30,10 +30,11 @@ describe('review QR PDF helpers', () => {
     )
   })
 
-  it('builds a PDF buffer for all catalog products', async () => {
-    const { pdf, count, source } = await buildReviewQrPdf('pages')
+  it('builds a PDF with one page per product', async () => {
+    const { pdf, count, source, pages } = await buildReviewQrPdf('pages')
     expect(source).toBe('catalog')
     expect(count).toBe(listCatalogReviewQrProducts().length)
+    expect(pages).toBe(count)
     expect(pdf.subarray(0, 4).toString('utf8')).toBe('%PDF')
     expect(pdf.byteLength).toBeGreaterThan(1000)
   })
