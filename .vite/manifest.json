@@ -1,60 +1,60 @@
 {
-  "_Container-5BejJXFK.js": {
-    "file": "assets/Container-5BejJXFK.js",
+  "_Container-Y2qwrQJm.js": {
+    "file": "assets/Container-Y2qwrQJm.js",
     "name": "Container"
   },
-  "_PageHeader-DlR6d9Gn.js": {
-    "file": "assets/PageHeader-DlR6d9Gn.js",
+  "_PageHeader-AfJTimf3.js": {
+    "file": "assets/PageHeader-AfJTimf3.js",
     "name": "PageHeader",
     "imports": [
-      "_Container-5BejJXFK.js"
+      "_Container-Y2qwrQJm.js"
     ]
   },
-  "_ProductCard-_IN2MiuV.js": {
-    "file": "assets/ProductCard-_IN2MiuV.js",
+  "_ProductCard-BeRIiHKq.js": {
+    "file": "assets/ProductCard-BeRIiHKq.js",
     "name": "ProductCard",
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
       "index.html"
     ]
   },
-  "_gtm-BIzByCi1.js": {
-    "file": "assets/gtm-BIzByCi1.js",
+  "_gtm-CTteOAzt.js": {
+    "file": "assets/gtm-CTteOAzt.js",
     "name": "gtm",
     "imports": [
-      "_Container-5BejJXFK.js"
+      "_Container-Y2qwrQJm.js"
     ]
   },
-  "_product-catalog-J0FmaTIL.js": {
-    "file": "assets/product-catalog-J0FmaTIL.js",
-    "name": "product-catalog"
-  },
-  "_shopify-jzHETnx9.js": {
-    "file": "assets/shopify-jzHETnx9.js",
-    "name": "shopify",
+  "_product-catalog-DJmkG5_3.js": {
+    "file": "assets/product-catalog-DJmkG5_3.js",
+    "name": "product-catalog",
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_product-catalog-J0FmaTIL.js"
+      "index.html"
     ]
   },
-  "_toast-BS7MEUZC.js": {
-    "file": "assets/toast-BS7MEUZC.js",
+  "_review-items-C7NqDwwZ.js": {
+    "file": "assets/review-items-C7NqDwwZ.js",
+    "name": "review-items",
+    "imports": [
+      "_product-catalog-DJmkG5_3.js"
+    ]
+  },
+  "_toast-BQLy1_iF.js": {
+    "file": "assets/toast-BQLy1_iF.js",
     "name": "toast",
     "imports": [
       "index.html"
     ]
   },
   "index.html": {
-    "file": "assets/index-8minAh1t.js",
+    "file": "assets/index-K6QvBgj5.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
-      "_product-catalog-J0FmaTIL.js",
-      "_shopify-jzHETnx9.js"
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js"
     ],
     "dynamicImports": [
       "src/pages/HomePage.tsx",
@@ -64,107 +64,23 @@
       "src/pages/ContactPage.tsx",
       "src/pages/CartPage.tsx",
       "src/pages/OrderThankYouPage.tsx",
-      "_shopify-jzHETnx9.js"
+      "src/lib/shopify.ts"
     ],
     "css": [
-      "assets/index-B8qsl-NI.css"
+      "assets/index-DZHZ-Am4.css"
     ],
     "assets": [
-      "assets/cormorant-garamond-cyrillic-ext-500-normal-Yta7XZ9C.woff2",
-      "assets/cormorant-garamond-cyrillic-ext-500-normal-lsPpqi9g.woff",
-      "assets/cormorant-garamond-cyrillic-500-normal-CyAY5ZLS.woff2",
-      "assets/cormorant-garamond-cyrillic-500-normal-DkJXBcIH.woff",
-      "assets/cormorant-garamond-vietnamese-500-normal-BZGLGj12.woff2",
-      "assets/cormorant-garamond-vietnamese-500-normal-DqXqCC0q.woff",
-      "assets/cormorant-garamond-latin-ext-500-normal-CH1kM7og.woff2",
-      "assets/cormorant-garamond-latin-ext-500-normal-DYeaGGzO.woff",
       "assets/cormorant-garamond-latin-500-normal-BsRWmXhO.woff2",
       "assets/cormorant-garamond-latin-500-normal-zIXX3Q-H.woff",
-      "assets/cormorant-garamond-cyrillic-ext-600-normal-BMhMHfrj.woff2",
-      "assets/cormorant-garamond-cyrillic-ext-600-normal-CsIYWmWK.woff",
-      "assets/cormorant-garamond-cyrillic-600-normal-C2atO-64.woff2",
-      "assets/cormorant-garamond-cyrillic-600-normal-FNmA3REe.woff",
-      "assets/cormorant-garamond-vietnamese-600-normal-BoXdMtcr.woff2",
-      "assets/cormorant-garamond-vietnamese-600-normal-C4HEjEaf.woff",
-      "assets/cormorant-garamond-latin-ext-600-normal-DaBc-lu7.woff2",
-      "assets/cormorant-garamond-latin-ext-600-normal-Dk3-quAP.woff",
       "assets/cormorant-garamond-latin-600-normal-Co1r35X9.woff2",
       "assets/cormorant-garamond-latin-600-normal-2CBVLo0M.woff",
-      "assets/inter-cyrillic-ext-400-normal-BQZuk6qB.woff2",
-      "assets/inter-cyrillic-ext-400-normal-DQukG94-.woff",
-      "assets/inter-cyrillic-400-normal-obahsSVq.woff2",
-      "assets/inter-cyrillic-400-normal-HOLc17fK.woff",
-      "assets/inter-greek-ext-400-normal-DGGRlc-M.woff2",
-      "assets/inter-greek-ext-400-normal-KugGGMne.woff",
-      "assets/inter-greek-400-normal-B4URO6DV.woff2",
-      "assets/inter-greek-400-normal-q2sYcFCs.woff",
-      "assets/inter-vietnamese-400-normal-DMkecbls.woff2",
-      "assets/inter-vietnamese-400-normal-Bbgyi5SW.woff",
-      "assets/inter-latin-ext-400-normal-C1nco2VV.woff2",
-      "assets/inter-latin-ext-400-normal-77YHD8bZ.woff",
       "assets/inter-latin-400-normal-C38fXH4l.woff2",
       "assets/inter-latin-400-normal-CyCys3Eg.woff",
-      "assets/inter-cyrillic-ext-500-normal-B0yAr1jD.woff2",
-      "assets/inter-cyrillic-ext-500-normal-BmqWE9Dz.woff",
-      "assets/inter-cyrillic-500-normal-BasfLYem.woff2",
-      "assets/inter-cyrillic-500-normal-CxZf_p3X.woff",
-      "assets/inter-greek-ext-500-normal-C4iEst2y.woff2",
-      "assets/inter-greek-ext-500-normal-2j5mBUwD.woff",
-      "assets/inter-greek-500-normal-BIZE56-Y.woff2",
-      "assets/inter-greek-500-normal-Xzm54t5V.woff",
-      "assets/inter-vietnamese-500-normal-DOriooB6.woff2",
-      "assets/inter-vietnamese-500-normal-mJboJaSs.woff",
-      "assets/inter-latin-ext-500-normal-CV4jyFjo.woff2",
-      "assets/inter-latin-ext-500-normal-BxGbmqWO.woff",
       "assets/inter-latin-500-normal-Cerq10X2.woff2",
       "assets/inter-latin-500-normal-BL9OpVg8.woff",
-      "assets/inter-cyrillic-ext-600-normal-Dfes3d0z.woff2",
-      "assets/inter-cyrillic-ext-600-normal-Bcila6Z-.woff",
-      "assets/inter-cyrillic-600-normal-CWCymEST.woff2",
-      "assets/inter-cyrillic-600-normal-4D_pXhcN.woff",
-      "assets/inter-greek-ext-600-normal-DRtmH8MT.woff2",
-      "assets/inter-greek-ext-600-normal-B8X0CLgF.woff",
-      "assets/inter-greek-600-normal-plRanbMR.woff2",
-      "assets/inter-greek-600-normal-BZpKdvQh.woff",
-      "assets/inter-vietnamese-600-normal-Cc8MFFhd.woff2",
-      "assets/inter-vietnamese-600-normal-BuLX-rYi.woff",
-      "assets/inter-latin-ext-600-normal-D2bJ5OIk.woff2",
-      "assets/inter-latin-ext-600-normal-CIVaiw4L.woff",
       "assets/inter-latin-600-normal-LgqL8muc.woff2",
       "assets/inter-latin-600-normal-CiBQ2DWP.woff"
     ]
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-500-normal.woff": {
-    "file": "assets/cormorant-garamond-cyrillic-500-normal-DkJXBcIH.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-500-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-500-normal.woff2": {
-    "file": "assets/cormorant-garamond-cyrillic-500-normal-CyAY5ZLS.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-500-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-600-normal.woff": {
-    "file": "assets/cormorant-garamond-cyrillic-600-normal-FNmA3REe.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-600-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-600-normal.woff2": {
-    "file": "assets/cormorant-garamond-cyrillic-600-normal-C2atO-64.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-600-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-500-normal.woff": {
-    "file": "assets/cormorant-garamond-cyrillic-ext-500-normal-lsPpqi9g.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-500-normal.woff2": {
-    "file": "assets/cormorant-garamond-cyrillic-ext-500-normal-Yta7XZ9C.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-600-normal.woff": {
-    "file": "assets/cormorant-garamond-cyrillic-ext-600-normal-CsIYWmWK.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-600-normal.woff2": {
-    "file": "assets/cormorant-garamond-cyrillic-ext-600-normal-BMhMHfrj.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-cyrillic-ext-600-normal.woff2"
   },
   "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff": {
     "file": "assets/cormorant-garamond-latin-500-normal-zIXX3Q-H.woff",
@@ -181,134 +97,6 @@
   "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2": {
     "file": "assets/cormorant-garamond-latin-600-normal-Co1r35X9.woff2",
     "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-500-normal.woff": {
-    "file": "assets/cormorant-garamond-latin-ext-500-normal-DYeaGGzO.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-500-normal.woff2": {
-    "file": "assets/cormorant-garamond-latin-ext-500-normal-CH1kM7og.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-600-normal.woff": {
-    "file": "assets/cormorant-garamond-latin-ext-600-normal-Dk3-quAP.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-600-normal.woff2": {
-    "file": "assets/cormorant-garamond-latin-ext-600-normal-DaBc-lu7.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-600-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-500-normal.woff": {
-    "file": "assets/cormorant-garamond-vietnamese-500-normal-DqXqCC0q.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-500-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-500-normal.woff2": {
-    "file": "assets/cormorant-garamond-vietnamese-500-normal-BZGLGj12.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-500-normal.woff2"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-600-normal.woff": {
-    "file": "assets/cormorant-garamond-vietnamese-600-normal-C4HEjEaf.woff",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-600-normal.woff"
-  },
-  "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-600-normal.woff2": {
-    "file": "assets/cormorant-garamond-vietnamese-600-normal-BoXdMtcr.woff2",
-    "src": "node_modules/@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff": {
-    "file": "assets/inter-cyrillic-400-normal-HOLc17fK.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff2": {
-    "file": "assets/inter-cyrillic-400-normal-obahsSVq.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff": {
-    "file": "assets/inter-cyrillic-500-normal-CxZf_p3X.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff2": {
-    "file": "assets/inter-cyrillic-500-normal-BasfLYem.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff": {
-    "file": "assets/inter-cyrillic-600-normal-4D_pXhcN.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff2": {
-    "file": "assets/inter-cyrillic-600-normal-CWCymEST.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-400-normal-DQukG94-.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-400-normal-BQZuk6qB.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-500-normal-BmqWE9Dz.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-500-normal-B0yAr1jD.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff": {
-    "file": "assets/inter-cyrillic-ext-600-normal-Bcila6Z-.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff2": {
-    "file": "assets/inter-cyrillic-ext-600-normal-Dfes3d0z.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-cyrillic-ext-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff": {
-    "file": "assets/inter-greek-400-normal-q2sYcFCs.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff2": {
-    "file": "assets/inter-greek-400-normal-B4URO6DV.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff": {
-    "file": "assets/inter-greek-500-normal-Xzm54t5V.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff2": {
-    "file": "assets/inter-greek-500-normal-BIZE56-Y.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff": {
-    "file": "assets/inter-greek-600-normal-BZpKdvQh.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff2": {
-    "file": "assets/inter-greek-600-normal-plRanbMR.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff": {
-    "file": "assets/inter-greek-ext-400-normal-KugGGMne.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff2": {
-    "file": "assets/inter-greek-ext-400-normal-DGGRlc-M.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff": {
-    "file": "assets/inter-greek-ext-500-normal-2j5mBUwD.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff2": {
-    "file": "assets/inter-greek-ext-500-normal-C4iEst2y.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff": {
-    "file": "assets/inter-greek-ext-600-normal-B8X0CLgF.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff2": {
-    "file": "assets/inter-greek-ext-600-normal-DRtmH8MT.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-greek-ext-600-normal.woff2"
   },
   "node_modules/@fontsource/inter/files/inter-latin-400-normal.woff": {
     "file": "assets/inter-latin-400-normal-CyCys3Eg.woff",
@@ -334,144 +122,112 @@
     "file": "assets/inter-latin-600-normal-LgqL8muc.woff2",
     "src": "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2"
   },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff": {
-    "file": "assets/inter-latin-ext-400-normal-77YHD8bZ.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff2": {
-    "file": "assets/inter-latin-ext-400-normal-C1nco2VV.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff": {
-    "file": "assets/inter-latin-ext-500-normal-BxGbmqWO.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff2": {
-    "file": "assets/inter-latin-ext-500-normal-CV4jyFjo.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff": {
-    "file": "assets/inter-latin-ext-600-normal-CIVaiw4L.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2": {
-    "file": "assets/inter-latin-ext-600-normal-D2bJ5OIk.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff": {
-    "file": "assets/inter-vietnamese-400-normal-Bbgyi5SW.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff2": {
-    "file": "assets/inter-vietnamese-400-normal-DMkecbls.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-400-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff": {
-    "file": "assets/inter-vietnamese-500-normal-mJboJaSs.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff2": {
-    "file": "assets/inter-vietnamese-500-normal-DOriooB6.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-500-normal.woff2"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff": {
-    "file": "assets/inter-vietnamese-600-normal-BuLX-rYi.woff",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff"
-  },
-  "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff2": {
-    "file": "assets/inter-vietnamese-600-normal-Cc8MFFhd.woff2",
-    "src": "node_modules/@fontsource/inter/files/inter-vietnamese-600-normal.woff2"
+  "src/lib/shopify.ts": {
+    "file": "assets/shopify-CNl12X2L.js",
+    "name": "shopify",
+    "src": "src/lib/shopify.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "_product-catalog-DJmkG5_3.js"
+    ]
   },
   "src/pages/AboutPage.tsx": {
-    "file": "assets/AboutPage-BcDU4e9T.js",
+    "file": "assets/AboutPage-DMZXnyjp.js",
     "name": "AboutPage",
     "src": "src/pages/AboutPage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_product-catalog-J0FmaTIL.js",
+      "_Container-Y2qwrQJm.js",
       "index.html"
     ]
   },
   "src/pages/CartPage.tsx": {
-    "file": "assets/CartPage-CIdq3pip.js",
+    "file": "assets/CartPage-Cymwt0gq.js",
     "name": "CartPage",
     "src": "src/pages/CartPage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
-      "_shopify-jzHETnx9.js",
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
       "index.html",
-      "_PageHeader-DlR6d9Gn.js"
+      "src/lib/shopify.ts",
+      "_PageHeader-AfJTimf3.js"
     ]
   },
   "src/pages/ContactPage.tsx": {
-    "file": "assets/ContactPage-D8_kprab.js",
+    "file": "assets/ContactPage-D6Mz_XtY.js",
     "name": "ContactPage",
     "src": "src/pages/ContactPage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
       "index.html",
-      "_PageHeader-DlR6d9Gn.js",
-      "_toast-BS7MEUZC.js"
+      "_PageHeader-AfJTimf3.js",
+      "_toast-BQLy1_iF.js"
     ]
   },
   "src/pages/HomePage.tsx": {
-    "file": "assets/HomePage-CLAKsPqq.js",
+    "file": "assets/HomePage-COMvk9Br.js",
     "name": "HomePage",
     "src": "src/pages/HomePage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
-      "_product-catalog-J0FmaTIL.js",
-      "_shopify-jzHETnx9.js",
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
       "index.html",
-      "_toast-BS7MEUZC.js",
-      "_ProductCard-_IN2MiuV.js"
+      "_product-catalog-DJmkG5_3.js",
+      "_toast-BQLy1_iF.js",
+      "_ProductCard-BeRIiHKq.js",
+      "_review-items-C7NqDwwZ.js"
+    ],
+    "dynamicImports": [
+      "src/lib/shopify.ts"
     ]
   },
   "src/pages/OrderThankYouPage.tsx": {
-    "file": "assets/OrderThankYouPage-DhagoANA.js",
+    "file": "assets/OrderThankYouPage-C4DhOFTr.js",
     "name": "OrderThankYouPage",
     "src": "src/pages/OrderThankYouPage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
-      "_PageHeader-DlR6d9Gn.js"
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
+      "_PageHeader-AfJTimf3.js"
     ]
   },
   "src/pages/ProductPage.tsx": {
-    "file": "assets/ProductPage-CgSxoaCg.js",
+    "file": "assets/ProductPage-BjceNxhq.js",
     "name": "ProductPage",
     "src": "src/pages/ProductPage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
-      "_product-catalog-J0FmaTIL.js",
-      "_shopify-jzHETnx9.js",
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
       "index.html",
-      "_PageHeader-DlR6d9Gn.js"
+      "_product-catalog-DJmkG5_3.js",
+      "_PageHeader-AfJTimf3.js",
+      "_review-items-C7NqDwwZ.js"
+    ],
+    "dynamicImports": [
+      "src/lib/shopify.ts"
     ]
   },
   "src/pages/ShopPage.tsx": {
-    "file": "assets/ShopPage-DI8Y0UUn.js",
+    "file": "assets/ShopPage-CK79unON.js",
     "name": "ShopPage",
     "src": "src/pages/ShopPage.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_Container-5BejJXFK.js",
-      "_gtm-BIzByCi1.js",
-      "_product-catalog-J0FmaTIL.js",
-      "_shopify-jzHETnx9.js",
+      "_Container-Y2qwrQJm.js",
+      "_gtm-CTteOAzt.js",
       "index.html",
-      "_PageHeader-DlR6d9Gn.js",
-      "_ProductCard-_IN2MiuV.js"
+      "_product-catalog-DJmkG5_3.js",
+      "_PageHeader-AfJTimf3.js",
+      "_ProductCard-BeRIiHKq.js"
+    ],
+    "dynamicImports": [
+      "src/lib/shopify.ts"
     ]
   }
 }
