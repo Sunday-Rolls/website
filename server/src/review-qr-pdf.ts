@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import PDFDocument from 'pdfkit'
 import QRCode from 'qrcode'
@@ -11,6 +14,13 @@ const require = createRequire(import.meta.url)
 const catalog = require('./data/review-qr-products.json') as {
   products: Array<{ handle: string; title: string; category?: string | null }>
 }
+
+const LOGO_PNG = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), 'assets/sunday-rolls-logo.png'),
+)
+
+/** Wordmark is 561×92 — keep aspect for cutouts. */
+const LOGO_ASPECT = 561 / 92
 
 export type ReviewQrSiteTarget = 'pages' | 'live'
 
@@ -32,6 +42,8 @@ export const REVIEW_QR_SITE_TARGETS: Record<
 
 /** Cutouts per product page (3×3 on letter). */
 export const REVIEW_QR_CUTOUTS_PER_PAGE = 9
+
+export const REVIEW_QR_CUTOUT_HEADLINE = 'Leave a Review!'
 
 export function parseReviewQrTarget(value: string | undefined): ReviewQrSiteTarget {
   return value === 'live' ? 'live' : 'pages'
@@ -87,11 +99,10 @@ function drawCutoutCell(
     cellHeight: number
     qrSize: number
     png: Buffer
-    title: string
-    handle: string
   },
 ) {
-  const { x, y, cellWidth, cellHeight, qrSize, png, title, handle } = opts
+  const { x, y, cellWidth, cellHeight, qrSize, png } = opts
+  const pad = 8
 
   doc
     .save()
@@ -103,26 +114,27 @@ function drawCutoutCell(
     .undash()
     .restore()
 
-  const imgX = x + (cellWidth - qrSize) / 2
-  const imgY = y + 10
-  doc.image(png, imgX, imgY, { width: qrSize, height: qrSize })
+  const logoWidth = Math.min(cellWidth - pad * 2, 118)
+  const logoHeight = logoWidth / LOGO_ASPECT
+  const logoX = x + (cellWidth - logoWidth) / 2
+  const logoY = y + pad
+  doc.image(LOGO_PNG, logoX, logoY, { width: logoWidth, height: logoHeight })
 
-  const textTop = imgY + qrSize + 8
+  const headlineY = logoY + logoHeight + 6
   doc
     .fillColor('#1b3a2f')
     .font('Times-Bold')
-    .fontSize(9)
-    .text(title, x + 6, textTop, {
-      width: cellWidth - 12,
+    .fontSize(11)
+    .text(REVIEW_QR_CUTOUT_HEADLINE, x + pad, headlineY, {
+      width: cellWidth - pad * 2,
       align: 'center',
-      height: 28,
-      ellipsis: true,
+      lineBreak: false,
     })
-  doc
-    .fillColor('#666666')
-    .font('Helvetica')
-    .fontSize(7)
-    .text(handle, x + 6, textTop + 30, { width: cellWidth - 12, align: 'center' })
+
+  const headlineBottom = headlineY + 16
+  const imgX = x + (cellWidth - qrSize) / 2
+  const imgY = headlineBottom + Math.max(4, (y + cellHeight - pad - qrSize - headlineBottom) / 2)
+  doc.image(png, imgX, imgY, { width: qrSize, height: qrSize })
 }
 
 /** One letter page filled with identical cutouts for a single product. */
@@ -135,27 +147,29 @@ export function drawProductCutoutPage(
   const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right
   const cols = 3
   const rows = 3
-  const gap = 12
+  const gap = 10
 
+  // Sheet label only (not on cutouts) — so you know which product page you're printing.
   doc
     .fillColor('#1b3a2f')
     .font('Times-Bold')
-    .fontSize(16)
+    .fontSize(14)
     .text(product.title, doc.page.margins.left, doc.page.margins.top, { width: pageWidth })
   doc
     .fillColor('#555555')
     .font('Helvetica')
     .fontSize(8)
     .text(
-      `${product.handle} · ${meta.siteLabel} · Scan → leave a review · Cut along dashed lines`,
+      `${product.handle} · ${meta.siteLabel} · Cut along dashed lines · Drop in box`,
       { width: pageWidth },
     )
 
-  const headerBottom = doc.y + 10
+  const headerBottom = doc.y + 8
   const gridHeight = doc.page.height - doc.page.margins.bottom - headerBottom
   const cellWidth = (pageWidth - gap * (cols - 1)) / cols
   const cellHeight = (gridHeight - gap * (rows - 1)) / rows
-  const qrSize = Math.min(150, cellWidth - 16, cellHeight - 56)
+  // Logo + headline ~40pt; leave that out of QR budget.
+  const qrSize = Math.min(148, cellWidth - 20, cellHeight - 52)
 
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
@@ -168,8 +182,6 @@ export function drawProductCutoutPage(
         cellHeight,
         qrSize,
         png,
-        title: product.title,
-        handle: product.handle,
       })
     }
   }
@@ -191,9 +203,9 @@ export async function buildReviewQrPdf(target: ReviewQrSiteTarget): Promise<{
     size: 'LETTER',
     margin: 36,
     info: {
-      Title: 'Sunday Rolls — Product review QR codes',
+      Title: 'Sunday Rolls — Leave a Review QR codes',
       Author: 'Sunday Rolls',
-      Subject: `One page per product · ${site.label} (${site.url})`,
+      Subject: `One page per product · cutouts · ${site.label} (${site.url})`,
     },
   })
 

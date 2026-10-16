@@ -3,6 +3,7 @@ import {
   buildReviewQrPdf,
   listCatalogReviewQrProducts,
   parseReviewQrTarget,
+  REVIEW_QR_CUTOUT_HEADLINE,
   reviewQrLandingUrl,
 } from './review-qr-pdf.js'
 
@@ -37,5 +38,6 @@ describe('review QR PDF helpers', () => {
     expect(pages).toBe(count)
     expect(pdf.subarray(0, 4).toString('utf8')).toBe('%PDF')
     expect(pdf.byteLength).toBeGreaterThan(1000)
+    expect(REVIEW_QR_CUTOUT_HEADLINE).toBe('Leave a Review!')
   })
 })
