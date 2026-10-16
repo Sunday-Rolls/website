@@ -93,6 +93,21 @@ describe('placeholderProducts', () => {
     expect(result.valid).toBe(true)
   })
 
+  it('keeps each product gallery to that product’s own photos', () => {
+    const grey = placeholderProducts.find((entry) => entry.handle === 'retro-roller-grey')
+    const birdie = placeholderProducts.find((entry) => entry.handle === 'the-birdie-machine')
+
+    expect(grey?.images?.map((image) => image.url)).toEqual([
+      '/assets/products/retro-roller-grey.jpg',
+    ])
+    expect(birdie?.images?.map((image) => image.url)).toEqual([
+      '/assets/products/the-birdie-machine.jpg',
+      '/assets/products/the-birdie-machine-pair.jpg',
+      '/assets/products/the-birdie-machine-open.jpg',
+      '/assets/products/the-birdie-machine-back.jpg',
+    ])
+  })
+
   it('includes key features and dimensions for product detail pages', () => {
     const product = placeholderProducts.find((entry) => entry.handle === 'the-doodle')
 

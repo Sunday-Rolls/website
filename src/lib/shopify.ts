@@ -98,7 +98,7 @@ const PRODUCT_SELECTION = `
     url
     altText
   }
-  images(first: 5) {
+  images(first: 20) {
     nodes {
       url
       altText

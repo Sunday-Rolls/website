@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import productContent from '@/content/pages/product.json'
 import reviewsData from '@/data/reviews.json'
 import { ProductPage } from '@/pages/ProductPage'
+import { fetchProductByHandle } from '@/lib/shopify'
 import { renderWithRouter } from '@/test/test-utils'
 
 vi.mock('@/lib/shopify', async () => {
@@ -138,6 +139,45 @@ describe('ProductPage', () => {
       await screen.findByRole('heading', { level: 1, name: productContent.notFound.title }),
     ).toBeInTheDocument()
     expect(screen.getByText(productContent.notFound.description)).toBeInTheDocument()
+  })
+
+  it('shows the store photos for that product instead of the catalog assortment', async () => {
+    vi.mocked(fetchProductByHandle).mockResolvedValueOnce({
+      id: 'gid://shopify/Product/1',
+      handle: 'retro-roller-grey',
+      title: 'Retro Roller - Grey',
+      description: 'Store description',
+      price: '$55.00',
+      imageUrl: 'https://cdn.shopify.com/grey-front.jpg',
+      imageAlt: 'Retro Roller - Grey',
+      images: [
+        { url: 'https://cdn.shopify.com/grey-front.jpg', alt: 'Retro Roller - Grey' },
+        { url: 'https://cdn.shopify.com/grey-back.jpg', alt: 'Retro Roller - Grey back' },
+      ],
+    })
+
+    renderWithRouter(<ProductPage />, {
+      route: '/products/retro-roller-grey',
+      path: '/products/:handle',
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('img', { name: 'Retro Roller - Grey' })).toHaveAttribute(
+        'src',
+        'https://cdn.shopify.com/grey-front.jpg?width=800',
+      )
+    })
+
+    const thumbnails = screen.getAllByRole('button', { name: /Show image/ })
+    expect(thumbnails).toHaveLength(2)
+    expect(thumbnails[0].querySelector('img')).toHaveAttribute(
+      'src',
+      'https://cdn.shopify.com/grey-front.jpg',
+    )
+    expect(thumbnails[1].querySelector('img')).toHaveAttribute(
+      'src',
+      'https://cdn.shopify.com/grey-back.jpg',
+    )
   })
 
   it('uses Figma gallery fallback when needed', async () => {

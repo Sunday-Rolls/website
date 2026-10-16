@@ -31,11 +31,12 @@ export function ProductPage() {
     fetchProductByHandle(handle).then((item) => {
       if (cancelled) return
       if (item && known) {
+        const useStoreImages = Boolean(item.images?.length)
         setProduct({
           ...item,
-          imageUrl: known.imageUrl ?? item.imageUrl,
-          imageAlt: known.imageAlt ?? item.imageAlt,
-          images: known.images?.length ? known.images : item.images,
+          imageUrl: useStoreImages ? item.imageUrl : (known.imageUrl ?? item.imageUrl),
+          imageAlt: useStoreImages ? item.imageAlt : (known.imageAlt ?? item.imageAlt),
+          images: useStoreImages ? item.images : known.images,
           description: item.description || known.description,
           material: known.material ?? item.material,
           category: known.category ?? item.category,

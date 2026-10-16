@@ -6,10 +6,8 @@ import type {
   ProductImage,
   ShopifyProduct,
 } from '@/lib/shopify'
-import { getProductImage, shopAssets } from '@/assets'
+import { getProductImage } from '@/assets'
 import { assetUrl } from '@/lib/asset-url'
-
-const PLACEHOLDER_GALLERY_COUNT = 5
 
 function formatCatalogPrice(amount: string | undefined): string {
   if (!amount) return '$55.00'
@@ -25,29 +23,9 @@ function buildPlaceholderGallery(product: CatalogProduct): ProductImage[] {
     alt: index === 0 ? product.title : `${product.title} — view ${index + 1}`,
   }))
 
-  // Real multi-shot sets should not be padded with other products.
-  if (own.length > 1) return own
+  if (own.length > 0) return own
 
-  const primary = own[0]?.url ?? getProductImage(product.handle)
-  const pool = shopAssets.products.filter((url) => url !== primary)
-  const images: ProductImage[] = [{ url: primary, alt: product.title }]
-
-  for (const url of pool) {
-    if (images.length >= PLACEHOLDER_GALLERY_COUNT) break
-    images.push({
-      url,
-      alt: `${product.title} view ${images.length + 1}`,
-    })
-  }
-
-  while (images.length < PLACEHOLDER_GALLERY_COUNT) {
-    images.push({
-      url: primary,
-      alt: `${product.title} view ${images.length + 1}`,
-    })
-  }
-
-  return images
+  return [{ url: getProductImage(product.handle), alt: product.title }]
 }
 
 export type CatalogProductStatus = 'Published' | 'Draft' | 'Unpublished' | 'Deleted' | string
