@@ -308,6 +308,10 @@ body {
   align-items: center;
   gap: 0.35rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.workbook-panel .panel-actions {
+  gap: 0.5rem;
 }
 .icon-btn {
   display: inline-grid;

@@ -368,12 +368,16 @@ export function buildPnL(input: {
   /** Unit manufacturing cost used for per-unit profit when line COGS unavailable. */
   unitCogs?: number
 }): PnLResponse {
-  const { year, month, expenses, cashForecast } = input
+  const { month, expenses, cashForecast } = input
   const orders = preferLiveOrders(input.orders)
   const unitCogs = input.unitCogs ?? 15
 
+  // Prefer year from YYYY-MM so a mismatched year query can't zero out the Month column.
+  const year =
+    month && /^\d{4}-\d{2}$/.test(month) ? Number(month.slice(0, 4)) : input.year
+
   const ytdOrders = orders.filter((o) => o.orderedAt.startsWith(String(year)))
-  const monthOrders = month ? ytdOrders.filter((o) => monthKey(o.orderedAt) === month) : []
+  const monthOrders = month ? orders.filter((o) => monthKey(o.orderedAt) === month) : []
 
   const ytdPrevOrders = orders.filter((o) => o.orderedAt.startsWith(String(year - 1)))
   // Compare selected month vs previous calendar month for net income sparkline-style KPI
@@ -393,7 +397,7 @@ export function buildPnL(input: {
   const units = (list: Order[]) => sum(list.flatMap((o) => o.lines.map((l) => l.quantity)))
 
   const ytdExpenses = expenses.filter((e) => e.spentAt.startsWith(String(year)))
-  const monthExpenses = month ? ytdExpenses.filter((e) => e.spentAt.startsWith(month)) : []
+  const monthExpenses = month ? expenses.filter((e) => e.spentAt.startsWith(month)) : []
 
   const expenseTotal = (list: Expense[], bucket: 'cogs' | 'sga', category?: string) =>
     sum(
@@ -529,8 +533,8 @@ export function buildPnL(input: {
     incomeStatement,
     revenueByChannel: channelStats,
     monthlyRevenueByChannel: [...monthMap.entries()]
+      .filter(([m]) => m.startsWith(String(year)))
       .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-13)
       .map(([m, v]) => ({ month: m, ...v })),
     cashForecast: [...cashForecast].sort((a, b) => a.monthEnd.localeCompare(b.monthEnd)),
   }

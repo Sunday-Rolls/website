@@ -98,4 +98,37 @@ describe('dashboard auth + overview', () => {
     expect(google?.campaigns?.length).toBeGreaterThan(1)
     expect(google.campaigns.some((c: { campaign: string }) => c.campaign === 'Brand Search')).toBe(true)
   })
+
+  it('downloads and re-uploads the editable data workbook', async () => {
+    const { app } = await setup()
+    const login = await app.request('/dashboard/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'sam@example.com', password: 'test-password-123' }),
+    })
+    const cookie = login.headers.get('set-cookie')!.split(';')[0]
+
+    const download = await app.request('/dashboard/api/workbook', {
+      headers: { Cookie: cookie },
+    })
+    expect(download.status).toBe(200)
+    expect(download.headers.get('content-type')).toContain(
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    const bytes = Buffer.from(await download.arrayBuffer())
+    expect(bytes.byteLength).toBeGreaterThan(1000)
+
+    const form = new FormData()
+    form.append('file', new Blob([bytes], { type: download.headers.get('content-type')! }), 'dash.xlsx')
+    const upload = await app.request('/dashboard/api/workbook', {
+      method: 'POST',
+      headers: { Cookie: cookie },
+      body: form,
+    })
+    expect(upload.status).toBe(200)
+    const body = await upload.json()
+    expect(body.ok).toBe(true)
+    expect(body.data.upsertedOrders).toBeGreaterThan(0)
+    expect(body.data.expenses).toBeGreaterThan(0)
+  })
 })

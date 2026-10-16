@@ -568,10 +568,26 @@ function setPnLFeedback(message, isError = false) {
   el.classList.toggle('error', isError)
 }
 
+function syncPnLPeriodControls(source) {
+  const yearEl = $('#pnl-year')
+  const monthEl = $('#pnl-month')
+  if (!yearEl || !monthEl) return
+  if (source === 'month' && /^\d{4}-\d{2}$/.test(monthEl.value)) {
+    yearEl.value = monthEl.value.slice(0, 4)
+  } else if (source === 'year' && yearEl.value) {
+    const mm = /^\d{4}-\d{2}$/.test(monthEl.value) ? monthEl.value.slice(5, 7) : '01'
+    monthEl.value = `${yearEl.value}-${mm}`
+  }
+}
+
 async function loadPnL() {
-  const year = $('#pnl-year').value
-  const month = $('#pnl-month').value
-  const { data } = await api(`/pnl?year=${year}&month=${encodeURIComponent(month)}`)
+  const monthEl = $('#pnl-month')
+  const yearEl = $('#pnl-year')
+  const month = monthEl?.value || ''
+  const year =
+    /^\d{4}-\d{2}$/.test(month) ? month.slice(0, 4) : yearEl?.value || String(new Date().getFullYear())
+  if (yearEl && yearEl.value !== year) yearEl.value = year
+  const { data } = await api(`/pnl?year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`)
   renderPnL(data)
   await loadManualOrders()
 }
@@ -827,8 +843,17 @@ function bind() {
   }
   $('#pnl-refresh')?.addEventListener('click', () => loadPnL().catch(showError))
   $('#pnl-refresh-cash')?.addEventListener('click', () => loadPnL().catch(showError))
-  $('#pnl-year')?.addEventListener('change', () => loadPnL().catch(showError))
-  $('#pnl-month')?.addEventListener('change', () => loadPnL().catch(showError))
+
+  let pnlPeriodTimer = null
+  function onPnLPeriodChange(source) {
+    syncPnLPeriodControls(source)
+    clearTimeout(pnlPeriodTimer)
+    pnlPeriodTimer = setTimeout(() => loadPnL().catch(showError), 80)
+  }
+  for (const eventName of ['change', 'input']) {
+    $('#pnl-year')?.addEventListener(eventName, () => onPnLPeriodChange('year'))
+    $('#pnl-month')?.addEventListener(eventName, () => onPnLPeriodChange('month'))
+  }
 
   $('#sync-ga4-btn')?.addEventListener('click', async () => {
     setSyncFeedback('Syncing GA4…')
@@ -934,25 +959,55 @@ function bind() {
     }
   })
 
-  async function uploadCsv(input, endpoint, label) {
+  async function downloadWorkbook() {
+    const btn = $('#workbook-download')
+    if (btn) btn.disabled = true
+    setPnLFeedback('Building workbook…')
+    try {
+      const res = await fetch('/dashboard/api/workbook', { credentials: 'same-origin' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to download workbook')
+      }
+      const blob = await res.blob()
+      const stamp = new Date().toISOString().slice(0, 10)
+      const href = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = href
+      a.download = `sunday-rolls-dashboard-${stamp}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(href)
+      setPnLFeedback('Downloaded workbook — edit sheets, then upload')
+    } catch (err) {
+      setPnLFeedback(err.message || 'Workbook download failed', true)
+    } finally {
+      if (btn) btn.disabled = false
+    }
+  }
+
+  async function uploadWorkbook(input) {
     const file = input?.files?.[0]
     if (!file) {
-      setPnLFeedback(`Choose a ${label} CSV first`, true)
+      setPnLFeedback('Choose an .xlsx workbook first', true)
       return
     }
     setPnLFeedback(`Uploading ${file.name}…`)
     try {
       const body = new FormData()
       body.append('file', file)
-      const res = await fetch(`/dashboard/api${endpoint}`, {
+      const res = await fetch('/dashboard/api/workbook', {
         method: 'POST',
         credentials: 'same-origin',
         body,
       })
       const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json.error || `${label} upload failed`)
+      if (!res.ok) throw new Error(json.error || 'Workbook upload failed')
+      const d = json.data || {}
       setPnLFeedback(
-        `${label}: ${json.data.rows} rows${json.data.warnings?.length ? ` · ${json.data.warnings[0]}` : ''}`,
+        `Workbook applied: ${d.upsertedOrders ?? 0} revenue, ${d.expenses ?? 0} expenses, ${d.cash ?? 0} cash` +
+          (d.warnings?.length ? ` · ${d.warnings[0]}` : ''),
       )
       input.value = ''
       await loadPnL()
@@ -961,17 +1016,11 @@ function bind() {
     }
   }
 
-  function bindCsvUpload(triggerId, inputId, endpoint, label) {
-    const trigger = $(triggerId)
-    const input = $(inputId)
-    if (!trigger || !input) return
-    trigger.addEventListener('click', () => input.click())
-    input.addEventListener('change', () => uploadCsv(input, endpoint, label).catch(showError))
-  }
-
-  bindCsvUpload('#pnl-upload-revenue', '#revenue-upload', '/import/revenue', 'Revenue')
-  bindCsvUpload('#pnl-upload-expenses', '#expense-upload', '/import/expenses', 'Expenses')
-  bindCsvUpload('#pnl-upload-cash', '#cash-upload', '/import/cash', 'Cash')
+  $('#workbook-download')?.addEventListener('click', () => downloadWorkbook().catch(showError))
+  $('#workbook-upload-btn')?.addEventListener('click', () => $('#workbook-upload')?.click())
+  $('#workbook-upload')?.addEventListener('change', (event) => {
+    uploadWorkbook(event.currentTarget).catch(showError)
+  })
 
   $('#manual-revenue-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
