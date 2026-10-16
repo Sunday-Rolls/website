@@ -37,7 +37,11 @@ import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analyt
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
 import { pingShopifyShop } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
-import type { PeriodKey } from '../analytics/types.js'
+import type { PeriodKey, PublicUser } from '../analytics/types.js'
+import type { ContactStore } from '../contact-store.js'
+import type { ContactPayload } from '../mail.js'
+import type { ReviewStore } from '../reviews.js'
+import { isWorkflowName, runWorkflow } from './workflows.js'
 import { clientIp } from '../app.js'
 import type { RateLimiter } from '../rate-limit.js'
 import {
@@ -55,11 +59,24 @@ export type DashboardDeps = {
   /** When true, cookie Secure flag is set. */
   secureCookies: boolean
   cutoverAt: string | null
+  reviews?: ReviewStore
+  contacts?: ContactStore
+  sendContactEmail?: (payload: ContactPayload) => Promise<void>
+  resendApiKey?: string
+  contactToEmail?: string
 }
 
 export function createDashboardRoutes(deps: DashboardDeps) {
   const app = new Hono()
   const { store, checkRateLimit, secureCookies } = deps
+
+  app.use('*', async (c, next) => {
+    const path = c.req.path
+    if (!path.includes('/api/') || /\/api\/(login|logout|me)$/.test(path)) return next()
+    const gate = await requireAdmin(c, store)
+    if (gate instanceof Response) return gate
+    return next()
+  })
 
   app.get('/', async (c) => file(c, 'index.html', 'text/html; charset=utf-8'))
   app.get('/styles.css', async (c) => file(c, 'styles.css', 'text/css; charset=utf-8'))
@@ -99,6 +116,9 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
       return c.json({ ok: false, error: 'Invalid email or password' }, 401)
     }
+    if (!user.isAdmin) {
+      return c.json({ ok: false, error: 'Admin access required' }, 403)
+    }
 
     const sessionId = newSessionId()
     await store.createSession({
@@ -113,7 +133,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       path: '/dashboard',
       maxAge: 14 * 24 * 60 * 60,
     })
-    return c.json({ ok: true, user: { id: user.id, email: user.email, name: user.name } })
+    return c.json({ ok: true, user: publicUser(user) })
   })
 
   app.post('/api/logout', async (c) => {
@@ -634,6 +654,25 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     }
   })
 
+  app.post('/api/workflows/:name', async (c) => {
+    const name = c.req.param('name')
+    if (!isWorkflowName(name)) return c.json({ ok: false, error: 'Unknown workflow' }, 404)
+    const result = await runWorkflow(name, {
+      reviews: deps.reviews,
+      contacts: deps.contacts,
+      sendContactEmail: deps.sendContactEmail,
+      resendApiKey: deps.resendApiKey,
+      contactToEmail: deps.contactToEmail,
+      shopify: loadShopifyCredentialsFromEnv(),
+      storefrontToken: (
+        process.env.VITE_SHOPIFY_STOREFRONT_TOKEN ||
+        process.env.SHOPIFY_STOREFRONT_TOKEN ||
+        ''
+      ).trim(),
+    })
+    return c.json({ ok: result.ok, data: { steps: result.steps } })
+  })
+
   app.post('/api/import/cash', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
@@ -677,11 +716,23 @@ async function readUploadText(c: Context): Promise<string | null> {
   return null
 }
 
+function publicUser(user: PublicUser): PublicUser {
+  return { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin }
+}
+
 async function currentUser(c: Context, store: AnalyticsStore) {
   const sessionId = getCookie(c, SESSION_COOKIE)
   if (!sessionId) return null
   const session = await store.getSession(sessionId)
   return session?.user ?? null
+}
+
+/** 401 without a session, 403 for a signed-in user who is not an admin. */
+async function requireAdmin(c: Context, store: AnalyticsStore): Promise<Response | PublicUser> {
+  const user = await currentUser(c, store)
+  if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+  if (!user.isAdmin) return c.json({ ok: false, error: 'Admin access required' }, 403)
+  return user
 }
 
 function parsePeriod(value: string | undefined): PeriodKey {
@@ -721,6 +772,7 @@ export async function ensureBootstrapUsers(
       email,
       name: user.name,
       passwordHash: await hashPassword(user.password),
+      isAdmin: true,
     })
   }
 }

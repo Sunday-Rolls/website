@@ -142,7 +142,7 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       if (!user) return null
       return {
         ...session,
-        user: { id: user.id, email: user.email, name: user.name },
+        user: { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin === true },
       }
     },
 
@@ -345,7 +345,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
 
     async getUserByEmail(email) {
       const { rows } = await db.query(
-        `SELECT id, email, name, password_hash, created_at FROM dashboard_users WHERE email = $1`,
+        `SELECT id, email, name, password_hash, is_admin, created_at FROM dashboard_users WHERE email = $1`,
         [email],
       )
       return rows[0] ? rowToUser(rows[0]) : null
@@ -353,7 +353,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
 
     async getUserById(id) {
       const { rows } = await db.query(
-        `SELECT id, email, name, password_hash, created_at FROM dashboard_users WHERE id = $1`,
+        `SELECT id, email, name, password_hash, is_admin, created_at FROM dashboard_users WHERE id = $1`,
         [id],
       )
       return rows[0] ? rowToUser(rows[0]) : null
@@ -361,11 +361,11 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
 
     async upsertUser(user) {
       const { rows } = await db.query(
-        `INSERT INTO dashboard_users (id, email, name, password_hash)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO dashboard_users (id, email, name, password_hash, is_admin)
+         VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, password_hash = EXCLUDED.password_hash
-         RETURNING id, email, name, password_hash, created_at`,
-        [user.id, user.email, user.name, user.passwordHash],
+         RETURNING id, email, name, password_hash, is_admin, created_at`,
+        [user.id, user.email, user.name, user.passwordHash, user.isAdmin === true],
       )
       return rowToUser(rows[0])
     },
@@ -379,7 +379,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
 
     async getSession(id) {
       const { rows } = await db.query(
-        `SELECT s.id, s.user_id, s.expires_at, u.email, u.name
+        `SELECT s.id, s.user_id, s.expires_at, u.email, u.name, u.is_admin
          FROM dashboard_sessions s
          JOIN dashboard_users u ON u.id = s.user_id
          WHERE s.id = $1 AND s.expires_at > now()`,
@@ -391,7 +391,12 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         id: str(row.id),
         userId: str(row.user_id),
         expiresAt: toIso(row.expires_at),
-        user: { id: str(row.user_id), email: str(row.email), name: str(row.name) },
+        user: {
+          id: str(row.user_id),
+          email: str(row.email),
+          name: str(row.name),
+          isAdmin: row.is_admin === true,
+        },
       }
     },
 
@@ -947,6 +952,7 @@ function rowToUser(row: Record<string, unknown>): DashboardUser {
     email: str(row.email),
     name: str(row.name),
     passwordHash: str(row.password_hash),
+    isAdmin: row.is_admin === true,
     createdAt: toIso(row.created_at),
   }
 }

@@ -9,6 +9,7 @@ export type StoredContactMessage = ContactPayload & {
 
 export interface ContactStore {
   create(message: ContactPayload, emailDelivered: boolean): Promise<StoredContactMessage>
+  deleteById(id: string): Promise<boolean>
 }
 
 type Queryable = {
@@ -61,6 +62,11 @@ export function createPgContactStore(db: Queryable): ContactStore & { migrate():
         createdAt: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
       }
     },
+
+    async deleteById(id) {
+      const { rows } = await db.query(`DELETE FROM contact_messages WHERE id = $1 RETURNING id`, [id])
+      return rows.length > 0
+    },
   }
 }
 
@@ -77,6 +83,13 @@ export function createMemoryContactStore(): ContactStore {
       }
       messages.unshift(saved)
       return saved
+    },
+
+    async deleteById(id) {
+      const index = messages.findIndex((message) => message.id === id)
+      if (index === -1) return false
+      messages.splice(index, 1)
+      return true
     },
   }
 }

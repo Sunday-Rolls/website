@@ -41,6 +41,7 @@
             <button type="button" data-page="pnl">P&amp;L</button>
             <button type="button" data-page="roas">ROAS</button>
             <button type="button" data-page="data">Data</button>
+            <button type="button" data-page="tests">Tests</button>
           </nav>
           <div class="top-actions">
             <span id="user-name"></span>
@@ -293,6 +294,41 @@
             <h2>Sync history</h2>
             <p class="muted">Manual revenue, expenses, and cash: use <strong>P&amp;L → Download / Upload workbook</strong> (one Excel file, replace-on-upload).</p>
             <div id="data-sync-status"></div>
+          </article>
+        </div>
+
+        <div id="tests-page" class="page hidden">
+          <article class="panel">
+            <h2>Reviews</h2>
+            <p class="muted">Posts a review, checks the product list the site reads, then deletes it.</p>
+            <div class="sync-actions">
+              <button type="button" class="btn btn-primary" data-workflow="reviews">Run review test</button>
+            </div>
+            <ol id="workflow-reviews" class="workflow-steps"></ol>
+          </article>
+          <article class="panel">
+            <h2>Contact us</h2>
+            <p class="muted">Sends a contact email through Resend, then deletes the saved message. The email stays in the inbox.</p>
+            <div class="sync-actions">
+              <button type="button" class="btn btn-primary" data-workflow="contact">Run contact test</button>
+            </div>
+            <ol id="workflow-contact" class="workflow-steps"></ol>
+          </article>
+          <article class="panel">
+            <h2>Mailing list</h2>
+            <p class="muted">Subscribes a unique test address, confirms it is on the Shopify list, then deletes that customer.</p>
+            <div class="sync-actions">
+              <button type="button" class="btn btn-primary" data-workflow="mailing-list">Run mailing list test</button>
+            </div>
+            <ol id="workflow-mailing-list" class="workflow-steps"></ol>
+          </article>
+          <article class="panel">
+            <h2>Orders</h2>
+            <p class="muted">Creates a $0 Shopify test order, reads it back, then deletes it. Inventory is left alone.</p>
+            <div class="sync-actions">
+              <button type="button" class="btn btn-primary" data-workflow="orders">Run order test</button>
+            </div>
+            <ol id="workflow-orders" class="workflow-steps"></ol>
           </article>
         </div>
       </section>

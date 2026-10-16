@@ -510,6 +510,17 @@ body {
   gap: 0.55rem;
   margin: 0.85rem 0 0;
 }
+.workflow-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0.85rem 0 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.workflow-steps:empty { display: none; }
+.workflow-steps li { font-size: 0.9rem; }
+.workflow-steps li.ok { color: var(--up); }
+.workflow-steps li.fail { color: var(--down); }
 .btn {
   font: inherit;
   font-weight: 600;

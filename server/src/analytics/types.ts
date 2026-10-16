@@ -13,6 +13,7 @@ export type DashboardUser = {
   email: string
   name: string
   passwordHash: string
+  isAdmin: boolean
   createdAt: string
 }
 
@@ -139,4 +140,5 @@ export type PublicUser = {
   id: string
   email: string
   name: string
+  isAdmin: boolean
 }

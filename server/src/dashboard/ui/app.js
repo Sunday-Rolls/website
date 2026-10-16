@@ -710,17 +710,50 @@ function setPage(page) {
   $('#pnl-page').classList.toggle('hidden', page !== 'pnl')
   $('#roas-page').classList.toggle('hidden', page !== 'roas')
   $('#data-page')?.classList.toggle('hidden', page !== 'data')
+  $('#tests-page')?.classList.toggle('hidden', page !== 'tests')
   if (page === 'overview') loadOverview().catch(showError)
   if (page === 'pnl') loadPnL().catch(showError)
   if (page === 'roas') loadRoas().catch(showError)
   if (page === 'data') loadDataPage().catch(showError)
 }
 
+function renderWorkflowSteps(name, steps) {
+  const list = $(`#workflow-${name}`)
+  if (!list) return
+  list.replaceChildren(
+    ...(steps || []).map((step) => {
+      const li = document.createElement('li')
+      li.className = step.ok ? 'ok' : 'fail'
+      li.textContent = `${step.ok ? 'Passed' : 'Failed'}: ${step.name}. ${step.detail}`
+      return li
+    }),
+  )
+}
+
+async function runWorkflow(name, button) {
+  if (button) button.disabled = true
+  renderWorkflowSteps(name, [])
+  try {
+    const body = await api(`/workflows/${name}`, { method: 'POST', body: '{}' })
+    renderWorkflowSteps(name, body.data?.steps || [])
+  } catch (err) {
+    renderWorkflowSteps(name, [{ ok: false, name: 'Run', detail: err.message || 'Request failed' }])
+    if (err.status === 401 || err.status === 403) showError(err)
+  } finally {
+    if (button) button.disabled = false
+  }
+}
+
 function showError(err) {
   console.error(err)
-  if (err.status === 401) {
+  if (err.status === 401 || err.status === 403) {
     state.user = null
     show('login')
+    if (err.status === 403) {
+      const error = $('#login-error')
+      error.textContent = err.message || 'Admin access required'
+      error.hidden = false
+    }
   }
 }
 
@@ -752,6 +785,11 @@ function bind() {
           password: $('#login-password').value,
         }),
       })
+      if (!data.user?.isAdmin) {
+        error.textContent = 'Admin access required'
+        error.hidden = false
+        return
+      }
       state.user = data.user
       $('#user-name').textContent = data.user.name
       show('dash')
@@ -830,6 +868,12 @@ function bind() {
     exportReviewQrPdf().catch(showError)
   })
 
+  for (const button of document.querySelectorAll('[data-workflow]')) {
+    button.addEventListener('click', () => {
+      runWorkflow(button.dataset.workflow, button).catch(showError)
+    })
+  }
+
   $('#sync-shopify-btn')?.addEventListener('click', async () => {
     setSyncFeedback('Syncing Shopify orders…')
     try {
@@ -839,62 +883,6 @@ function bind() {
       })
       setSyncFeedback(
         `Shopify synced: ${data.orders} orders · ${data.abandoned ?? 0} abandoned · ${data.recovered ?? 0} recovered`,
-      )
-      loadDataPage().catch(showError)
-    } catch (err) {
-      setSyncFeedback(err.message, true)
-    }
-  })
-
-  $('#drive-refresh-btn')?.addEventListener('click', () => loadDriveFiles().catch(showError))
-
-  $('#sync-tracker-btn')?.addEventListener('click', async () => {
-    setSyncFeedback('Importing Sales Tracker from Drive…')
-    try {
-      const { data } = await api('/sync/sales-tracker', {
-        method: 'POST',
-        body: JSON.stringify({
-          fileId: $('#drive-file-id').value,
-          ...syncPayload(),
-          includeCash: true,
-        }),
-      })
-      setSyncFeedback(
-        `Sales Tracker: ${data.orders} orders, ${data.expenses} expenses, ${data.cashRows} cash rows${
-          data.warnings?.length ? ` · ${data.warnings.length} warnings` : ''
-        }`,
-      )
-      loadDataPage().catch(showError)
-    } catch (err) {
-      setSyncFeedback(err.message, true)
-    }
-  })
-
-  $('#upload-tracker-btn')?.addEventListener('click', async () => {
-    const file = $('#tracker-upload')?.files?.[0]
-    if (!file) {
-      setSyncFeedback('Choose an .xlsx file first', true)
-      return
-    }
-    setSyncFeedback(`Uploading ${file.name}…`)
-    try {
-      const body = new FormData()
-      body.append('file', file)
-      const { start, end } = syncPayload()
-      if (start) body.append('start', start)
-      if (end) body.append('end', end)
-      const res = await fetch('/dashboard/api/sync/sales-tracker/upload', {
-        method: 'POST',
-        credentials: 'same-origin',
-        body,
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json.error || 'Upload failed')
-      const data = json.data
-      setSyncFeedback(
-        `Uploaded: ${data.orders} orders, ${data.expenses} expenses, ${data.cashRows} cash rows${
-          data.warnings?.length ? ` · ${data.warnings[0]}` : ''
-        }`,
       )
       loadDataPage().catch(showError)
     } catch (err) {
@@ -1013,6 +1001,14 @@ async function boot() {
   bind()
   try {
     const me = await api('/me')
+    if (!me.user?.isAdmin) {
+      show('login')
+      const error = $('#login-error')
+      error.textContent = 'Admin access required'
+      error.hidden = false
+      await api('/logout', { method: 'POST' }).catch(() => {})
+      return
+    }
     state.user = me.user
     $('#user-name').textContent = me.user.name
     show('dash')

@@ -159,6 +159,7 @@ describe('GET /reviews', () => {
     const { app } = setup({
       listByHandle: vi.fn().mockRejectedValue(new Error('db down')),
       create: vi.fn(),
+      deleteById: vi.fn(),
     })
 
     expect((await listReviews(app, validReview.productHandle)).response.status).toBe(502)

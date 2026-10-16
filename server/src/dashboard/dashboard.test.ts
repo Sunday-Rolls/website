@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { hashPassword } from '../analytics/auth.js'
+import { hashPassword, SESSION_COOKIE, sessionExpiry } from '../analytics/auth.js'
 import { seedDemoStore } from '../analytics/seed.js'
 import { createMemoryAnalyticsStore } from '../analytics/store.js'
 import { createApp } from '../app.js'
+import { createMemoryReviewStore } from '../reviews.js'
 
 async function setup() {
   const store = createMemoryAnalyticsStore()
@@ -12,6 +13,7 @@ async function setup() {
     email: 'sam@example.com',
     name: 'Sam',
     passwordHash: await hashPassword('test-password-123'),
+    isAdmin: true,
   })
   const app = createApp({
     config: {
@@ -130,5 +132,100 @@ describe('dashboard auth + overview', () => {
     expect(body.ok).toBe(true)
     expect(body.data.upsertedOrders).toBeGreaterThan(0)
     expect(body.data.expenses).toBeGreaterThan(0)
+  })
+
+  it('rejects a non-admin login and hides reports from a non-admin session', async () => {
+    const { app, store } = await setup()
+    await store.upsertUser({
+      id: '00000000-0000-4000-8000-000000000002',
+      email: 'guest@example.com',
+      name: 'Guest',
+      passwordHash: await hashPassword('test-password-123'),
+      isAdmin: false,
+    })
+
+    const login = await app.request('/dashboard/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'guest@example.com', password: 'test-password-123' }),
+    })
+    expect(login.status).toBe(403)
+    expect(login.headers.get('set-cookie')).toBeNull()
+    const loginBody = await login.json()
+    expect(loginBody.error).toBe('Admin access required')
+
+    const sessionId = '00000000-0000-4000-8000-000000000099'
+    await store.createSession({
+      id: sessionId,
+      userId: '00000000-0000-4000-8000-000000000002',
+      expiresAt: sessionExpiry().toISOString(),
+    })
+    const cookie = `${SESSION_COOKIE}=${sessionId}`
+
+    const overview = await app.request('/dashboard/api/overview', { headers: { Cookie: cookie } })
+    expect(overview.status).toBe(403)
+
+    const workflow = await app.request('/dashboard/api/workflows/reviews', {
+      method: 'POST',
+      headers: { Cookie: cookie },
+    })
+    expect(workflow.status).toBe(403)
+    const workflowBody = await workflow.json()
+    expect(workflowBody.error).toBe('Admin access required')
+  })
+
+  it('runs the review workflow for an admin and rejects signed-out callers', async () => {
+    const store = createMemoryAnalyticsStore()
+    await store.upsertUser({
+      id: '00000000-0000-4000-8000-000000000001',
+      email: 'sam@example.com',
+      name: 'Sam',
+      passwordHash: await hashPassword('test-password-123'),
+      isAdmin: true,
+    })
+    const reviews = createMemoryReviewStore()
+    const app = createApp({
+      config: {
+        corsOrigins: ['http://localhost:5173'],
+        requireBrowserOrigin: false,
+        contactApiKey: '',
+        dashboardSecureCookies: false,
+      },
+      sendContactEmail: async () => {},
+      analytics: store,
+      reviews,
+    })
+
+    const signedOut = await app.request('/dashboard/api/workflows/reviews', { method: 'POST' })
+    expect(signedOut.status).toBe(401)
+
+    const login = await app.request('/dashboard/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'sam@example.com', password: 'test-password-123' }),
+    })
+    const cookie = login.headers.get('set-cookie')!.split(';')[0]
+    const me = await app.request('/dashboard/api/me', { headers: { Cookie: cookie } })
+    expect((await me.json()).user.isAdmin).toBe(true)
+
+    const run = await app.request('/dashboard/api/workflows/reviews', {
+      method: 'POST',
+      headers: { Cookie: cookie },
+    })
+    expect(run.status).toBe(200)
+    const body = await run.json()
+    expect(body.ok).toBe(true)
+    expect(body.data.steps.map((step: { name: string }) => step.name)).toEqual([
+      'Post review',
+      'Show on site',
+      'Delete review',
+    ])
+    expect(await reviews.listByHandle('retro-roller-grey', 10)).toEqual([])
+
+    const unknown = await app.request('/dashboard/api/workflows/nope', {
+      method: 'POST',
+      headers: { Cookie: cookie },
+    })
+    expect(unknown.status).toBe(404)
   })
 })

@@ -42,7 +42,11 @@ const user = await store.upsertUser({
   email,
   name: nameArg?.trim() || existing?.name || email.split('@')[0],
   passwordHash: await hashPassword(password),
+  isAdmin: existing?.isAdmin ?? false,
 })
 
 console.log(`Password set for ${user.email} (${user.name})`)
+if (!user.isAdmin) {
+  console.log('This account cannot open dashboard reports until is_admin is set.')
+}
 await pool.end()

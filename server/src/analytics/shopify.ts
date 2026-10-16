@@ -54,13 +54,16 @@ export function loadShopifyCredentialsFromEnv(env: NodeJS.ProcessEnv = process.e
 }
 
 /** Dev Dashboard / custom apps: mint a short-lived Admin API token. */
-export async function createShopifyAccessToken(creds: ShopifyCredentials): Promise<{
+export async function createShopifyAccessToken(
+  creds: ShopifyCredentials,
+  fetchImpl: typeof fetch = fetch,
+): Promise<{
   accessToken: string
   expiresIn: number
   scope: string
 }> {
   const host = shopHost(creds.shop)
-  const res = await fetch(`https://${host}/admin/oauth/access_token`, {
+  const res = await fetchImpl(`https://${host}/admin/oauth/access_token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

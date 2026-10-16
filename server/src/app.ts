@@ -12,6 +12,8 @@ export type AppDeps = {
   config: Pick<Config, 'corsOrigins' | 'requireBrowserOrigin' | 'contactApiKey'> & {
     dashboardSecureCookies?: boolean
     websiteCutoverAt?: string | null
+    resendApiKey?: string
+    contactToEmail?: string
   }
   sendContactEmail: (payload: ContactPayload) => Promise<void>
   /** Persists contact form submissions (Postgres). Preferred path on Railway Hobby. */
@@ -58,6 +60,11 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
         checkRateLimit,
         secureCookies: config.dashboardSecureCookies ?? false,
         cutoverAt: config.websiteCutoverAt ?? null,
+        reviews,
+        contacts,
+        sendContactEmail,
+        resendApiKey: config.resendApiKey,
+        contactToEmail: config.contactToEmail,
       }),
     )
     app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))

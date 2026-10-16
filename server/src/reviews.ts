@@ -15,6 +15,7 @@ export type NewReview = Omit<Review, 'id' | 'createdAt'>
 export interface ReviewStore {
   listByHandle(handle: string, limit: number): Promise<Review[]>
   create(review: NewReview): Promise<Review>
+  deleteById(id: string): Promise<boolean>
 }
 
 export const REVIEW_LIMITS = {
@@ -156,6 +157,11 @@ export function createPgReviewStore(db: Queryable): ReviewStore & { migrate(): P
       )
       return rowToReview(rows[0])
     },
+
+    async deleteById(id) {
+      const { rows } = await db.query(`DELETE FROM product_reviews WHERE id = $1 RETURNING id`, [id])
+      return rows.length > 0
+    },
   }
 }
 
@@ -171,6 +177,13 @@ export function createMemoryReviewStore(): ReviewStore {
       const saved: Review = { ...review, id: randomUUID(), createdAt: new Date().toISOString() }
       reviews.unshift(saved)
       return saved
+    },
+
+    async deleteById(id) {
+      const index = reviews.findIndex((review) => review.id === id)
+      if (index === -1) return false
+      reviews.splice(index, 1)
+      return true
     },
   }
 }

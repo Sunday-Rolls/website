@@ -4,8 +4,15 @@ CREATE TABLE IF NOT EXISTS dashboard_users (
   email text NOT NULL UNIQUE,
   name text NOT NULL,
   password_hash text NOT NULL,
+  is_admin boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+-- Existing accounts predate is_admin. Add the column nullable, promote those
+-- rows once, then require the flag. Later migrates match no nulls.
+ALTER TABLE dashboard_users ADD COLUMN IF NOT EXISTS is_admin boolean;
+UPDATE dashboard_users SET is_admin = true WHERE is_admin IS NULL;
+ALTER TABLE dashboard_users ALTER COLUMN is_admin SET DEFAULT false;
+ALTER TABLE dashboard_users ALTER COLUMN is_admin SET NOT NULL;
 
 CREATE TABLE IF NOT EXISTS dashboard_sessions (
   id uuid PRIMARY KEY,
