@@ -1,0 +1,1 @@
+import{i as e}from"./index-8minAh1t.js";function t(t){e.success(t)}function n(t){e.error(t)}export{t as n,n as t};
