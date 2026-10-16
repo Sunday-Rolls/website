@@ -614,42 +614,6 @@ function renderSyncList(target, syncs) {
           .join('')
 }
 
-function renderDriveFiles(files, defaultFileId) {
-  const el = $('#drive-files')
-  if (!el) return
-  if (!files.length) {
-    el.innerHTML = `<p class="muted">No spreadsheets visible to the service account yet. Share the Sales Tracker as Viewer with the analytics service account, or paste a file URL below.</p>`
-    return
-  }
-  el.innerHTML = files
-    .map((f) => {
-      const selected = f.id === defaultFileId || f.id === $('#drive-file-id')?.value
-      return `<button type="button" class="file-item ${selected ? 'active' : ''}" data-file-id="${escapeHtml(f.id)}">
-        <strong>${escapeHtml(f.name)}</strong>
-        <span class="muted">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</span>
-      </button>`
-    })
-    .join('')
-  for (const btn of el.querySelectorAll('.file-item')) {
-    btn.addEventListener('click', () => {
-      $('#drive-file-id').value = btn.dataset.fileId
-      for (const b of el.querySelectorAll('.file-item')) b.classList.toggle('active', b === btn)
-    })
-  }
-}
-
-async function loadDriveFiles() {
-  try {
-    const { data } = await api('/drive/files')
-    if (data.defaultFileId && !$('#drive-file-id').value) {
-      $('#drive-file-id').value = data.defaultFileId
-    }
-    renderDriveFiles(data.files || [], data.defaultFileId)
-  } catch (err) {
-    $('#drive-files').innerHTML = `<p class="error">${escapeHtml(err.message)}</p>`
-  }
-}
-
 async function loadShopifyStatus() {
   const el = $('#shopify-status')
   if (!el) return
@@ -735,7 +699,7 @@ async function exportReviewQrPdf() {
 async function loadDataPage() {
   const sync = await api('/sync-status')
   renderSyncList('#data-sync-status', sync.data || [])
-  await Promise.all([loadDriveFiles(), loadShopifyStatus(), loadReviewQrMeta()])
+  await Promise.all([loadShopifyStatus(), loadReviewQrMeta()])
 }
 
 function setPage(page) {

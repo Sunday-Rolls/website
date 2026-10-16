@@ -262,31 +262,12 @@
             <article class="panel">
               <h2>Shopify (live orders)</h2>
               <p id="shopify-status" class="muted">Checking connection…</p>
-              <p class="muted">Source of truth for website sales after cutover. Sync removes any Sales Tracker Shopify rows so nothing double-counts.</p>
+              <p class="muted">Source of truth for website sales. Etsy / eBay / other history and expenses live on P&amp;L → Download / Upload workbook.</p>
               <div class="sync-actions">
                 <button type="button" id="sync-shopify-btn" class="btn btn-primary">Sync Shopify</button>
               </div>
             </article>
           </div>
-
-          <article class="panel">
-            <h2>Historical Sales Tracker</h2>
-            <p class="muted">One-time (or occasional) import of Etsy / Squarespace / eBay / expense / cash history. Shopify Sales-tab rows are skipped by default — use live Shopify sync instead.</p>
-            <div class="sync-actions">
-              <button type="button" id="drive-refresh-btn" class="btn btn-secondary">Refresh Drive files</button>
-              <button type="button" id="sync-tracker-btn" class="btn btn-primary">Import selected file</button>
-            </div>
-            <label class="stack-label">Drive file or URL
-              <input id="drive-file-id" type="text" placeholder="Spreadsheet URL or file id" />
-            </label>
-            <div id="drive-files" class="file-list"></div>
-            <label class="stack-label">Or upload .xlsx
-              <input id="tracker-upload" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-            </label>
-            <div class="sync-actions">
-              <button type="button" id="upload-tracker-btn" class="btn btn-secondary">Upload &amp; import</button>
-            </div>
-          </article>
 
           <article class="panel">
             <h2>Review QR codes</h2>
