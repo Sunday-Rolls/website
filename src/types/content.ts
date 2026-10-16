@@ -65,6 +65,7 @@ export interface HomeContent {
     cta: ContentLink
     video?: string
     poster?: string
+    posterWebp?: string
   }
   values: {
     items: Array<{ label: string; icon?: ValueIcon }>
@@ -77,6 +78,7 @@ export interface HomeContent {
   mediaBreak?: {
     video: string
     poster?: string
+    posterWebp?: string
     caption?: string
   }
   reviews: {

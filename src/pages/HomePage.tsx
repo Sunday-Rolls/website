@@ -25,7 +25,7 @@ export function HomePage() {
       title: content.meta.title,
       description: content.meta.description,
       path: '/',
-      image: '/assets/home/hero.jpg',
+      image: '/assets/home/videos/hero-poster.jpg',
     })
 
     fetchProducts(50).then((items) => {

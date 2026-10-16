@@ -11,7 +11,8 @@
       "href": "/shop"
     },
     "video": "/assets/home/videos/hero-golf.mp4",
-    "poster": "/assets/home/videos/hero-poster.jpg"
+    "poster": "/assets/home/videos/hero-poster.jpg",
+    "posterWebp": "/assets/home/videos/hero-poster.webp"
   },
   "values": {
     "items": [
@@ -56,6 +57,7 @@
   "mediaBreak": {
     "video": "/assets/home/videos/swing-golf.mp4",
     "poster": "/assets/home/videos/course-poster.jpg",
+    "posterWebp": "/assets/home/videos/course-poster.webp",
     "caption": "Built for the good times on the course."
   },
   "reviews": {

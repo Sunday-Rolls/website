@@ -124,10 +124,16 @@ describe('HomePage', () => {
     expect(shopLink).toHaveAttribute('href', '/shop')
   })
 
-  it('uses hero video with poster fallback', () => {
+  it('uses a prioritized hero poster before mounting video', () => {
     renderWithRouter(<HomePage />)
 
-    const video = document.querySelector('video source[src="/assets/home/videos/hero-golf.mp4"]')
-    expect(video).not.toBeNull()
+    const poster = document.querySelector(
+      'img[src="/assets/home/videos/hero-poster.jpg"]',
+    ) as HTMLImageElement | null
+    expect(poster).not.toBeNull()
+    expect(poster).toHaveAttribute('fetchPriority', 'high')
+    expect(
+      document.querySelector('source[type="image/webp"][srcset="/assets/home/videos/hero-poster.webp"]'),
+    ).not.toBeNull()
   })
 })

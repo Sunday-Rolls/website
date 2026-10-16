@@ -5,6 +5,7 @@
   "home": {
     "hero": "/assets/home/hero.jpg",
     "heroWebp": "/assets/home/hero.webp",
+    "heroPosterWebp": "/assets/home/videos/hero-poster.webp",
     "crew": "/assets/home/crew.jpg",
     "lifestyle": "/assets/home/lifestyle.png",
     "heroVideo": "/assets/home/videos/hero-golf.mp4",

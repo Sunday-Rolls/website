@@ -2,6 +2,7 @@ import { resolveLinkLabel, usePageContent } from '@/lib/content'
 import { trackCtaClick } from '@/lib/gtm'
 import { assetUrl } from '@/lib/asset-url'
 import { homeAssets } from '@/assets'
+import { DeferredBackgroundVideo } from '@/components/home/DeferredBackgroundVideo'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 
@@ -9,23 +10,21 @@ export function HeroSection() {
   const content = usePageContent('home')
   const videoSrc = content.hero.video ? assetUrl(content.hero.video) : homeAssets.heroVideo
   const posterSrc = content.hero.poster ? assetUrl(content.hero.poster) : homeAssets.hero
+  const posterWebpSrc = content.hero.posterWebp
+    ? assetUrl(content.hero.posterWebp)
+    : homeAssets.heroPosterWebp
 
   return (
     <section className="relative overflow-hidden bg-heritage-green text-cream">
-      <div className="absolute inset-0">
-        <video
-          className="h-full w-full object-cover object-bottom"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={posterSrc}
-          aria-hidden="true"
-        >
-          <source src={videoSrc} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-black/10" />
-      </div>
+      <DeferredBackgroundVideo
+        videoSrc={videoSrc}
+        posterSrc={posterSrc}
+        posterWebpSrc={posterWebpSrc}
+        prioritizePoster
+        rootMargin="0px"
+        videoClassName="object-bottom"
+      />
+      <div className="absolute inset-0 bg-black/10" />
 
       <Container className="relative flex min-h-[min(68vh,640px)] items-center justify-center py-16 text-center md:py-section-y">
         <div className="mx-auto max-w-3xl space-y-5">

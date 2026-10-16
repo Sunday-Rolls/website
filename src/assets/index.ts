@@ -9,6 +9,7 @@ export const brandAssets = {
 export const homeAssets = {
   hero: assetUrl(assetsManifest.home.hero),
   heroWebp: assetUrl(assetsManifest.home.heroWebp),
+  heroPosterWebp: assetUrl(assetsManifest.home.heroPosterWebp),
   heroTexture: assetUrl('/assets/home/hero-texture.svg'),
   lifestyle: assetUrl(assetsManifest.home.lifestyle),
   crew: assetUrl(assetsManifest.home.crew),
