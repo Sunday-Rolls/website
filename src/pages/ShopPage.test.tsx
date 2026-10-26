@@ -1,6 +1,8 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import shopContent from '@/content/pages/shop.json'
+import siteContent from '@/content/site.json'
 import { ShopPage } from '@/pages/ShopPage'
 import { renderWithRouter } from '@/test/test-utils'
 
@@ -58,11 +60,19 @@ describe('ShopPage', () => {
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(23)
   })
 
-  it('does not render filter buttons', () => {
-    renderWithRouter(<ShopPage />)
+  it('renders section chips above the product sections, matching footer shop labels', () => {
+    renderWithRouter(<ShopPage />, { route: '/shop' })
 
-    expect(screen.queryByRole('button', { name: 'All Products' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Headcovers' })).not.toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: 'Shop sections' })
+    const expectedChips = siteContent.navigation.footerShop.filter((link) =>
+      link.href.includes('category='),
+    )
+
+    for (const chip of expectedChips) {
+      expect(within(nav).getByRole('button', { name: chip.label })).toBeInTheDocument()
+    }
+
+    expect(within(nav).queryByRole('button', { name: 'All Products' })).not.toBeInTheDocument()
   })
 
   it('scrolls to the section named in ?category= for Shop All links', () => {
@@ -73,6 +83,24 @@ describe('ShopPage', () => {
 
     expect(scrollIntoView).toHaveBeenCalledTimes(1)
     expect(scrollIntoView.mock.contexts[0]).toBe(sectionFor('Mallet Putter Covers'))
+    expect(
+      screen.getByRole('button', { name: 'Mallet', current: true }),
+    ).toBeInTheDocument()
+  })
+
+  it('scrolls to a section when its chip is clicked', async () => {
+    const user = userEvent.setup()
+    const scrollIntoView = vi.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+
+    renderWithRouter(<ShopPage />, { route: '/shop' })
+
+    await user.click(screen.getByRole('button', { name: 'Center Shafted' }))
+
+    expect(scrollIntoView).toHaveBeenCalled()
+    expect(scrollIntoView.mock.contexts.at(-1)).toBe(
+      sectionFor('Center Shafted Putter Covers'),
+    )
   })
 
   it('uses the Figma shop header banner asset', () => {

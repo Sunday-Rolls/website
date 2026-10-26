@@ -8,6 +8,7 @@ import { scheduleAfterLoad } from '@/lib/schedule'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { ShopHeader } from '@/components/shop/ShopHeader'
+import { ShopSectionNav } from '@/components/shop/ShopSectionNav'
 import { Container } from '@/components/ui/Container'
 import { cn } from '@/lib/utils'
 
@@ -59,6 +60,10 @@ export function ShopPage() {
   return (
     <>
       <ShopHeader />
+
+      {sections.length > 0 ? (
+        <ShopSectionNav sectionIds={sections.map(({ section }) => section.id)} />
+      ) : null}
 
       {sections.length === 0 ? (
         <Container className="py-section-y">
