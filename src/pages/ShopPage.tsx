@@ -54,7 +54,7 @@ export function ShopPage() {
 
   useEffect(() => {
     if (!targetSection) return
-    document.getElementById(targetSection)?.scrollIntoView()
+    document.getElementById(targetSection)?.scrollIntoView({ behavior: 'smooth' })
   }, [targetSection, products])
 
   return (
