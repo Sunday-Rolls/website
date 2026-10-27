@@ -6,13 +6,11 @@ interface ProductGridProps {
   products: ShopifyProduct[]
   listId?: string
   listName?: string
-  /** Optional chip on each product photo (e.g. section "New!" badge). */
+  /** Optional chip on the first product photo only (e.g. section "New!" badge). */
   badge?: string
   /** First N cards load immediately so an in-view photo is not deferred. */
   priorityCount?: number
 }
-
-const BADGE_TILTS = [-10, -6, -12, -7, -9, -5, -11]
 
 export function ProductGrid({
   products,
@@ -44,8 +42,7 @@ export function ProductGrid({
           product={product}
           listId={listId}
           listName={listName}
-          badge={badge}
-          badgeTilt={BADGE_TILTS[index % BADGE_TILTS.length]}
+          badge={index === 0 ? badge : undefined}
           priority={index < priorityCount}
           imageSizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         />
