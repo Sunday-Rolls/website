@@ -8,6 +8,7 @@ Target:
 | Surface | Host |
 |---------|------|
 | Storefront | `https://www.sundayrollsgolf.com` (+ apex) → Railway **`website`** |
+| Shopify checkout | Branded subdomain (e.g. `checkout.sundayrollsgolf.com`) → **Shopify** Primary / Online Store — **not** `chrgrk-ff.myshopify.com` |
 | Contact / reviews API | Same `contact-api` (keep `*.up.railway.app` or a future `api.` host) |
 | Analytics dashboard | `https://dashboard.sundayrollsgolf.com/dashboard/` → Railway **`contact-api`** |
 
@@ -97,6 +98,35 @@ Point the purchase pixel at the **same** measurement ID as `VITE_GA4_MEASUREMENT
 
 Optional later: also attach `api.sundayrollsgolf.com` to `contact-api` and point `VITE_CONTACT_API_URL` at it so the storefront and dashboard share a branded API host.
 
+### Shopify checkout domain (required for headless)
+
+The SPA is hosted on Railway (`www` / apex). **Shopify-hosted checkout cannot share that same hostname** — it needs a domain whose DNS points at Shopify and whose **Target** is Online Store (usually the **Primary** domain).
+
+If this is wrong, Cart → Checkout lands on the raw shop host, e.g.  
+`https://chrgrk-ff.myshopify.com/checkouts/cn…` (or `/cart/c/…` on that host). That is a cutover failure even when the marketing site looks fine.
+
+Recommended layout:
+
+| Host | DNS / target |
+|------|----------------|
+| `www.sundayrollsgolf.com` (+ apex) | Railway **`website`** (this SPA) |
+| `checkout.sundayrollsgolf.com` (or `shop.…`) | **Shopify** — Settings → Domains → connect subdomain → Target **Online Store** → set as **Primary** |
+
+Setup:
+
+1. At the DNS host, create `checkout` (or chosen subdomain) with the **A / CNAME records Shopify shows** when you add the domain (not the Railway website target).
+2. Shopify Admin → **Settings → Domains** → add/verify that subdomain → Target **Online Store** → **Change primary domain** to it.
+3. Leave `www` / apex pointed at Railway for the headless storefront. Do **not** make `www` the Shopify primary while Railway serves the SPA.
+
+Validate (do this before calling cutover done):
+
+1. On the live (or Railway) storefront: add a product → **Checkout**.
+2. Confirm the browser address bar host is the **branded checkout domain** (e.g. `checkout.sundayrollsgolf.com`), **not** `chrgrk-ff.myshopify.com`.
+3. Fail the check if the URL stays on `*.myshopify.com/checkouts/…` or `*.myshopify.com/cart/c/…` without redirecting to the primary custom domain.
+4. Optional API check: Storefront cart `checkoutUrl` should use the primary domain (or immediately redirect there). `VITE_SHOPIFY_STORE_DOMAIN` may still be `chrgrk-ff.myshopify.com` for the Storefront API client — that is fine; customer-facing checkout must not look like myshopify.
+
+Also unlock the storefront password (“Opening soon”) before public traffic, or checkout will show the password gate on the Shopify domain.
+
 ## Cutover sequence
 
 1. **Apply IaC / create `website` service** and attach a Railway `*.up.railway.app` URL.
@@ -105,9 +135,10 @@ Optional later: also attach `api.sundayrollsgolf.com` to `contact-api` and point
 4. **Flip Shopify pixel** to the live measurement ID; place a test order / thank-you hit.
 5. **Expand `CORS_ORIGINS`** on `contact-api` for the production storefront hostnames; redeploy API.
 6. **Attach storefront custom domains + DNS** on `website`; confirm HTTPS and deep links.
-7. **Attach `dashboard.sundayrollsgolf.com` + DNS** on `contact-api`; confirm login / cookies ([section above](#dashboard-subdomain--contact-api)).
-8. **Set `WEBSITE_CUTOVER_AT`**; update `SITE_URL` for QR scripts if used.
-9. **Post-cutover:** contact form, GA4 funnel mid-steps + purchase, Search Console, cancel/export Squarespace when ready ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md)). Update team bookmarks from the `*.up.railway.app/dashboard/` URL to `https://dashboard.sundayrollsgolf.com/dashboard/`.
+7. **Attach Shopify checkout subdomain + DNS** (Primary / Online Store) — [section above](#shopify-checkout-domain-required-for-headless). Smoke: Checkout must **not** stay on `chrgrk-ff.myshopify.com`.
+8. **Attach `dashboard.sundayrollsgolf.com` + DNS** on `contact-api`; confirm login / cookies ([section above](#dashboard-subdomain--contact-api)).
+9. **Set `WEBSITE_CUTOVER_AT`**; update `SITE_URL` for QR scripts if used.
+10. **Post-cutover:** contact form, full checkout URL check again, GA4 funnel mid-steps + purchase, Search Console, cancel/export Squarespace when ready ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md)). Update team bookmarks from the `*.up.railway.app/dashboard/` URL to `https://dashboard.sundayrollsgolf.com/dashboard/`.
 
 Pages can keep deploying previews under `/website/previews/…` during overlap; production traffic should hit Railway.
 
