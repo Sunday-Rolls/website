@@ -41,6 +41,8 @@ Set these on the Railway **website** service, then redeploy/rebuild:
 | Variable | Live value |
 |----------|------------|
 | `VITE_BASE_PATH` | `/` |
+| `VITE_SITE_ORIGIN` | `https://www.sundayrollsgolf.com` |
+| `VITE_SEO_INDEX` | `true` |
 | `VITE_GTM_ID` | `GTM-PPTR6V3B` |
 | `VITE_GA4_MEASUREMENT_ID` | Confirm in GA4 Admin (Railway API already uses property `513898453`; stream is `G-YKOBBOTPM4` there) |
 | `VITE_GA4_SEND_DIRECT` | `true` |
@@ -138,9 +140,9 @@ Also unlock the storefront password (“Opening soon”) before public traffic, 
 7. **Attach Shopify checkout subdomain + DNS** (Primary / Online Store) — [section above](#shopify-checkout-domain-required-for-headless). Smoke: Checkout must **not** stay on `chrgrk-ff.myshopify.com`.
 8. **Attach `dashboard.sundayrollsgolf.com` + DNS** on `contact-api`; confirm login / cookies ([section above](#dashboard-subdomain--contact-api)).
 9. **Set `WEBSITE_CUTOVER_AT`**; update `SITE_URL` for QR scripts if used.
-10. **Post-cutover:** contact form, full checkout URL check again, GA4 funnel mid-steps + purchase, Search Console, cancel/export Squarespace when ready ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md)). Update team bookmarks from the `*.up.railway.app/dashboard/` URL to `https://dashboard.sundayrollsgolf.com/dashboard/`.
+10. **Post-cutover:** contact form, full checkout URL check again, GA4 funnel mid-steps + purchase, Search Console (submit `https://www.sundayrollsgolf.com/sitemap.xml`; confirm apex → www redirect), cancel/export Squarespace when ready ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md)). Update team bookmarks from the `*.up.railway.app/dashboard/` URL to `https://dashboard.sundayrollsgolf.com/dashboard/`.
 
-Pages can keep deploying previews under `/website/previews/…` during overlap; production traffic should hit Railway.
+Pages can keep deploying previews under `/website/previews/…` during overlap (builds are `noindex`); production traffic should hit Railway.
 
 ## Local smoke for the SPA server
 
@@ -149,4 +151,7 @@ npm run build:railway
 PORT=4173 npm run start:spa
 # open http://127.0.0.1:4173/shop  (hard refresh / deep link)
 curl -s http://127.0.0.1:4173/health
+curl -sI http://127.0.0.1:4173/does-not-exist | head -1   # expect 404
+curl -s http://127.0.0.1:4173/robots.txt
+curl -s http://127.0.0.1:4173/sitemap.xml | head -20
 ```

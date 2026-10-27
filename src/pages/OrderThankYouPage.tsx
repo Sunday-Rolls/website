@@ -7,6 +7,7 @@ import {
   readPendingCheckout,
   trackPurchase,
 } from '@/lib/gtm'
+import { applyPageMeta } from '@/lib/page-meta'
 
 /**
  * Optional return / validation landing for purchases.
@@ -20,6 +21,15 @@ export function OrderThankYouPage() {
   const [params] = useSearchParams()
   const fired = useRef(false)
   const [status, setStatus] = useState<'pending' | 'tracked' | 'missing'>('pending')
+
+  useEffect(() => {
+    applyPageMeta({
+      title: 'Thanks for your order — Sunday Rolls',
+      description: 'Order confirmation for Sunday Rolls.',
+      path: '/order/thank-you',
+      robots: 'noindex, nofollow',
+    })
+  }, [])
 
   useEffect(() => {
     if (fired.current) return
