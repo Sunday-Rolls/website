@@ -327,60 +327,79 @@ export function CartPage() {
       </div>
 
       {selectedTowel ? (
-        <aside className="grid gap-4 border border-heritage-green/25 bg-warm-sand/40 p-4 sm:grid-cols-[96px_1fr_auto] sm:items-center">
-          {towelImage ? (
-            <img
-              src={towelImage}
-              alt={selectedTowel.title}
-              className="aspect-square w-full object-cover"
-            />
-          ) : (
-            <div className="aspect-square bg-warm-sand" />
-          )}
-          <div className="space-y-3">
-            <p className="font-body text-label uppercase tracking-widest text-leather">
-              {upsell.eyebrow}
-            </p>
-            <div className="space-y-1">
+        <aside className="grid gap-5 border border-heritage-green/25 bg-warm-sand/40 p-4 sm:grid-cols-[112px_1fr] sm:items-stretch lg:grid-cols-[112px_1fr_auto]">
+          <Link
+            to={sitePath(`/products/${selectedTowel.handle}`)}
+            className="block overflow-hidden border border-sand bg-white"
+          >
+            {towelImage ? (
+              <img
+                src={towelImage}
+                alt={selectedTowel.title}
+                className="aspect-square w-full object-cover"
+              />
+            ) : (
+              <div className="aspect-square bg-warm-sand" />
+            )}
+          </Link>
+          <div className="flex flex-col gap-4">
+            <div className="space-y-2">
+              <p className="font-body text-label uppercase tracking-widest text-leather">
+                {upsell.eyebrow}
+              </p>
               <h2 className="font-display text-xl text-heritage-green">{upsell.title}</h2>
-              <p className="font-body text-body-small text-matte-black/80">{upsell.description}</p>
-            </div>
-            <div className="flex flex-wrap items-end gap-3">
-              <label className="block space-y-1" htmlFor={towelColorId}>
-                <span className="font-body text-body-small text-leather">{upsell.colorLabel}</span>
-                <select
-                  id={towelColorId}
-                  value={selectedTowel.handle}
-                  disabled={isUpdating || addingUpsell}
-                  onChange={(event) => setSelectedTowelHandle(event.target.value)}
-                  className="block min-w-[12rem] border border-leather/35 bg-white px-3 py-2 font-body text-body text-matte-black focus:border-heritage-green focus:outline-none focus:ring-1 focus:ring-heritage-green/30 disabled:opacity-60"
-                >
-                  {towelOptions.map((option) => (
-                    <option key={option.handle} value={option.handle}>
-                      {towelColorLabel(option.title)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p className="pb-2 font-body text-body-small text-leather">
-                <Link
-                  to={sitePath(`/products/${selectedTowel.handle}`)}
-                  className="text-heritage-green hover:text-forest-green"
-                >
-                  {selectedTowel.title}
-                </Link>
-                {towelPrice ? ` · ${towelPrice}` : null}
+              <p className="max-w-xl font-body text-body-small text-matte-black/80">
+                {upsell.description}
               </p>
             </div>
+            <div className="flex flex-wrap items-end gap-4">
+              <label className="block min-w-[12rem] flex-1 space-y-2 sm:max-w-xs" htmlFor={towelColorId}>
+                <span className="font-body text-label uppercase tracking-widest text-leather">
+                  {upsell.colorLabel}
+                </span>
+                <span className="relative block">
+                  <select
+                    id={towelColorId}
+                    value={selectedTowel.handle}
+                    disabled={isUpdating || addingUpsell}
+                    onChange={(event) => setSelectedTowelHandle(event.target.value)}
+                    className="w-full appearance-none border border-heritage-green bg-cream py-3 pl-4 pr-11 font-body text-body text-heritage-green transition-colors hover:bg-white focus:border-forest-green focus:outline-none focus:ring-1 focus:ring-heritage-green/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {towelOptions.map((option) => (
+                      <option key={option.handle} value={option.handle}>
+                        {towelColorLabel(option.title)}
+                      </option>
+                    ))}
+                  </select>
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 right-0 flex w-11 items-center justify-center text-heritage-green"
+                  >
+                    <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                      <path
+                        d="M1 1.5L6 6.5L11 1.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="square"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </label>
+              {towelPrice ? (
+                <p className="pb-3 font-display text-xl text-heritage-green">{towelPrice}</p>
+              ) : null}
+            </div>
           </div>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isUpdating || addingUpsell}
-            onClick={() => void handleAddTowelUpsell()}
-          >
-            {addingUpsell ? upsell.addingLabel : upsell.ctaLabel}
-          </Button>
+          <div className="flex items-end lg:justify-end">
+            <Button
+              type="button"
+              disabled={isUpdating || addingUpsell}
+              onClick={() => void handleAddTowelUpsell()}
+            >
+              {addingUpsell ? upsell.addingLabel : upsell.ctaLabel}
+            </Button>
+          </div>
         </aside>
       ) : null}
     </Container>
