@@ -46,9 +46,24 @@ export default defineRailway(() => {
       DASHBOARD_ENABLED: preserve(),
       DASHBOARD_SECURE_COOKIES: preserve(),
       DATABASE_URL: preserve(),
+      GA4_PROPERTY_ID: preserve(),
+      GA4_PROPERTY_RESOURCE: preserve(),
+      GA4_SYNC_DAYS: preserve(),
+      GA4_SYNC_ON_BOOT: preserve(),
+      GOOGLE_ADS_CUSTOMER_ID: preserve(),
+      GOOGLE_SERVICE_ACCOUNT_JSON: preserve(),
+      META_AD_ACCOUNT_ID: preserve(),
       REQUIRE_BROWSER_ORIGIN: preserve(),
       RESEND_API_KEY: preserve(),
       RESEND_FROM_EMAIL: preserve(),
+      SALES_TRACKER_DRIVE_FILE_ID: preserve(),
+      SEARCH_CONSOLE_SITE_URL: preserve(),
+      SHOPIFY_ADMIN_ACCESS_TOKEN: preserve(),
+      SHOPIFY_API_VERSION: preserve(),
+      SHOPIFY_CLIENT_ID: preserve(),
+      SHOPIFY_CLIENT_SECRET: preserve(),
+      SHOPIFY_SHOP: preserve(),
+      SHOPIFY_STORE_DOMAIN: preserve(),
       SMTP_CONNECTION_TIMEOUT_MS: preserve(),
       SMTP_HOST: preserve(),
       SMTP_PASS: preserve(),
@@ -57,7 +72,7 @@ export default defineRailway(() => {
     },
   })
 
-  /** Storefront SPA — custom domain / DNS cutover target (apex + www). */
+  /** Storefront SPA — GitHub main autodeploy; Pages keeps PR previews. */
   const website = service('website', {
     source: github('Sunday-Rolls/website', {
       branch: 'main',
@@ -65,7 +80,8 @@ export default defineRailway(() => {
     }),
     build: {
       builder: 'RAILPACK',
-      buildCommand: 'npm ci && npm run build:railway',
+      // Railpack already installs deps; `npm ci` here races a locked node_modules cache.
+      buildCommand: 'npm run build:railway',
       watchPatterns: [
         '/src/**',
         '/public/**',
@@ -77,12 +93,16 @@ export default defineRailway(() => {
         '/tsconfig.app.json',
         '/tsconfig.node.json',
         '/scripts/serve-spa.mjs',
+        '/scripts/emit-spa-shells.mjs',
       ],
     },
     start: 'npm run start:spa',
     healthcheck: '/health',
     replicas: { sfo: 1 },
     env: {
+      // Railpack: pin Node; disable Vite cache mounts (avoids EBUSY with npm)
+      RAILPACK_NODE_VERSION: '22',
+      RAILPACK_DISABLE_CACHES: '*',
       // Build-time Vite vars (set live values in Railway before cutover)
       VITE_BASE_PATH: '/',
       VITE_GTM_ID: preserve(),
