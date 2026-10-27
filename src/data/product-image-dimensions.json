@@ -1,11 +1,11 @@
 {
   "coin-collector.jpg": {
-    "width": 800,
-    "height": 612
+    "width": 2048,
+    "height": 2048
   },
   "flagstick-fuel.jpg": {
-    "width": 800,
-    "height": 673
+    "width": 2048,
+    "height": 2048
   },
   "golf-towel-black-stripe-draped.jpg": {
     "width": 1080,
@@ -88,20 +88,20 @@
     "height": 1080
   },
   "mallet-retro-roller-grey.jpg": {
-    "width": 800,
-    "height": 617
+    "width": 2048,
+    "height": 2048
   },
   "mallet-retro-roller-white.jpg": {
-    "width": 800,
-    "height": 631
+    "width": 2048,
+    "height": 2048
   },
   "mallet-sunday-stripes.jpg": {
-    "width": 800,
-    "height": 584
+    "width": 2048,
+    "height": 2048
   },
   "mallet-the-corduroy.jpg": {
-    "width": 783,
-    "height": 800
+    "width": 2048,
+    "height": 2048
   },
   "morning-dew-back.jpg": {
     "width": 1080,
@@ -120,24 +120,24 @@
     "height": 1920
   },
   "retro-roller-grey.jpg": {
-    "width": 800,
-    "height": 618
+    "width": 2048,
+    "height": 2048
   },
   "retro-roller-purple.jpg": {
-    "width": 800,
-    "height": 641
+    "width": 1254,
+    "height": 1254
   },
   "retro-roller-yellow.jpg": {
-    "width": 800,
-    "height": 609
+    "width": 2048,
+    "height": 2048
   },
   "sunday-stripes.jpg": {
-    "width": 800,
-    "height": 502
+    "width": 2048,
+    "height": 2048
   },
   "sunny-side-up.jpg": {
-    "width": 800,
-    "height": 533
+    "width": 2048,
+    "height": 2048
   },
   "the-birdie-machine-back.jpg": {
     "width": 1080,
@@ -156,15 +156,15 @@
     "height": 1080
   },
   "the-breakfast-roller.jpg": {
-    "width": 800,
-    "height": 553
+    "width": 2048,
+    "height": 2048
   },
   "the-corduroy.jpg": {
-    "width": 800,
-    "height": 572
+    "width": 2048,
+    "height": 2048
   },
   "the-doodle.jpg": {
-    "width": 600,
-    "height": 800
+    "width": 1254,
+    "height": 1254
   }
 }
