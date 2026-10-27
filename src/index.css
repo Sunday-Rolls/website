@@ -47,10 +47,6 @@
 }
 
 @layer base {
-  html {
-    @apply scroll-smooth;
-  }
-
   body {
     @apply m-0 bg-cream font-body text-body text-matte-black antialiased;
   }
