@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '@/lib/cart'
+import { freeShippingProgress } from '@/lib/cart-free-shipping'
 import {
   getButtonLabel,
   resolveLinkLabel,
@@ -9,10 +10,17 @@ import {
 import { trackBeginCheckout, trackViewCart } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
 import { sitePath } from '@/lib/site-path'
-import { isShopifyConfigured } from '@/lib/shopify'
+import { formatPrice, isShopifyConfigured } from '@/lib/shopify'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
+
+function fillTemplate(template: string, values: Record<string, string>): string {
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{${key}}`, value),
+    template,
+  )
+}
 
 export function CartPage() {
   const content = usePageContent('cart')
@@ -30,6 +38,19 @@ export function CartPage() {
   const cartSignature = cart
     ? `${cart.id}:${cart.totalQuantity}:${cart.total}:${lines.map((l) => `${l.id}:${l.quantity}`).join(',')}`
     : ''
+
+  const shipping = freeShippingProgress(
+    cart?.subtotalAmount ?? 0,
+    content.freeShipping.threshold,
+  )
+  const thresholdLabel = formatPrice(
+    String(content.freeShipping.threshold),
+    cart?.currencyCode ?? 'USD',
+  )
+  const remainingLabel = formatPrice(
+    String(shipping.remaining),
+    cart?.currencyCode ?? 'USD',
+  )
 
   useEffect(() => {
     applyPageMeta({
@@ -122,6 +143,35 @@ export function CartPage() {
         <p className="font-body text-body-small text-matte-black/60">{content.status.updating}</p>
       ) : null}
 
+      <div
+        className="space-y-3 border border-sand bg-cream/50 px-4 py-4"
+        aria-label={content.freeShipping.barLabel}
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="font-body text-body-small font-semibold text-heritage-green">
+            {fillTemplate(content.freeShipping.progressLabel, { threshold: thresholdLabel })}
+          </p>
+          <p className="font-body text-body-small text-leather">
+            {shipping.unlocked
+              ? content.freeShipping.unlockedLabel
+              : fillTemplate(content.freeShipping.remainingLabel, { remaining: remainingLabel })}
+          </p>
+        </div>
+        <div
+          className="h-2 overflow-hidden bg-sand"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={shipping.percent}
+          aria-label={content.freeShipping.barLabel}
+        >
+          <div
+            className="h-full bg-heritage-green transition-[width] duration-500"
+            style={{ width: `${shipping.percent}%` }}
+          />
+        </div>
+      </div>
+
       <div className="space-y-4">
         {lines.map((item) => (
           <div
@@ -187,15 +237,30 @@ export function CartPage() {
               </div>
             </div>
 
-            <p className="font-body text-body text-matte-black">{item.price}</p>
+            <p className="font-body text-body text-matte-black">{item.lineTotal}</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-col items-end gap-4 border-t border-sand pt-6">
-        <p className="font-display text-2xl text-heritage-green">
-          {content.summary.totalLabel}: {cart?.total}
-        </p>
+        <dl className="w-full max-w-sm space-y-2">
+          <div className="flex items-baseline justify-between gap-6">
+            <dt className="font-body text-body text-leather">{content.summary.subtotalLabel}</dt>
+            <dd className="font-body text-body text-matte-black">{cart?.subtotal}</dd>
+          </div>
+          {(cart?.discounts ?? []).map((discount) => (
+            <div key={`${discount.title}-${discount.amount}`} className="flex items-baseline justify-between gap-6">
+              <dt className="font-body text-body text-leather">
+                {discount.title || content.summary.discountLabel}
+              </dt>
+              <dd className="font-body text-body text-heritage-green">−{discount.amount}</dd>
+            </div>
+          ))}
+          <div className="flex items-baseline justify-between gap-6 border-t border-sand pt-3">
+            <dt className="font-display text-2xl text-heritage-green">{content.summary.totalLabel}</dt>
+            <dd className="font-display text-2xl text-heritage-green">{cart?.total}</dd>
+          </div>
+        </dl>
         {cart?.checkoutUrl ? (
           <Button href={cart.checkoutUrl} onClick={handleCheckoutClick}>
             {getButtonLabel(content.summary.checkoutLabelKey)}

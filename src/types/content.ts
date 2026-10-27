@@ -265,8 +265,17 @@ export interface CartContent {
     continueShoppingHref: string
   }
   summary: {
+    subtotalLabel: string
+    discountLabel: string
     totalLabel: string
     checkoutLabelKey: string
+  }
+  freeShipping: {
+    threshold: number
+    progressLabel: string
+    remainingLabel: string
+    unlockedLabel: string
+    barLabel: string
   }
   lineActions: {
     quantityLabel: string

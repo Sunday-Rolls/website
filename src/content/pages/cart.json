@@ -9,8 +9,17 @@
     "continueShoppingHref": "/shop"
   },
   "summary": {
+    "subtotalLabel": "Subtotal",
+    "discountLabel": "Discount",
     "totalLabel": "Total",
     "checkoutLabelKey": "checkout"
+  },
+  "freeShipping": {
+    "threshold": 100,
+    "progressLabel": "Free shipping at {threshold}",
+    "remainingLabel": "Add {remaining} more for free shipping",
+    "unlockedLabel": "Free shipping unlocked — applied automatically at checkout",
+    "barLabel": "Progress toward free shipping"
   },
   "lineActions": {
     "quantityLabel": "Qty",

@@ -73,9 +73,20 @@ export interface CartLineItem {
   title: string
   handle: string
   variantId: string
+  /** Formatted unit merchandise price. */
   price: string
+  /** Formatted line total after quantity (and line discounts when present). */
+  lineTotal: string
   imageUrl?: string
   imageAlt?: string
+}
+
+export interface CartDiscount {
+  /** Code or automatic discount title shown to the buyer. */
+  title: string
+  /** Formatted discount amount (positive currency string). */
+  amount: string
+  amountValue: number
 }
 
 export interface ShopifyCart {
@@ -84,6 +95,11 @@ export interface ShopifyCart {
   totalQuantity: number
   subtotal: string
   total: string
+  /** Raw merchandise subtotal before cart-level discounts (USD/major units). */
+  subtotalAmount: number
+  totalAmount: number
+  currencyCode: string
+  discounts: CartDiscount[]
   lines: CartLineItem[]
 }
 
@@ -149,10 +165,39 @@ const CART_SELECTION = `
       currencyCode
     }
   }
+  discountCodes {
+    code
+    applicable
+  }
+  discountAllocations {
+    discountedAmount {
+      amount
+      currencyCode
+    }
+    ... on CartAutomaticDiscountAllocation {
+      title
+    }
+    ... on CartCodeDiscountAllocation {
+      code
+    }
+    ... on CartCustomDiscountAllocation {
+      title
+    }
+  }
   lines(first: 100) {
     nodes {
       id
       quantity
+      cost {
+        totalAmount {
+          amount
+          currencyCode
+        }
+        amountPerQuantity {
+          amount
+          currencyCode
+        }
+      }
       merchandise {
         ... on ProductVariant {
           id
@@ -254,6 +299,12 @@ type ProductNode = {
   variants?: { nodes: Array<{ id: string }> }
 }
 
+type DiscountAllocationNode = {
+  discountedAmount: Money
+  title?: string | null
+  code?: string | null
+}
+
 type CartNode = {
   id: string
   checkoutUrl: string
@@ -262,10 +313,16 @@ type CartNode = {
     subtotalAmount: Money
     totalAmount: Money
   }
+  discountCodes?: Array<{ code: string; applicable: boolean }> | null
+  discountAllocations?: DiscountAllocationNode[] | null
   lines: {
     nodes: Array<{
       id: string
       quantity: number
+      cost?: {
+        totalAmount?: Money | null
+        amountPerQuantity?: Money | null
+      } | null
       merchandise: {
         id: string
         title: string
@@ -275,6 +332,49 @@ type CartNode = {
       }
     }>
   }
+}
+
+function moneyAmount(money: Money | null | undefined): number {
+  if (!money?.amount) return 0
+  const value = Number(money.amount)
+  return Number.isFinite(value) ? value : 0
+}
+
+function mapCartDiscounts(node: CartNode, currencyCode: string): CartDiscount[] {
+  const allocations = node.discountAllocations ?? []
+  const fromAllocations = allocations
+    .map((allocation) => {
+      const amountValue = moneyAmount(allocation.discountedAmount)
+      if (amountValue <= 0) return null
+      const title =
+        allocation.code?.trim() ||
+        allocation.title?.trim() ||
+        'Discount'
+      return {
+        title,
+        amountValue,
+        amount: formatPrice(String(amountValue), allocation.discountedAmount.currencyCode || currencyCode),
+      } satisfies CartDiscount
+    })
+    .filter((entry): entry is CartDiscount => entry != null)
+
+  if (fromAllocations.length > 0) return fromAllocations
+
+  const subtotal = moneyAmount(node.cost.subtotalAmount)
+  const total = moneyAmount(node.cost.totalAmount)
+  const savings = Math.round((subtotal - total) * 100) / 100
+  if (savings <= 0) return []
+
+  const applicableCode = (node.discountCodes ?? []).find((entry) => entry.applicable)?.code
+  const title = applicableCode?.trim() || 'Discount'
+
+  return [
+    {
+      title,
+      amountValue: savings,
+      amount: formatPrice(String(savings), currencyCode),
+    },
+  ]
 }
 
 export function formatPrice(amount: string, currencyCode: string): string {
@@ -366,25 +466,41 @@ function mapProduct(node: ProductNode): ShopifyProduct {
 }
 
 function mapCart(node: CartNode): ShopifyCart {
+  const currencyCode = node.cost.totalAmount.currencyCode || node.cost.subtotalAmount.currencyCode
+  const subtotalAmount = moneyAmount(node.cost.subtotalAmount)
+  const totalAmount = moneyAmount(node.cost.totalAmount)
+
   return {
     id: node.id,
     checkoutUrl: node.checkoutUrl,
     totalQuantity: node.totalQuantity,
-    subtotal: formatPrice(
-      node.cost.subtotalAmount.amount,
-      node.cost.subtotalAmount.currencyCode,
-    ),
-    total: formatPrice(node.cost.totalAmount.amount, node.cost.totalAmount.currencyCode),
-    lines: node.lines.nodes.map((line) => ({
-      id: line.id,
-      quantity: line.quantity,
-      title: line.merchandise.product.title,
-      handle: line.merchandise.product.handle,
-      variantId: line.merchandise.id,
-      price: formatPrice(line.merchandise.price.amount, line.merchandise.price.currencyCode),
-      imageUrl: line.merchandise.image?.url,
-      imageAlt: line.merchandise.image?.altText ?? line.merchandise.product.title,
-    })),
+    subtotal: formatPrice(node.cost.subtotalAmount.amount, currencyCode),
+    total: formatPrice(node.cost.totalAmount.amount, currencyCode),
+    subtotalAmount,
+    totalAmount,
+    currencyCode,
+    discounts: mapCartDiscounts(node, currencyCode),
+    lines: node.lines.nodes.map((line) => {
+      const unitMoney = line.cost?.amountPerQuantity ?? line.merchandise.price
+      const lineMoney =
+        line.cost?.totalAmount ??
+        ({
+          amount: String(moneyAmount(unitMoney) * line.quantity),
+          currencyCode: unitMoney.currencyCode,
+        } satisfies Money)
+
+      return {
+        id: line.id,
+        quantity: line.quantity,
+        title: line.merchandise.product.title,
+        handle: line.merchandise.product.handle,
+        variantId: line.merchandise.id,
+        price: formatPrice(unitMoney.amount, unitMoney.currencyCode),
+        lineTotal: formatPrice(lineMoney.amount, lineMoney.currencyCode),
+        imageUrl: line.merchandise.image?.url,
+        imageAlt: line.merchandise.image?.altText ?? line.merchandise.product.title,
+      }
+    }),
   }
 }
 
