@@ -50,7 +50,7 @@ describe('ShopPage', () => {
     )
 
     expect(within(towels).getAllByRole('heading', { level: 3 })).toHaveLength(7)
-    expect(within(towels).getByText('New!')).toBeInTheDocument()
+    expect(within(towels).getAllByText('New!').length).toBeGreaterThanOrEqual(7)
     expect(within(towels).getByRole('heading', { name: 'Golf Towel - Green Stripe' })).toBeInTheDocument()
     expect(within(centerShafted).getAllByRole('heading', { level: 3 })).toHaveLength(10)
     expect(within(centerShafted).getByRole('heading', { name: 'Morning Dew' })).toBeInTheDocument()

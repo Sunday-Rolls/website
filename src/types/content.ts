@@ -111,7 +111,7 @@ export interface ShopSection {
   id: string
   title: string
   subtitle?: string
-  /** Short label shown above the section title, e.g. "New!". */
+  /** Short label overlaid on each product card in the section, e.g. "New!". */
   badge?: string
 }
 
@@ -164,6 +164,8 @@ export interface ProductContent {
   reviews?: {
     heading: string
     empty: string
+    /** Shown when this product has no reviews but sibling products do. */
+    emptyWithSimilar: string
     leaveCta: string
     summary: {
       outOf: string
@@ -284,6 +286,7 @@ export interface CartContent {
     eyebrow: string
     title: string
     description: string
+    colorLabel: string
     ctaLabel: string
     addingLabel: string
   }

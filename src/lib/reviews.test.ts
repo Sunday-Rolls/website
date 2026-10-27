@@ -7,6 +7,7 @@ import {
   productReviewUrl,
   ratingHistogram,
   reviewsForProduct,
+  otherProductReviews,
   similarProductReviews,
   sortReviewsForProduct,
   withInferredProductHandle,
@@ -121,6 +122,22 @@ describe('similarProductReviews', () => {
     const similar = similarProductReviews(reviews, 'the-birdie-machine')
     expect(similar.map((review) => review.author)).toEqual(['Grey', 'Mallet', 'Shared'])
     expect(similarProductReviews(reviews, 'golf-towel-solid-black')).toEqual([])
+  })
+})
+
+describe('otherProductReviews', () => {
+  it('returns written reviews from other products', () => {
+    const reviews: ProductReview[] = [
+      { author: 'Self', rating: 5, text: 'mine', productHandle: 'golf-towel-green-stripe' },
+      { author: 'Grey', rating: 5, text: 'grey cover', productHandle: 'retro-roller-grey' },
+      { author: 'Blank', rating: 5, text: '   ', productHandle: 'retro-roller-yellow' },
+      { author: 'Mallet', rating: 5, text: 'mallet cover', productHandle: 'mallet-retro-roller-grey' },
+    ]
+
+    expect(otherProductReviews(reviews, 'golf-towel-green-stripe').map((r) => r.author)).toEqual([
+      'Grey',
+      'Mallet',
+    ])
   })
 })
 

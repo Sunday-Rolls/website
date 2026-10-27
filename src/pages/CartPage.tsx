@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { assetUrl } from '@/lib/asset-url'
 import { useCart } from '@/lib/cart'
 import { freeShippingProgress } from '@/lib/cart-free-shipping'
-import { selectTowelUpsell, shouldShowTowelUpsell } from '@/lib/cart-towel-upsell'
+import {
+  listTowelUpsellOptions,
+  shouldShowTowelUpsell,
+  towelColorLabel,
+} from '@/lib/cart-towel-upsell'
 import {
   getButtonLabel,
   resolveLinkLabel,
@@ -36,6 +40,8 @@ export function CartPage() {
     removeItem,
   } = useCart()
   const [addingUpsell, setAddingUpsell] = useState(false)
+  const [selectedTowelHandle, setSelectedTowelHandle] = useState<string | null>(null)
+  const towelColorId = useId()
 
   const lines = cart?.lines ?? []
   const isEmpty = !isLoading && lines.length === 0
@@ -53,15 +59,17 @@ export function CartPage() {
     upsell.minTotal,
     upsell.maxTotal,
   )
-  const towelUpsell = showTowelUpsell
-    ? selectTowelUpsell(
-        lines.map((line) => line.handle),
-        upsell.preferredHandle,
-      )
-    : null
-  const towelImage = towelUpsell?.images[0] ? assetUrl(towelUpsell.images[0]) : undefined
-  const towelPrice = towelUpsell?.price
-    ? formatPrice(towelUpsell.price, cart?.currencyCode ?? 'USD')
+  const cartHandles = useMemo(() => lines.map((line) => line.handle), [lines])
+  const towelOptions = useMemo(
+    () =>
+      showTowelUpsell ? listTowelUpsellOptions(cartHandles, upsell.preferredHandle) : [],
+    [cartHandles, showTowelUpsell, upsell.preferredHandle],
+  )
+  const selectedTowel =
+    towelOptions.find((option) => option.handle === selectedTowelHandle) ?? towelOptions[0] ?? null
+  const towelImage = selectedTowel?.images[0] ? assetUrl(selectedTowel.images[0]) : undefined
+  const towelPrice = selectedTowel?.price
+    ? formatPrice(selectedTowel.price, cart?.currencyCode ?? 'USD')
     : null
   const thresholdLabel = formatPrice(
     String(content.freeShipping.threshold),
@@ -71,6 +79,18 @@ export function CartPage() {
     String(shipping.remaining),
     cart?.currencyCode ?? 'USD',
   )
+
+  useEffect(() => {
+    if (towelOptions.length === 0) {
+      setSelectedTowelHandle(null)
+      return
+    }
+    setSelectedTowelHandle((current) =>
+      current && towelOptions.some((option) => option.handle === current)
+        ? current
+        : towelOptions[0]!.handle,
+    )
+  }, [towelOptions])
 
   useEffect(() => {
     applyPageMeta({
@@ -142,10 +162,10 @@ export function CartPage() {
   }
 
   async function handleAddTowelUpsell() {
-    if (!towelUpsell || addingUpsell) return
+    if (!selectedTowel || addingUpsell) return
     setAddingUpsell(true)
     try {
-      const product = await fetchProductByHandle(towelUpsell.handle)
+      const product = await fetchProductByHandle(selectedTowel.handle)
       if (!product?.variantId) {
         throw new Error('Towel is unavailable')
       }
@@ -306,30 +326,48 @@ export function CartPage() {
         )}
       </div>
 
-      {towelUpsell ? (
+      {selectedTowel ? (
         <aside className="grid gap-4 border border-heritage-green/25 bg-warm-sand/40 p-4 sm:grid-cols-[96px_1fr_auto] sm:items-center">
           {towelImage ? (
             <img
               src={towelImage}
-              alt={towelUpsell.title}
+              alt={selectedTowel.title}
               className="aspect-square w-full object-cover"
             />
           ) : (
             <div className="aspect-square bg-warm-sand" />
           )}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="font-body text-label uppercase tracking-widest text-leather">
               {upsell.eyebrow}
             </p>
             <div className="space-y-1">
               <h2 className="font-display text-xl text-heritage-green">{upsell.title}</h2>
               <p className="font-body text-body-small text-matte-black/80">{upsell.description}</p>
-              <p className="font-body text-body-small text-leather">
+            </div>
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="block space-y-1" htmlFor={towelColorId}>
+                <span className="font-body text-body-small text-leather">{upsell.colorLabel}</span>
+                <select
+                  id={towelColorId}
+                  value={selectedTowel.handle}
+                  disabled={isUpdating || addingUpsell}
+                  onChange={(event) => setSelectedTowelHandle(event.target.value)}
+                  className="block min-w-[12rem] border border-leather/35 bg-white px-3 py-2 font-body text-body text-matte-black focus:border-heritage-green focus:outline-none focus:ring-1 focus:ring-heritage-green/30 disabled:opacity-60"
+                >
+                  {towelOptions.map((option) => (
+                    <option key={option.handle} value={option.handle}>
+                      {towelColorLabel(option.title)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="pb-2 font-body text-body-small text-leather">
                 <Link
-                  to={sitePath(`/products/${towelUpsell.handle}`)}
+                  to={sitePath(`/products/${selectedTowel.handle}`)}
                   className="text-heritage-green hover:text-forest-green"
                 >
-                  {towelUpsell.title}
+                  {selectedTowel.title}
                 </Link>
                 {towelPrice ? ` · ${towelPrice}` : null}
               </p>

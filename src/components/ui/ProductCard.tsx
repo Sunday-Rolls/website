@@ -12,6 +12,10 @@ interface ProductCardProps {
   className?: string
   listId?: string
   listName?: string
+  /** Optional chip overlaid on the photo (e.g. "New!"). */
+  badge?: string
+  /** Slightly varies badge tilt when several cards share a badge. */
+  badgeTilt?: number
   /** Hides the material line and "View details" link for shorter cards. */
   compact?: boolean
   /** Load immediately. Use for the image that can be the largest paint. */
@@ -26,6 +30,8 @@ export function ProductCard({
   className,
   listId = 'shop',
   listName = 'Shop',
+  badge,
+  badgeTilt = -8,
   compact = false,
   priority = false,
   loadImage = true,
@@ -45,8 +51,8 @@ export function ProductCard({
         className,
       )}
     >
-      <Link to={productPath} className="block" onClick={handleSelect} {...preload}>
-        <div className="aspect-[4/5] bg-warm-sand">
+      <Link to={productPath} className="relative block" onClick={handleSelect} {...preload}>
+        <div className="relative aspect-[4/5] overflow-hidden bg-warm-sand">
           {loadImage && product.imageUrl ? (
             <img
               src={sizedImageUrl(product.imageUrl, 640) ?? product.imageUrl}
@@ -65,7 +71,17 @@ export function ProductCard({
               <span className="font-display text-2xl text-heritage-green/30">SR</span>
             </div>
           )}
+          {badge ? (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-3 z-10 inline-flex origin-center items-center bg-heritage-green px-2.5 py-1 font-body text-sm font-semibold tracking-wide text-cream shadow-sm"
+              style={{ transform: `rotate(${badgeTilt}deg)` }}
+            >
+              {badge}
+            </span>
+          ) : null}
         </div>
+        {badge ? <span className="sr-only">{badge}</span> : null}
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">

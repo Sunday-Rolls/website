@@ -147,6 +147,22 @@ export function similarProductReviews(
   return picked
 }
 
+/** Reviews from other products — used when this product has none yet. */
+export function otherProductReviews(
+  reviews: ProductReview[],
+  handle: string,
+  limit = SIMILAR_REVIEW_LIMIT,
+): ProductReview[] {
+  const picked: ProductReview[] = []
+  for (const review of reviews) {
+    if (isReviewForProduct(review, handle)) continue
+    if (!review.text.trim()) continue
+    picked.push(review)
+    if (picked.length >= limit) break
+  }
+  return picked
+}
+
 export function averageRating(reviews: ProductReview[]): number {
   if (reviews.length === 0) return 0
   const total = reviews.reduce((sum, review) => sum + review.rating, 0)

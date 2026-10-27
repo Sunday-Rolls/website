@@ -131,6 +131,9 @@ describe('ProductPage', () => {
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: productContent.reviews.emptyWithSimilar }),
+    ).toBeInTheDocument()
   })
 
   it('shows not found state for unknown handles', async () => {

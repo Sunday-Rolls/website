@@ -9,6 +9,7 @@ import {
   averageRating,
   formatReviewDate,
   mergeReviews,
+  otherProductReviews,
   ratingHistogram,
   reviewsForProduct,
   similarProductReviews,
@@ -18,6 +19,7 @@ import type { ShopifyProduct } from '@/lib/shopify'
 import type { ProductReview } from '@/types/content'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
+import { cn } from '@/lib/utils'
 
 interface ProductReviewsProps {
   product: ShopifyProduct
@@ -110,6 +112,12 @@ export function ProductReviews({ product }: ProductReviewsProps) {
   const curated = liveReviews ?? getReviewItems()
   const items = reviewsForProduct(curated, product.handle)
   const similar = similarProductReviews(curated, product.handle)
+  const otherReviews =
+    items.length === 0 && similar.length === 0
+      ? otherProductReviews(curated, product.handle)
+      : []
+  const relatedReviews = items.length === 0 ? (similar.length > 0 ? similar : otherReviews) : similar
+  const showRelatedAsEmptyState = items.length === 0 && relatedReviews.length > 0
   const similarCopy =
     product.category === 'towels' ? reviews?.similar?.towels : reviews?.similar?.headcovers
   const avg = averageRating(items)
@@ -359,28 +367,49 @@ export function ProductReviews({ product }: ProductReviewsProps) {
           </Button>
         </form>
 
-        {items.length === 0 ? (
-          <p className="font-body text-body text-matte-black/70">{reviews.empty}</p>
-        ) : (
+        {items.length > 0 ? (
           <ul className="divide-y divide-sand">
             {items.map((review) => (
               <ReviewItem key={review.id ?? `${review.author}-${review.text.slice(0, 24)}`} review={review} />
             ))}
           </ul>
-        )}
+        ) : null}
 
-        {similar.length > 0 && reviews.similar ? (
-          <div className="space-y-4 border-t border-sand pt-10">
+        {items.length === 0 && relatedReviews.length === 0 ? (
+          <p className="font-body text-body text-matte-black/70">{reviews.empty}</p>
+        ) : null}
+
+        {relatedReviews.length > 0 && reviews.similar ? (
+          <div
+            className={cn(
+              'space-y-4',
+              items.length > 0 ? 'border-t border-sand pt-10' : undefined,
+            )}
+          >
             <div className="space-y-2">
-              <h3 id="similar-reviews-heading" className="font-display text-section-title text-heritage-green">
-                {reviews.similar.heading}
-              </h3>
-              {similarCopy ? (
-                <p className="font-body text-body-small text-leather">{similarCopy}</p>
-              ) : null}
+              {showRelatedAsEmptyState ? (
+                <h3
+                  id="similar-reviews-heading"
+                  className="font-display text-xl text-heritage-green sm:text-2xl"
+                >
+                  {reviews.emptyWithSimilar}
+                </h3>
+              ) : (
+                <>
+                  <h3
+                    id="similar-reviews-heading"
+                    className="font-display text-section-title text-heritage-green"
+                  >
+                    {reviews.similar.heading}
+                  </h3>
+                  {similarCopy ? (
+                    <p className="font-body text-body-small text-leather">{similarCopy}</p>
+                  ) : null}
+                </>
+              )}
             </div>
             <ul className="divide-y divide-sand" aria-labelledby="similar-reviews-heading">
-              {similar.map((review) => {
+              {relatedReviews.map((review) => {
                 const catalogProduct = review.productHandle
                   ? getCatalogProductByHandle(review.productHandle)
                   : undefined

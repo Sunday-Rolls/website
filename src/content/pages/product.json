@@ -20,7 +20,8 @@
   },
   "reviews": {
     "heading": "Customer reviews",
-    "empty": "No reviews yet—be the first to share your round.",
+    "empty": "No reviews yet. Be the first to share your round.",
+    "emptyWithSimilar": "There's no reviews for this one yet, here's reviews from some of our other products!",
     "leaveCta": "Write a review",
     "summary": {
       "outOf": "out of 5",

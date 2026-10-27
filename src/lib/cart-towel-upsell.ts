@@ -12,17 +12,34 @@ export function shouldShowTowelUpsell(
   return totalUsd >= min && totalUsd < max
 }
 
+/** "Golf Towel - Green Stripe" → "Green Stripe" */
+export function towelColorLabel(title: string): string {
+  const separator = title.indexOf(' - ')
+  if (separator === -1) return title.trim()
+  return title.slice(separator + 3).trim() || title.trim()
+}
+
+/** Towels not already in the cart, preferred color first. */
+export function listTowelUpsellOptions(
+  cartHandles: Iterable<string>,
+  preferredHandle = DEFAULT_TOWEL_UPSELL_HANDLE,
+): CatalogProduct[] {
+  const inCart = new Set(cartHandles)
+  const towels = getPublishedCatalogProducts().filter(
+    (product) => product.category === 'towels' && !inCart.has(product.handle),
+  )
+
+  return [...towels].sort((a, b) => {
+    if (a.handle === preferredHandle) return -1
+    if (b.handle === preferredHandle) return 1
+    return 0
+  })
+}
+
 /** Prefer a configured towel that isn’t already in the cart; otherwise any other towel. */
 export function selectTowelUpsell(
   cartHandles: Iterable<string>,
   preferredHandle = DEFAULT_TOWEL_UPSELL_HANDLE,
 ): CatalogProduct | null {
-  const inCart = new Set(cartHandles)
-  const towels = getPublishedCatalogProducts().filter((product) => product.category === 'towels')
-  if (towels.length === 0) return null
-
-  const preferred = towels.find((product) => product.handle === preferredHandle)
-  if (preferred && !inCart.has(preferred.handle)) return preferred
-
-  return towels.find((product) => !inCart.has(product.handle)) ?? null
+  return listTowelUpsellOptions(cartHandles, preferredHandle)[0] ?? null
 }
