@@ -1,5 +1,7 @@
 const SHOPIFY_WIDTHS = [480, 640, 800]
 const LOCAL_WIDTHS = [320, 480, 640, 800]
+/** Bump when replacing product masters so browsers skip cached green-BG WebPs. */
+export const LOCAL_PRODUCT_IMAGE_VERSION = '20261027-cream'
 
 function isShopifyCdn(url: string): boolean {
   try {
@@ -31,11 +33,16 @@ function localProductBase(url: string): { prefix: string; name: string } | undef
   }
 }
 
+function withLocalCacheBust(path: string): string {
+  const joiner = path.includes('?') ? '&' : '?'
+  return `${path}${joiner}v=${LOCAL_PRODUCT_IMAGE_VERSION}`
+}
+
 function localSizedUrl(url: string, width: number): string | undefined {
   const local = localProductBase(url)
   if (!local) return undefined
   const chosen = nearestWidth(LOCAL_WIDTHS, width)
-  return `${local.prefix}/assets/products/w${chosen}/${local.name}.webp`
+  return withLocalCacheBust(`${local.prefix}/assets/products/w${chosen}/${local.name}.webp`)
 }
 
 /** Resize Shopify CDN images and local product photos. */
@@ -61,9 +68,12 @@ export function productImageSrcSet(url: string | undefined): string | undefined 
 
   const local = localProductBase(url)
   if (!local) return undefined
-  return LOCAL_WIDTHS.map(
-    (width) => `${local.prefix}/assets/products/w${width}/${local.name}.webp ${width}w`,
-  ).join(', ')
+  return LOCAL_WIDTHS.map((width) => {
+    const path = withLocalCacheBust(
+      `${local.prefix}/assets/products/w${width}/${local.name}.webp`,
+    )
+    return `${path} ${width}w`
+  }).join(', ')
 }
 
 /** Gallery src: a Shopify width param, or the prebuilt local WebP nearest that width. */

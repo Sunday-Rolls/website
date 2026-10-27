@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { optimizedImageUrl, productImageSrcSet, sizedImageUrl } from '@/lib/responsive-image'
+import {
+  LOCAL_PRODUCT_IMAGE_VERSION,
+  optimizedImageUrl,
+  productImageSrcSet,
+  sizedImageUrl,
+} from '@/lib/responsive-image'
 
 describe('sizedImageUrl', () => {
   it('adds width for Shopify CDN URLs', () => {
@@ -9,7 +14,7 @@ describe('sizedImageUrl', () => {
 
   it('points local product photos at a generated WebP', () => {
     expect(sizedImageUrl('/assets/products/the-doodle.jpg', 640)).toBe(
-      '/assets/products/w640/the-doodle.webp',
+      `/assets/products/w640/the-doodle.webp?v=${LOCAL_PRODUCT_IMAGE_VERSION}`,
     )
   })
 })
@@ -22,12 +27,13 @@ describe('productImageSrcSet', () => {
   })
 
   it('builds a WebP srcset for local product photos', () => {
+    const bust = `?v=${LOCAL_PRODUCT_IMAGE_VERSION}`
     expect(productImageSrcSet('/assets/products/the-doodle.jpg')).toBe(
       [
-        '/assets/products/w320/the-doodle.webp 320w',
-        '/assets/products/w480/the-doodle.webp 480w',
-        '/assets/products/w640/the-doodle.webp 640w',
-        '/assets/products/w800/the-doodle.webp 800w',
+        `/assets/products/w320/the-doodle.webp${bust} 320w`,
+        `/assets/products/w480/the-doodle.webp${bust} 480w`,
+        `/assets/products/w640/the-doodle.webp${bust} 640w`,
+        `/assets/products/w800/the-doodle.webp${bust} 800w`,
       ].join(', '),
     )
   })
@@ -36,7 +42,7 @@ describe('productImageSrcSet', () => {
 describe('optimizedImageUrl', () => {
   it('points local product photos at the 800px WebP', () => {
     expect(optimizedImageUrl('/assets/products/golf-towel-solid-black.jpg')).toBe(
-      '/assets/products/w800/golf-towel-solid-black.webp',
+      `/assets/products/w800/golf-towel-solid-black.webp?v=${LOCAL_PRODUCT_IMAGE_VERSION}`,
     )
   })
 
