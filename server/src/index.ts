@@ -81,6 +81,10 @@ if (pool) {
 
   reviews = createPgReviewStore(pool)
   await reviews.migrate()
+  const seeded = await reviews.seedCatalog()
+  if (seeded > 0) {
+    console.log(`Seeded ${seeded} product reviews into Postgres`)
+  }
 
   if (config.dashboardEnabled) {
     analytics = createPgAnalyticsStore(pool)

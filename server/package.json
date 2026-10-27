@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "tsc -p tsconfig.json && mkdir -p dist/dashboard dist/data dist/assets && cp -R src/dashboard/ui dist/dashboard/ui && cp src/data/review-qr-products.json dist/data/review-qr-products.json && cp src/assets/sunday-rolls-logo.png dist/assets/sunday-rolls-logo.png",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/dashboard dist/data dist/assets && cp -R src/dashboard/ui dist/dashboard/ui && cp src/data/review-qr-products.json dist/data/review-qr-products.json && cp src/data/product-reviews-seed.json dist/data/product-reviews-seed.json && cp src/assets/sunday-rolls-logo.png dist/assets/sunday-rolls-logo.png",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "user:set-password": "tsx src/scripts/set-password.ts",

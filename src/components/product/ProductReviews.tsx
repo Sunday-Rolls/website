@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { getCatalogProductByHandle } from '@/lib/product-catalog'
 import { getReviewItems } from '@/lib/review-items'
-import { fetchProductReviews, submitProductReview } from '@/lib/reviews-api'
+import { fetchAllReviews, submitProductReview } from '@/lib/reviews-api'
 import {
   REVIEW_QUERY_PARAM,
   averageRating,
@@ -22,6 +22,9 @@ import { Container } from '@/components/ui/Container'
 interface ProductReviewsProps {
   product: ShopifyProduct
 }
+
+const fieldClassName =
+  'w-full rounded-md border border-leather/35 bg-white px-3 py-2.5 font-body text-body text-matte-black placeholder:text-leather/55 focus:border-heritage-green focus:outline-none focus:ring-1 focus:ring-heritage-green/30'
 
 function StarRating({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'md' | 'lg' }) {
   const sizeClass =
@@ -95,8 +98,7 @@ export function ProductReviews({ product }: ProductReviewsProps) {
   const formId = useId()
   const formRef = useRef<HTMLFormElement>(null)
   const [searchParams, setSearchParams] = useSearchParams()
-  const [remoteReviews, setRemoteReviews] = useState<ProductReview[]>([])
-  const [manualFormOpen, setManualFormOpen] = useState(false)
+  const [liveReviews, setLiveReviews] = useState<ProductReview[] | null>(null)
   const [author, setAuthor] = useState('')
   const [location, setLocation] = useState('')
   const [rating, setRating] = useState(5)
@@ -104,9 +106,8 @@ export function ProductReviews({ product }: ProductReviewsProps) {
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'submit-error'>('idle')
   const [submitting, setSubmitting] = useState(false)
 
-  const formOpen = manualFormOpen || searchParams.get(REVIEW_QUERY_PARAM) === '1'
-
-  const curated = mergeReviews(mergeReviews(getReviewItems()), remoteReviews)
+  const shouldFocusForm = searchParams.get(REVIEW_QUERY_PARAM) === '1'
+  const curated = liveReviews ?? getReviewItems()
   const items = reviewsForProduct(curated, product.handle)
   const similar = similarProductReviews(curated, product.handle)
   const similarCopy =
@@ -118,26 +119,26 @@ export function ProductReviews({ product }: ProductReviewsProps) {
   useEffect(() => {
     let cancelled = false
 
-    fetchProductReviews(product.handle)
+    fetchAllReviews()
       .then((loaded) => {
-        if (!cancelled) setRemoteReviews(loaded)
+        if (!cancelled) setLiveReviews(loaded)
       })
       .catch(() => {
-        // Curated reviews still render if the API is unreachable.
+        // Static curated reviews still render if the API is unreachable.
       })
 
     return () => {
       cancelled = true
     }
-  }, [product.handle])
+  }, [])
 
   useEffect(() => {
-    if (!formOpen) return
+    if (!shouldFocusForm) return
     const form = formRef.current
     if (form && typeof form.scrollIntoView === 'function') {
       form.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-  }, [formOpen])
+  }, [shouldFocusForm])
 
   if (!reviews) return null
 
@@ -146,12 +147,6 @@ export function ProductReviews({ product }: ProductReviewsProps) {
     const next = new URLSearchParams(searchParams)
     next.delete(REVIEW_QUERY_PARAM)
     setSearchParams(next, { replace: true })
-  }
-
-  function closeForm() {
-    setManualFormOpen(false)
-    setStatus('idle')
-    clearReviewQuery()
   }
 
   function reviewCountLabel(count: number): string {
@@ -178,13 +173,12 @@ export function ProductReviews({ product }: ProductReviewsProps) {
         productHandle: product.handle,
         location,
       })
-      setRemoteReviews((current) => mergeReviews(current, [saved]))
+      setLiveReviews((current) => mergeReviews(current ?? [], [saved]))
       setAuthor('')
       setLocation('')
       setRating(5)
       setText('')
       setStatus('success')
-      setManualFormOpen(false)
       clearReviewQuery()
     } catch {
       setStatus('submit-error')
@@ -197,21 +191,14 @@ export function ProductReviews({ product }: ProductReviewsProps) {
     <section className="border-t border-sand py-12 md:py-16" aria-labelledby="product-reviews-heading">
       <Container className="max-w-3xl space-y-10">
         <div className="space-y-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-2">
-              <h2
-                id="product-reviews-heading"
-                className="font-display text-section-title text-heritage-green"
-              >
-                {reviews.heading}
-              </h2>
-              <p className="font-body text-body-small text-leather">{product.title}</p>
-            </div>
-            {!formOpen ? (
-              <Button type="button" variant="secondary" onClick={() => setManualFormOpen(true)}>
-                {reviews.leaveCta}
-              </Button>
-            ) : null}
+          <div className="space-y-2">
+            <h2
+              id="product-reviews-heading"
+              className="font-display text-section-title text-heritage-green"
+            >
+              {reviews.heading}
+            </h2>
+            <p className="font-body text-body-small text-leather">{product.title}</p>
           </div>
 
           {items.length > 0 ? (
@@ -259,125 +246,118 @@ export function ProductReviews({ product }: ProductReviewsProps) {
           </p>
         ) : null}
 
-        {formOpen ? (
-          <form
-            ref={formRef}
-            id={`${formId}-form`}
-            className="scroll-mt-24 space-y-5 border-t border-b border-sand py-8"
-            onSubmit={handleSubmit}
-            aria-labelledby={`${formId}-title`}
-          >
-            <h3 id={`${formId}-title`} className="font-display text-xl text-heritage-green">
-              {reviews.form.title}
-            </h3>
+        <form
+          ref={formRef}
+          id={`${formId}-form`}
+          className="scroll-mt-24 space-y-5 border border-sand bg-cream/60 px-5 py-8 sm:px-6"
+          onSubmit={handleSubmit}
+          aria-labelledby={`${formId}-title`}
+        >
+          <h3 id={`${formId}-title`} className="font-display text-xl text-heritage-green">
+            {reviews.form.title}
+          </h3>
 
-            {/* Honeypot — hidden from people, filled by bots */}
+          {/* Honeypot — hidden from people, filled by bots */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            className="absolute left-[-9999px] h-0 w-0 opacity-0"
+            aria-hidden="true"
+          />
+
+          <div className="space-y-2">
+            <label className="font-body text-body-small text-leather" htmlFor={`${formId}-name`}>
+              {reviews.form.nameLabel}
+            </label>
             <input
-              type="text"
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              className="absolute left-[-9999px] h-0 w-0 opacity-0"
-              aria-hidden="true"
+              id={`${formId}-name`}
+              name="author"
+              value={author}
+              onChange={(event) => setAuthor(event.target.value)}
+              placeholder={reviews.form.namePlaceholder}
+              className={fieldClassName}
+              autoComplete="name"
+              required
             />
+          </div>
 
-            <div className="space-y-2">
-              <label className="font-body text-body-small text-leather" htmlFor={`${formId}-name`}>
-                {reviews.form.nameLabel}
-              </label>
-              <input
-                id={`${formId}-name`}
-                name="author"
-                value={author}
-                onChange={(event) => setAuthor(event.target.value)}
-                placeholder={reviews.form.namePlaceholder}
-                className="w-full border-0 border-b border-sand bg-transparent px-0 py-2 font-body text-body text-matte-black focus:border-heritage-green focus:outline-none"
-                autoComplete="name"
-                required
-              />
+          <div className="space-y-2">
+            <label
+              className="font-body text-body-small text-leather"
+              htmlFor={`${formId}-location`}
+            >
+              {reviews.form.locationLabel}
+            </label>
+            <input
+              id={`${formId}-location`}
+              name="location"
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
+              placeholder={reviews.form.locationPlaceholder}
+              className={fieldClassName}
+              autoComplete="address-level2"
+            />
+          </div>
+
+          <fieldset className="space-y-2">
+            <legend className="font-body text-body-small text-leather">{reviews.form.ratingLabel}</legend>
+            <div className="flex flex-wrap gap-1">
+              {[1, 2, 3, 4, 5].map((value) => (
+                <label
+                  key={value}
+                  className={`cursor-pointer px-2 py-1 font-body text-xl ${
+                    value <= rating ? 'text-soft-gold' : 'text-sand'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="rating"
+                    value={value}
+                    checked={rating === value}
+                    onChange={() => setRating(value)}
+                    className="sr-only"
+                  />
+                  <span aria-hidden="true">★</span>
+                  <span className="sr-only">{value} stars</span>
+                </label>
+              ))}
             </div>
+          </fieldset>
 
-            <div className="space-y-2">
-              <label
-                className="font-body text-body-small text-leather"
-                htmlFor={`${formId}-location`}
-              >
-                {reviews.form.locationLabel}
-              </label>
-              <input
-                id={`${formId}-location`}
-                name="location"
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-                placeholder={reviews.form.locationPlaceholder}
-                className="w-full border-0 border-b border-sand bg-transparent px-0 py-2 font-body text-body text-matte-black focus:border-heritage-green focus:outline-none"
-                autoComplete="address-level2"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className="font-body text-body-small text-leather" htmlFor={`${formId}-text`}>
+              {reviews.form.reviewLabel}
+            </label>
+            <textarea
+              id={`${formId}-text`}
+              name="text"
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              placeholder={reviews.form.reviewPlaceholder}
+              rows={4}
+              required
+              className={`${fieldClassName} resize-y`}
+            />
+          </div>
 
-            <fieldset className="space-y-2">
-              <legend className="font-body text-body-small text-leather">{reviews.form.ratingLabel}</legend>
-              <div className="flex flex-wrap gap-1">
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <label
-                    key={value}
-                    className={`cursor-pointer px-2 py-1 font-body text-xl ${
-                      value <= rating ? 'text-soft-gold' : 'text-sand'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="rating"
-                      value={value}
-                      checked={rating === value}
-                      onChange={() => setRating(value)}
-                      className="sr-only"
-                    />
-                    <span aria-hidden="true">★</span>
-                    <span className="sr-only">{value} stars</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+          {status === 'error' ? (
+            <p className="font-body text-body-small text-leather" role="alert">
+              {reviews.form.error}
+            </p>
+          ) : null}
 
-            <div className="space-y-2">
-              <label className="font-body text-body-small text-leather" htmlFor={`${formId}-text`}>
-                {reviews.form.reviewLabel}
-              </label>
-              <textarea
-                id={`${formId}-text`}
-                name="text"
-                value={text}
-                onChange={(event) => setText(event.target.value)}
-                placeholder={reviews.form.reviewPlaceholder}
-                rows={4}
-                required
-                className="w-full resize-y border border-sand bg-transparent px-3 py-2 font-body text-body text-matte-black focus:border-heritage-green focus:outline-none"
-              />
-            </div>
+          {status === 'submit-error' ? (
+            <p className="font-body text-body-small text-leather" role="alert">
+              {reviews.form.submitError}
+            </p>
+          ) : null}
 
-            {status === 'error' ? (
-              <p className="font-body text-body-small text-leather" role="alert">
-                {reviews.form.error}
-              </p>
-            ) : null}
-
-            {status === 'submit-error' ? (
-              <p className="font-body text-body-small text-leather" role="alert">
-                {reviews.form.submitError}
-              </p>
-            ) : null}
-
-            <div className="flex flex-wrap gap-3">
-              <Button type="submit" disabled={submitting}>
-                {reviews.form.submitLabel}
-              </Button>
-              <Button type="button" variant="ghost" onClick={closeForm}>
-                {reviews.form.cancelLabel}
-              </Button>
-            </div>
-          </form>
-        ) : null}
+          <Button type="submit" disabled={submitting}>
+            {reviews.form.submitLabel}
+          </Button>
+        </form>
 
         {items.length === 0 ? (
           <p className="font-body text-body text-matte-black/70">{reviews.empty}</p>

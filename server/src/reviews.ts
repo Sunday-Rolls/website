@@ -1,19 +1,31 @@
 import { randomUUID } from 'node:crypto'
+import { loadProductReviewsSeed, type SeedReviewRow } from './review-seed.js'
 
 export type Review = {
   id: string
-  productHandle: string
+  productHandle: string | null
   author: string
   rating: number
   text: string
   location: string | null
+  listing: string | null
+  source: string | null
   createdAt: string
 }
 
-export type NewReview = Omit<Review, 'id' | 'createdAt'>
+export type NewReview = {
+  productHandle: string | null
+  author: string
+  rating: number
+  text: string
+  location: string | null
+  listing?: string | null
+  source?: string | null
+}
 
 export interface ReviewStore {
   listByHandle(handle: string, limit: number): Promise<Review[]>
+  listAll(limit: number): Promise<Review[]>
   create(review: NewReview): Promise<Review>
   deleteById(id: string): Promise<boolean>
 }
@@ -24,6 +36,7 @@ export const REVIEW_LIMITS = {
   text: 2000,
   handle: 120,
   list: 100,
+  listAll: 200,
 } as const
 
 /** Bots fill every input; people never see this one. */
@@ -95,7 +108,15 @@ export function parseReviewBody(body: unknown): ParsedReviewBody {
   return {
     ok: true,
     spam: false,
-    value: { productHandle: record.productHandle, author, rating, text, location },
+    value: {
+      productHandle: record.productHandle,
+      author,
+      rating,
+      text,
+      location,
+      listing: null,
+      source: 'site',
+    },
   }
 }
 
@@ -106,39 +127,79 @@ type Queryable = {
 export const REVIEWS_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS product_reviews (
   id uuid PRIMARY KEY,
-  product_handle text NOT NULL,
+  product_handle text,
   author text NOT NULL,
   rating smallint NOT NULL CHECK (rating BETWEEN 1 AND 5),
   body text NOT NULL,
   location text,
+  listing text,
+  source text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS listing text;
+ALTER TABLE product_reviews ADD COLUMN IF NOT EXISTS source text;
+ALTER TABLE product_reviews ALTER COLUMN product_handle DROP NOT NULL;
 CREATE INDEX IF NOT EXISTS product_reviews_handle_created_idx
   ON product_reviews (product_handle, created_at DESC);
+CREATE INDEX IF NOT EXISTS product_reviews_created_idx
+  ON product_reviews (created_at DESC);
 `
 
 function rowToReview(row: Record<string, unknown>): Review {
   const createdAt = row.created_at
   return {
     id: String(row.id),
-    productHandle: String(row.product_handle),
+    productHandle: row.product_handle == null ? null : String(row.product_handle),
     author: String(row.author),
     rating: Number(row.rating),
     text: String(row.body),
     location: row.location == null ? null : String(row.location),
+    listing: row.listing == null ? null : String(row.listing),
+    source: row.source == null ? null : String(row.source),
     createdAt: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
   }
 }
 
-export function createPgReviewStore(db: Queryable): ReviewStore & { migrate(): Promise<void> } {
+const REVIEW_SELECT = `id, product_handle, author, rating, body, location, listing, source, created_at`
+
+export function createPgReviewStore(db: Queryable): ReviewStore & {
+  migrate(): Promise<void>
+  seedCatalog(rows?: SeedReviewRow[]): Promise<number>
+} {
   return {
     async migrate() {
       await db.query(REVIEWS_SCHEMA_SQL)
     },
 
+    async seedCatalog(rows = loadProductReviewsSeed()) {
+      let inserted = 0
+      for (const row of rows) {
+        const result = await db.query(
+          `INSERT INTO product_reviews
+             (id, product_handle, author, rating, body, location, listing, source, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+           ON CONFLICT (id) DO NOTHING
+           RETURNING id`,
+          [
+            row.id,
+            row.productHandle,
+            row.author,
+            row.rating,
+            row.text,
+            row.location,
+            row.listing ?? null,
+            row.source ?? 'etsy',
+            row.createdAt,
+          ],
+        )
+        if (result.rows.length > 0) inserted += 1
+      }
+      return inserted
+    },
+
     async listByHandle(handle, limit) {
       const { rows } = await db.query(
-        `SELECT id, product_handle, author, rating, body, location, created_at
+        `SELECT ${REVIEW_SELECT}
          FROM product_reviews
          WHERE product_handle = $1
          ORDER BY created_at DESC
@@ -148,12 +209,33 @@ export function createPgReviewStore(db: Queryable): ReviewStore & { migrate(): P
       return rows.map(rowToReview)
     },
 
+    async listAll(limit) {
+      const { rows } = await db.query(
+        `SELECT ${REVIEW_SELECT}
+         FROM product_reviews
+         ORDER BY created_at DESC
+         LIMIT $1`,
+        [limit],
+      )
+      return rows.map(rowToReview)
+    },
+
     async create(review) {
       const { rows } = await db.query(
-        `INSERT INTO product_reviews (id, product_handle, author, rating, body, location)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, product_handle, author, rating, body, location, created_at`,
-        [randomUUID(), review.productHandle, review.author, review.rating, review.text, review.location],
+        `INSERT INTO product_reviews
+           (id, product_handle, author, rating, body, location, listing, source)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING ${REVIEW_SELECT}`,
+        [
+          randomUUID(),
+          review.productHandle,
+          review.author,
+          review.rating,
+          review.text,
+          review.location,
+          review.listing ?? null,
+          review.source ?? 'site',
+        ],
       )
       return rowToReview(rows[0])
     },
@@ -165,16 +247,26 @@ export function createPgReviewStore(db: Queryable): ReviewStore & { migrate(): P
   }
 }
 
-export function createMemoryReviewStore(): ReviewStore {
-  const reviews: Review[] = []
+export function createMemoryReviewStore(initial: Review[] = []): ReviewStore {
+  const reviews: Review[] = [...initial]
 
   return {
     async listByHandle(handle, limit) {
       return reviews.filter((review) => review.productHandle === handle).slice(0, limit)
     },
 
+    async listAll(limit) {
+      return reviews.slice(0, limit)
+    },
+
     async create(review) {
-      const saved: Review = { ...review, id: randomUUID(), createdAt: new Date().toISOString() }
+      const saved: Review = {
+        ...review,
+        listing: review.listing ?? null,
+        source: review.source ?? 'site',
+        id: randomUUID(),
+        createdAt: new Date().toISOString(),
+      }
       reviews.unshift(saved)
       return saved
     },

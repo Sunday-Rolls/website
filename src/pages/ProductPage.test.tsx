@@ -23,7 +23,8 @@ vi.mock('@/lib/gtm', () => ({
 }))
 
 vi.mock('@/lib/reviews-api', () => ({
-  fetchProductReviews: vi.fn().mockResolvedValue([]),
+  fetchAllReviews: vi.fn().mockRejectedValue(new Error('offline')),
+  fetchProductReviews: vi.fn().mockRejectedValue(new Error('offline')),
   submitProductReview: vi.fn(),
 }))
 
@@ -68,7 +69,10 @@ describe('ProductPage', () => {
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: productContent.reviews.leaveCta })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: productContent.reviews.form.title }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText(productContent.reviews.form.nameLabel)).toBeInTheDocument()
     expect(screen.getByText(greyReview!.author)).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { level: 3, name: productContent.reviews.similar.heading }),
@@ -76,7 +80,7 @@ describe('ProductPage', () => {
     expect(screen.getByText(productContent.reviews.similar.headcovers)).toBeInTheDocument()
   })
 
-  it('opens the leave-a-review form from the QR query param', async () => {
+  it('keeps the review form on the page for QR landings', async () => {
     renderWithRouter(<ProductPage />, {
       route: '/products/retro-roller-grey?review=1',
       path: '/products/:handle',

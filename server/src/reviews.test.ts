@@ -147,17 +147,33 @@ describe('GET /reviews', () => {
     ])
   })
 
-  it('rejects a missing or malformed handle', async () => {
+  it('rejects a malformed handle', async () => {
     const { app } = setup()
 
-    expect((await app.request('/reviews')).status).toBe(400)
     expect((await listReviews(app, '../etc/passwd')).response.status).toBe(400)
+  })
+
+  it('lists every review when no handle is provided', async () => {
+    const { app } = setup()
+    await postReview(app, { ...validReview, text: 'Grey' })
+    await postReview(app, {
+      ...validReview,
+      productHandle: 'the-birdie-machine',
+      text: 'Birdie',
+    }, { 'X-Forwarded-For': '10.0.0.3' })
+
+    const response = await app.request('/reviews', { headers: { Origin: SITE } })
+    const data = (await response.json()) as { ok: boolean; reviews: { text: string }[] }
+
+    expect(response.status).toBe(200)
+    expect(data.reviews.map((review) => review.text)).toEqual(['Birdie', 'Grey'])
   })
 
   it('returns 502 when the database fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const { app } = setup({
       listByHandle: vi.fn().mockRejectedValue(new Error('db down')),
+      listAll: vi.fn().mockRejectedValue(new Error('db down')),
       create: vi.fn(),
       deleteById: vi.fn(),
     })
@@ -185,6 +201,8 @@ describe('createPgReviewStore', () => {
           rating: 5,
           body: validReview.text,
           location: null,
+          listing: null,
+          source: null,
           created_at: new Date('2026-10-08T12:00:00Z'),
         },
       ],
@@ -203,6 +221,8 @@ describe('createPgReviewStore', () => {
       5,
       validReview.text,
       null,
+      null,
+      'site',
     ])
     const [selectSql, selectParams] = query.mock.calls[1]
     expect(selectSql).not.toContain(validReview.productHandle)
@@ -214,6 +234,8 @@ describe('createPgReviewStore', () => {
       rating: 5,
       text: validReview.text,
       location: null,
+      listing: null,
+      source: null,
       createdAt: '2026-10-08T12:00:00.000Z',
     })
   })

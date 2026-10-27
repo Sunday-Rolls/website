@@ -132,7 +132,7 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
     }
 
     const handle = c.req.query('handle')
-    if (!isValidHandle(handle)) {
+    if (handle !== undefined && handle !== '' && !isValidHandle(handle)) {
       return c.json({ ok: false, error: 'Unknown product' }, 400)
     }
 
@@ -143,7 +143,9 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
     }
 
     try {
-      const items = await reviews.listByHandle(handle, REVIEW_LIMITS.list)
+      const items = handle
+        ? await reviews.listByHandle(handle, REVIEW_LIMITS.list)
+        : await reviews.listAll(REVIEW_LIMITS.listAll)
       return c.json({ ok: true, reviews: items })
     } catch (error) {
       console.error('Failed to list reviews', error)

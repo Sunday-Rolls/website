@@ -2,11 +2,13 @@ import type { ProductReview } from '@/types/content'
 
 type ApiReview = {
   id: string
-  productHandle: string
+  productHandle: string | null
   author: string
   rating: number
   text: string
   location: string | null
+  listing?: string | null
+  source?: string | null
   createdAt: string
 }
 
@@ -20,27 +22,23 @@ function reviewsBaseUrl(): string | null {
 }
 
 function toProductReview(review: ApiReview): ProductReview {
+  const source =
+    review.source === 'etsy' || review.source === 'site' ? review.source : undefined
+
   return {
     id: review.id,
-    productHandle: review.productHandle,
+    productHandle: review.productHandle ?? undefined,
     author: review.author,
     rating: review.rating,
     text: review.text,
     location: review.location ?? undefined,
-    source: 'site',
+    listing: review.listing ?? undefined,
+    source,
     createdAt: review.createdAt,
   }
 }
 
-export async function fetchProductReviews(handle: string): Promise<ProductReview[]> {
-  const baseUrl = reviewsBaseUrl()
-  if (!baseUrl) return []
-
-  const response = await fetch(
-    `${baseUrl}/reviews?handle=${encodeURIComponent(handle)}`,
-    { headers: { Accept: 'application/json' } },
-  )
-
+async function parseReviewsResponse(response: Response): Promise<ProductReview[]> {
   type ListResponse = { ok?: boolean; reviews?: ApiReview[]; error?: string }
   let data: ListResponse | null = null
   try {
@@ -54,6 +52,35 @@ export async function fetchProductReviews(handle: string): Promise<ProductReview
   }
 
   return data.reviews.map(toProductReview)
+}
+
+/** Live reviews for one product. Throws when the API is unreachable or unconfigured. */
+export async function fetchProductReviews(handle: string): Promise<ProductReview[]> {
+  const baseUrl = reviewsBaseUrl()
+  if (!baseUrl) {
+    throw new Error('Reviews API is not configured')
+  }
+
+  const response = await fetch(
+    `${baseUrl}/reviews?handle=${encodeURIComponent(handle)}`,
+    { headers: { Accept: 'application/json' } },
+  )
+
+  return parseReviewsResponse(response)
+}
+
+/** All live reviews (marquee + similar-product sections). */
+export async function fetchAllReviews(): Promise<ProductReview[]> {
+  const baseUrl = reviewsBaseUrl()
+  if (!baseUrl) {
+    throw new Error('Reviews API is not configured')
+  }
+
+  const response = await fetch(`${baseUrl}/reviews`, {
+    headers: { Accept: 'application/json' },
+  })
+
+  return parseReviewsResponse(response)
 }
 
 export async function submitProductReview(input: {

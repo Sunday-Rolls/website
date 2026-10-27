@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { usePageContent } from '@/lib/content'
 import { selectMarqueeReviews } from '@/lib/marquee-reviews'
 import { getReviewItems } from '@/lib/review-items'
+import { fetchAllReviews } from '@/lib/reviews-api'
+import type { ProductReview } from '@/types/content'
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -20,8 +23,26 @@ function StarRating({ rating }: { rating: number }) {
 
 export function ReviewsMarquee() {
   const { reviews } = usePageContent('home')
-  const writtenReviews = selectMarqueeReviews(getReviewItems())
+  const [liveReviews, setLiveReviews] = useState<ProductReview[] | null>(null)
+  const source = liveReviews ?? getReviewItems()
+  const writtenReviews = selectMarqueeReviews(source)
   const loopItems = [...writtenReviews, ...writtenReviews]
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetchAllReviews()
+      .then((loaded) => {
+        if (!cancelled) setLiveReviews(loaded)
+      })
+      .catch(() => {
+        // Keep static curated reviews when the API is unreachable.
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   if (writtenReviews.length === 0) return null
 
@@ -40,7 +61,7 @@ export function ReviewsMarquee() {
         <div className="home-marquee flex w-max items-stretch gap-4">
           {loopItems.map((review, index) => (
             <article
-              key={`${review.author}-${index}`}
+              key={`${review.id ?? review.author}-${index}`}
               className="flex w-80 shrink-0 flex-col border border-cream/15 bg-forest-green/50 px-4 py-3 backdrop-blur-sm"
             >
               <StarRating rating={review.rating} />

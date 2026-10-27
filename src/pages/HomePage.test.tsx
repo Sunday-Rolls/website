@@ -23,6 +23,12 @@ vi.mock('@/lib/gtm', () => ({
   pushEvent: vi.fn(),
 }))
 
+vi.mock('@/lib/reviews-api', () => ({
+  fetchAllReviews: vi.fn().mockRejectedValue(new Error('offline')),
+  fetchProductReviews: vi.fn().mockRejectedValue(new Error('offline')),
+  submitProductReview: vi.fn(),
+}))
+
 describe('HomePage', () => {
   it('renders hero content from home.json', () => {
     renderWithRouter(<HomePage />)
