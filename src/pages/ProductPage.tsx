@@ -4,7 +4,6 @@ import { usePageContent } from '@/lib/content'
 import { trackViewItem } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
 import { placeholderProducts } from '@/lib/product-catalog'
-import { scheduleAfterLoad } from '@/lib/schedule'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { ProductDetails } from '@/components/product/ProductDetails'
 import { ProductGallery } from '@/components/product/ProductGallery'
@@ -26,44 +25,32 @@ export function ProductPage() {
     const known = placeholderProducts.find((entry) => entry.handle === handle)
     setProduct(known)
 
-    const startFetch = () => {
-      void import('@/lib/shopify').then(({ fetchProductByHandle }) =>
-        fetchProductByHandle(handle).then((item) => {
-          if (cancelled) return
-          if (item && known) {
-            const useStoreImages = Boolean(item.images?.length)
-            setProduct({
-              ...item,
-              imageUrl: useStoreImages ? item.imageUrl : (known.imageUrl ?? item.imageUrl),
-              imageAlt: useStoreImages ? item.imageAlt : (known.imageAlt ?? item.imageAlt),
-              images: useStoreImages ? item.images : known.images,
-              description: item.description || known.description,
-              material: known.material ?? item.material,
-              category: known.category ?? item.category,
-              subcategory: known.subcategory ?? item.subcategory,
-              keyFeatures: known.keyFeatures ?? item.keyFeatures,
-              features: known.features ?? item.features,
-              dimensionsDisplay: known.dimensionsDisplay ?? item.dimensionsDisplay,
-            })
-            return
-          }
-          setProduct(item ?? known ?? null)
-        }),
-      )
-    }
-
-    if (import.meta.env.VITEST) {
-      startFetch()
-      return () => {
-        cancelled = true
-      }
-    }
-
-    const cancelDelay = scheduleAfterLoad(startFetch, 8_000)
+    void import('@/lib/shopify').then(({ fetchProductByHandle }) =>
+      fetchProductByHandle(handle).then((item) => {
+        if (cancelled) return
+        if (item && known) {
+          const useStoreImages = Boolean(item.images?.length)
+          setProduct({
+            ...item,
+            imageUrl: useStoreImages ? item.imageUrl : (known.imageUrl ?? item.imageUrl),
+            imageAlt: useStoreImages ? item.imageAlt : (known.imageAlt ?? item.imageAlt),
+            images: useStoreImages ? item.images : known.images,
+            description: item.description || known.description,
+            material: known.material ?? item.material,
+            category: known.category ?? item.category,
+            subcategory: known.subcategory ?? item.subcategory,
+            keyFeatures: known.keyFeatures ?? item.keyFeatures,
+            features: known.features ?? item.features,
+            dimensionsDisplay: known.dimensionsDisplay ?? item.dimensionsDisplay,
+          })
+          return
+        }
+        setProduct(item ?? known ?? null)
+      }),
+    )
 
     return () => {
       cancelled = true
-      cancelDelay()
     }
   }, [handle])
 

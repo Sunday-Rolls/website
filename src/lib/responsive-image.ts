@@ -1,7 +1,7 @@
 const SHOPIFY_WIDTHS = [480, 640, 800]
 const LOCAL_WIDTHS = [320, 480, 640, 800]
 /** Bump when replacing product masters so browsers skip cached green-BG WebPs. */
-export const LOCAL_PRODUCT_IMAGE_VERSION = '20261027-cream'
+export const LOCAL_PRODUCT_IMAGE_VERSION = '20261027-front'
 
 function isShopifyCdn(url: string): boolean {
   try {

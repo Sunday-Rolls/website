@@ -32,7 +32,7 @@ export function ShopPage() {
           if (items.length > 0) setProducts(items)
         }),
       )
-    }, 8000)
+    }, 0)
   }, [content.meta.title, content.meta.description])
 
   const sections = useMemo(

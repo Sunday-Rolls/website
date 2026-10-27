@@ -401,24 +401,15 @@ function mergeProductImages(
   return merged.length > 0 ? merged : undefined
 }
 
-export function moveFrontImageFirst(
-  images: ProductImage[],
-  frontImageIndex = 0,
-): ProductImage[] {
-  const front = images[frontImageIndex]
-  if (frontImageIndex <= 0 || !front) return images
-  return [front, ...images.filter((_, index) => index !== frontImageIndex)]
-}
-
 function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
   const catalog = getCatalogProductByHandle(product.handle)
   if (!catalog) return product
 
   const fromCatalog = catalogProductToShopifyProduct(catalog)
-  // Prefer Shopify media as-is. Only fall back to catalog placeholders when
-  // the storefront product has no images yet — never pad real media with fillers.
+  // Shopify media order is the source of truth (featured = shop thumbnail).
+  // Catalog images are placeholders only when the storefront product has none.
   const images = product.images?.length
-    ? moveFrontImageFirst(product.images, catalog.frontImageIndex)
+    ? product.images
     : mergeProductImages(product.images, fromCatalog.images)
 
   return {
@@ -565,23 +556,8 @@ export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {
   }
 
   const live =
-    data?.products?.edges?.map((edge: { node: ProductNode }) =>
-      withCatalogImages(mapProduct(edge.node)),
-    ) ?? []
+    data?.products?.edges?.map((edge: { node: ProductNode }) => mapProduct(edge.node)) ?? []
   return mergeCatalogOnlyProducts(live)
-}
-
-/** Listing pages keep the sized local photo instead of swapping in the store CDN file. */
-function withCatalogImages(product: ShopifyProduct): ShopifyProduct {
-  const catalog = getCatalogProductByHandle(product.handle)
-  if (!catalog?.images?.length) return product
-  const local = catalogProductToShopifyProduct(catalog)
-  return {
-    ...product,
-    imageUrl: local.imageUrl ?? product.imageUrl,
-    imageAlt: local.imageAlt ?? product.imageAlt,
-    images: local.images ?? product.images,
-  }
 }
 
 /** Keep published catalog products on the site until they exist in Shopify. */

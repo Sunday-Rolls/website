@@ -53,8 +53,6 @@ export interface CatalogProduct {
   dimensionsDisplay?: string
   keyFeatures?: ProductFeature[]
   images: string[]
-  /** Position of the front-only shot in the Shopify media list (defaults to 0). */
-  frontImageIndex?: number
 }
 
 export interface ProductValidationIssue {

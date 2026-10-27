@@ -10,7 +10,7 @@
         "3.png",
         "4.png"
       ],
-      "notes": "Fried egg Oz cover \u2014 front, dual, open, back"
+      "notes": "Fried egg Oz cover — single front, dual, open, back — files ordered front-first for Shopify featured"
     },
     "sunday-stripes": {
       "title": "Sunday Stripes",
@@ -21,40 +21,40 @@
         "7.png",
         "8.png"
       ],
-      "notes": "Blue/white seersucker with sailor embroidery (center-shafted)"
+      "notes": "Blue/white seersucker with sailor embroidery (center-shafted) — front first"
     },
     "flagstick-fuel": {
       "title": "Flagstick Fuel",
       "confidence": "high",
       "files": [
-        "9.PNG",
         "10.PNG",
+        "9.PNG",
         "11.PNG",
         "12.PNG"
       ],
-      "notes": "Green Gatorade-style lightning bolt"
+      "notes": "Green lightning bolt — dual first in shoot; frontIndex 1 is single front — files ordered front-first for Shopify featured"
     },
     "mallet-retro-roller-white": {
       "title": "Mallet - Retro Roller White",
       "confidence": "high",
       "files": [
+        "19.png",
         "17.png",
         "18.png",
-        "19.png",
         "20.png"
       ],
-      "notes": "White Game Boy mallet"
+      "notes": "White Game Boy mallet — dual/open before single front at index 2 — files ordered front-first for Shopify featured"
     },
     "mallet-retro-roller-grey": {
       "title": "Mallet - Retro Roller Grey",
       "confidence": "medium",
       "files": [
-        "21.png",
         "22.png",
+        "21.png",
         "23.png",
         "24.png"
       ],
-      "notes": "Grey/off-white Game Boy mallet \u2014 confirm vs center-shafted grey"
+      "notes": "Grey Game Boy mallet — open first; frontIndex 1 is single front — files ordered front-first for Shopify featured"
     },
     "retro-roller-yellow": {
       "title": "Retro Roller - Yellow",
@@ -65,29 +65,29 @@
         "27.png",
         "28.png"
       ],
-      "notes": "Yellow Game Boy"
+      "notes": "Yellow Game Boy — front first"
     },
     "the-corduroy": {
       "title": "The Corduroy",
       "confidence": "high",
       "files": [
+        "35.png",
         "33.png",
         "34.png",
-        "35.png",
         "36.png"
       ],
-      "notes": "Brown corduroy + green stripe + logo patch"
+      "notes": "Brown corduroy — dual/open before single front at index 2 — files ordered front-first for Shopify featured"
     },
     "coin-collector": {
       "title": "Coin Collector",
       "confidence": "high",
       "files": [
+        "39.png",
         "37.png",
         "38.png",
-        "39.png",
         "40.png"
       ],
-      "notes": "Blue Oz Mario/dino Game Mode cover"
+      "notes": "Blue Oz Mario/dino — dual first; frontIndex 2 is single front — files ordered front-first for Shopify featured"
     },
     "retro-roller-grey": {
       "title": "Retro Roller - Grey",
@@ -98,18 +98,18 @@
         "43.png",
         "44.png"
       ],
-      "notes": "Light grey Game Boy \u2014 confirm vs mallet grey swap"
+      "notes": "Light grey Game Boy — front first"
     },
     "mallet-the-corduroy": {
       "title": "Mallet - The Corduroy",
       "confidence": "high",
       "files": [
-        "45.png",
         "46.png",
+        "45.png",
         "47.png",
         "48.png"
       ],
-      "notes": "Brown corduroy mallet dual + angles"
+      "notes": "Brown corduroy mallet — dual first; frontIndex 1 is single front — files ordered front-first for Shopify featured"
     },
     "the-breakfast-roller": {
       "title": "The Breakfast Roller",
@@ -120,7 +120,7 @@
         "55.png",
         "56.png"
       ],
-      "notes": "Orange Cap'n Crunch / monkey bogey cover"
+      "notes": "Orange Cap'n Crunch / monkey bogey cover — front first"
     },
     "the-doodle": {
       "title": "The Doodle",
@@ -131,7 +131,7 @@
         "Doodle 2.png",
         "Doodle 3.png"
       ],
-      "notes": "Monster doodle pattern \u2014 reorder so best hero is first if needed"
+      "notes": "Monster doodle pattern — front first"
     },
     "retro-roller-purple": {
       "title": "Retro Roller - Purple",
@@ -142,18 +142,18 @@
         "purple 3.png",
         "purple 4.png"
       ],
-      "notes": "Purple Game Boy"
+      "notes": "Purple Game Boy — front first"
     },
     "mallet-sunday-stripes": {
       "title": "Mallet - Sunday Stripes",
       "confidence": "high",
       "files": [
+        "stripes mallet 4.png",
         "Stripes mallet 1.png",
         "stripes mallet 2.png",
-        "stripes mallet 4.png",
         "Stripes mallet 5.png"
       ],
-      "notes": "Blue/white seersucker mallet (no sailor embroidery on face)"
+      "notes": "Blue/white seersucker mallet — back/open before embroidered front at index 2 — files ordered front-first for Shopify featured"
     }
   },
   "missing_from_shoot": [

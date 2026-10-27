@@ -126,7 +126,7 @@ describe('ProductPage', () => {
     expect(screen.getByText('Towel')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Golf Towel - Green Stripe' })).toHaveAttribute(
       'src',
-      '/assets/products/w800/golf-towel-green-stripe.webp?v=20261027-cream',
+      '/assets/products/w800/golf-towel-green-stripe.webp?v=20261027-front',
     )
     expect(
       await screen.findByRole('heading', { level: 2, name: productContent.reviews.heading }),
@@ -197,7 +197,7 @@ describe('ProductPage', () => {
       const gallery = screen.getByRole('img', { name: 'Retro Roller - Grey' })
       expect(gallery).toHaveAttribute(
         'src',
-        '/assets/products/w800/retro-roller-grey.webp?v=20261027-cream',
+        '/assets/products/w800/retro-roller-grey.webp?v=20261027-front',
       )
     })
   })
