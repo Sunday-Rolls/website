@@ -45,12 +45,7 @@ export function ProductCard({
   }
 
   return (
-    <article
-      className={cn(
-        'group relative flex flex-col border border-sand bg-white transition-shadow hover:shadow-md',
-        className,
-      )}
-    >
+    <article className={cn('relative', className)}>
       {badge ? (
         <span
           aria-hidden="true"
@@ -60,49 +55,49 @@ export function ProductCard({
           {badge}
         </span>
       ) : null}
-      <Link to={productPath} className="relative block overflow-hidden" onClick={handleSelect} {...preload}>
-        <div className="aspect-[4/5] overflow-hidden bg-warm-sand">
-          {loadImage && product.imageUrl ? (
-            <img
-              src={sizedImageUrl(product.imageUrl, 640) ?? product.imageUrl}
-              srcSet={productImageSrcSet(product.imageUrl)}
-              sizes={imageSizes}
-              alt={product.imageAlt ?? product.title}
-              width={640}
-              height={800}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-              loading={priority ? 'eager' : 'lazy'}
-              fetchPriority={priority ? 'high' : 'auto'}
-              decoding={priority ? 'sync' : 'async'}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-b from-warm-sand to-sand">
-              <span className="font-display text-2xl text-heritage-green/30">SR</span>
-            </div>
-          )}
+      <Link
+        to={productPath}
+        onClick={handleSelect}
+        className="group flex h-full flex-col border border-sand bg-white transition-shadow hover:shadow-md"
+        {...preload}
+      >
+        <div className="relative overflow-hidden">
+          <div className="aspect-[4/5] overflow-hidden bg-warm-sand">
+            {loadImage && product.imageUrl ? (
+              <img
+                src={sizedImageUrl(product.imageUrl, 640) ?? product.imageUrl}
+                srcSet={productImageSrcSet(product.imageUrl)}
+                sizes={imageSizes}
+                alt={product.imageAlt ?? product.title}
+                width={640}
+                height={800}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                loading={priority ? 'eager' : 'lazy'}
+                fetchPriority={priority ? 'high' : 'auto'}
+                decoding={priority ? 'sync' : 'async'}
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-gradient-to-b from-warm-sand to-sand">
+                <span className="font-display text-2xl text-heritage-green/30">SR</span>
+              </div>
+            )}
+          </div>
+          {badge ? <span className="sr-only">{badge}</span> : null}
         </div>
-        {badge ? <span className="sr-only">{badge}</span> : null}
-      </Link>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <Link to={productPath} onClick={handleSelect} {...preload}>
+        <div className="flex flex-1 flex-col gap-2 p-4">
           <h3 className="font-display text-xl text-heritage-green">{product.title}</h3>
-        </Link>
-        <p className="font-body text-body-small text-matte-black/70">{product.price}</p>
-        {!compact && product.material ? (
-          <p className="font-body text-body-small text-leather">{product.material}</p>
-        ) : null}
-        {!compact ? (
-          <Link
-            to={productPath}
-            className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors hover:text-forest-green"
-            onClick={handleSelect}
-            {...preload}
-          >
-            {getButtonLabel('viewDetails')} →
-          </Link>
-        ) : null}
-      </div>
+          <p className="font-body text-body-small text-matte-black/70">{product.price}</p>
+          {!compact && product.material ? (
+            <p className="font-body text-body-small text-leather">{product.material}</p>
+          ) : null}
+          {!compact ? (
+            <span className="mt-auto font-body text-label uppercase tracking-widest text-heritage-green transition-colors group-hover:text-forest-green">
+              {getButtonLabel('viewDetails')} →
+            </span>
+          ) : null}
+        </div>
+      </Link>
     </article>
   )
 }

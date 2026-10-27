@@ -137,14 +137,17 @@ export function CartPage() {
 
   if (isEmpty) {
     return (
-      <Container className="space-y-6 py-section-y text-center">
-        <PageHeader
-          title={content.emptyState.title}
-          subtitle={content.emptyState.description}
-        />
-        <Button href={content.emptyState.cta.href}>
-          {resolveLinkLabel(content.emptyState.cta)}
-        </Button>
+      <Container className="flex min-h-[70vh] flex-col items-center justify-center py-24 text-center md:py-32">
+        <div className="flex w-full max-w-lg flex-col items-center gap-8 border border-sand bg-white px-8 py-12 sm:px-12 sm:py-16">
+          <PageHeader
+            className="items-center text-center [&_p]:mx-auto"
+            title={content.emptyState.title}
+            subtitle={content.emptyState.description}
+          />
+          <Button href={content.emptyState.cta.href}>
+            {resolveLinkLabel(content.emptyState.cta)}
+          </Button>
+        </div>
       </Container>
     )
   }
