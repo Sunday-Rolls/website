@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Zero-dependency static file server with SPA fallback for Railway.
- * Serves ./dist, rewrites unknown paths to index.html, exposes GET /health.
+ * Serves ./dist, returns HTTP 404 + 404.html for unknown paths (soft-404 fix),
+ * exposes GET /health.
  */
 import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
@@ -26,6 +27,7 @@ const TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
 }
 
@@ -45,6 +47,19 @@ async function sendFile(res, filePath, status = 200) {
     'Cache-Control': extname(filePath) === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable',
   })
   res.end(body)
+}
+
+async function sendNotFound(res) {
+  try {
+    await sendFile(res, join(dist, '404.html'), 404)
+  } catch {
+    try {
+      await sendFile(res, join(dist, 'index.html'), 404)
+    } catch {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' })
+      res.end('Not Found')
+    }
+  }
 }
 
 const server = createServer(async (req, res) => {
@@ -72,16 +87,28 @@ const server = createServer(async (req, res) => {
       await sendFile(res, filePath)
       return
     } catch {
-      // fall through to SPA index
+      // fall through
     }
 
-    // Asset-like paths should 404 instead of returning HTML
+    // Try sibling .html shell (e.g. /shop → shop.html) before 404
+    if (!extname(filePath)) {
+      const htmlSibling = `${filePath}.html`
+      try {
+        await stat(htmlSibling)
+        await sendFile(res, htmlSibling)
+        return
+      } catch {
+        // unknown route
+      }
+    }
+
+    // Asset-like paths should 404 without HTML
     if (extname(filePath)) {
       res.writeHead(404).end('Not Found')
       return
     }
 
-    await sendFile(res, join(dist, 'index.html'))
+    await sendNotFound(res)
   } catch (error) {
     console.error(error)
     res.writeHead(500).end('Internal Server Error')

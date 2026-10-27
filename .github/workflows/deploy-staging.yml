@@ -105,6 +105,7 @@ jobs:
         if: ${{ steps.slug.outputs.kind == 'production' }}
         env:
           VITE_SITE_ORIGIN: https://sunday-rolls.github.io
+          VITE_SEO_INDEX: 'false'
         run: |
           # Ensure contact/reviews hit Railway even if the Actions secret is empty.
           export VITE_CONTACT_API_URL="${VITE_CONTACT_API_URL:-https://contact-api-production-9af6.up.railway.app}"
@@ -115,6 +116,7 @@ jobs:
         if: ${{ steps.slug.outputs.kind == 'preview' && !(github.event_name == 'pull_request' && github.event.action == 'closed') }}
         env:
           VITE_SITE_ORIGIN: https://sunday-rolls.github.io
+          VITE_SEO_INDEX: 'false'
         run: |
           export VITE_CONTACT_API_URL="${VITE_CONTACT_API_URL:-https://contact-api-production-9af6.up.railway.app}"
           SLUG="${{ steps.slug.outputs.value }}"

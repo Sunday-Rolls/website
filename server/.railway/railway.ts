@@ -105,6 +105,8 @@ export default defineRailway(() => {
       RAILPACK_DISABLE_CACHES: '*',
       // Build-time Vite vars (set live values in Railway before cutover)
       VITE_BASE_PATH: '/',
+      VITE_SITE_ORIGIN: 'https://www.sundayrollsgolf.com',
+      VITE_SEO_INDEX: 'true',
       VITE_GTM_ID: preserve(),
       VITE_GA4_MEASUREMENT_ID: preserve(),
       VITE_GA4_SEND_DIRECT: preserve(),

@@ -11,6 +11,7 @@ export function NotFoundPage() {
     applyPageMeta({
       title: content.meta.title,
       description: content.meta.description,
+      robots: 'noindex, nofollow',
     })
   }, [content.meta.title, content.meta.description])
 

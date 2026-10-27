@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { trackViewItem } from '@/lib/gtm'
-import { applyPageMeta } from '@/lib/page-meta'
+import { applyPageMeta, buildProductJsonLd } from '@/lib/page-meta'
 import { placeholderProducts } from '@/lib/product-catalog'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { ProductDetails } from '@/components/product/ProductDetails'
@@ -62,6 +62,13 @@ export function ProductPage() {
         path: `/products/${product.handle}`,
         image: product.imageUrl,
         type: 'product',
+        jsonLd: buildProductJsonLd({
+          name: product.title,
+          description: product.description || content.meta.description,
+          image: product.imageUrl,
+          path: `/products/${product.handle}`,
+          price: product.price,
+        }),
       })
       trackViewItem(product)
       return
@@ -70,6 +77,8 @@ export function ProductPage() {
       title: content.meta.title,
       description: content.meta.description,
       path: handle ? `/products/${handle}` : undefined,
+      robots: product === null ? 'noindex, nofollow' : undefined,
+      jsonLd: null,
     })
   }, [product, content.meta.title, content.meta.description, handle])
 

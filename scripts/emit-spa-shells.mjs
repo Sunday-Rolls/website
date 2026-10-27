@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 /**
- * Copy the Vite SPA shell onto each route so GitHub Pages returns HTTP 200
- * for deep links like /shop and /products/:handle.
+ * Copy the Vite SPA shell onto each route so deep links return HTTP 200
+ * (GitHub Pages) or a dedicated HTML shell (Railway).
+ *
+ * Also writes robots.txt + sitemap.xml and rewrites head meta for the
+ * configured VITE_SITE_ORIGIN. Production (www) is indexable; Pages/previews
+ * are noindexed via VITE_SEO_INDEX=false.
  *
  * A folder index (/shop/index.html) is what /shop/ serves. GitHub Pages 301s
  * /shop to /shop/ when that is the only file, and Lighthouse treats that
@@ -10,18 +14,28 @@
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(root, 'dist')
 const catalogPath = join(root, 'src/data/product-catalog.json')
 
+export const PRODUCTION_ORIGIN = 'https://www.sundayrollsgolf.com'
+export const DEFAULT_OG_IMAGE = '/assets/home/videos/hero-poster-1280.webp'
+export const HOME_META = {
+  title: 'Sunday Rolls — Premium Golf Goods',
+  description: 'Premium vintage-inspired golf goods. Find your pace.',
+}
+
 const STATIC_ROUTES = ['shop', 'about', 'contact', 'cart', 'order/thank-you']
+const INDEXABLE_STATIC_ROUTES = ['shop', 'about', 'contact']
+const NOINDEX_ROUTES = new Set(['cart', 'order/thank-you'])
 
 const ROUTE_META = {
   shop: {
     title: 'Our Collection — Sunday Rolls',
     description: 'Timeless golf goods built for the walk.',
+    image: '/assets/shop/banner.jpg',
     preload: [
       {
         srcSet:
@@ -43,6 +57,12 @@ const ROUTE_META = {
   cart: {
     title: 'Your Cart — Sunday Rolls',
     description: 'Review your Sunday Rolls cart.',
+    robots: 'noindex, nofollow',
+  },
+  'order/thank-you': {
+    title: 'Thanks for your order — Sunday Rolls',
+    description: 'Order confirmation for Sunday Rolls.',
+    robots: 'noindex, nofollow',
   },
 }
 
@@ -54,13 +74,20 @@ function stripHeroLcp(html) {
   return html.replace(/\s*<img\b[^>]*id="hero-lcp"[^>]*>\s*/i, '\n')
 }
 
-function withTrailingSlash(path) {
+export function withTrailingSlash(path) {
   if (!path || path.endsWith('/')) return path
   return `${path}/`
 }
 
 function withBase(path, base) {
   return `${base}/${path}`.replace(/\/{2,}/g, '/').replace(':/', '://')
+}
+
+function absoluteAssetUrl(siteOrigin, base, assetPath) {
+  if (!assetPath) return undefined
+  if (assetPath.startsWith('http')) return assetPath
+  const cleaned = assetPath.startsWith('/') ? assetPath.slice(1) : assetPath
+  return withBase(cleaned, `${siteOrigin}${base}`)
 }
 
 function prefixSrcSet(srcSet, base) {
@@ -89,37 +116,205 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;')
 }
 
-function injectHead(html, { title, description, canonicalPath, preload = [], modulePreload = [] }) {
+function escapeXml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+export function resolveSeoIndexable(siteOrigin, seoIndexEnv = process.env.VITE_SEO_INDEX) {
+  if (seoIndexEnv === 'true') return true
+  if (seoIndexEnv === 'false') return false
+  return siteOrigin === PRODUCTION_ORIGIN
+}
+
+export function buildRobotsTxt({ siteOrigin, base = '', indexable }) {
+  const sitemapUrl = withTrailingSlash(`${siteOrigin}${base}`).replace(/\/$/, '') + '/sitemap.xml'
+  if (!indexable) {
+    return ['User-agent: *', 'Disallow: /', '', `# Non-production host — not for indexing`, ''].join(
+      '\n',
+    )
+  }
+  return ['User-agent: *', 'Allow: /', '', `Sitemap: ${sitemapUrl}`, ''].join('\n')
+}
+
+export function buildSitemapXml({ siteOrigin, base = '', productHandles = [] }) {
+  const entries = [
+    { path: '/', changefreq: 'weekly', priority: '1' },
+    ...INDEXABLE_STATIC_ROUTES.map((route) => ({
+      path: `/${route}/`,
+      changefreq: route === 'shop' ? 'weekly' : 'monthly',
+      priority: route === 'shop' ? '0.9' : route === 'about' ? '0.7' : '0.6',
+    })),
+    ...productHandles.map((handle) => ({
+      path: `/products/${handle}/`,
+      changefreq: 'weekly',
+      priority: '0.8',
+    })),
+  ]
+
+  const urls = entries
+    .map(({ path, changefreq, priority }) => {
+      const loc =
+        path === '/'
+          ? withTrailingSlash(`${siteOrigin}${base}/`)
+          : withTrailingSlash(`${siteOrigin}${base}${path}`)
+      return `  <url>
+    <loc>${escapeXml(loc)}</loc>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`
+    })
+    .join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>
+`
+}
+
+function replaceMeta(html, attr, key, content) {
+  const safe = escapeHtml(content)
+  const re = new RegExp(`<meta\\s+${attr}="${key}"\\s+content="[^"]*"\\s*\\/?>`, 'i')
+  if (re.test(html)) {
+    return html.replace(re, `<meta ${attr}="${key}" content="${safe}" />`)
+  }
+  return html.replace('</head>', `    <meta ${attr}="${key}" content="${safe}" />\n  </head>`)
+}
+
+function replaceOrInsertCanonical(html, href) {
+  if (/<link\s+rel="canonical"/i.test(html)) {
+    return html.replace(
+      /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i,
+      `<link rel="canonical" href="${href}" />`,
+    )
+  }
+  return html.replace('</head>', `    <link rel="canonical" href="${href}" />\n  </head>`)
+}
+
+function replaceJsonLd(html, json) {
+  const block = `<script type="application/ld+json">\n${json}\n    </script>`
+  if (/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/i.test(html)) {
+    return html.replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/i, block)
+  }
+  return html.replace('</head>', `    ${block}\n  </head>`)
+}
+
+function appendJsonLd(html, json) {
+  const block = `<script type="application/ld+json">\n${json}\n    </script>`
+  return html.replace('</head>', `    ${block}\n  </head>`)
+}
+
+export function buildOrganizationJsonLd(siteOrigin, base = '') {
+  return JSON.stringify(
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Sunday Rolls',
+      url: withTrailingSlash(`${siteOrigin}${base}/`),
+      description: 'Premium vintage-inspired golf goods.',
+      email: 'Sundayrollsco@gmail.com',
+      telephone: '+1-612-750-0674',
+      sameAs: [
+        'https://www.facebook.com/profile.php?id=61581441887317',
+        'https://www.instagram.com/sundayrolls_co/',
+        'https://www.etsy.com/shop/SundayRolls',
+      ],
+    },
+    null,
+    2,
+  )
+}
+
+export function buildProductJsonLd({
+  siteOrigin,
+  base = '',
+  handle,
+  title,
+  description,
+  image,
+  price,
+}) {
+  const url = withTrailingSlash(`${siteOrigin}${base}/products/${handle}`)
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: title,
+    description: description || undefined,
+    image: image ? [image] : undefined,
+    brand: {
+      '@type': 'Brand',
+      name: 'Sunday Rolls',
+    },
+    url,
+  }
+  if (price != null && String(price).trim() !== '') {
+    data.offers = {
+      '@type': 'Offer',
+      url,
+      priceCurrency: 'USD',
+      price: String(price).replace(/^\$/, ''),
+      availability: 'https://schema.org/InStock',
+    }
+  }
+  return JSON.stringify(data, null, 2)
+}
+
+export function injectHead(
+  html,
+  {
+    title,
+    description,
+    canonicalPath,
+    image,
+    type = 'website',
+    robots,
+    jsonLd,
+    replaceJsonLd: replaceLd = false,
+    preload = [],
+    modulePreload = [],
+  } = {},
+) {
   let next = html
   if (title) {
     next = next.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
   }
   if (description) {
-    const safeDescription = escapeHtml(description)
-    next = next.replace(
-      /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
-      `<meta name="description" content="${safeDescription}" />`,
-    )
-    if (!next.includes(`content="${safeDescription}"`)) {
-      next = next.replace(
-        /<meta[\s\S]*?name="description"[\s\S]*?content="[^"]*"[\s\S]*?\/?>/i,
-        `<meta name="description" content="${safeDescription}" />`,
-      )
-    }
+    next = replaceMeta(next, 'name', 'description', description)
+  }
+  if (robots) {
+    next = replaceMeta(next, 'name', 'robots', robots)
   }
   if (canonicalPath) {
-    if (/<link\s+rel="canonical"/i.test(next)) {
-      next = next.replace(
-        /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i,
-        `<link rel="canonical" href="${canonicalPath}" />`,
-      )
-    } else {
-      next = next.replace(
-        '</head>',
-        `    <link rel="canonical" href="${canonicalPath}" />\n  </head>`,
-      )
-    }
+    next = replaceOrInsertCanonical(next, canonicalPath)
   }
+  if (title) {
+    next = replaceMeta(next, 'property', 'og:title', title)
+    next = replaceMeta(next, 'name', 'twitter:title', title)
+  }
+  if (description) {
+    next = replaceMeta(next, 'property', 'og:description', description)
+    next = replaceMeta(next, 'name', 'twitter:description', description)
+  }
+  if (type) {
+    next = replaceMeta(next, 'property', 'og:type', type)
+  }
+  if (canonicalPath) {
+    next = replaceMeta(next, 'property', 'og:url', canonicalPath)
+  }
+  if (image) {
+    next = replaceMeta(next, 'property', 'og:image', image)
+    next = replaceMeta(next, 'name', 'twitter:image', image)
+  }
+  next = replaceMeta(next, 'name', 'twitter:card', 'summary_large_image')
+
+  if (jsonLd) {
+    next = replaceLd ? replaceJsonLd(next, jsonLd) : appendJsonLd(next, jsonLd)
+  }
+
   const links = [
     ...preload.map((asset) => {
       const typeAttr = asset.type ? ` type="${asset.type}"` : ''
@@ -140,7 +335,6 @@ function injectHead(html, { title, description, canonicalPath, preload = [], mod
 function baseFromHtml(html) {
   const match = html.match(/<base\s+href="([^"]+)"/i)
   if (match) return match[1].replace(/\/$/, '')
-  // Vite injects asset URLs with the configured base; fall back to relative.
   const script = html.match(/src="(\/?[^"]*assets\/[^"]+\.js)"/)
   if (script?.[1]?.startsWith('/')) {
     const parts = script[1].split('/')
@@ -168,9 +362,14 @@ const ROUTE_CHUNKS = {
 }
 
 async function main() {
-  const html = stripHeroLcp(stripHeroPosterPreload(await readFile(join(distDir, 'index.html'), 'utf8')))
-  const base = process.env.VITE_BASE_PATH?.replace(/\/$/, '') || baseFromHtml(html)
-  const siteOrigin = (process.env.VITE_SITE_ORIGIN || '').replace(/\/$/, '')
+  const rawHtml = await readFile(join(distDir, 'index.html'), 'utf8')
+  const html = stripHeroLcp(stripHeroPosterPreload(rawHtml))
+  const base = process.env.VITE_BASE_PATH?.replace(/\/$/, '') || baseFromHtml(rawHtml)
+  const siteOrigin = (process.env.VITE_SITE_ORIGIN || PRODUCTION_ORIGIN).replace(/\/$/, '')
+  const indexable = resolveSeoIndexable(siteOrigin)
+  const globalRobots = indexable ? undefined : 'noindex, nofollow'
+  const defaultOgImage = absoluteAssetUrl(siteOrigin, base, DEFAULT_OG_IMAGE)
+
   let manifest = null
   try {
     manifest = JSON.parse(await readFile(join(distDir, '.vite/manifest.json'), 'utf8'))
@@ -178,12 +377,12 @@ async function main() {
     manifest = null
   }
 
-function modulePreloadFor(sourceSuffix) {
-  if (!manifest) return []
-  const entry = Object.entries(manifest).find(([key]) => key.endsWith(sourceSuffix))?.[1]
-  if (!entry?.file) return []
-  return [`${base}/${entry.file}`.replace(/\/{2,}/g, '/').replace(':/', '://')]
-}
+  function modulePreloadFor(sourceSuffix) {
+    if (!manifest) return []
+    const entry = Object.entries(manifest).find(([key]) => key.endsWith(sourceSuffix))?.[1]
+    if (!entry?.file) return []
+    return [`${base}/${entry.file}`.replace(/\/{2,}/g, '/').replace(':/', '://')]
+  }
 
   let products = []
   let shopContent = null
@@ -214,9 +413,31 @@ function modulePreloadFor(sourceSuffix) {
     ? displayProductSrcSet(firstShopProduct.images?.[0], base)
     : null
 
+  const orgJsonLd = buildOrganizationJsonLd(siteOrigin, base)
+
+  // Home index.html — rewrite production meta + organization schema
+  const homeCanonical = withTrailingSlash(`${siteOrigin}${base}/`)
+  let homeHtml = injectHead(rawHtml, {
+    title: HOME_META.title,
+    description: HOME_META.description,
+    canonicalPath: homeCanonical,
+    image: defaultOgImage,
+    type: 'website',
+    robots: globalRobots,
+    jsonLd: orgJsonLd,
+    replaceJsonLd: true,
+    modulePreload: modulePreloadFor('src/pages/HomePage.tsx'),
+  })
+  await writeFile(join(distDir, 'index.html'), homeHtml)
+
   for (const route of STATIC_ROUTES) {
     const meta = ROUTE_META[route] ?? {}
-    const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
+    const canonicalPath = withTrailingSlash(`${siteOrigin}${base}/${route}`)
+    const robots =
+      globalRobots || meta.robots || (NOINDEX_ROUTES.has(route) ? 'noindex, nofollow' : undefined)
+    const image = meta.image
+      ? absoluteAssetUrl(siteOrigin, base, meta.image)
+      : defaultOgImage
     const preload = (meta.preload ?? []).map((asset) => {
       if (asset.srcSet) {
         return { ...asset, srcSet: prefixSrcSet(asset.srcSet, base) }
@@ -237,6 +458,8 @@ function modulePreloadFor(sourceSuffix) {
       title: meta.title,
       description: meta.description,
       canonicalPath,
+      image,
+      robots,
       preload,
       modulePreload: modulePreloadFor(ROUTE_CHUNKS[route]),
     })
@@ -245,12 +468,32 @@ function modulePreloadFor(sourceSuffix) {
 
   for (const product of products) {
     const route = `products/${product.handle}`
-    const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
+    const canonicalPath = withTrailingSlash(`${siteOrigin}${base}/${route}`)
     const imageSrcSet = displayProductSrcSet(product.images?.[0], base)
+    const productImage = absoluteAssetUrl(
+      siteOrigin,
+      base,
+      product.images?.[0] || DEFAULT_OG_IMAGE,
+    )
+    const title = `${product.title ?? product.handle.replace(/-/g, ' ')} — Sunday Rolls`
+    const productJsonLd = buildProductJsonLd({
+      siteOrigin,
+      base,
+      handle: product.handle,
+      title: product.title ?? product.handle,
+      description: product.description,
+      image: productImage,
+      price: product.price,
+    })
     const shell = injectHead(html, {
-      title: `${product.title ?? product.handle.replace(/-/g, ' ')} — Sunday Rolls`,
+      title,
       description: product.description,
       canonicalPath,
+      image: productImage,
+      type: 'product',
+      robots: globalRobots,
+      jsonLd: productJsonLd,
+      replaceJsonLd: false,
       preload: imageSrcSet
         ? [{ srcSet: imageSrcSet, sizes: '(min-width: 1024px) 50vw, 100vw', type: 'image/webp' }]
         : [],
@@ -259,21 +502,41 @@ function modulePreloadFor(sourceSuffix) {
     await writeShell(route, shell)
   }
 
-  const homeChunk = modulePreloadFor('src/pages/HomePage.tsx')
-  if (homeChunk.length) {
-    const homeHtml = await readFile(join(distDir, 'index.html'), 'utf8')
-    await writeFile(
-      join(distDir, 'index.html'),
-      injectHead(homeHtml, { modulePreload: homeChunk }),
-    )
-  }
+  // Soft-404 shell for Railway (and any host that serves 404.html)
+  const notFoundMeta = JSON.parse(
+    await readFile(join(root, 'src/content/pages/not-found.json'), 'utf8'),
+  )
+  const notFoundHtml = injectHead(html, {
+    title: notFoundMeta.meta?.title ?? 'Page Not Found — Sunday Rolls',
+    description: notFoundMeta.meta?.description ?? "The page you're looking for doesn't exist.",
+    canonicalPath: undefined,
+    image: defaultOgImage,
+    robots: 'noindex, nofollow',
+    modulePreload: modulePreloadFor('src/pages/NotFoundPage.tsx'),
+  })
+  await writeFile(join(distDir, '404.html'), notFoundHtml)
+
+  const robotsTxt = buildRobotsTxt({ siteOrigin, base, indexable })
+  const sitemapXml = buildSitemapXml({
+    siteOrigin,
+    base,
+    productHandles: products.map((p) => p.handle),
+  })
+  await writeFile(join(distDir, 'robots.txt'), robotsTxt)
+  await writeFile(join(distDir, 'sitemap.xml'), sitemapXml)
 
   console.log(
-    `Emitted SPA shells for ${STATIC_ROUTES.length} routes and ${products.length} products`,
+    `Emitted SPA shells for ${STATIC_ROUTES.length} routes and ${products.length} products` +
+      ` (origin=${siteOrigin}, indexable=${indexable})`,
   )
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exit(1)
-})
+const isMain =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url
+
+if (isMain) {
+  main().catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+}

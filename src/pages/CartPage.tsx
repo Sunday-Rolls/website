@@ -97,6 +97,7 @@ export function CartPage() {
       title: content.meta.title,
       description: content.meta.description,
       path: '/cart',
+      robots: 'noindex, nofollow',
     })
   }, [content.meta.title, content.meta.description])
 
