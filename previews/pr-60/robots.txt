@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+# Non-production host — not for indexing

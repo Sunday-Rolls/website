@@ -1,0 +1,1 @@
+import{a as e,i as t}from"./page-meta-DyDVQmhJ.js";var n=t();function r({title:t,subtitle:r,className:i}){return(0,n.jsxs)(`header`,{className:e(`space-y-3`,i),children:[(0,n.jsx)(`h1`,{className:`font-display text-page-title text-heritage-green`,children:t}),r?(0,n.jsx)(`p`,{className:`max-w-2xl font-body text-body text-matte-black/80`,children:r}):null]})}export{r as t};
