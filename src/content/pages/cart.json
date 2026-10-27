@@ -18,8 +18,18 @@
     "threshold": 100,
     "progressLabel": "Free shipping at {threshold}",
     "remainingLabel": "Add {remaining} more for free shipping",
-    "unlockedLabel": "Free shipping unlocked — applied automatically at checkout",
+    "unlockedLabel": "🚚 Free shipping unlocked",
     "barLabel": "Progress toward free shipping"
+  },
+  "towelUpsell": {
+    "minTotal": 70,
+    "maxTotal": 100,
+    "preferredHandle": "golf-towel-green-stripe",
+    "eyebrow": "Close to free shipping",
+    "title": "Add a golf towel",
+    "description": "A towel is basically what shipping costs — and it unlocks free shipping on your whole order.",
+    "ctaLabel": "Add to cart",
+    "addingLabel": "Adding…"
   },
   "lineActions": {
     "quantityLabel": "Qty",

@@ -277,6 +277,16 @@ export interface CartContent {
     unlockedLabel: string
     barLabel: string
   }
+  towelUpsell: {
+    minTotal: number
+    maxTotal: number
+    preferredHandle: string
+    eyebrow: string
+    title: string
+    description: string
+    ctaLabel: string
+    addingLabel: string
+  }
   lineActions: {
     quantityLabel: string
     removeLabel: string

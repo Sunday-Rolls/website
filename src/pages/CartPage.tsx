@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { assetUrl } from '@/lib/asset-url'
 import { useCart } from '@/lib/cart'
 import { freeShippingProgress } from '@/lib/cart-free-shipping'
+import { selectTowelUpsell, shouldShowTowelUpsell } from '@/lib/cart-towel-upsell'
 import {
   getButtonLabel,
   resolveLinkLabel,
@@ -10,7 +12,7 @@ import {
 import { trackBeginCheckout, trackViewCart } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
 import { sitePath } from '@/lib/site-path'
-import { formatPrice, isShopifyConfigured } from '@/lib/shopify'
+import { fetchProductByHandle, formatPrice, isShopifyConfigured } from '@/lib/shopify'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -29,9 +31,11 @@ export function CartPage() {
     isLoading,
     isUpdating,
     error,
+    addItem,
     updateItemQuantity,
     removeItem,
   } = useCart()
+  const [addingUpsell, setAddingUpsell] = useState(false)
 
   const lines = cart?.lines ?? []
   const isEmpty = !isLoading && lines.length === 0
@@ -43,6 +47,22 @@ export function CartPage() {
     cart?.subtotalAmount ?? 0,
     content.freeShipping.threshold,
   )
+  const upsell = content.towelUpsell
+  const showTowelUpsell = shouldShowTowelUpsell(
+    cart?.totalAmount ?? 0,
+    upsell.minTotal,
+    upsell.maxTotal,
+  )
+  const towelUpsell = showTowelUpsell
+    ? selectTowelUpsell(
+        lines.map((line) => line.handle),
+        upsell.preferredHandle,
+      )
+    : null
+  const towelImage = towelUpsell?.images[0] ? assetUrl(towelUpsell.images[0]) : undefined
+  const towelPrice = towelUpsell?.price
+    ? formatPrice(towelUpsell.price, cart?.currencyCode ?? 'USD')
+    : null
   const thresholdLabel = formatPrice(
     String(content.freeShipping.threshold),
     cart?.currencyCode ?? 'USD',
@@ -119,6 +139,22 @@ export function CartPage() {
       })),
       cart?.total,
     )
+  }
+
+  async function handleAddTowelUpsell() {
+    if (!towelUpsell || addingUpsell) return
+    setAddingUpsell(true)
+    try {
+      const product = await fetchProductByHandle(towelUpsell.handle)
+      if (!product?.variantId) {
+        throw new Error('Towel is unavailable')
+      }
+      await addItem(product.variantId, 1)
+    } catch {
+      // Cart provider surfaces the error banner.
+    } finally {
+      setAddingUpsell(false)
+    }
   }
 
   return (
@@ -269,6 +305,46 @@ export function CartPage() {
           <Button disabled>{getButtonLabel(content.summary.checkoutLabelKey)}</Button>
         )}
       </div>
+
+      {towelUpsell ? (
+        <aside className="grid gap-4 border border-heritage-green/25 bg-warm-sand/40 p-4 sm:grid-cols-[96px_1fr_auto] sm:items-center">
+          {towelImage ? (
+            <img
+              src={towelImage}
+              alt={towelUpsell.title}
+              className="aspect-square w-full object-cover"
+            />
+          ) : (
+            <div className="aspect-square bg-warm-sand" />
+          )}
+          <div className="space-y-2">
+            <p className="font-body text-label uppercase tracking-widest text-leather">
+              {upsell.eyebrow}
+            </p>
+            <div className="space-y-1">
+              <h2 className="font-display text-xl text-heritage-green">{upsell.title}</h2>
+              <p className="font-body text-body-small text-matte-black/80">{upsell.description}</p>
+              <p className="font-body text-body-small text-leather">
+                <Link
+                  to={sitePath(`/products/${towelUpsell.handle}`)}
+                  className="text-heritage-green hover:text-forest-green"
+                >
+                  {towelUpsell.title}
+                </Link>
+                {towelPrice ? ` · ${towelPrice}` : null}
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isUpdating || addingUpsell}
+            onClick={() => void handleAddTowelUpsell()}
+          >
+            {addingUpsell ? upsell.addingLabel : upsell.ctaLabel}
+          </Button>
+        </aside>
+      ) : null}
     </Container>
   )
 }
