@@ -64,6 +64,8 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 
 ### Ship walkthrough (when they have an idea)
 
+Hand off to the `website-change` skill (`/website-change`), which runs these steps through `/start-feature`, `/open-preview` and `/merge-feature`. The outline:
+
 1. Branch from `main`.
 2. Implement; run `npm test` / `npm run lint` (and server tests if touching `server/`).
 3. Open a PR → Actions deploys preview `https://sunday-rolls.github.io/website/previews/pr-N/`.

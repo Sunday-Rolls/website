@@ -123,6 +123,14 @@ feature branch  →  PR  →  Pages preview  →  merge main
 4. **Review** — `https://sunday-rolls.github.io/website/previews/pr-N/` (private repo; preview links are public — safe to send clients)
 5. **Merge** — Pages demo updates; Railway `website` rebuilds the production SPA; `server/**` changes autodeploy `contact-api`
 
+In Claude Code, `/website-change <what you want>` walks this whole loop. The steps are also separate skills in `.claude/skills/`:
+
+| Skill | Does |
+|-------|------|
+| `/start-feature` | Fresh branch off the latest `main` |
+| `/open-preview` | Checks, commit, push, open or update the PR, wait for the build, return the preview link |
+| `/merge-feature` | After you confirm approval: merge to `main`, watch the deploy, clean up the branch |
+
 Custom domain cutover (`www.sundayrollsgolf.com` → Railway, `dashboard.sundayrollsgolf.com` → API): [`docs/RAILWAY_CUTOVER.md`](docs/RAILWAY_CUTOVER.md).
 
 ### Operations (day-to-day)
