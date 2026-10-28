@@ -251,6 +251,7 @@ tr:last-child td { border-bottom: 0; }
     <section>
       <h2>Idea → preview → production</h2>
       <p>The SPA ships through GitHub Pages (demo and PR previews); the API ships on Railway.</p>
+      <p>In Claude Code, run <code>/website-change</code> and describe what you want. Claude takes you through every step below: <code>/start-feature</code> makes the branch, <code>/open-preview</code> pushes and hands back the preview link, and <code>/merge-feature</code> merges once you say it's approved.</p>
       <div class="steps">
         <div><b>1</b><strong>Branch</strong><span class="muted">From <code>main</code>: <code>git checkout -b feature/your-idea</code></span></div>
         <div><b>2</b><strong>Implement and test locally</strong><span class="muted">Run both servers. <code>npm test</code> and <code>npm run lint</code> at the root; <code>npm test</code> and <code>npm run typecheck</code> in <code>server/</code>.</span></div>

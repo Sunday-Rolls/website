@@ -4,6 +4,7 @@ Headless Shopify storefront for sundayrollsgolf.com: React 19 + Vite SPA at the 
 
 ## Start here
 - New admin or developer, or anyone asking about handoff, setup, orders, fulfillment, discounts or review QRs: use the `admin-handoff` skill (`/admin-handoff`). Its source of truth is `docs/admin-handoff.html`. Keep the two in sync.
+- Anyone changing the website: use the `website-change` skill (`/website-change`). It runs the branch → PR preview → merge loop through `/start-feature`, `/open-preview` and `/merge-feature`.
 - Overview, commands and the toolchain are in `README.md`. Runbooks are in `docs/` (Shippo, review QRs, analytics, contact email, Railway cutover, dashboard access) and `server/README.md`.
 
 ## Tools
@@ -16,7 +17,7 @@ Headless Shopify storefront for sundayrollsgolf.com: React 19 + Vite SPA at the 
 - E2E: `npm run test:e2e`; the full order flow is `npm run test:e2e:order-analytics` (see `docs/E2E_ORDER_ANALYTICS.md` first: it toggles the Bogus Gateway on the real store)
 
 ## Workflow
-- Branch from `main` and open a PR. Actions deploys a preview to `https://sunday-rolls.github.io/website/previews/pr-N/`. Merging to `main` updates the Pages site and Railway `website`, and changes under `server/**` autodeploy `contact-api`.
+- Branch from `main` and open a PR (the `website-change` skills automate this). Actions deploys a preview to `https://sunday-rolls.github.io/website/previews/pr-N/`. Merging to `main` updates the Pages site and Railway `website`, and changes under `server/**` autodeploy `contact-api`.
 - Run tests and lint for the area you touched before opening a PR.
 
 ## Rules
