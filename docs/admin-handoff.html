@@ -1,0 +1,335 @@
+<title>Sunday Rolls Admin Handoff</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: one 880px column on cream paper; brand tokens from src/theme/theme.json. Tabs switch Operations / Workflow. */
+:root {
+  --bg: #f6f2e8;          /* cream */
+  --surface: #fffdf8;
+  --sand: #ede3cb;
+  --fg: #1a1a1a;          /* matte black */
+  --muted: #5d5a52;
+  --line: #dccfb4;
+  --accent: #1b3a2f;      /* heritage green */
+  --accent-fg: #f6f2e8;
+  --gold: #8a5a3b;        /* leather, for links */
+  --warn-bg: #f6e6cf;
+  --warn-line: #b08d57;
+  --info-bg: #e3ebe4;
+  --done: #274b3a;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121a16; --surface: #1a2520; --sand: #22302a; --fg: #ece6d8; --muted: #a9a394;
+  --line: #34443c; --accent: #c4a36a; --accent-fg: #121a16; --gold: #d2b07a;
+  --warn-bg: #2e2619; --warn-line: #b08d57; --info-bg: #1f2e27; --done: #8fbf9f; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #121a16; --surface: #1a2520; --sand: #22302a; --fg: #ece6d8; --muted: #a9a394;
+  --line: #34443c; --accent: #c4a36a; --accent-fg: #121a16; --gold: #d2b07a;
+  --warn-bg: #2e2619; --warn-line: #b08d57; --info-bg: #1f2e27; --done: #8fbf9f; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font: 15px/1.6 var(--font-body);
+  padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.1rem, 5vw, 3rem); letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.3rem; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--gold); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font: 0.86em var(--font-mono); background: var(--sand); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); font-size: 0.9rem; }
+section { display: flex; flex-direction: column; gap: 12px; }
+.stack { display: flex; flex-direction: column; gap: 22px; }
+.tabs { display: flex; gap: 6px; padding: 4px; background: var(--sand); border-radius: 999px; width: fit-content; }
+.tabs button {
+  font: 500 0.92rem var(--font-body); border: 0; border-radius: 999px; padding: 8px 18px; cursor: pointer;
+  background: transparent; color: var(--fg);
+}
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); }
+.callout { border-left: 3px solid var(--accent); background: var(--info-bg); padding: 12px 16px; border-radius: 0 6px 6px 0; display: flex; flex-direction: column; gap: 4px; }
+.callout.warn { border-color: var(--warn-line); background: var(--warn-bg); }
+.callout strong { font-weight: 600; }
+.hubs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.hub { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.hub .links { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+ol, ul { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 4px; }
+details { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+summary { cursor: pointer; padding: 10px 14px; font-weight: 500; }
+details > div { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--sand); }
+tr:last-child td { border-bottom: 0; }
+.steps { display: flex; flex-direction: column; gap: 10px; }
+.steps div { display: grid; grid-template-columns: 2em 1fr; gap: 2px 8px; }
+.steps b { font-family: var(--font-display); font-size: 1.3rem; color: var(--gold); line-height: 1.2; grid-row: span 2; }
+.steps span { min-width: 0; }
+.checklist { list-style: none; padding: 0; gap: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.checklist li + li { border-top: 1px solid var(--line); }
+.checklist button {
+  all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: auto 1fr auto;
+  gap: 12px; align-items: center; padding: 10px 14px;
+}
+.checklist .box { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); }
+.checklist [data-s="in_progress"] .box { border-color: var(--warn-line); background: conic-gradient(var(--warn-line) 50%, transparent 0); }
+.checklist [data-s="completed"] .box { border-color: var(--done); background: var(--done); }
+.checklist [data-s="completed"] .txt { color: var(--muted); text-decoration: line-through; }
+.checklist .state { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.checklist .txt { min-width: 0; }
+</style>
+
+<main>
+  <header class="stack" style="gap:10px">
+    <span class="eyebrow">Sunday Rolls · chrgrk-ff</span>
+    <h1>Admin handoff</h1>
+    <p class="muted">How to run the site day to day, and how to set up the toolchain and ship a change. Source: <code>docs/admin-handoff.html</code> in Sunday-Rolls/website.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-operations" data-track="operations" aria-selected="true">Operations</button>
+    <button role="tab" id="tab-workflow" data-track="workflow" aria-selected="false">Workflow</button>
+  </div>
+
+  <!-- OPERATIONS -->
+  <div class="stack" id="operations">
+    <div class="callout"><strong>Two hubs, plus Shippo</strong>
+      <p>Orders, discounts and checkout rates live in Shopify Admin. Labels are bought in Shippo, which syncs tracking back to Shopify. Analytics sync, P&amp;L and review QR PDFs live on the Railway dashboard. The storefront itself does not buy labels or manage discount codes.</p>
+    </div>
+
+    <div class="hubs">
+      <div class="hub"><span class="eyebrow">Commerce</span><h3>Shopify Admin</h3>
+        <p class="muted">Shop: chrgrk-ff.myshopify.com</p>
+        <p>Purchases, refunds, discounts, catalog and checkout shipping rates.</p>
+        <div class="links">
+          <a href="https://admin.shopify.com/store/chrgrk-ff/orders">Orders</a>
+          <a href="https://admin.shopify.com/store/chrgrk-ff/discounts">Discounts</a>
+          <a href="https://admin.shopify.com/store/chrgrk-ff/products">Products</a>
+          <a href="https://apps.shopify.com/shippo">Shippo app</a>
+        </div>
+      </div>
+      <div class="hub"><span class="eyebrow">Ops tools</span><h3>Railway dashboard</h3>
+        <p>Sync GA4 and Shopify, P&amp;L and ROAS, export review QR PDFs, smoke-test contact and reviews.</p>
+        <div class="links"><a href="https://contact-api-production-9af6.up.railway.app/dashboard/">Open /dashboard/</a></div>
+      </div>
+    </div>
+
+    <section>
+      <h2>See purchases and ship with Shippo</h2>
+      <p>Paid checkouts land in <a href="https://admin.shopify.com/store/chrgrk-ff/orders">Shopify Orders</a> and import into Shippo once the app is connected. Buy the label in Shippo; tracking and “fulfilled” sync back to Shopify.</p>
+      <div class="callout warn"><strong>Setup still needed on chrgrk-ff</strong>
+        <p>Shippo is not installed yet. The location street address is incomplete (MN 55419 only). Follow <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/SHIPPO.md">docs/SHIPPO.md</a> before relying on label sync.</p>
+      </div>
+      <details id="ship-path" open><summary>Day-to-day ship path</summary><div>
+        <ol>
+          <li>Confirm the order in Shopify Orders (Unfulfilled).</li>
+          <li>Open the same order in Shippo and set weight and dimensions.</li>
+          <li>Pick a carrier rate, buy the label, print.</li>
+          <li>Shippo syncs tracking and marks it fulfilled; the customer gets Shopify’s shipping email if that sync option is on.</li>
+        </ol>
+        <p class="muted">Refunds and cancellations stay on the Shopify order page. The rates customers pay at checkout are under Settings → Shipping and delivery (currently flat Standard $8 / $0 and Express $15), separate from what you pay Shippo for the label.</p>
+      </div></details>
+      <details id="shippo-setup"><summary>One-time Shippo setup</summary><div>
+        <ol>
+          <li>Complete the <a href="https://admin.shopify.com/store/chrgrk-ff/settings/locations">Locations</a> street address.</li>
+          <li>Install <a href="https://apps.shopify.com/shippo">Shippo</a> on chrgrk-ff and authorize.</li>
+          <li>In Shippo Stores → Manage, turn on tracking sync and Shopify customer notification.</li>
+          <li>Smoke-test one order end to end (label → fulfilled in Shopify).</li>
+        </ol>
+        <div class="links" style="display:flex;flex-wrap:wrap;gap:4px 14px">
+          <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/SHIPPO.md">docs/SHIPPO.md</a>
+          <a href="https://support.goshippo.com/hc/en-us/articles/360029218511-Use-Shopify-with-Shippo">Shippo’s Shopify guide</a>
+          <a href="https://admin.shopify.com/store/chrgrk-ff/settings/shipping">Shopify shipping settings</a>
+        </div>
+      </div></details>
+    </section>
+
+    <section>
+      <h2>Record keeping</h2>
+      <p>Shopify is the source of truth for website sales. The dashboard pulls those orders into Postgres for P&amp;L and ROAS. Legacy and multi-channel history still uses the Sales Tracker workbook.</p>
+      <div class="table-wrap"><table>
+        <tr><th>Source</th><th>Where</th><th>When</th></tr>
+        <tr><td>Website sales</td><td>Shopify → dashboard Sync Shopify</td><td>After orders land, or when numbers look stale</td></tr>
+        <tr><td>Traffic &amp; ads</td><td>Dashboard Sync GA4</td><td>After campaigns or at the weekly check-in</td></tr>
+        <tr><td>Legacy / other channels</td><td><a href="https://docs.google.com/spreadsheets/d/1v18ftrLt5jcyGJsKFq37CwIYYY04aKIDeeEp0F5_XMU/edit">Sales Tracker sheet</a></td><td>Owned by Derick; optional import into Postgres</td></tr>
+      </table></div>
+      <p class="muted">Access checklist: <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/DASHBOARD_ACCESS.md">docs/DASHBOARD_ACCESS.md</a></p>
+    </section>
+
+    <section>
+      <h2>Shopify day to day</h2>
+      <details id="discounts" open><summary>Discount codes</summary><div>
+        <p>Create and edit codes under <a href="https://admin.shopify.com/store/chrgrk-ff/discounts">Discounts</a> (percentage, fixed amount, free shipping, automatic). This app has no discount UI; the storefront honors whatever Shopify applies at checkout.</p>
+      </div></details>
+      <details id="products"><summary>Products and inventory</summary><div>
+        <p>Manage the catalog in <a href="https://admin.shopify.com/store/chrgrk-ff/products">Products</a>. The site reads the Storefront API; after catalog changes, soft-refresh the live site. Bulk port scripts live under <code>npm run catalog:*</code> for developers.</p>
+      </div></details>
+      <details id="pixel"><summary>Purchase analytics pixel</summary><div>
+        <p>Checkout purchase events fire from a Shopify Customer Events custom pixel named <code>Sunday Rolls GA4</code>. Confirm it under <a href="https://admin.shopify.com/store/chrgrk-ff/settings/customer_events">Settings → Customer events</a>. Setup notes: <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/SHOPIFY_WEB_PIXEL.md">SHOPIFY_WEB_PIXEL.md</a></p>
+      </div></details>
+    </section>
+
+    <section>
+      <h2>Print review QR codes</h2>
+      <p>QR codes open a product page with the leave-a-review form (<code>?review=1</code>). The dashboard PDF export is the preferred path.</p>
+      <ol>
+        <li>Open the analytics dashboard → Data.</li>
+        <li>Under Review QR codes, pick GitHub Pages or Live site.</li>
+        <li>Click Export PDF: one letter page per product, 3×3 cutouts.</li>
+      </ol>
+      <p class="muted">CLI fallback from the repo root: <code>npm run reviews:qr:pages</code> or <code>npm run reviews:qr:live</code> → <code>output/product-review-qrs/</code>. Details: <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/REVIEW_QR_CODES.md">REVIEW_QR_CODES.md</a></p>
+    </section>
+
+    <section>
+      <h2>Contact and reviews</h2>
+      <p>Contact form submissions go to Resend → <code>CONTACT_TO_EMAIL</code> and are stored in Postgres. Product reviews also land in Postgres (and email). Use Dashboard → Tests to smoke-test contact, reviews and a tagged $0 order. See <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/CONTACT_EMAIL.md">CONTACT_EMAIL.md</a>.</p>
+    </section>
+
+    <section>
+      <h2>Weekly operator checklist</h2>
+      <p class="muted">Click a row to cycle pending → in progress → done. Progress is saved in this browser.</p>
+      <ul class="checklist" data-list="ops"></ul>
+    </section>
+  </div>
+
+  <!-- WORKFLOW -->
+  <div class="stack" id="workflow" hidden>
+    <div class="callout"><strong>Ask Claude for a guided setup</strong>
+      <p>In Claude Code, opened on this repo, ask for a “guided setup” or run <code>/admin-handoff</code>. Claude walks these steps with you and opens the relevant docs.</p>
+    </div>
+
+    <section>
+      <h2>Toolchain</h2>
+      <div class="table-wrap"><table>
+        <tr><th>Tool</th><th>Role</th><th>Link</th></tr>
+        <tr><td>Node 22 + npm</td><td>Runtime and package manager</td><td><a href="https://nodejs.org/">nodejs.org</a></td></tr>
+        <tr><td>Claude Code</td><td>Coding agent for this repo (desktop app or CLI)</td><td><a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code docs</a></td></tr>
+        <tr><td>GitHub</td><td>Source, PRs, Pages previews</td><td><a href="https://github.com/Sunday-Rolls/website">Sunday-Rolls/website</a></td></tr>
+        <tr><td>Shopify</td><td>Checkout and Admin API</td><td><a href="https://admin.shopify.com/store/chrgrk-ff">chrgrk-ff Admin</a></td></tr>
+        <tr><td>Railway</td><td>contact-api + Postgres (+ website cutover)</td><td><a href="https://railway.com/">railway.com</a></td></tr>
+      </table></div>
+      <p class="muted">Stack: React 19 + Vite storefront, Hono API under <code>server/</code>, Shopify Storefront API (headless, not a Liquid theme deploy).</p>
+    </section>
+
+    <section>
+      <h2>First-time setup</h2>
+      <p>You need two env files and two processes. Secrets come from Railway, Shopify Admin or the team. Never invent or commit them; start from the examples.</p>
+      <details id="commands" open><summary>Commands</summary><div>
+        <p>SPA: <code>cp .env.example .env &amp;&amp; npm install &amp;&amp; npm run dev</code></p>
+        <p>API: <code>cd server &amp;&amp; cp .env.example .env &amp;&amp; npm install &amp;&amp; npm run dev</code></p>
+        <p>Dashboard locally: <code>http://localhost:3001/dashboard/</code></p>
+      </div></details>
+      <p class="muted">Click a row to cycle its status as you finish setup.</p>
+      <ul class="checklist" data-list="setup"></ul>
+    </section>
+
+    <section>
+      <h2>Idea → preview → production</h2>
+      <p>The SPA ships through GitHub Pages (demo and PR previews); the API ships on Railway.</p>
+      <div class="steps">
+        <div><b>1</b><strong>Branch</strong><span class="muted">From <code>main</code>: <code>git checkout -b feature/your-idea</code></span></div>
+        <div><b>2</b><strong>Implement and test locally</strong><span class="muted">Run both servers. <code>npm test</code> and <code>npm run lint</code> at the root; <code>npm test</code> and <code>npm run typecheck</code> in <code>server/</code>.</span></div>
+        <div><b>3</b><strong>Open a pull request</strong><span class="muted">Actions builds a preview under <code>/website/previews/pr-N/</code> and comments the URL.</span></div>
+        <div><b>4</b><strong>Review the preview</strong><span class="muted">Open <code>https://sunday-rolls.github.io/website/previews/pr-N/</code> with your PR number. The repo is private; preview links are public.</span></div>
+        <div><b>5</b><strong>Merge</strong><span class="muted">Merging to <code>main</code> updates <a href="https://sunday-rolls.github.io/website/">the Pages site</a>. Changes under <code>server/**</code> also autodeploy Railway <code>contact-api</code>.</span></div>
+      </div>
+      <div class="callout warn"><strong>Production cutover target</strong>
+        <p>The live custom domain is planned on Railway <code>website</code> + DNS. Follow <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/RAILWAY_CUTOVER.md">RAILWAY_CUTOVER.md</a> when moving www.sundayrollsgolf.com off Pages.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Where docs live</h2>
+      <div class="table-wrap"><table>
+        <tr><th>Doc</th><th>Covers</th></tr>
+        <tr><td><code>docs/DASHBOARD_ACCESS.md</code></td><td>Access checklist, IDs, partner punch list</td></tr>
+        <tr><td><code>docs/ANALYTICS.md</code></td><td>GTM / GA4 demo vs live</td></tr>
+        <tr><td><code>docs/REVIEW_QR_CODES.md</code></td><td>QR generation and print</td></tr>
+        <tr><td><code>docs/SHOPIFY_WEB_PIXEL.md</code></td><td>Purchase pixel install</td></tr>
+        <tr><td><code>docs/CONTACT_EMAIL.md</code></td><td>Resend contact path</td></tr>
+        <tr><td><code>docs/RAILWAY_CUTOVER.md</code></td><td>SPA → Railway production cutover</td></tr>
+        <tr><td><code>server/README.md</code></td><td>API endpoints, dashboard, Railway</td></tr>
+      </table></div>
+    </section>
+  </div>
+
+  <section>
+    <h3>Bookmarks</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Place</th><th>URL</th></tr>
+      <tr><td>Live site</td><td><a href="https://www.sundayrollsgolf.com">www.sundayrollsgolf.com</a></td></tr>
+      <tr><td>Demo (GitHub Pages)</td><td><a href="https://sunday-rolls.github.io/website/">sunday-rolls.github.io/website</a></td></tr>
+      <tr><td>Shopify Admin</td><td><a href="https://admin.shopify.com/store/chrgrk-ff">admin.shopify.com/store/chrgrk-ff</a></td></tr>
+      <tr><td>Shippo (labels)</td><td><a href="https://apps.shopify.com/shippo">apps.shopify.com/shippo</a></td></tr>
+      <tr><td>Analytics dashboard</td><td><a href="https://contact-api-production-9af6.up.railway.app/dashboard/">Railway /dashboard/</a></td></tr>
+      <tr><td>GitHub</td><td><a href="https://github.com/Sunday-Rolls/website">Sunday-Rolls/website</a></td></tr>
+    </table></div>
+  </section>
+</main>
+
+<script>
+const LISTS = {
+  ops: [
+    ["ops-orders", "Check Shopify Orders (and Shippo Orders) for new purchases"],
+    ["ops-fulfill", "Buy Shippo label → tracking syncs; refunds stay in Shopify"],
+    ["ops-sync", "If numbers look stale, Sync Shopify + Sync GA4 in the dashboard"],
+    ["ops-qr", "When packaging, print review QR sheets from Dashboard → Data"],
+    ["ops-contact", "Skim contact inbox (CONTACT_TO_EMAIL) and dashboard reviews"],
+  ],
+  setup: [
+    ["wf-node", "Confirm Node 22+ (node -v)"],
+    ["wf-clone", "Clone Sunday-Rolls/website and open it in Claude Code"],
+    ["wf-env-spa", "Copy .env.example → .env at repo root"],
+    ["wf-env-api", "Copy server/.env.example → server/.env"],
+    ["wf-install", "npm install at root and in server/"],
+    ["wf-dev", "Run npm run dev (SPA) and cd server && npm run dev (API)"],
+    ["wf-open", "Open the SPA (Vite) and http://localhost:3001/dashboard/"],
+  ],
+};
+const NEXT = { pending: "in_progress", in_progress: "completed", completed: "pending" };
+const LABEL = { pending: "", in_progress: "In progress", completed: "Done" };
+const KEY = "sr-admin-handoff";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function render() {
+  document.querySelectorAll(".checklist").forEach((ul) => {
+    ul.innerHTML = "";
+    for (const [id, text] of LISTS[ul.dataset.list]) {
+      const s = state[id] || "pending";
+      const li = document.createElement("li");
+      li.innerHTML = `<button data-id="${id}" data-s="${s}"><span class="box"></span><span class="txt"></span><span class="state">${LABEL[s]}</span></button>`;
+      li.querySelector(".txt").textContent = text;
+      ul.append(li);
+    }
+  });
+}
+document.addEventListener("click", (e) => {
+  const item = e.target.closest(".checklist button");
+  if (item) { state[item.dataset.id] = NEXT[state[item.dataset.id] || "pending"]; save(); render(); return; }
+  const tab = e.target.closest(".tabs button");
+  if (tab) showTrack(tab.dataset.track);
+});
+function showTrack(track) {
+  for (const t of ["operations", "workflow"]) {
+    document.getElementById(t).hidden = t !== track;
+    document.getElementById("tab-" + t).setAttribute("aria-selected", t === track);
+  }
+  try { history.replaceState(null, "", "#" + track); } catch (e) {}
+}
+render();
+showTrack(location.hash === "#workflow" ? "workflow" : "operations");
+</script>

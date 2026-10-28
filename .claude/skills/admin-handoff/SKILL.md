@@ -6,7 +6,7 @@ description: >-
   developer toolchain / first-time setup / PR-preview-to-production workflow.
   Use when the user mentions handoff, administer the site, Shopify ops,
   fulfillment, discount codes, review QR, dashboard access, first-time setup,
-  guided setup, toolchain, Cursor/Claude Code/GitHub setup, or how to ship a
+  guided setup, toolchain, Claude Code/GitHub setup, or how to ship a
   feature branch.
 ---
 
@@ -14,9 +14,8 @@ description: >-
 
 ## Source of truth
 
-1. Read and keep open [`canvases/admin-handoff.canvas.tsx`](../../../canvases/admin-handoff.canvas.tsx) — Operations and Workflow tracks.
-2. For live Cursor viewing, the same file is mirrored under the workspace managed `canvases/` folder as `admin-handoff.canvas.tsx`.
-3. Deep docs (do not duplicate): `docs/DASHBOARD_ACCESS.md`, `docs/SHIPPO.md`, `docs/REVIEW_QR_CODES.md`, `docs/SHOPIFY_WEB_PIXEL.md`, `docs/CONTACT_EMAIL.md`, `docs/RAILWAY_CUTOVER.md`, `docs/ANALYTICS.md`, `docs/E2E_ORDER_ANALYTICS.md`, `server/README.md`.
+1. Read [`docs/admin-handoff.html`](../../../docs/admin-handoff.html) — the interactive handoff page with Operations and Workflow tracks and their checklists. If you change it, keep this skill in sync.
+2. Deep docs (do not duplicate): `docs/DASHBOARD_ACCESS.md`, `docs/SHIPPO.md`, `docs/REVIEW_QR_CODES.md`, `docs/SHOPIFY_WEB_PIXEL.md`, `docs/CONTACT_EMAIL.md`, `docs/RAILWAY_CUTOVER.md`, `docs/ANALYTICS.md`, `docs/E2E_ORDER_ANALYTICS.md`, `server/README.md`.
 
 ## Start every session
 
@@ -51,7 +50,7 @@ Key facts:
 
 ## Workflow track (guided setup)
 
-Walk **one step at a time**. After each step, wait for confirmation before the next. Suggest they tick the matching checklist row on the canvas Workflow tab.
+Walk **one step at a time**. After each step, wait for confirmation before the next. Suggest they tick the matching checklist row on the handoff page's Workflow tab.
 
 1. Confirm Node 22+ (`node -v`).
 2. Confirm repo open: `Sunday-Rolls/website` (local path may vary).
@@ -72,7 +71,6 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 
 ## Toolchain links
 
-- Cursor: https://cursor.com/
 - Claude Code: https://docs.anthropic.com/en/docs/claude-code
 - GitHub repo: https://github.com/Sunday-Rolls/website
 - Live site: https://www.sundayrollsgolf.com
@@ -80,6 +78,6 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 
 ## Style
 
-- Concise; prefer canvas + docs links over long pasted runbooks.
+- Concise; prefer handoff page + docs links over long pasted runbooks.
 - Open files with the editor when pointing at a doc.
 - No commits unless the user asks.

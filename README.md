@@ -22,7 +22,7 @@ Headless Shopify storefront for [sundayrollsgolf.com](https://www.sundayrollsgol
 | **Shopify Admin** | [chrgrk-ff](https://admin.shopify.com/store/chrgrk-ff) |
 | **Repo** | [Sunday-Rolls/website](https://github.com/Sunday-Rolls/website) |
 
-> **Admin handoff** — open [`canvases/admin-handoff.canvas.tsx`](canvases/admin-handoff.canvas.tsx) beside chat in Cursor (Operations + Workflow tracks), or ask an agent for a *guided setup* / *admin handoff* (skill: `.cursor/skills/admin-handoff/`).
+> **Admin handoff** — open [`docs/admin-handoff.html`](docs/admin-handoff.html) in a browser (Operations + Workflow tracks), or ask Claude Code for a *guided setup* / *admin handoff* (skill: `.claude/skills/admin-handoff/`, or `/admin-handoff`).
 
 ---
 
@@ -93,14 +93,14 @@ cd server && npm run dev
 ### Setup checklist
 
 - [ ] Node 22+ (`node -v`)
-- [ ] Repo open in Cursor / your editor
+- [ ] Repo open in Claude Code / your editor
 - [ ] Root `.env` from `.env.example`
 - [ ] `server/.env` from `server/.env.example`
 - [ ] `npm install` at root and in `server/`
 - [ ] SPA + API both running
 - [ ] Storefront loads; dashboard opens at `/dashboard/`
 
-Prefer a guided walkthrough? Ask Cursor to run the **admin-handoff** skill.
+Prefer a guided walkthrough? Ask Claude Code to run the **admin-handoff** skill (`/admin-handoff`).
 
 ---
 
@@ -133,7 +133,7 @@ Custom domain cutover (`www.sundayrollsgolf.com` → Railway, `dashboard.sundayr
 | Sync sales / GA4, P&L, review QR PDF, Tests | [Dashboard](https://contact-api-production-9af6.up.railway.app/dashboard/) |
 | Contact inbox | Resend → `CONTACT_TO_EMAIL` ([docs/CONTACT_EMAIL.md](docs/CONTACT_EMAIL.md)) |
 
-Weekly operator loop: Shopify Orders → Shippo label → dashboard sync if numbers look stale → print review QRs when packaging. Details: handoff canvas **Operations** tab + [`docs/SHIPPO.md`](docs/SHIPPO.md).
+Weekly operator loop: Shopify Orders → Shippo label → dashboard sync if numbers look stale → print review QRs when packaging. Details: handoff page **Operations** tab + [`docs/SHIPPO.md`](docs/SHIPPO.md).
 
 ---
 
@@ -158,8 +158,7 @@ Weekly operator loop: Shopify Orders → Shippo label → dashboard sync if numb
 | Tool | Role |
 |------|------|
 | [Node 22 + npm](https://nodejs.org/) | Runtime |
-| [Cursor](https://cursor.com/) | IDE + agents for this repo |
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Optional CLI coding agent |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Coding agent for this repo (desktop app or CLI) |
 | [GitHub](https://github.com/Sunday-Rolls/website) | Source, PRs, Pages previews |
 | [Shopify](https://admin.shopify.com/store/chrgrk-ff) | Checkout + Admin |
 | [Railway](https://railway.com/) | `website`, `contact-api`, Postgres |
@@ -170,7 +169,7 @@ Weekly operator loop: Shopify Orders → Shippo label → dashboard sync if numb
 
 | Doc | Covers |
 |-----|--------|
-| [`canvases/admin-handoff.canvas.tsx`](canvases/admin-handoff.canvas.tsx) | Interactive ops + workflow handoff |
+| [`docs/admin-handoff.html`](docs/admin-handoff.html) | Interactive ops + workflow handoff |
 | [`docs/RAILWAY_CUTOVER.md`](docs/RAILWAY_CUTOVER.md) | SPA + dashboard subdomain DNS cutover |
 | [`docs/DASHBOARD_ACCESS.md`](docs/DASHBOARD_ACCESS.md) | Access checklist, IDs, punch list |
 | [`docs/ANALYTICS.md`](docs/ANALYTICS.md) | GTM / GA4 demo vs live |
