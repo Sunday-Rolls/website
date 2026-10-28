@@ -14,16 +14,16 @@ type DeferredBackgroundVideoProps = {
   className?: string
   videoClassName?: string
   /**
-   * Wait this long after load before fetching the mp4.
-   * The hero is on screen immediately, so a short idle timeout still
-   * competes with Largest Contentful Paint.
+   * Fallback: wait this long after load before fetching the mp4 if the
+   * visitor neither scrolls the video into view nor interacts.
    */
   delayMs?: number
 }
 
 /**
- * Renders a static poster as the paint/LCP surface, then mounts the video
- * after the visitor interacts or well after load.
+ * Renders a static poster as the paint/LCP surface, then mounts the video.
+ * A prioritized (above-the-fold) video starts as soon as the page has loaded,
+ * so the poster has already painted; others start when they near the viewport.
  */
 export function DeferredBackgroundVideo({
   videoSrc,
@@ -39,7 +39,7 @@ export function DeferredBackgroundVideo({
 }: DeferredBackgroundVideoProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
-  const loadDelay = delayMs ?? (prioritizePoster ? 15_000 : 20_000)
+  const loadDelay = delayMs ?? (prioritizePoster ? 0 : 20_000)
 
   useEffect(() => {
     let cancelled = false
@@ -56,14 +56,27 @@ export function DeferredBackgroundVideo({
       window.addEventListener(event, onInteract, { once: true, passive: true })
     }
 
+    const container = containerRef.current
+    const observer =
+      container && !prioritizePoster && 'IntersectionObserver' in window
+        ? new IntersectionObserver(
+            (entries) => {
+              if (entries.some((entry) => entry.isIntersecting)) onInteract()
+            },
+            { rootMargin: '200px 0px' },
+          )
+        : null
+    if (container) observer?.observe(container)
+
     return () => {
       cancelled = true
       cancelDelay()
+      observer?.disconnect()
       for (const event of ['pointerdown', 'keydown'] as const) {
         window.removeEventListener(event, onInteract)
       }
     }
-  }, [loadDelay])
+  }, [loadDelay, prioritizePoster])
 
   return (
     <div ref={containerRef} className={cn('absolute inset-0', className)}>
