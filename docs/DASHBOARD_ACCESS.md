@@ -8,7 +8,7 @@ What we already have, and what still needs a human. Checked against Drive, the l
 
 | Item | Status | Notes |
 |------|--------|--------|
-| Devops Drive access (`sundayrollsdevops@gmail.com`) | Done | Connected in Cursor Drive MCP as account alias `sundayrolls`. |
+| Devops Drive access (`sundayrollsdevops@gmail.com`) | Done | Connected in the Google Drive MCP (`@piotr-agier/google-drive-mcp`) as account alias `sundayrolls`. |
 | P&L / Sales Tracker sheet | Readable | [Sunday Rolls Sales Tracker](https://docs.google.com/spreadsheets/d/1v18ftrLt5jcyGJsKFq37CwIYYY04aKIDeeEp0F5_XMU/edit) — owned by **Derick** (`derickkuchera04@gmail.com`). Devops can **view/download** (not edit). Shortcut in shared folder: `1U1hXKGwaYT1epkaPbgkswFLajq0-svuC`. |
 | Weekly Sales Dashboard folder | Writable by devops | Folder id `1DfwrYHjTfi55woSst1O9d9D9JvYm5o-Y`. Devops is already a **writer**. Also has writers: Alex (`funk20alex@gmail.com`), Ben (`Benjamin.Weir4@gmail.com`), Nick, Sam (`stwolfe10@gmail.com`). |
 | Live Squarespace analytics IDs | Found | Site loads **GTM-PPTR6V3B** → GA4 **G-YKOBBOTPM4**, Google Ads **AW-17744695066**, Meta Pixel (`fbq`). |

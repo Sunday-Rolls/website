@@ -6,7 +6,7 @@ description: >-
   developer toolchain / first-time setup / PR-preview-to-production workflow.
   Use when the user mentions handoff, administer the site, Shopify ops,
   fulfillment, discount codes, review QR, dashboard access, first-time setup,
-  guided setup, toolchain, Cursor/Claude Code/GitHub setup, or how to ship a
+  guided setup, toolchain, Claude Code/GitHub setup, or how to ship a
   feature branch.
 ---
 
@@ -14,9 +14,8 @@ description: >-
 
 ## Source of truth
 
-1. Read and keep open [`canvases/admin-handoff.canvas.tsx`](../../../canvases/admin-handoff.canvas.tsx) — Operations and Workflow tracks.
-2. For live Cursor viewing, the same file is mirrored under the workspace managed `canvases/` folder as `admin-handoff.canvas.tsx`.
-3. Deep docs (do not duplicate): `docs/DASHBOARD_ACCESS.md`, `docs/SHIPPO.md`, `docs/REVIEW_QR_CODES.md`, `docs/SHOPIFY_WEB_PIXEL.md`, `docs/CONTACT_EMAIL.md`, `docs/RAILWAY_CUTOVER.md`, `docs/ANALYTICS.md`, `docs/E2E_ORDER_ANALYTICS.md`, `server/README.md`.
+1. Read [`docs/admin-handoff.html`](../../../docs/admin-handoff.html) — the interactive handoff page with Operations and Workflow tracks and their checklists. If you change it, keep this skill in sync.
+2. Deep docs (do not duplicate): `docs/DASHBOARD_ACCESS.md`, `docs/SHIPPO.md`, `docs/REVIEW_QR_CODES.md`, `docs/SHOPIFY_WEB_PIXEL.md`, `docs/CONTACT_EMAIL.md`, `docs/RAILWAY_CUTOVER.md`, `docs/ANALYTICS.md`, `docs/E2E_ORDER_ANALYTICS.md`, `server/README.md`.
 
 ## Start every session
 
@@ -45,13 +44,14 @@ Key facts:
 - Website sales source of truth: Shopify → dashboard **Sync Shopify**.
 - Review QRs: Dashboard → Data → Review QR codes → Export PDF (preferred). CLI: `npm run reviews:qr:pages` / `reviews:qr:live`.
 - Contact mail: Resend → `CONTACT_TO_EMAIL`; see `docs/CONTACT_EMAIL.md`.
+- With the `shopify` MCP connected, you can look up orders, products and discounts directly. Confirm with the user before any write (discounts, refunds, fulfillments).
 - Never invent or paste secrets. Point at Railway env, `.env.example`, or Shopify Admin.
 - Installing Shippo requires a human Shopify staff login (browser OAuth) — guide them; you cannot finish authorize alone.
 - Full order→dashboard E2E: `docs/E2E_ORDER_ANALYTICS.md`. Needs staff Admin login (2FA/storageState caveats), storefront password, and dashboard credentials. The test enables Bogus Gateway at start and deactivates it in `finally` — if teardown fails, deactivate Bogus manually in Settings → Payments.
 
 ## Workflow track (guided setup)
 
-Walk **one step at a time**. After each step, wait for confirmation before the next. Suggest they tick the matching checklist row on the canvas Workflow tab.
+Walk **one step at a time**. After each step, wait for confirmation before the next. Suggest they tick the matching checklist row on the handoff page's Workflow tab.
 
 1. Confirm Node 22+ (`node -v`).
 2. Confirm repo open: `Sunday-Rolls/website` (local path may vary).
@@ -60,6 +60,7 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 5. `npm install` at repo root, then `cd server && npm install`.
 6. Start SPA: `npm run dev`. Start API: `cd server && npm run dev`.
 7. Open the Vite URL and `http://localhost:3001/dashboard/`.
+8. Connect Claude tools (README → *Claude tools (MCP)*): approve the project MCP servers and the Shopify plugin when prompted, run `/mcp` and authenticate `shopify` with their Shopify staff login, `railway login` for Railway. Google Drive is optional and needs a GCP OAuth client file. They complete each browser sign-in themselves.
 
 ### Ship walkthrough (when they have an idea)
 
@@ -72,7 +73,6 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 
 ## Toolchain links
 
-- Cursor: https://cursor.com/
 - Claude Code: https://docs.anthropic.com/en/docs/claude-code
 - GitHub repo: https://github.com/Sunday-Rolls/website
 - Live site: https://www.sundayrollsgolf.com
@@ -80,6 +80,6 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 
 ## Style
 
-- Concise; prefer canvas + docs links over long pasted runbooks.
+- Concise; prefer handoff page + docs links over long pasted runbooks.
 - Open files with the editor when pointing at a doc.
 - No commits unless the user asks.
