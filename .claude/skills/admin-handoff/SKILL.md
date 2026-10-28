@@ -44,6 +44,7 @@ Key facts:
 - Website sales source of truth: Shopify → dashboard **Sync Shopify**.
 - Review QRs: Dashboard → Data → Review QR codes → Export PDF (preferred). CLI: `npm run reviews:qr:pages` / `reviews:qr:live`.
 - Contact mail: Resend → `CONTACT_TO_EMAIL`; see `docs/CONTACT_EMAIL.md`.
+- With the `shopify` MCP connected, you can look up orders, products and discounts directly. Confirm with the user before any write (discounts, refunds, fulfillments).
 - Never invent or paste secrets. Point at Railway env, `.env.example`, or Shopify Admin.
 - Installing Shippo requires a human Shopify staff login (browser OAuth) — guide them; you cannot finish authorize alone.
 - Full order→dashboard E2E: `docs/E2E_ORDER_ANALYTICS.md`. Needs staff Admin login (2FA/storageState caveats), storefront password, and dashboard credentials. The test enables Bogus Gateway at start and deactivates it in `finally` — if teardown fails, deactivate Bogus manually in Settings → Payments.
@@ -59,6 +60,7 @@ Walk **one step at a time**. After each step, wait for confirmation before the n
 5. `npm install` at repo root, then `cd server && npm install`.
 6. Start SPA: `npm run dev`. Start API: `cd server && npm run dev`.
 7. Open the Vite URL and `http://localhost:3001/dashboard/`.
+8. Connect Claude tools (README → *Claude tools (MCP)*): approve the project MCP servers and the Shopify plugin when prompted, run `/mcp` and authenticate `shopify` with their Shopify staff login, `railway login` for Railway. Google Drive is optional and needs a GCP OAuth client file. They complete each browser sign-in themselves.
 
 ### Ship walkthrough (when they have an idea)
 

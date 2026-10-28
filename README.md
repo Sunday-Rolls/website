@@ -99,6 +99,7 @@ cd server && npm run dev
 - [ ] `npm install` at root and in `server/`
 - [ ] SPA + API both running
 - [ ] Storefront loads; dashboard opens at `/dashboard/`
+- [ ] Claude tools connected (see [Claude tools](#claude-tools-mcp))
 
 Prefer a guided walkthrough? Ask Claude Code to run the **admin-handoff** skill (`/admin-handoff`).
 
@@ -162,6 +163,24 @@ Weekly operator loop: Shopify Orders → Shippo label → dashboard sync if numb
 | [GitHub](https://github.com/Sunday-Rolls/website) | Source, PRs, Pages previews |
 | [Shopify](https://admin.shopify.com/store/chrgrk-ff) | Checkout + Admin |
 | [Railway](https://railway.com/) | `website`, `contact-api`, Postgres |
+
+### Claude tools (MCP)
+
+The repo ships its Claude Code tooling, so a fresh clone works the same way for everyone:
+
+- [`.mcp.json`](.mcp.json) — project MCP servers. Claude Code asks you to approve them the first time you open the repo.
+- [`.claude/settings.json`](.claude/settings.json) — installs Shopify's [AI Toolkit](https://github.com/Shopify/Shopify-AI-Toolkit) plugin (Shopify docs, GraphQL/Liquid validation skills). Accept the plugin prompt on first open.
+- [`.claude/skills/admin-handoff/`](.claude/skills/admin-handoff/) — the guided handoff (`/admin-handoff`).
+
+| Server | What Claude uses it for | One-time setup |
+|--------|-------------------------|----------------|
+| `shopify` | Store admin: orders, products, discounts, analytics on `chrgrk-ff` | Run `/mcp` → `shopify` → Authenticate, sign in with your Shopify staff account |
+| `shopify-dev` | Shopify docs search + GraphQL schema validation | None (Node 22) |
+| `railway` | Logs, deploys, variables for `contact-api` / `website` | `brew install railway` then `railway login` |
+| `chrome-devtools` | Headless Chrome for checking pages, console and network | None (Chrome installed) |
+| `google-drive` | Devops Drive/Sheets (stock sheet, docs) | Put a GCP OAuth client at `~/.config/google-drive-mcp/gcp-oauth.keys.json`, then authenticate on first use — see [`docs/DASHBOARD_ACCESS.md`](docs/DASHBOARD_ACCESS.md) |
+
+Check status any time with `/mcp`. Servers you don't need can stay disabled. The Shopify plugin's skill scripts send usage telemetry to shopify.dev; set `OPT_OUT_INSTRUMENTATION=true` to turn that off.
 
 ---
 

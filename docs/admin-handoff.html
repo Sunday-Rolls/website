@@ -224,6 +224,19 @@ tr:last-child td { border-bottom: 0; }
     </section>
 
     <section>
+      <h2>Claude tools</h2>
+      <p>The repo ships its MCP servers (<code>.mcp.json</code>) and the Shopify AI Toolkit plugin (<code>.claude/settings.json</code>). Approve both when Claude Code prompts on first open, then run <code>/mcp</code> to sign in.</p>
+      <div class="table-wrap"><table>
+        <tr><th>Server</th><th>Used for</th><th>Setup</th></tr>
+        <tr><td>shopify</td><td>Orders, products, discounts, analytics</td><td><code>/mcp</code> → shopify → Authenticate with your staff login</td></tr>
+        <tr><td>shopify-dev</td><td>Shopify docs and GraphQL validation</td><td>None</td></tr>
+        <tr><td>railway</td><td>Logs, deploys, variables</td><td><code>brew install railway</code>, then <code>railway login</code></td></tr>
+        <tr><td>chrome-devtools</td><td>Checking pages in headless Chrome</td><td>None</td></tr>
+        <tr><td>google-drive</td><td>Devops Drive and Sheets</td><td>Optional: GCP OAuth client file, see <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/DASHBOARD_ACCESS.md">DASHBOARD_ACCESS</a></td></tr>
+      </table></div>
+    </section>
+
+    <section>
       <h2>First-time setup</h2>
       <p>You need two env files and two processes. Secrets come from Railway, Shopify Admin or the team. Never invent or commit them; start from the examples.</p>
       <details id="commands" open><summary>Commands</summary><div>
@@ -296,6 +309,8 @@ const LISTS = {
     ["wf-install", "npm install at root and in server/"],
     ["wf-dev", "Run npm run dev (SPA) and cd server && npm run dev (API)"],
     ["wf-open", "Open the SPA (Vite) and http://localhost:3001/dashboard/"],
+    ["wf-mcp", "Approve the MCP servers + Shopify plugin, then /mcp → authenticate shopify"],
+    ["wf-railway", "brew install railway && railway login"],
   ],
 };
 const NEXT = { pending: "in_progress", in_progress: "completed", completed: "pending" };
