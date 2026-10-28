@@ -1,1 +1,0 @@
-import{n as e,r as t}from"./Container-Y2qwrQJm.js";var n=e();function r({title:e,subtitle:r,className:i}){return(0,n.jsxs)(`header`,{className:t(`space-y-3`,i),children:[(0,n.jsx)(`h1`,{className:`font-display text-page-title text-heritage-green`,children:e}),r?(0,n.jsx)(`p`,{className:`max-w-2xl font-body text-body text-matte-black/80`,children:r}):null]})}export{r as t};
