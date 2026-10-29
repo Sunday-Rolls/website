@@ -12,7 +12,7 @@ const LazyRig = lazy(() =>
       const anchorRef = useRef<HTMLSpanElement>(null)
       const [scene, setScene] = useState<{ header: HTMLElement; g: PuttGeometry } | null>(null)
 
-      // Measure where the ball starts and where the cart is before drawing anything, so
+      // Measure where his hand holds the ball and where the cart is before drawing anything, so
       // the old man and the ball start on the same clock.
       useLayoutEffect(() => {
         const anchor = anchorRef.current
@@ -27,6 +27,7 @@ const LazyRig = lazy(() =>
           header,
           g: {
             logoLeft: box.left - h.left,
+            logoTop: box.top - h.top,
             unit,
             ground: h.height - 1.5,
             cartX: c.left - h.left + c.width / 2,
@@ -72,7 +73,7 @@ interface StrollingLogoProps {
   className?: string
 }
 
-/** The header's logo mark. While `strolling`, the rigged old man takes his place and putts a ball to the cart. */
+/** The header's logo mark. While `strolling`, the rigged old man takes his place, drops a ball and putts it to the cart. */
 export function StrollingLogo({ strolling, onDone, onClick, className }: StrollingLogoProps) {
   const [rigShown, setRigShown] = useState(false)
   const [wasStrolling, setWasStrolling] = useState(strolling)

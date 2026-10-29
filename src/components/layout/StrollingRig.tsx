@@ -2,19 +2,28 @@ import { useId } from 'react'
 import { brandAssets } from '@/assets'
 import { OLD_MAN } from '@/components/brand/old-man'
 import { OldManRig } from '@/components/brand/OldManRig'
-import { rigTip, type Pt, type RigFrame, type RigPose, type Skeleton } from '@/components/brand/old-man-rig-math'
-import { PUTT_ADDRESS, PUTT_BACK, PUTT_THROUGH, PUTT_WATCH, STAND } from '@/components/brand/old-man-poses'
+import { rigTip, view, type Pt, type RigFrame, type RigPose, type Skeleton } from '@/components/brand/old-man-rig-math'
+import {
+  FACE_PUTT_ADDRESS,
+  FACE_PUTT_BACK,
+  FACE_PUTT_THROUGH,
+  PUTT_WATCH,
+  STAND,
+  STRIDE_BOB,
+  strollStep,
+} from '@/components/brand/old-man-poses'
 
 /*
- * The header logo's putt, drawn into the logo mark's 0 0 79 120 box: the seated logo springs
- * off his log as the rig, lands on the header's bottom edge, turns toward the cart, pulls out
- * a putter and rolls a ball along the bottom of the header. PuttToCart (below) draws that
- * ball and the catcher the cart icon lowers for it, across the whole header, on the same
- * clock. Then he puts the putter away and hops back onto his log, where the logo picture
- * takes over again. One CSS pixel is 1/0.3 logo units.
+ * The header logo's putt, drawn into the logo mark's 0 0 79 120 box: still sitting on his log,
+ * the old man holds out a ball and drops it, and it bounces a couple of times along the
+ * header's bottom edge. He springs off the log as the rig, walks over to the ball, turns to
+ * face the viewer, pulls out a putter and rolls it along the bottom of the header to the cart.
+ * PuttToCart (below) draws that ball and the catcher the cart icon lowers for it, across the
+ * whole header, on the same clock. Then he puts the putter away, walks back and hops onto his
+ * log, where the logo picture takes over again. One CSS pixel is 1/0.3 logo units.
  */
 
-export const STROLL_S = 8.8
+export const STROLL_S = 14.75
 const DUR = `${STROLL_S}s`
 // Sized so his head matches the logo's: rig head scale (0.42) x SCALE = logo units per trace unit.
 const SCALE = 0.33214 / 0.42
@@ -35,6 +44,10 @@ const SIT: Skeleton = {
   kneeL: [24, 2, -6], ankleL: [22, 25, -6], toeL: [30, 27, -6],
   kneeR: [24, 2, 6], ankleR: [22, 25, 6], toeR: [30, 27, 6],
 }
+/** Sitting, holding the ball out in his near (left) hand, looking down at it. */
+const SIT_HOLD: Skeleton = { ...SIT, neck: [10, -42, 0], elbowL: [14, -24, -12], handL: [27, -23, -11] }
+/** The hand opens: a little lift as the ball drops away. */
+const SIT_LET_GO: Skeleton = { ...SIT_HOLD, handL: [27, -26, -11] }
 const TUCK: Skeleton = {
   ...SIT,
   elbowL: [2, -24, -13], handL: [10, -30, -12],
@@ -52,52 +65,94 @@ const CROUCH: Skeleton = {
 const at = (x: number, y: number, yaw: number, joints: Skeleton): RigPose => ({ root: [x, y], yaw, joints })
 
 const PEAK: [number, number] = [SEAT[0] - 3 * PX, SEAT[1] - 6 * PX]
-// Facing the cart (to the right), turned a touch toward the viewer.
-const AIM = 160
+// Facing: 0 left (as he sits), 180 right (walking to the ball), 90 square to the viewer to putt,
+// and turned a touch toward the cart to watch it roll.
+const YAW = { left: 0, right: 180, face: 90, watch: 118 }
 
-/** Seconds into the putt: when the ball's struck, rolls, reaches the cart and is reeled in. */
-const PUTT = {
-  ballDown: 2.6,
-  strike: 3.25,
-  roll: 2.4,
-  arrive: 5.65,
-  reel: 0.6,
-  reeled: 6.45,
+// The walk: STEP seconds a beat, and how far his pelvis moves each beat so the planted boot stays put.
+const STEP = 0.3
+const STRIDE = 12.5 * SCALE
+const WALK_BEATS = 6
+// Where he stands to putt: the beats plus the closing step back to standing.
+const ADDRESS_X = LAND_X + (WALK_BEATS + 1) * STRIDE
+
+/** Seconds into the scene. */
+const T = {
+  swap: 0.35,
+  holdOut: 0.75,
+  drop: 1.0,
+  hop: 2.25,
+  walkOut: 3.65,
+  address: 6.5,
+  strike: 7.4,
+  arrive: 9.6,
+  reeled: 10.4,
+  walkBack: 11.4,
 }
-// When he's back under his log and springs up onto it.
-const BACK_ON_LOG = 8.35
+const BACK_ON_LOG = 14.3
+
+/** Strolling hands-in-pockets from `x0`, `dir` +1 to the right or -1 to the left, ending stood still. */
+function walk(t0: number, x0: number, dir: 1 | -1, yaw: number): RigFrame[] {
+  const frames: RigFrame[] = []
+  for (let beat = 0; beat < WALK_BEATS; beat++) {
+    const x = x0 + dir * (beat + 1) * STRIDE
+    frames.push([t0 + (beat + 1) * STEP, at(x, STAND_Y + STRIDE_BOB[beat % 4] * SCALE, yaw, strollStep(beat)), LINEAR])
+  }
+  frames.push([t0 + (WALK_BEATS + 1) * STEP, at(x0 + dir * (WALK_BEATS + 1) * STRIDE, STAND_Y, yaw, STAND), '0 0 .4 1'])
+  return frames
+}
 
 const FRAMES: RigFrame[] = [
-  [0, at(SEAT[0], SEAT[1], 0, SIT), LINEAR],
-  [0.35, at(SEAT[0], SEAT[1], 0, SIT), LINEAR],
-  [0.62, at(PEAK[0], PEAK[1], 0, TUCK), '.2 .6 .4 1'],
-  [0.95, at(LAND_X, STAND_Y + 7, 0, CROUCH), '.5 0 .9 .5'],
-  [1.3, at(LAND_X, STAND_Y, 0, STAND), EASE],
-  // Turn toward the cart and pull out the putter.
-  [1.95, at(LAND_X, STAND_Y, AIM, STAND), '.45 0 .4 1'],
-  [2.3, at(LAND_X, STAND_Y, AIM, PUTT_ADDRESS), EASE],
-  [2.75, at(LAND_X, STAND_Y, AIM, PUTT_ADDRESS), LINEAR],
-  [3.05, at(LAND_X, STAND_Y, AIM, PUTT_BACK), '.4 0 .6 1'],
-  [PUTT.strike, at(LAND_X, STAND_Y, AIM, PUTT_ADDRESS), '.5 0 1 1'],
-  [3.5, at(LAND_X, STAND_Y, AIM, PUTT_THROUGH), '0 0 .4 1'],
-  [4.2, at(LAND_X, STAND_Y, AIM, PUTT_THROUGH), LINEAR],
+  [0, at(SEAT[0], SEAT[1], YAW.left, SIT), LINEAR],
+  [T.swap, at(SEAT[0], SEAT[1], YAW.left, SIT), LINEAR],
+  // Hold the ball out and let it go.
+  [T.holdOut, at(SEAT[0], SEAT[1], YAW.left, SIT_HOLD), EASE],
+  [T.drop, at(SEAT[0], SEAT[1], YAW.left, SIT_HOLD), LINEAR],
+  [T.drop + 0.12, at(SEAT[0], SEAT[1], YAW.left, SIT_LET_GO), EASE],
+  [T.drop + 0.55, at(SEAT[0], SEAT[1], YAW.left, SIT), EASE],
+  // Watch it bounce, then down off the log.
+  [T.hop, at(SEAT[0], SEAT[1], YAW.left, SIT), LINEAR],
+  [T.hop + 0.27, at(PEAK[0], PEAK[1], YAW.left, TUCK), '.2 .6 .4 1'],
+  [T.hop + 0.6, at(LAND_X, STAND_Y + 7, YAW.left, CROUCH), '.5 0 .9 .5'],
+  [T.hop + 0.95, at(LAND_X, STAND_Y, YAW.left, STAND), EASE],
+  // Turn round and walk over to the ball.
+  [T.walkOut, at(LAND_X, STAND_Y, YAW.right, STAND), '.45 0 .4 1'],
+  ...walk(T.walkOut, LAND_X, 1, YAW.right),
+  // Square up to the viewer and pull out the putter.
+  [T.address - 0.35, at(ADDRESS_X, STAND_Y, YAW.face, STAND), '.45 0 .4 1'],
+  [T.address, at(ADDRESS_X, STAND_Y, YAW.face, FACE_PUTT_ADDRESS), EASE],
+  [T.address + 0.4, at(ADDRESS_X, STAND_Y, YAW.face, FACE_PUTT_ADDRESS), LINEAR],
+  [T.strike - 0.2, at(ADDRESS_X, STAND_Y, YAW.face, FACE_PUTT_BACK), '.4 0 .6 1'],
+  [T.strike, at(ADDRESS_X, STAND_Y, YAW.face, FACE_PUTT_ADDRESS), '.5 0 1 1'],
+  [T.strike + 0.25, at(ADDRESS_X, STAND_Y, YAW.face, FACE_PUTT_THROUGH), '0 0 .4 1'],
+  [T.strike + 0.9, at(ADDRESS_X, STAND_Y, YAW.face, FACE_PUTT_THROUGH), LINEAR],
   // Stand up and watch it go.
-  [4.6, at(LAND_X, STAND_Y, AIM, PUTT_WATCH), EASE],
-  [6.6, at(LAND_X, STAND_Y, AIM, PUTT_WATCH), LINEAR],
-  // Putter away, turn back, and up onto the log.
-  [7.0, at(LAND_X, STAND_Y, AIM, STAND), EASE],
-  [7.55, at(LAND_X, STAND_Y, 0, STAND), '.45 0 .4 1'],
-  [7.8, at(LAND_X, STAND_Y + 7, 0, CROUCH), EASE],
-  [8.05, at(PEAK[0], PEAK[1], 0, TUCK), '.2 .6 .4 1'],
-  [BACK_ON_LOG, at(SEAT[0], SEAT[1], 0, SIT), '.5 0 .5 1'],
-  [STROLL_S, at(SEAT[0], SEAT[1], 0, SIT), LINEAR],
+  [T.strike + 1.3, at(ADDRESS_X, STAND_Y, YAW.watch, PUTT_WATCH), EASE],
+  [T.reeled + 0.2, at(ADDRESS_X, STAND_Y, YAW.watch, PUTT_WATCH), LINEAR],
+  // Putter away, turn back toward his log and walk home.
+  [T.reeled + 0.6, at(ADDRESS_X, STAND_Y, YAW.face, STAND), EASE],
+  [T.walkBack, at(ADDRESS_X, STAND_Y, YAW.left, STAND), '.45 0 .4 1'],
+  ...walk(T.walkBack, ADDRESS_X, -1, YAW.left),
+  // Up onto the log.
+  [BACK_ON_LOG - 0.55, at(LAND_X, STAND_Y + 7, YAW.left, CROUCH), EASE],
+  [BACK_ON_LOG - 0.3, at(PEAK[0], PEAK[1], YAW.left, TUCK), '.2 .6 .4 1'],
+  [BACK_ON_LOG, at(SEAT[0], SEAT[1], YAW.left, SIT), '.5 0 .5 1'],
+  [STROLL_S, at(SEAT[0], SEAT[1], YAW.left, SIT), LINEAR],
 ]
+
+const BALL_R = 2.2
+
+/** Where his left hand is at a frame time, in logo units. */
+const handAt = (t: number): Pt => {
+  const [, pose] = FRAMES.find(([ft]) => ft === t)!
+  return view(pose, SCALE).x(pose.joints.handL)
+}
 
 /** Where the ball sits when he strikes it, in logo units: just ahead of the putter's head. */
 const BALL_START: Pt = (() => {
-  const i = FRAMES.findIndex(([t]) => t === PUTT.strike)
-  const tip = rigTip(FRAMES, SCALE)[i] ?? [LAND_X + 10, 166]
-  return [tip[0] + 4, tip[1]]
+  const i = FRAMES.findIndex(([t]) => t === T.strike)
+  const tip = rigTip(FRAMES, SCALE)[i] ?? [ADDRESS_X, 166]
+  return [tip[0] + BALL_R * PX * 0.9, tip[1]]
 })()
 
 const swap = (t0: number, t1: number, during: '0' | '1') => {
@@ -157,8 +212,9 @@ export function StrollingRig({ clipId }: { clipId: string }) {
 }
 
 export interface PuttGeometry {
-  /** Header pixels: the logo mark's left edge and pixels per logo unit, the header's bottom edge, the cart icon. */
+  /** Header pixels: the logo mark's top-left corner and pixels per logo unit, the header's bottom edge, the cart icon. */
   logoLeft: number
+  logoTop: number
   unit: number
   ground: number
   cartX: number
@@ -166,18 +222,38 @@ export interface PuttGeometry {
   cartBottom: number
 }
 
-const BALL_R = 2.2
 const CUP_W = 14
 const CUP_H = 10
+// Gravity, near enough: speeding up as it falls, slowing as it rises.
+const FALL = '.55 .085 .68 .53'
+const RISE = '.25 .46 .45 .94'
+
+type Key = readonly [t: number, value: number, ease?: string]
+
+/** One animated attribute through timed keys; each key's ease shapes the stretch leading to it. */
+function Track({ attr, keys }: { attr: string; keys: Key[] }) {
+  return (
+    <animate
+      attributeName={attr}
+      dur={DUR}
+      values={keys.map(([, v]) => v.toFixed(2)).join(';')}
+      keyTimes={keys.map(([t]) => (t / STROLL_S).toFixed(4)).join(';')}
+      calcMode="spline"
+      keySplines={keys.slice(1).map(([, , ease]) => ease ?? LINEAR).join(';')}
+      fill="freeze"
+    />
+  )
+}
 
 /**
- * The ball he putts and the catcher the cart lowers for it, drawn over the whole header in
- * header pixels. Mount it with the rig so the two share a clock.
+ * The ball he drops and putts and the catcher the cart lowers for it, drawn over the whole
+ * header in header pixels. Mount it with the rig so the two share a clock.
  */
 export function PuttToCart({ g }: { g: PuttGeometry }) {
   const clipId = `putt-under-cart-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   const kt = (...t: number[]) => t.map((v) => (v / STROLL_S).toFixed(4)).join(';')
-  const ballX = g.logoLeft + BALL_START[0] * g.unit
+  const px = ([x, y]: Pt): Pt => [g.logoLeft + x * g.unit, g.logoTop + y * g.unit]
+  const ballX = px(BALL_START)[0]
   const rest = g.ground - BALL_R
   // The catcher is a scoop lying on its side, mouth open toward him, so the ball rolls
   // straight in. Raised, it's wholly inside the cart icon: everything above the icon's
@@ -188,9 +264,51 @@ export function PuttToCart({ g }: { g: PuttGeometry }) {
   const scoop = `M${left} ${g.ground - CUP_H} L${right - 4} ${g.ground - CUP_H} Q${right} ${g.ground - CUP_H} ${right} ${g.ground - CUP_H / 2} Q${right} ${g.ground} ${right - 4} ${g.ground} L${left} ${g.ground}`
   // The ball comes to rest against the back of the scoop.
   const stop = right - 2.5 - BALL_R
-  const dropAt = PUTT.arrive - 1.0
-  const landedAt = PUTT.arrive - 0.5
-  const reelFrom = PUTT.arrive + 0.2
+  const dropAt = T.arrive - 1.0
+  const landedAt = T.arrive - 0.5
+  const reelFrom = T.arrive + 0.2
+
+  // In his hand while he sits, hanging just under his fingers.
+  const [sitX, sitY] = px(handAt(T.swap))
+  const [holdX, holdY] = px(handAt(T.holdOut))
+  const grip = BALL_R * 0.8
+  // Dropped: it falls, bounces twice, each lower and quicker, drifting on along the header,
+  // and rolls to a stop where he'll putt it from.
+  const drop = rest - holdY - grip
+  const fall = 0.38
+  const bounce = (h: number) => fall * Math.sqrt(h)
+  const land1 = T.drop + fall
+  const peak1 = land1 + bounce(0.3)
+  const land2 = peak1 + bounce(0.3)
+  const peak2 = land2 + bounce(0.08)
+  const land3 = peak2 + bounce(0.08)
+  const stopped = land3 + 0.6
+  const drift = ballX - holdX
+  const ballCx: Key[] = [
+    [0, sitX],
+    [T.swap, sitX],
+    [T.holdOut, holdX, EASE],
+    [T.drop, holdX],
+    [land1, holdX + drift * 0.3],
+    [land2, holdX + drift * 0.65],
+    [land3, holdX + drift * 0.82],
+    [stopped, ballX, '.2 .6 .4 1'],
+    [T.strike, ballX],
+    [T.arrive, stop, '.32 .3 .45 1'],
+    [STROLL_S, stop],
+  ]
+  const ballCy: Key[] = [
+    [0, sitY + grip],
+    [T.swap, sitY + grip],
+    [T.holdOut, holdY + grip, EASE],
+    [T.drop, holdY + grip],
+    [land1, rest, FALL],
+    [peak1, rest - drop * 0.3, RISE],
+    [land2, rest, FALL],
+    [peak2, rest - drop * 0.08, RISE],
+    [land3, rest, FALL],
+    [STROLL_S, rest],
+  ]
 
   return (
     <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
@@ -199,16 +317,23 @@ export function PuttToCart({ g }: { g: PuttGeometry }) {
           <rect x="-10000" y={g.cartBottom} width="20000" height="200" />
         </clipPath>
       </defs>
+      {/* the ball: held out, dropped, bouncing, struck and rolled all the way into the scoop */}
+      <circle cx={sitX} cy={sitY + grip} r={BALL_R} fill="#fff" stroke={OLD_MAN.outline} strokeWidth="1.2" opacity="0">
+        <animate attributeName="opacity" dur={DUR} values="0;1;0" keyTimes={kt(0, T.swap, T.arrive)} calcMode="discrete" fill="freeze" />
+        <Track attr="cx" keys={ballCx} />
+        <Track attr="cy" keys={ballCy} />
+      </circle>
+
       <g fill="none" strokeLinecap="round" clipPath={`url(#${clipId})`}>
         {/* the catcher: a little basket on a line from the cart icon */}
         <g opacity="0">
-          <animate attributeName="opacity" dur={DUR} values="0;1;1;0" keyTimes={kt(0, dropAt, PUTT.reeled, STROLL_S)} calcMode="discrete" fill="freeze" />
+          <animate attributeName="opacity" dur={DUR} values="0;1;1;0" keyTimes={kt(0, dropAt, T.reeled, STROLL_S)} calcMode="discrete" fill="freeze" />
           <line x1={g.cartX} y1={g.cartBottom} x2={g.cartX} y2={g.cartBottom} stroke={OLD_MAN.outline} strokeWidth="1.2">
             <animate
               attributeName="y2"
               dur={DUR}
               values={`${g.cartBottom};${g.cartBottom};${g.ground - CUP_H};${g.ground - CUP_H};${g.cartBottom};${g.cartBottom}`}
-              keyTimes={kt(0, dropAt, landedAt, reelFrom, PUTT.reeled, STROLL_S)}
+              keyTimes={kt(0, dropAt, landedAt, reelFrom, T.reeled, STROLL_S)}
               calcMode="spline"
               keySplines="0 0 1 1;.5 0 .3 1;0 0 1 1;.5 0 .3 1;0 0 1 1"
               fill="freeze"
@@ -220,7 +345,7 @@ export function PuttToCart({ g }: { g: PuttGeometry }) {
               type="translate"
               dur={DUR}
               values={`0 ${raised};0 ${raised};0 0;0 0;0 ${raised};0 ${raised}`}
-              keyTimes={kt(0, dropAt, landedAt, reelFrom, PUTT.reeled, STROLL_S)}
+              keyTimes={kt(0, dropAt, landedAt, reelFrom, T.reeled, STROLL_S)}
               calcMode="spline"
               keySplines="0 0 1 1;.5 0 .3 1;0 0 1 1;.5 0 .3 1;0 0 1 1"
               fill="freeze"
@@ -229,35 +354,25 @@ export function PuttToCart({ g }: { g: PuttGeometry }) {
           </g>
         </g>
 
-        {/* the ball: down at his feet, struck, rolls all the way into the scoop, reeled up into the cart */}
-        <circle cx={ballX} cy={rest} r={BALL_R} fill="#fff" stroke={OLD_MAN.outline} strokeWidth="1.2" opacity="0">
-          <animate attributeName="opacity" dur={DUR} values="0;1;0" keyTimes={kt(0, PUTT.ballDown, PUTT.reeled)} calcMode="discrete" fill="freeze" />
-          <animate
-            attributeName="cx"
-            dur={DUR}
-            values={`${ballX};${ballX};${stop};${stop}`}
-            keyTimes={kt(0, PUTT.strike, PUTT.arrive, STROLL_S)}
-            calcMode="spline"
-            keySplines="0 0 1 1;.32 .3 .45 1;0 0 1 1"
-            fill="freeze"
-          />
+        {/* the same ball once it's in the scoop, reeled up into the cart */}
+        <circle cx={stop} cy={rest} r={BALL_R} fill="#fff" stroke={OLD_MAN.outline} strokeWidth="1.2" opacity="0">
+          <animate attributeName="opacity" dur={DUR} values="0;1;0" keyTimes={kt(0, T.arrive, T.reeled)} calcMode="discrete" fill="freeze" />
           <animate
             attributeName="cy"
             dur={DUR}
             values={`${rest};${rest};${rest + raised};${rest + raised}`}
-            keyTimes={kt(0, reelFrom, PUTT.reeled, STROLL_S)}
+            keyTimes={kt(0, reelFrom, T.reeled, STROLL_S)}
             calcMode="spline"
             keySplines="0 0 1 1;.5 0 .3 1;0 0 1 1"
             fill="freeze"
           />
         </circle>
-
       </g>
       <g fill="none">
         {/* the cart's little pop as the ball goes in */}
         <circle cx={g.cartX} cy={g.cartY} r="4" stroke="var(--color-soft-gold)" strokeWidth="1.6" opacity="0">
-          <animate attributeName="r" dur={DUR} values="4;4;17;17" keyTimes={kt(0, PUTT.reeled, PUTT.reeled + 0.45, STROLL_S)} fill="freeze" />
-          <animate attributeName="opacity" dur={DUR} values="0;0;0.9;0;0" keyTimes={kt(0, PUTT.reeled - 0.01, PUTT.reeled, PUTT.reeled + 0.45, STROLL_S)} fill="freeze" />
+          <animate attributeName="r" dur={DUR} values="4;4;17;17" keyTimes={kt(0, T.reeled, T.reeled + 0.45, STROLL_S)} fill="freeze" />
+          <animate attributeName="opacity" dur={DUR} values="0;0;0.9;0;0" keyTimes={kt(0, T.reeled - 0.01, T.reeled, T.reeled + 0.45, STROLL_S)} fill="freeze" />
         </circle>
       </g>
     </svg>
