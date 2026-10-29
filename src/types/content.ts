@@ -32,6 +32,7 @@ export interface SiteContent {
       etsy?: string
     }
     copyright: string
+    credit?: string
   }
   buttons: Record<string, string>
 }
