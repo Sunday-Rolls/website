@@ -74,6 +74,14 @@ export function Footer() {
       <Container className="border-t border-cream/10 py-4">
         <p className="font-body text-body-small text-cream/70">
           {formatCopyright(footer.copyright)}
+          {footer.credit ? (
+            <>
+              <span aria-hidden="true" className="mx-2">
+                ·
+              </span>
+              {footer.credit}
+            </>
+          ) : null}
         </p>
       </Container>
     </footer>
