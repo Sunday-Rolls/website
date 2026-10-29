@@ -317,13 +317,6 @@ export function PuttToCart({ g }: { g: PuttGeometry }) {
           <rect x="-10000" y={g.cartBottom} width="20000" height="200" />
         </clipPath>
       </defs>
-      {/* the ball: held out, dropped, bouncing, struck and rolled all the way into the scoop */}
-      <circle cx={sitX} cy={sitY + grip} r={BALL_R} fill="#fff" stroke={OLD_MAN.outline} strokeWidth="1.2" opacity="0">
-        <animate attributeName="opacity" dur={DUR} values="0;1;0" keyTimes={kt(0, T.swap, T.arrive)} calcMode="discrete" fill="freeze" />
-        <Track attr="cx" keys={ballCx} />
-        <Track attr="cy" keys={ballCy} />
-      </circle>
-
       <g fill="none" strokeLinecap="round" clipPath={`url(#${clipId})`}>
         {/* the catcher: a little basket on a line from the cart icon */}
         <g opacity="0">
@@ -368,6 +361,14 @@ export function PuttToCart({ g }: { g: PuttGeometry }) {
           />
         </circle>
       </g>
+      {/* the ball: held out, dropped, bouncing, struck and rolled all the way into the scoop,
+          drawn over the catcher so it stays in sight as it rolls in */}
+      <circle cx={sitX} cy={sitY + grip} r={BALL_R} fill="#fff" stroke={OLD_MAN.outline} strokeWidth="1.2" opacity="0">
+        <animate attributeName="opacity" dur={DUR} values="0;1;0" keyTimes={kt(0, T.swap, T.arrive)} calcMode="discrete" fill="freeze" />
+        <Track attr="cx" keys={ballCx} />
+        <Track attr="cy" keys={ballCy} />
+      </circle>
+
       <g fill="none">
         {/* the cart's little pop as the ball goes in */}
         <circle cx={g.cartX} cy={g.cartY} r="4" stroke="var(--color-soft-gold)" strokeWidth="1.6" opacity="0">

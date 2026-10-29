@@ -124,7 +124,8 @@ const T = {
   finish: 5.15,
   finishHold: 6.6,
   relax: 7.1,
-  ballInCup: 7.35,
+  // The flight lands it on the lip of the hole (impact + 2.4s), and it drops in.
+  ballInCup: 7.15,
   walkOut: 7.4,
   gone: 9.8,
   trailOut: 8.2,
@@ -230,6 +231,7 @@ function DriveScene({ width, scale }: SceneProps) {
   const uid = sanitizeId(useId())
   const trailMaskId = `drive-trail-${uid}`
   const flagClipId = `drive-flag-${uid}`
+  const cupClipId = `drive-cup-${uid}`
 
   // Golfer and cup sit a set distance in from the viewport edges.
   const golferX = Math.round(Math.max(70, width * 0.12))
@@ -261,6 +263,12 @@ function DriveScene({ width, scale }: SceneProps) {
       aria-label="A golfer walks on, drives the ball into the hole and walks off"
     >
       <defs>
+        {/* Everywhere but the hole below ground level, so the ball drops out of sight into it. */}
+        <clipPath id={cupClipId}>
+          <rect x="-100" y="-300" width={width + 200} height={GROUND_Y + 301} />
+          <rect x="-100" y="0" width={cupX - 10 + 100} height={HEIGHT} />
+          <rect x={cupX + 10} y="0" width={width - cupX + 90} height={HEIGHT} />
+        </clipPath>
         <clipPath id={flagClipId}>
           <rect x={cupX - 30} y="0" width="90" height={GROUND_Y + 1} />
         </clipPath>
@@ -316,11 +324,13 @@ function DriveScene({ width, scale }: SceneProps) {
           </g>
         </g>
 
-        <circle cx={tee[0]} cy={tee[1]} r="4.5" fill="#fff" stroke={INK} strokeWidth="1.5" opacity="0">
-          <animate attributeName="opacity" begin={`${T.ballOnTee}s`} dur="0.3s" values="0;1" fill="freeze" />
-          <animateMotion begin={`${T.impact}s`} dur="2.4s" path={relativeFlight} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".25 .1 .35 1" fill="freeze" />
-          <animate attributeName="opacity" begin={`${T.ballInCup}s`} dur="0.2s" values="1;0" fill="freeze" />
-        </circle>
+        <g clipPath={`url(#${cupClipId})`}>
+          <circle cx={tee[0]} cy={tee[1]} r="4.5" fill="#fff" stroke={INK} strokeWidth="1.5" opacity="0">
+            <animate attributeName="opacity" begin={`${T.ballOnTee}s`} dur="0.3s" values="0;1" fill="freeze" />
+            <animateMotion begin={`${T.impact}s`} dur="2.4s" path={relativeFlight} calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".25 .1 .35 1" fill="freeze" />
+            <animate attributeName="cy" begin={`${T.ballInCup}s`} dur="0.22s" values={`${tee[1]};${tee[1] + 14}`} calcMode="spline" keySplines=".55 .085 .68 .53" fill="freeze" />
+          </circle>
+        </g>
       </g>
     </svg>
   )
