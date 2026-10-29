@@ -65,3 +65,44 @@ export function carryStep(beat: number): Skeleton {
 
 /** Standing with the club held down at his side. */
 export const STAND_CLUB: Skeleton = { ...STAND, handR: [4, -3, 11], tip: [20, 40, 12] }
+
+/**
+ * Putting: bent over the ball, hands together low in front, the putter's head on the ground
+ * just ahead of his toes. Back and through are a short pendulum from the shoulders.
+ */
+export const PUTT_ADDRESS: Skeleton = {
+  ...STAND,
+  neck: [19, -37, 0],
+  shoulderL: [8, -31, -9],
+  shoulderR: [8, -31, 9],
+  elbowL: [11, -15, -8],
+  elbowR: [11, -15, 8],
+  handL: [16, -2, -2],
+  handR: [16, -1, 2],
+  kneeL: [8, 23, -7],
+  kneeR: [8, 23, 7],
+  ankleL: [0, 46, -7],
+  ankleR: [0, 46, 7],
+  toeL: [9, 47, -8],
+  toeR: [9, 47, 8],
+  tip: [25, 50, 0],
+}
+export const PUTT_BACK: Skeleton = {
+  ...PUTT_ADDRESS,
+  elbowL: [7, -15, -8],
+  elbowR: [7, -15, 8],
+  handL: [10, -2, -2],
+  handR: [10, -1, 2],
+  tip: [11, 48, 0],
+}
+export const PUTT_THROUGH: Skeleton = {
+  ...PUTT_ADDRESS,
+  neck: [18, -38, 0],
+  elbowL: [15, -15, -8],
+  elbowR: [15, -15, 8],
+  handL: [22, -3, -2],
+  handR: [22, -2, 2],
+  tip: [40, 46, 0],
+}
+/** Upright, watching the putt roll, putter resting at his side. */
+export const PUTT_WATCH: Skeleton = { ...STAND, handR: [5, -3, 11], tip: [13, 50, 12] }

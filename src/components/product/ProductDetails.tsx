@@ -50,9 +50,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         throw new Error('This product is missing a Shopify variant.')
       }
 
-      await addItem(variantId, 1)
-      trackAddToCart(product)
+      // Head to the cart straight away: it holds a spot for the item, with a putt playing,
+      // until Shopify has added it. A failed add shows in the cart's error banner.
+      const added = addItem(variantId, 1)
       navigate('/cart')
+      added.then(() => trackAddToCart(product)).catch(() => undefined)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to add to cart')
     } finally {

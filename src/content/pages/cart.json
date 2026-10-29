@@ -41,6 +41,8 @@
   "status": {
     "loading": "Loading your cart…",
     "updating": "Updating cart…",
+    "adding": "Adding to your cart…",
+    "removing": "Taking it out…",
     "unavailable": "Checkout isn’t available yet. Connect Shopify Storefront API to enable cart."
   },
   "emptyState": {

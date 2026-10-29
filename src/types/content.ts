@@ -299,6 +299,8 @@ export interface CartContent {
   status: {
     loading: string
     updating: string
+    adding: string
+    removing: string
     unavailable: string
   }
   emptyState: {
