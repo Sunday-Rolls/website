@@ -16,8 +16,11 @@ permissions:
   contents: write
   pull-requests: write
 
+# Production and each preview queue separately, so a preview build can't knock a pending
+# main deploy out of the queue. They can run side by side because each one publishes only
+# its own part of gh-pages (see "Publish to gh-pages").
 concurrency:
-  group: github-pages
+  group: github-pages-${{ github.event_name == 'push' && 'production' || format('preview-{0}', github.event.number || inputs.slug) }}
   cancel-in-progress: false
 
 jobs:
@@ -130,14 +133,55 @@ jobs:
       - name: Install SPA 404 fallback
         run: sed "s|__PAGES_BASE__|${PAGES_BASE}|g" scripts/gh-pages-404.html > site/404.html
 
-      - name: Persist site tree
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: site
-          branch: gh-pages
-          clean: true
-          git-config-name: github-actions[bot]
-          git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
+      - name: Publish to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KIND: ${{ steps.slug.outputs.kind }}
+          SLUG: ${{ steps.slug.outputs.value }}
+          CLOSED: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
+        run: |
+          # Start from the latest gh-pages each attempt and change only this run's part of it:
+          # production replaces everything outside previews/, a preview its own previews/<slug>/.
+          # If another deploy pushed in between, the push is rejected and we go round again.
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          for attempt in 1 2 3 4 5; do
+            rm -rf publish
+            if ! git clone --quiet --depth 1 --branch gh-pages "$remote" publish; then
+              mkdir publish
+              git -C publish init --quiet --initial-branch gh-pages
+            fi
+            if [ "$KIND" = "production" ]; then
+              rsync -a --checksum --delete --exclude .git/ --exclude previews/ site/ publish/
+            else
+              rm -rf "publish/previews/${SLUG}"
+              if [ "$CLOSED" != "true" ]; then
+                mkdir -p "publish/previews/${SLUG}"
+                rsync -a --checksum "site/previews/${SLUG}/" "publish/previews/${SLUG}/"
+                # A brand-new gh-pages also needs the production site this preview seeded.
+                if [ ! -f publish/index.html ]; then
+                  rsync -a --checksum --exclude .git/ --exclude previews/ site/ publish/
+                fi
+              fi
+              cp site/404.html publish/404.html
+            fi
+            cd publish
+            git add -A
+            if git diff --cached --quiet; then
+              echo "gh-pages already up to date"
+              exit 0
+            fi
+            git commit --quiet -m "Deploy ${KIND}${SLUG:+ ${SLUG}} from ${GITHUB_SHA}"
+            if git push --quiet "$remote" HEAD:gh-pages; then
+              exit 0
+            fi
+            cd ..
+            echo "gh-pages moved on; retrying ($attempt)"
+            sleep $((attempt * 5))
+          done
+          echo "Could not publish to gh-pages after 5 attempts"
+          exit 1
 
       - name: Comment preview URL
         if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
