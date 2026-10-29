@@ -6,6 +6,7 @@ import { applyPageMeta } from '@/lib/page-meta'
 import { filterProductsByCategory, placeholderProducts } from '@/lib/product-catalog'
 import { scheduleAfterLoad } from '@/lib/schedule'
 import type { ShopifyProduct } from '@/lib/shopify'
+import { DriveAnimation } from '@/components/golf/DriveAnimation'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { ShopHeader } from '@/components/shop/ShopHeader'
 import { ShopSectionNav } from '@/components/shop/ShopSectionNav'
@@ -104,6 +105,10 @@ export function ShopPage() {
           </Container>
         </section>
       ))}
+
+      <div className="bg-cream pt-6" aria-hidden="true">
+        <DriveAnimation />
+      </div>
     </>
   )
 }
