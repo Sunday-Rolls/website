@@ -14,9 +14,11 @@ import {
   usePageContent,
 } from '@/lib/content'
 import { trackBeginCheckout, trackViewCart } from '@/lib/gtm'
+import { useMinimumDuration } from '@/lib/motion'
 import { applyPageMeta } from '@/lib/page-meta'
 import { sitePath } from '@/lib/site-path'
 import { fetchProductByHandle, formatPrice, isShopifyConfigured } from '@/lib/shopify'
+import { PUTT_LOOP_MS, PuttLoader } from '@/components/golf/PuttAnimation'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -42,6 +44,8 @@ export function CartPage() {
   const [addingUpsell, setAddingUpsell] = useState(false)
   const [selectedTowelHandle, setSelectedTowelHandle] = useState<string | null>(null)
   const towelColorId = useId()
+
+  const showUpdating = useMinimumDuration(isUpdating, PUTT_LOOP_MS)
 
   const lines = cart?.lines ?? []
   const isEmpty = !isLoading && lines.length === 0
@@ -198,9 +202,7 @@ export function CartPage() {
         </p>
       ) : null}
 
-      {isUpdating ? (
-        <p className="font-body text-body-small text-matte-black/60">{content.status.updating}</p>
-      ) : null}
+      {showUpdating ? <PuttLoader label={content.status.updating} overlay /> : null}
 
       <div
         className="space-y-3 border border-sand bg-cream/50 px-4 py-4"

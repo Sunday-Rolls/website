@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { PUTT_LOOP_MS, PuttLoader } from '@/components/golf/PuttAnimation'
 import { Container } from '@/components/ui/Container'
 import { PageHeader } from '@/components/ui/PageHeader'
 import {
@@ -7,6 +8,7 @@ import {
   readPendingCheckout,
   trackPurchase,
 } from '@/lib/gtm'
+import { useMinimumDuration } from '@/lib/motion'
 
 /**
  * Optional return / validation landing for purchases.
@@ -52,6 +54,12 @@ export function OrderThankYouPage() {
     clearPendingCheckout()
     setStatus('tracked')
   }, [params])
+
+  const confirming = useMinimumDuration(status === 'pending', PUTT_LOOP_MS)
+
+  if (confirming) {
+    return <PuttLoader label="Confirming your order…" />
+  }
 
   return (
     <Container className="space-y-6 py-section-y text-center">

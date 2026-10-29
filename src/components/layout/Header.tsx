@@ -1,11 +1,14 @@
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { brandAssets } from '@/assets'
 import { useCart } from '@/lib/cart'
 import { getButtonLabel, useSiteContent } from '@/lib/content'
 import { prefetchHandlers } from '@/lib/preload-route'
+import { scheduleAfterLoad } from '@/lib/schedule'
 import { sitePath } from '@/lib/site-path'
 import { cn } from '@/lib/utils'
 import { Container } from '@/components/ui/Container'
+import { StrollingLogo } from '@/components/layout/StrollingLogo'
+import { preloadStroll } from '@/components/layout/stroll-loader'
 
 function CartIcon({ className }: { className?: string }) {
   return (
@@ -27,23 +30,71 @@ function CartIcon({ className }: { className?: string }) {
   )
 }
 
+const STROLL_QUERY = '(min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference)'
+const FIRST_STROLL_MS = 12_000
+const STROLL_GAP_MS = [30_000, 60_000] as const
+
+/** Every so often on desktop, the logo's old man gets up and goes for a walk along the header. */
+function useLogoStroll() {
+  const [strolling, setStrolling] = useState(false)
+
+  useEffect(() => {
+    if (typeof window.matchMedia === 'function' && window.matchMedia(STROLL_QUERY).matches) {
+      return scheduleAfterLoad(preloadStroll, 4000)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (strolling || typeof window.matchMedia !== 'function') return
+    const [minGap, maxGap] = STROLL_GAP_MS
+    let delay = minGap + Math.random() * (maxGap - minGap)
+    if (!sessionStorageFlag()) delay = FIRST_STROLL_MS
+    const timer = window.setTimeout(() => {
+      if (document.hidden || !window.matchMedia(STROLL_QUERY).matches) return
+      markStrolled()
+      setStrolling(true)
+    }, delay)
+    return () => window.clearTimeout(timer)
+  }, [strolling])
+
+  const endStroll = useCallback(() => setStrolling(false), [])
+  /** Click the old man and he goes for a walk (unless he's already out, or motion is reduced). */
+  const startStroll = useCallback(() => {
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    markStrolled()
+    setStrolling(true)
+  }, [])
+  return { strolling, startStroll, endStroll }
+}
+
+
+function sessionStorageFlag(): boolean {
+  try {
+    return window.sessionStorage.getItem('sr-logo-strolled') === '1'
+  } catch {
+    return true
+  }
+}
+
+function markStrolled() {
+  try {
+    window.sessionStorage.setItem('sr-logo-strolled', '1')
+  } catch {
+    // Storage blocked: the next stroll just waits the normal gap.
+  }
+}
+
 export function Header() {
   const { brand, navigation } = useSiteContent()
   const { itemCount } = useCart()
+  const { strolling, startStroll, endStroll } = useLogoStroll()
 
   return (
     <header className="sticky top-0 z-50 border-b border-sand bg-cream/95 backdrop-blur-sm">
       <Container className="flex h-16 items-center justify-between gap-6">
         <Link to="/" className="flex items-center gap-3 text-heritage-green" {...prefetchHandlers('/')}>
-          <img
-            src={brandAssets.logoMark}
-            alt=""
-            aria-hidden="true"
-            width={24}
-            height={36}
-            className="h-9 w-auto shrink-0"
-          />
-          <span className="font-display text-lg tracking-wide">{brand.name}</span>
+          <StrollingLogo strolling={strolling} onDone={endStroll} onClick={startStroll} />
+          <span className="relative z-10 font-display text-lg tracking-wide">{brand.name}</span>
         </Link>
 
         <div className="flex items-center gap-6">
