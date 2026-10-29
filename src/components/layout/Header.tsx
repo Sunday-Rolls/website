@@ -34,7 +34,7 @@ const STROLL_QUERY = '(min-width: 1024px) and (hover: hover) and (prefers-reduce
 const FIRST_STROLL_MS = 12_000
 const STROLL_GAP_MS = [30_000, 60_000] as const
 
-/** Every so often on desktop, the logo's old man gets up and goes for a walk along the header. */
+/** Every so often on desktop, the logo's old man hops off his log and putts a ball to the cart. */
 function useLogoStroll() {
   const [strolling, setStrolling] = useState(false)
 
@@ -58,7 +58,7 @@ function useLogoStroll() {
   }, [strolling])
 
   const endStroll = useCallback(() => setStrolling(false), [])
-  /** Click the old man and he goes for a walk (unless he's already out, or motion is reduced). */
+  /** Click the old man and he putts one too (unless he's already at it, or motion is reduced). */
   const startStroll = useCallback(() => {
     if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     markStrolled()
@@ -119,6 +119,7 @@ export function Header() {
 
           <Link
             to="/cart"
+            data-putt-target
             className={cn(
               'relative inline-flex items-center justify-center text-heritage-green',
               'transition-colors hover:text-forest-green',

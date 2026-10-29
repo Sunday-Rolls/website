@@ -3,7 +3,7 @@ import { usePrefersReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 /** One full putt, from the take-back to the ball dropping and resetting. */
-export const PUTT_LOOP_MS = 1200
+export const PUTT_LOOP_MS = 2000
 
 const DUR = `${PUTT_LOOP_MS / 1000}s`
 const INK = 'var(--color-heritage-green)'
@@ -124,18 +124,13 @@ export function PuttAnimation({ className }: { className?: string }) {
   )
 }
 
-/** Full-screen "working on it" state that plays at least one putt. */
-export function PuttLoader({ label, overlay = false }: { label: string; overlay?: boolean }) {
+/** A full-page "working on it" state that plays at least one putt. */
+export function PuttLoader({ label }: { label: string }) {
   return (
     <div
       role="status"
       aria-live="polite"
-      className={cn(
-        'flex flex-col items-center justify-center gap-4 text-center',
-        overlay
-          ? 'fixed inset-0 z-40 bg-cream/80 backdrop-blur-sm'
-          : 'min-h-[calc(100svh-4rem)] py-section-y',
-      )}
+      className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-4 py-section-y text-center"
     >
       <div className="w-72 max-w-[80vw]">
         <PuttAnimation />

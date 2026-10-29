@@ -23,6 +23,8 @@ interface CartContextValue {
   cart: ShopifyCart | null
   isLoading: boolean
   isUpdating: boolean
+  /** Adds still on their way to Shopify, so the cart can hold a spot for them. */
+  pendingAdds: number
   error: string | null
   itemCount: number
   addItem: (variantId: string, quantity?: number) => Promise<ShopifyCart>
@@ -56,6 +58,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<ShopifyCart | null>(null)
   const [isLoading, setIsLoading] = useState(shopifyConfigured)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [pendingAdds, setPendingAdds] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -110,6 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
 
       setIsUpdating(true)
+      setPendingAdds((n) => n + 1)
       setError(null)
 
       try {
@@ -125,6 +129,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         throw err
       } finally {
         setIsUpdating(false)
+        setPendingAdds((n) => n - 1)
       }
     },
     [cart, persistCart],
@@ -182,6 +187,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       cart,
       isLoading,
       isUpdating,
+      pendingAdds,
       error,
       itemCount: cart?.totalQuantity ?? 0,
       addItem,
@@ -189,7 +195,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       clearError: () => setError(null),
     }),
-    [addItem, cart, error, isLoading, isUpdating, removeItem, updateItemQuantity],
+    [addItem, cart, error, isLoading, isUpdating, pendingAdds, removeItem, updateItemQuantity],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

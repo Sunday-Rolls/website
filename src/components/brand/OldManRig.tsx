@@ -225,12 +225,14 @@ interface OldManRigProps {
   dur: number
   /** Scene units per body unit. */
   scale: number
-  /** What he's holding (a club), drawn from his right hand to `joints.tip`. */
+  /** What he's holding (a club or putter), drawn from his right hand to `joints.tip` in frames that have one. */
   holdColor?: string
+  /** Thickens what he's holding, for small sizes where a true-to-scale shaft disappears. */
+  holdWeight?: number
 }
 
 /** The old man, animated through `frames` once over `dur` seconds. */
-export function OldManRig({ frames, dur, scale, holdColor }: OldManRigProps) {
+export function OldManRig({ frames, dur, scale, holdColor, holdWeight = 1 }: OldManRigProps) {
   const baked = bake(frames)
   const samples: Sample[] = baked.map(([, pose]) => ({ v: view(pose, scale), j: pose.joints }))
   const timing: Timing = {
@@ -292,7 +294,10 @@ export function OldManRig({ frames, dur, scale, holdColor }: OldManRigProps) {
     return line(s.v.x([f, y, -7]), s.v.x([f + 4, y + 9, 0]), s.v.x([f, y, 7]))
   })
 
-  const holding = holdColor && frames[0][1].joints.tip !== undefined
+  // He holds something only in frames that give it a tip; between, it slides out of (or back
+  // into) his hand.
+  const holding = Boolean(holdColor) && frames.some(([, pose]) => pose.joints.tip !== undefined)
+  const held = channel(samples, (s) => (s.j.tip ? 1 : 0))
   const club = holding
     ? channel(samples, (s) => {
         const tip = s.j.tip ? reach(s.j.tip) : s.j.handR
@@ -378,14 +383,15 @@ export function OldManRig({ frames, dur, scale, holdColor }: OldManRigProps) {
       </g>
 
       {club && clubHead ? (
-        <>
-          <path d={club.values[0]} stroke={holdColor} strokeWidth={w(2.2)}>
+        <g opacity={held.values[0]}>
+          <Anim attr="opacity" ch={held} timing={timing} discrete />
+          <path d={club.values[0]} stroke={holdColor} strokeWidth={w(2.2 * holdWeight)}>
             <Anim attr="d" ch={club} timing={timing} />
           </path>
-          <path d={clubHead.values[0]} stroke={holdColor} strokeWidth={w(4.2)}>
+          <path d={clubHead.values[0]} stroke={holdColor} strokeWidth={w(4.2 * holdWeight)}>
             <Anim attr="d" ch={clubHead} timing={timing} />
           </path>
-        </>
+        </g>
       ) : null}
       {sides.map((side) => (
         <g key={side}>
