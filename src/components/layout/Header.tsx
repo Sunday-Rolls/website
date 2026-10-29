@@ -34,7 +34,7 @@ const STROLL_QUERY = '(min-width: 1024px) and (hover: hover) and (prefers-reduce
 const FIRST_STROLL_MS = 12_000
 const STROLL_GAP_MS = [30_000, 60_000] as const
 
-/** Every so often on desktop, the logo's old man hops off his log and putts a ball to the cart. */
+/** Every so often on desktop, the logo's old man drops a ball, hops off his log and putts it to the cart. */
 function useLogoStroll() {
   const [strolling, setStrolling] = useState(false)
 

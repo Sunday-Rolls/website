@@ -106,3 +106,43 @@ export const PUTT_THROUGH: Skeleton = {
 }
 /** Upright, watching the putt roll, putter resting at his side. */
 export const PUTT_WATCH: Skeleton = { ...STAND, handR: [5, -3, 11], tip: [13, 50, 12] }
+
+/*
+ * Putting face-on to the viewer (yaw 90): the same bent-over address, but the putter swings
+ * across his body, back toward his right side and through toward his left, where the target is.
+ */
+export const FACE_PUTT_ADDRESS: Skeleton = {
+  ...PUTT_ADDRESS,
+  elbowL: [11, -15, -7],
+  elbowR: [11, -15, 7],
+  handL: [16, -2, -2],
+  handR: [16, -1, 0],
+  kneeL: [8, 23, -10],
+  kneeR: [8, 23, 10],
+  ankleL: [1, 46, -11],
+  ankleR: [1, 46, 11],
+  toeL: [10, 47, -13],
+  toeR: [10, 47, 13],
+  tip: [24, 50, 6],
+}
+export const FACE_PUTT_BACK: Skeleton = {
+  ...FACE_PUTT_ADDRESS,
+  shoulderL: [8, -29, -9],
+  shoulderR: [8, -33, 9],
+  elbowL: [11, -14, -4],
+  elbowR: [11, -16, 10],
+  handL: [15, -1, 4],
+  handR: [15, -1, 6],
+  tip: [22, 49, 20],
+}
+export const FACE_PUTT_THROUGH: Skeleton = {
+  ...FACE_PUTT_ADDRESS,
+  neck: [18, -38, 0],
+  shoulderL: [8, -33, -9],
+  shoulderR: [8, -29, 9],
+  elbowL: [11, -16, -11],
+  elbowR: [11, -14, 3],
+  handL: [15, -3, -8],
+  handR: [15, -2, -6],
+  tip: [22, 47, -18],
+}
