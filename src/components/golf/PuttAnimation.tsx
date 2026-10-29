@@ -3,7 +3,7 @@ import { usePrefersReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 /** One full putt, from the take-back to the ball dropping and resetting. */
-export const PUTT_LOOP_MS = 3600
+export const PUTT_LOOP_MS = 1200
 
 const DUR = `${PUTT_LOOP_MS / 1000}s`
 const INK = 'var(--color-heritage-green)'
