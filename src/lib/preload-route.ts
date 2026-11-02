@@ -10,7 +10,43 @@ const pageLoaders = {
   thankYou: () => import('@/pages/OrderThankYouPage'),
 } as const
 
-export const routeModules = pageLoaders
+const STALE_CHUNK_RELOAD_KEY = 'sr:stale-chunk-reload'
+
+/**
+ * Each deploy renames the page chunks, so a tab opened before it fails to load
+ * the next page. Reload once to pick up the new build; if that just happened,
+ * let the error through instead of looping.
+ */
+export function reloadForStaleChunk(): boolean {
+  try {
+    const last = Number(sessionStorage.getItem(STALE_CHUNK_RELOAD_KEY) || 0)
+    if (Date.now() - last < 10_000) return false
+    sessionStorage.setItem(STALE_CHUNK_RELOAD_KEY, String(Date.now()))
+  } catch {
+    return false
+  }
+  window.location.reload()
+  return true
+}
+
+function withStaleChunkReload<T>(load: () => Promise<T>): () => Promise<T> {
+  return () =>
+    load().catch((error: unknown) => {
+      if (!reloadForStaleChunk()) throw error
+      return new Promise<T>(() => {})
+    })
+}
+
+/** Route loaders. Prefetching uses `pageLoaders` directly so a hover never reloads the page. */
+export const routeModules = {
+  home: withStaleChunkReload(pageLoaders.home),
+  shop: withStaleChunkReload(pageLoaders.shop),
+  product: withStaleChunkReload(pageLoaders.product),
+  about: withStaleChunkReload(pageLoaders.about),
+  contact: withStaleChunkReload(pageLoaders.contact),
+  cart: withStaleChunkReload(pageLoaders.cart),
+  thankYou: withStaleChunkReload(pageLoaders.thankYou),
+}
 
 function normalizePath(to: string) {
   const path = to.split(/[?#]/)[0] ?? '/'
