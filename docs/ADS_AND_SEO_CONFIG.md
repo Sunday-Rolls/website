@@ -9,8 +9,8 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Google Tag Manager | `GTM-PPTR6V3B` (account `6333037927`, container `240141963`) | [tagmanager.google.com](https://tagmanager.google.com/#/container/accounts/6333037927/containers/240141963) | Publish (granted by Sam) |
 | GA4 | `G-YKOBBOTPM4` (letter **O**); dashboard reads property `513898453` | [analytics.google.com](https://analytics.google.com) | None |
 | Google Ads | `AW-17744695066` (URL `ocid=7809216417`) | [ads.google.com](https://ads.google.com/aw/overview?ocid=7809216417) | Can edit (made the changes below) |
-| Merchant Center | `5685591896` "Sunday Rolls", linked to Ads since 2025-11-19 | [merchants.google.com](https://merchants.google.com/mc/overview?a=5685591896) | **None**: ask Sam to add devops as Admin |
-| Search Console | Domain property `sundayrollsgolf.com` | [search.google.com/search-console](https://search.google.com/search-console?resource_id=sc-domain%3Asundayrollsgolf.com) | **None**: ask the owner to add devops as Owner or Full user |
+| Merchant Center | `5685591896` "Sunday Rolls", linked to Ads since 2025-11-19 | [merchants.google.com](https://merchants.google.com/mc/overview?a=5685591896) | User (invited by Sam, accepted 2026-11-02) |
+| Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
 
 ## Change log: 2026-11-02
@@ -66,7 +66,32 @@ Unchanged because they already work: Sunday Rolls Shop and Shop Products (`/shop
 
 `/shop/?category=<section>` scrolls to a shop section. Section ids come from `src/content/pages/shop.json`: `towels`, `center-shafted`, `mallet`, `oz-mezz`.
 
-Product-level links in Shopping and Performance Max ads (towel listings, for example) come from Merchant Center, not sitelinks. See [Still to do](#still-to-do).
+Product-level links in Shopping and Performance Max ads (towel listings, for example) come from Merchant Center, not sitelinks. See the next section.
+
+### Merchant Center product links
+
+**Settings → Data sources.** The only active primary source is **Squarespace** (Merchant API, feed label US, 23 products), still synced daily by the old Squarespace store. Its `link` for every product is the Squarespace URL, such as `https://www.sundayrollsgolf.com/shop/p/sunday-stripes`. Those URLs 301 to the new pages, but Google treats redirecting landing pages as a quality problem. A second primary source, `Content API`, has no products.
+
+The fix is a **supplemental source** that overrides only `link`, matched on the Squarespace product `id`. Price, stock and images keep coming from the Squarespace feed.
+
+- Sheet: [Merchant Center link overrides (Sunday Rolls)](https://docs.google.com/spreadsheets/d/1A4ehnYSHxekcP5JFmSEZrmoV-DCVM8BjKhPOdmeK77k/edit) in the devops Drive, with columns `id` and `link`.
+- A copy is in this repo: [data/merchant-center-link-overrides.tsv](./data/merchant-center-link-overrides.tsv). The links were produced by running each old slug through `legacyRedirect()`, and every one returned 200.
+- In Merchant Center it's **SUPPLEMENTAL SOURCE 1** (Google Sheet, feed label US, English, applied to the Squarespace source). It matched all 23 products on 2026-11-02, and Merchant Center re-reads it every 24 hours. Use **Update** on the source's page to apply an edit straight away.
+
+**Keeping it current.** The sheet only needs to change when a product's handle changes or a product is removed from the site. Squarespace adds no new products now, so the list is otherwise fixed.
+- `src/data/merchant-center-links.test.ts` runs in CI (`npm test`). It fails if any link in the TSV points at a handle that isn't in `src/data/product-catalog.json`, or if an id is listed twice.
+- A PR that renames or removes a product therefore fails until the TSV is fixed. Copy the same change into the sheet in the same PR.
+- Edit the TSV and the sheet together; the sheet is what Merchant Center reads.
+- To revert, open **Data sources → Supplemental sources** and remove the sheet; the Squarespace links come back on the next sync.
+
+When Squarespace is cancelled, its feed stops and these 23 products expire from Merchant Center within about 30 days, which takes the Shopping ads down with them. Before cancelling, add a primary source from Shopify (the **Google & YouTube** app, connected to this Merchant Center account). Then remove the Squarespace source and this sheet, because Shopify sends `/products/<handle>` links itself.
+
+### Search Console
+
+Property `https://www.sundayrollsgolf.com/`.
+
+- **Sitemaps:** `sitemap.xml` was resubmitted on 2026-11-02 and read straight away: Success, 27 pages. The previous submission (2026-10-21) was the Squarespace sitemap, with 33 pages.
+- **URL Inspection:** indexing was requested on 2026-11-02 for `/` and `/shop/`. `/shop/` was "Discovered – currently not indexed" before that. The quota is about 10 requests a day; use the inspect bar at the top of any page, because direct `/inspect?...` links return 404.
 
 ### Other changes outside the repo
 
@@ -122,8 +147,8 @@ For ad clicks, open `https://www.sundayrollsgolf.com/shop/?gclid=TEST`. Without 
 
 ## Still to do
 
-- **Merchant Center `5685591896`:** product links probably still use Squarespace `/shop/p/...` URLs. They redirect, but Google flags redirecting landing pages. Once devops has access, check the feed source. The lasting fix is a feed from Shopify's **Google & YouTube** app, which uses `/products/<handle>`.
-- **Search Console:** submit `https://www.sundayrollsgolf.com/sitemap.xml` and request indexing for `/`, `/shop/` and the top products. This needs devops (or the owner) on the property; the property should be verified by DNS TXT.
+- **Before cancelling Squarespace:** connect Shopify's **Google & YouTube** app to Merchant Center `5685591896`. The current product feed comes from Squarespace (see [Merchant Center product links](#merchant-center-product-links)).
+- Search Console: request indexing for the top products, and ask the owner to add devops to the domain property `sundayrollsgolf.com` too.
 - Remove the old `Shopping Cart` / `Begin checkout (Page load …/checkout)` Ads actions once the site-event actions record.
 - Meta ROAS in the dashboard: there is no Meta spend sync yet. It needs a Marketing API token and the ad account id ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md#5-meta-marketing-api-token--meta-business-admin)).
 - Confirm GA4 property `513898453` is the `G-YKOBBOTPM4` stream (devops has no GA4 access).
