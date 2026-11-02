@@ -26,7 +26,7 @@ Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY
 
 ```bash
 VITE_GTM_ID=GTM-PPTR6V3B
-VITE_GA4_MEASUREMENT_ID=G-YK0BB0TPM4
+VITE_GA4_MEASUREMENT_ID=G-YKOBBOTPM4
 VITE_GA4_SEND_DIRECT=true
 VITE_CONTACT_API_URL=https://contact-api-production-9af6.up.railway.app
 ```
