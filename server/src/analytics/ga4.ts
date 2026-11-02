@@ -72,10 +72,13 @@ function titleFromSlug(slug: string): string {
     .join(' ')
 }
 
-/** Map Squarespace product URLs to a readable product name. */
+/** Product pages: Squarespace `/shop/p/<slug>` before the cutover, the SPA's `/products/<handle>` after. */
+const PRODUCT_PATH_PREFIXES = ['/shop/p/', '/products/']
+
+/** Map product page URLs to a readable product name. */
 export function productFromPath(path: string): { name: string; category: string | null } | null {
   const clean = path.split('?')[0].replace(/\/+$/, '')
-  const match = /^\/shop\/p\/([^/]+)$/i.exec(clean)
+  const match = /^\/(?:shop\/p|products)\/([^/]+)$/i.exec(clean)
   if (!match) return null
   return { name: titleFromSlug(match[1]), category: 'Product page' }
 }
@@ -185,9 +188,10 @@ export async function fetchGa4TrafficBundle(
       dimensions: [{ name: 'date' }, { name: 'pagePath' }],
       metrics: [{ name: 'screenPageViews' }],
       dimensionFilter: {
-        filter: {
-          fieldName: 'pagePath',
-          stringFilter: { matchType: 'BEGINS_WITH', value: '/shop/p/' },
+        orGroup: {
+          expressions: PRODUCT_PATH_PREFIXES.map((value) => ({
+            filter: { fieldName: 'pagePath', stringFilter: { matchType: 'BEGINS_WITH', value } },
+          })),
         },
       },
       limit: 50_000,
