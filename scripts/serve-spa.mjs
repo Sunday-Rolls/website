@@ -6,9 +6,15 @@
 import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { extname, join, normalize } from 'node:path'
+import { legacyRedirect } from './lib/legacy-redirects.mjs'
 
 const dist = join(process.cwd(), 'dist')
 const port = Number(process.env.PORT || 8080)
+
+// Product handles for the Squarespace URL redirects (empty set → product URLs fall back to /shop/).
+const productHandles = await readFile(join(process.cwd(), 'src/data/product-catalog.json'), 'utf8')
+  .then((text) => new Set(JSON.parse(text).map((product) => product.handle).filter(Boolean)))
+  .catch(() => new Set())
 const host = process.env.HOST || '0.0.0.0'
 
 const TYPES = {
@@ -57,6 +63,13 @@ const server = createServer(async (req, res) => {
 
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       res.writeHead(405).end('Method Not Allowed')
+      return
+    }
+
+    const redirect = legacyRedirect(req.url || '/', productHandles)
+    if (redirect) {
+      res.writeHead(301, { Location: redirect, 'Cache-Control': 'public, max-age=86400' })
+      res.end()
       return
     }
 
