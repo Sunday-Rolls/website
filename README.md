@@ -198,6 +198,7 @@ Check status any time with `/mcp`. Servers you don't need can stay disabled. The
 |-----|--------|
 | [`docs/admin-handoff.html`](docs/admin-handoff.html) | Interactive ops + workflow handoff |
 | [`docs/RAILWAY_CUTOVER.md`](docs/RAILWAY_CUTOVER.md) | SPA + dashboard subdomain DNS cutover |
+| [`docs/CUTOVER_DAY_CHECKLIST.md`](docs/CUTOVER_DAY_CHECKLIST.md) | Day-of cutover order, rollback records, E2E purchase test |
 | [`docs/DASHBOARD_ACCESS.md`](docs/DASHBOARD_ACCESS.md) | Access checklist, IDs, punch list |
 | [`docs/ANALYTICS.md`](docs/ANALYTICS.md) | GTM / GA4 demo vs live |
 | [`docs/SHIPPO.md`](docs/SHIPPO.md) | Shippo ↔ Shopify labels |
