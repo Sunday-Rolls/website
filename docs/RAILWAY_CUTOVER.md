@@ -75,7 +75,7 @@ Point the purchase pixel at the **same** measurement ID as `VITE_GA4_MEASUREMENT
 ### Storefront → `website`
 
 1. In Railway → **`website`** → Settings → Networking → custom domains: add `www.sundayrollsgolf.com` and `sundayrollsgolf.com`.
-2. At the DNS host (currently Squarespace DNS for the brand domain):
+2. At the DNS host (**Cloudflare** — registrar and nameservers; Squarespace only hosts the old site). Keep new records DNS only (grey cloud) until certs are Active. Day-of order: [CUTOVER_DAY_CHECKLIST.md](./CUTOVER_DAY_CHECKLIST.md).
    - `www` → CNAME to the Railway-provided target for **`website`**
    - Apex → Railway A/ALIAS records as shown in the dashboard (or redirect apex → `www`)
 3. Wait for Railway certificate **Active**.

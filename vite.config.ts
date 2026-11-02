@@ -60,7 +60,11 @@ function prefixImageSrcSet(): Plugin {
   }
 }
 
-/** The built stylesheet is ~10 KiB and otherwise blocks first paint. */
+/**
+ * The built stylesheet is ~10 KiB and otherwise blocks first paint. The file
+ * stays in the bundle: lazy chunks list it as a preload dependency, and a 404
+ * there rejects the dynamic import (e.g. `@/lib/shopify` for the newsletter).
+ */
 function inlineCss(): Plugin {
   return {
     name: 'inline-css',
@@ -80,7 +84,6 @@ function inlineCss(): Plugin {
         const asset = assetName ? bundle[assetName] : undefined
         if (!asset || asset.type !== 'asset') continue
         html = html.replace(tag, `<style>${asset.source.toString()}</style>`)
-        delete bundle[assetName!]
       }
 
       htmlAsset.source = html
