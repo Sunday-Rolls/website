@@ -1,0 +1,1 @@
+import{i as e}from"./index-B0i7x1G8.js";function t(t){e.success(t)}function n(t){e.error(t)}export{t as n,n as t};
