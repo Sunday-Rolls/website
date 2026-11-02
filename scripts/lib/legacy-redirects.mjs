@@ -8,6 +8,7 @@ const PAGE_ALIASES = {
   '/about-us': '/about/',
   '/our-story': '/about/',
   '/contact-us': '/contact/',
+  '/contact-us-1': '/contact/#returns',
   '/home': '/',
 }
 
@@ -23,7 +24,9 @@ export function legacyRedirect(url, handles) {
   const query = queryStart === -1 ? '' : url.slice(queryStart)
 
   const target = targetFor(path.toLowerCase(), handles)
-  return target ? target + query : null
+  if (!target) return null
+  const [targetPath, hash] = target.split('#')
+  return targetPath + query + (hash ? `#${hash}` : '')
 }
 
 function targetFor(path, handles) {
@@ -45,7 +48,10 @@ function targetFor(path, handles) {
   return null
 }
 
-/** Squarespace slugs reorder words: `sunday-stripes-mallet` is `mallet-sunday-stripes`. */
+/**
+ * Squarespace slugs reorder and inflect words: `sunday-stripes-mallet` is
+ * `mallet-sunday-stripes`, `golf-towel-striped-green` is `golf-towel-green-stripe`.
+ */
 function sameWords(slug, handles) {
   const key = wordKey(slug)
   for (const handle of handles) if (wordKey(handle) === key) return handle
@@ -56,6 +62,7 @@ function wordKey(slug) {
   return slug
     .split('-')
     .filter((word) => word && word !== 'the')
+    .map((word) => (word === 'striped' || word === 'stripes' ? 'stripe' : word))
     .sort()
     .join('-')
 }

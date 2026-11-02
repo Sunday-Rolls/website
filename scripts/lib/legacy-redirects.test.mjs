@@ -9,6 +9,8 @@ const handles = new Set([
   'the-breakfast-roller',
   'mallet-retro-roller-grey',
   'morning-dew',
+  'golf-towel-green-stripe',
+  'golf-towel-red-blue-stripe',
 ])
 
 test('maps Squarespace product URLs to the new product pages', () => {
@@ -17,6 +19,8 @@ test('maps Squarespace product URLs to the new product pages', () => {
   assert.equal(legacyRedirect('/shop/p/breakfast-roller/', handles), '/products/the-breakfast-roller/')
   assert.equal(legacyRedirect('/shop/p/retro-roller-mallet-grey', handles), '/products/mallet-retro-roller-grey/')
   assert.equal(legacyRedirect('/shop/p/sunday-stripes-mallet', handles), '/products/mallet-sunday-stripes/')
+  assert.equal(legacyRedirect('/shop/p/golf-towel-striped-green', handles), '/products/golf-towel-green-stripe/')
+  assert.equal(legacyRedirect('/shop/p/golf-towel-striped-red-blue', handles), '/products/golf-towel-red-blue-stripe/')
 })
 
 test('keeps the query string for ad and Shopping attribution', () => {
@@ -30,6 +34,7 @@ test('sends unknown products and category pages to the shop', () => {
   assert.equal(legacyRedirect('/shop/p/oz-and-mezz-putter-cover', handles), '/shop/')
   assert.equal(legacyRedirect('/shop/headcovers', handles), '/shop/')
   assert.equal(legacyRedirect('/contact-us', handles), '/contact/')
+  assert.equal(legacyRedirect('/contact-us-1?gclid=a', handles), '/contact/?gclid=a#returns')
 })
 
 test('leaves current pages alone', () => {
