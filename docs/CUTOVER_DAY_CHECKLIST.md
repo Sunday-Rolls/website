@@ -48,9 +48,9 @@ Leave every new record **DNS only (grey cloud)** until its certificate is Active
 - [ ] Shopify Admin → Settings → Domains → connect `shop.sundayrollsgolf.com`.
 - [ ] Cloudflare: `shop` CNAME → `shops.myshopify.com`, grey cloud (keep it grey permanently).
 - [ ] Target **Online Store**, set as **Primary**. Don't make `www` the Shopify primary.
-- [ ] Remove the storefront password ("Opening soon").
+- [x] Remove the storefront password ("Opening soon"). Done 2026-11-02.
+- [x] Horizon theme `layout/theme.liquid` forwards storefront pages to `www` (products → `/products/<handle>`, collections/search → `/shop`, cart → `/cart`, everything else → `/`). Checkout, accounts and policies stay on Shopify. Done 2026-11-02.
 - [ ] Add to cart → Checkout: the address bar is `shop.sundayrollsgolf.com/checkouts/…`, **not** `chrgrk-ff.myshopify.com`.
-- [ ] Visitors who hit `shop.sundayrollsgolf.com/` directly land on the Shopify theme; redirect it to `www` if that matters.
 
 ### 3. Dashboard → Railway `contact-api`
 
