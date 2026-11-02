@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sunday-rolls.github.io/website/sitemap.xml
+Sitemap: https://sunday-rolls.github.io/website/previews/pr-79/sitemap.xml
