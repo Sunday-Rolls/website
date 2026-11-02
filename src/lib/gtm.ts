@@ -1,9 +1,19 @@
 import { scheduleAfterLoad } from '@/lib/schedule'
 
+type Fbq = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void
+  queue: unknown[]
+  push: Fbq
+  loaded: boolean
+  version: string
+}
+
 declare global {
   interface Window {
     dataLayer: Record<string, unknown>[]
     gtag?: (...args: unknown[]) => void
+    fbq?: Fbq
+    _fbq?: Fbq
   }
 }
 
@@ -18,6 +28,8 @@ const sendDirect =
   !gtmId &&
   (import.meta.env.VITE_GA4_SEND_DIRECT as string | undefined)?.trim() !== 'false' &&
   Boolean(ga4MeasurementId)
+/** Meta Pixel. Loaded with GTM; calls made before then queue on the fbq stub. */
+const metaPixelId = (import.meta.env.VITE_META_PIXEL_ID as string | undefined)?.trim()
 
 const PENDING_CHECKOUT_KEY = 'sr_pending_checkout'
 
@@ -69,6 +81,13 @@ function loadAnalyticsScripts(): void {
     document.head.appendChild(script)
   }
 
+  if (metaPixelId && window.fbq) {
+    const script = document.createElement('script')
+    script.async = true
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js'
+    document.head.appendChild(script)
+  }
+
   if (sendDirect && ga4MeasurementId) {
     window.gtag = function gtag(...args: unknown[]) {
       // GA4 expects the Arguments-like object pushed onto dataLayer
@@ -92,6 +111,7 @@ export function initGtm(): void {
   if (typeof window === 'undefined') return
 
   window.dataLayer = window.dataLayer ?? []
+  installMetaPixelStub()
 
   const boot = () => loadAnalyticsScripts()
   const cancelDelay = scheduleAfterLoad(boot, 15_000)
@@ -103,6 +123,52 @@ export function initGtm(): void {
   for (const event of ['pointerdown', 'keydown', 'touchstart'] as const) {
     window.addEventListener(event, onInteract, { once: true, passive: true })
   }
+}
+
+/** Meta's base-code stub: queues calls until fbevents.js loads and drains them. */
+function installMetaPixelStub(): void {
+  if (!metaPixelId || window.fbq) return
+  const fbq = function (...args: unknown[]) {
+    if (fbq.callMethod) fbq.callMethod(...args)
+    else fbq.queue.push(args)
+  } as Fbq
+  fbq.queue = []
+  fbq.push = fbq
+  fbq.loaded = true
+  fbq.version = '2.0'
+  window.fbq = fbq
+  window._fbq = window._fbq ?? fbq
+  fbq('init', metaPixelId)
+}
+
+/** GA4 ecommerce event → Meta standard event. Unlisted events don't go to Meta. */
+const META_ECOMMERCE_EVENTS: Record<string, string> = {
+  view_item: 'ViewContent',
+  add_to_cart: 'AddToCart',
+  begin_checkout: 'InitiateCheckout',
+  purchase: 'Purchase',
+}
+
+function sendMetaEcommerce(event: string, ecommerce: Record<string, unknown>): void {
+  const metaEvent = META_ECOMMERCE_EVENTS[event]
+  if (!metaEvent || !window.fbq) return
+  const items = (ecommerce.items as EcommerceItem[] | undefined) ?? []
+  const params = {
+    content_type: 'product',
+    content_ids: items.map((item) => item.item_id),
+    contents: items.map((item) => ({ id: item.item_id, quantity: item.quantity ?? 1 })),
+    num_items: items.reduce((sum, item) => sum + (item.quantity ?? 1), 0),
+    value: ecommerce.value,
+    currency: ecommerce.currency ?? 'USD',
+  }
+  // The Shopify checkout pixel sends the same eventID, so Meta counts a purchase once.
+  const transactionId = ecommerce.transaction_id
+  if (transactionId) window.fbq('track', metaEvent, params, { eventID: String(transactionId) })
+  else window.fbq('track', metaEvent, params)
+}
+
+function sendMetaEvent(event: string): void {
+  window.fbq?.('track', event)
 }
 
 export function pushEvent(
@@ -137,6 +203,7 @@ function pushEcommerce(event: string, ecommerce: Record<string, unknown>): void 
   pushEvent(event, { ecommerce: null })
   pushEvent(event, { ecommerce })
   sendGa4Ecommerce(event, ecommerce)
+  sendMetaEcommerce(event, ecommerce)
 }
 
 export function trackPageView(path: string, title?: string): void {
@@ -144,6 +211,7 @@ export function trackPageView(path: string, title?: string): void {
     page_path: path,
     page_title: title ?? (typeof document !== 'undefined' ? document.title : path),
   })
+  sendMetaEvent('PageView')
   if (sendDirect && window.gtag && ga4MeasurementId) {
     window.gtag('event', 'page_view', {
       send_to: ga4MeasurementId,
@@ -274,14 +342,17 @@ export function clearPendingCheckout(): void {
 
 export function trackNewsletterSubscribe(method = 'shopify_storefront'): void {
   pushEvent('newsletter_subscribe', { method })
+  sendMetaEvent('Lead')
 }
 
 export function trackContactSubmit(method = 'contact_api'): void {
   pushEvent('contact_submit', { method })
+  sendMetaEvent('Contact')
 }
 
 export const analyticsConfig = {
   gtmId: gtmId || null,
   ga4MeasurementId: ga4MeasurementId || null,
+  metaPixelId: metaPixelId || null,
   sendDirect,
 }
