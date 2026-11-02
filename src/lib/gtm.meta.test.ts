@@ -64,3 +64,17 @@ describe('Meta Pixel', () => {
     expect(window.fbq).toBeUndefined()
   })
 })
+
+describe('dataLayer ecommerce', () => {
+  it('pushes each ecommerce event once, after a bare clear', async () => {
+    const gtm = await loadGtm('')
+    gtm.trackAddToCart(product, 1)
+    const pushes = (window.dataLayer as Record<string, unknown>[]).filter(
+      (entry) => 'ecommerce' in entry,
+    )
+    expect(pushes).toEqual([
+      { ecommerce: null },
+      expect.objectContaining({ event: 'add_to_cart' }),
+    ])
+  })
+})

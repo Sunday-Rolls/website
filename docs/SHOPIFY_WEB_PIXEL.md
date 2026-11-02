@@ -142,7 +142,7 @@ analytics.subscribe('checkout_completed', (event) => {
 ## Limits
 
 - Checkout can't see the site's `_gcl_aw` / `_fbc` click cookies, so attribution leans on enhanced conversions / advanced matching (email, phone, address). Google's **Google & YouTube** and Meta's **Facebook & Instagram** Shopify apps add server-side matching (Conversions API) if match rates come back low.
-- GA4 funnel steps (`view_item`, `add_to_cart`, `begin_checkout`) reach GTM's dataLayer but the `GTM-PPTR6V3B` container has no GA4 event tags for them yet; add a GA4 Event tag on those custom events in GTM.
+- GA4 funnel steps (`view_item`, `add_to_cart`, `begin_checkout`, …) are sent by GTM before checkout; see [ANALYTICS.md](./ANALYTICS.md#live-gtm-container-gtm-pptr6v3b).
 
 ## Manual SPA validation
 

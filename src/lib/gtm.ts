@@ -200,7 +200,10 @@ function sendGa4Ecommerce(event: string, ecommerce: Record<string, unknown>): vo
 
 /** Clear previous ecommerce object before a new ecommerce event (GA4 recommended). */
 function pushEcommerce(event: string, ecommerce: Record<string, unknown>): void {
-  pushEvent(event, { ecommerce: null })
+  if (typeof window === 'undefined') return
+  // The clear carries no `event`, or GTM triggers would fire twice per action.
+  window.dataLayer = window.dataLayer ?? []
+  window.dataLayer.push({ ecommerce: null })
   pushEvent(event, { ecommerce })
   sendGa4Ecommerce(event, ecommerce)
   sendMetaEcommerce(event, ecommerce)
