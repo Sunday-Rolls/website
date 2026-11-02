@@ -17,6 +17,8 @@ const distDir = join(root, 'dist')
 const catalogPath = join(root, 'src/data/product-catalog.json')
 
 const STATIC_ROUTES = ['shop', 'about', 'contact', 'cart', 'order/thank-you']
+/** Routes worth indexing; cart and thank-you are per-visitor. */
+const SITEMAP_ROUTES = ['shop', 'about', 'contact']
 
 const ROUTE_META = {
   shop: {
@@ -265,6 +267,22 @@ function modulePreloadFor(sourceSuffix) {
     await writeFile(
       join(distDir, 'index.html'),
       injectHead(homeHtml, { modulePreload: homeChunk }),
+    )
+  }
+
+  // The checked-in public/ copies only list the main pages; this one adds every product.
+  if (siteOrigin) {
+    const sitemapRoutes = ['', ...SITEMAP_ROUTES, ...products.map((product) => `products/${product.handle}`)]
+    const urls = sitemapRoutes
+      .map((route) => `  <url><loc>${withTrailingSlash(`${siteOrigin}${base}/${route}`)}</loc></url>`)
+      .join('\n')
+    await writeFile(
+      join(distDir, 'sitemap.xml'),
+      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+    )
+    await writeFile(
+      join(distDir, 'robots.txt'),
+      `User-agent: *\nAllow: /\n\nSitemap: ${siteOrigin}${base}/sitemap.xml\n`,
     )
   }
 
