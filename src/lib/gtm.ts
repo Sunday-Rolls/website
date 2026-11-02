@@ -102,16 +102,32 @@ function loadAnalyticsScripts(): void {
   }
 }
 
+/** Ad click IDs that Google Ads / Meta read from the landing URL. */
+const AD_CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid', 'fbclid']
+
+function hasAdClickId(search: string): boolean {
+  const params = new URLSearchParams(search)
+  return AD_CLICK_PARAMS.some((name) => params.has(name))
+}
+
 /**
  * Defer GTM/gtag until the visitor interacts, or well after load.
  * Loading them during the initial trace adds seconds of main-thread work.
  * Events pushed before the script arrives stay queued on dataLayer.
+ *
+ * Ad landings boot right away: the click ID lives only in the landing URL,
+ * and the first in-app navigation drops it before a deferred boot would run.
  */
 export function initGtm(): void {
   if (typeof window === 'undefined') return
 
   window.dataLayer = window.dataLayer ?? []
   installMetaPixelStub()
+
+  if (hasAdClickId(window.location.search)) {
+    loadAnalyticsScripts()
+    return
+  }
 
   const boot = () => loadAnalyticsScripts()
   const cancelDelay = scheduleAfterLoad(boot, 15_000)

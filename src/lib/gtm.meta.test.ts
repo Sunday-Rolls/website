@@ -58,6 +58,17 @@ describe('Meta Pixel', () => {
     expect(document.querySelector('script[src*="fbevents.js"]')).not.toBeNull()
   })
 
+  it('loads analytics immediately when landing from an ad click', async () => {
+    window.history.replaceState(null, '', '/shop?gclid=test-click')
+    try {
+      await loadGtm('123')
+      expect(document.querySelector('script[src*="gtm.js"]')).not.toBeNull()
+      expect(document.querySelector('script[src*="fbevents.js"]')).not.toBeNull()
+    } finally {
+      window.history.replaceState(null, '', '/')
+    }
+  })
+
   it('does nothing without a pixel id', async () => {
     const gtm = await loadGtm('')
     gtm.trackViewItem(product)

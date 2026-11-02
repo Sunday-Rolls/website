@@ -32,6 +32,7 @@ const TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
 }
 
@@ -42,13 +43,18 @@ function safePath(urlPath) {
   return join(dist, relative || 'index.html')
 }
 
+const UNHASHED = new Set(['.html', '.txt', '.xml'])
+
 async function sendFile(res, filePath, status = 200) {
   const body = await readFile(filePath)
   const type = TYPES[extname(filePath).toLowerCase()] || 'application/octet-stream'
   res.writeHead(status, {
     'Content-Type': type,
     'Content-Length': body.length,
-    'Cache-Control': extname(filePath) === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable',
+    // Only hashed build assets are immutable; pages, robots.txt and sitemap.xml change in place.
+    'Cache-Control': UNHASHED.has(extname(filePath).toLowerCase())
+      ? 'no-cache'
+      : 'public, max-age=31536000, immutable',
   })
   res.end(body)
 }
