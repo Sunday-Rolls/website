@@ -33,6 +33,8 @@ function targetFor(path, handles) {
   if (product) {
     const slug = decodeURIComponent(product[1])
     if (handles.has(slug)) return `/products/${slug}/`
+    const reordered = sameWords(slug, handles)
+    if (reordered) return `/products/${reordered}/`
     const inferred = inferProductHandleFromListing(slug.replace(/-/g, ' '))
     return inferred && handles.has(inferred) ? `/products/${inferred}/` : '/shop/'
   }
@@ -41,4 +43,19 @@ function targetFor(path, handles) {
   if (path.startsWith('/shop/')) return '/shop/'
 
   return null
+}
+
+/** Squarespace slugs reorder words: `sunday-stripes-mallet` is `mallet-sunday-stripes`. */
+function sameWords(slug, handles) {
+  const key = wordKey(slug)
+  for (const handle of handles) if (wordKey(handle) === key) return handle
+  return null
+}
+
+function wordKey(slug) {
+  return slug
+    .split('-')
+    .filter((word) => word && word !== 'the')
+    .sort()
+    .join('-')
 }

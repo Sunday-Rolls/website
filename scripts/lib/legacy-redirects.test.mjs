@@ -4,6 +4,7 @@ import { legacyRedirect } from './legacy-redirects.mjs'
 
 const handles = new Set([
   'sunday-stripes',
+  'mallet-sunday-stripes',
   'the-birdie-machine',
   'the-breakfast-roller',
   'mallet-retro-roller-grey',
@@ -15,6 +16,7 @@ test('maps Squarespace product URLs to the new product pages', () => {
   assert.equal(legacyRedirect('/shop/p/birdie-machine', handles), '/products/the-birdie-machine/')
   assert.equal(legacyRedirect('/shop/p/breakfast-roller/', handles), '/products/the-breakfast-roller/')
   assert.equal(legacyRedirect('/shop/p/retro-roller-mallet-grey', handles), '/products/mallet-retro-roller-grey/')
+  assert.equal(legacyRedirect('/shop/p/sunday-stripes-mallet', handles), '/products/mallet-sunday-stripes/')
 })
 
 test('keeps the query string for ad and Shopping attribution', () => {
