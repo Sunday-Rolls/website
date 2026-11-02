@@ -28,9 +28,10 @@ export function ProductPage() {
     void import('@/lib/shopify').then(({ fetchProductByHandle }) =>
       fetchProductByHandle(handle).then((item) => {
         if (cancelled) return
+        let resolved: ShopifyProduct | null = item ?? known ?? null
         if (item && known) {
           const useStoreImages = Boolean(item.images?.length)
-          setProduct({
+          resolved = {
             ...item,
             imageUrl: useStoreImages ? item.imageUrl : (known.imageUrl ?? item.imageUrl),
             imageAlt: useStoreImages ? item.imageAlt : (known.imageAlt ?? item.imageAlt),
@@ -42,10 +43,11 @@ export function ProductPage() {
             keyFeatures: known.keyFeatures ?? item.keyFeatures,
             features: known.features ?? item.features,
             dimensionsDisplay: known.dimensionsDisplay ?? item.dimensionsDisplay,
-          })
-          return
+          }
         }
-        setProduct(item ?? known ?? null)
+        setProduct(resolved)
+        // Once per page, with the store product rather than the catalog placeholder.
+        if (resolved) trackViewItem(resolved)
       }),
     )
 
@@ -63,7 +65,6 @@ export function ProductPage() {
         image: product.imageUrl,
         type: 'product',
       })
-      trackViewItem(product)
       return
     }
     applyPageMeta({
