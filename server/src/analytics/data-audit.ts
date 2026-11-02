@@ -158,7 +158,7 @@ export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> 
     holes.push({
       area: 'Product page views',
       severity: 'gap',
-      detail: 'No per-product view rows (expected from /shop/p/* in GA4).',
+      detail: 'No per-product view rows (expected from /products/* or Squarespace /shop/p/* in GA4).',
     })
   } else {
     holes.push({

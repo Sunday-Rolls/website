@@ -11,7 +11,12 @@ describe('ga4 helpers', () => {
       name: 'Retro Roller Mallet Grey',
       category: 'Product page',
     })
+    expect(productFromPath('/products/golf-towel-green-stripe/')).toEqual({
+      name: 'Golf Towel Green Stripe',
+      category: 'Product page',
+    })
     expect(productFromPath('/shop')).toBeNull()
+    expect(productFromPath('/products/')).toBeNull()
   })
 
   it('normalizes common traffic sources', () => {
