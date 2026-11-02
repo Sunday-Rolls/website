@@ -60,6 +60,19 @@ Contact form email is **not** a Vite env: `contact-api` sends via **Resend free 
 | `newsletter_subscribe` | Newsletter success |
 | `contact_submit` | Contact form success |
 
+Each ecommerce event is one dataLayer push, preceded by a bare `{ ecommerce: null }` clear (no `event` key, so GTM triggers fire once).
+
+## Live GTM container (`GTM-PPTR6V3B`)
+
+| Tag | Trigger | Sends |
+|-----|---------|-------|
+| GA4 - ecommerce funnel | `CE - GA4 ecommerce funnel` (regex: the six events from `view_item_list` to `begin_checkout`) | `{{Event}}` + dataLayer ecommerce → `G-YKOBBOTPM4` |
+| Ads - Add to cart (site event) | `CE - add_to_cart` | Google Ads `AW-17744695066/jF7_CK6g-LAdEJqeqo1C`, secondary |
+| Ads - Begin checkout (site event) | `CE - begin_checkout` | Google Ads `AW-17744695066/oKa5CLGg-LAdEJqeqo1C`, secondary |
+| Purchase v2 / Google Analytics Purchases | `Trigger Purchase` | SPA thank-you page only; real checkouts report through the Shopify pixel |
+
+Google Ads page views come from the GA4 import (`Sunday Rolls (web) page_view`). The old URL-rule actions (`Shopping Cart`, `Begin checkout (Page load …/checkout)`) predate the headless site and can be removed once the site-event actions record.
+
 ## Purchase
 
 1. **Preferred:** [Shopify Customer events pixel](./SHOPIFY_WEB_PIXEL.md) on `checkout_completed`
