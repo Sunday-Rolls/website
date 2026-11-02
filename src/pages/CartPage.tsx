@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { assetUrl } from '@/lib/asset-url'
 import { useCart } from '@/lib/cart'
@@ -145,8 +145,12 @@ export function CartPage() {
     })
   }, [content.meta.title, content.meta.description])
 
+  // `lines` is a new array every render; track once per distinct cart contents.
+  const trackedCartSignature = useRef('')
   useEffect(() => {
     if (isLoading || isEmpty || !cart || lines.length === 0) return
+    if (trackedCartSignature.current === cartSignature) return
+    trackedCartSignature.current = cartSignature
     trackViewCart(
       lines.map((item) => ({
         id: item.variantId || item.id,
