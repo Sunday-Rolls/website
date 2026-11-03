@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://sunday-rolls.github.io/website/previews/pr-80/sitemap.xml
