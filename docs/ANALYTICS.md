@@ -71,6 +71,8 @@ Each ecommerce event is one dataLayer push, preceded by a bare `{ ecommerce: nul
 | Ads - Begin checkout (site event) | `CE - begin_checkout` | Google Ads `AW-17744695066/oKa5CLGg-LAdEJqeqo1C`, secondary |
 | Purchase v2 / Google Analytics Purchases | `Trigger Purchase` | SPA thank-you page only; real checkouts report through the Shopify pixel |
 
+Change history, revert steps, Ads sitelinks and Merchant Center / Search Console: [ADS_AND_SEO_CONFIG.md](./ADS_AND_SEO_CONFIG.md).
+
 Google Ads page views come from the GA4 import (`Sunday Rolls (web) page_view`). The old URL-rule actions (`Shopping Cart`, `Begin checkout (Page load …/checkout)`) predate the headless site and can be removed once the site-event actions record.
 
 ## Purchase

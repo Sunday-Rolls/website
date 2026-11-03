@@ -78,7 +78,7 @@ Run right after step 4, before announcing the new site.
 ## After
 
 - [ ] Cloudflare redirect rules for old Squarespace URLs.
-- [ ] Submit the sitemap in Search Console.
+- [ ] Submit the sitemap in Search Console (blocked on access; see [ADS_AND_SEO_CONFIG.md](./ADS_AND_SEO_CONFIG.md#still-to-do)).
 - [ ] Disconnect the domain in Squarespace; cancel only after exports are confirmed.
 - [ ] Raise TTLs back to Auto. Optional: proxy `@` / `www` (orange cloud) with SSL/TLS **Full (strict)**, never Flexible.
 - [ ] Update `SITE_URL` for review QR scripts if used, and team bookmarks to `https://dashboard.sundayrollsgolf.com/dashboard/`.

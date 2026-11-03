@@ -5,7 +5,7 @@ Headless Shopify storefront for sundayrollsgolf.com: React 19 + Vite SPA at the 
 ## Start here
 - New admin or developer, or anyone asking about handoff, setup, orders, fulfillment, discounts or review QRs: use the `admin-handoff` skill (`/admin-handoff`). Its source of truth is `docs/admin-handoff.html`. Keep the two in sync.
 - Anyone changing the website: use the `website-change` skill (`/website-change`). It runs the branch → PR preview → merge loop through `/start-feature`, `/open-preview` and `/merge-feature`.
-- Overview, commands and the toolchain are in `README.md`. Runbooks are in `docs/` (Shippo, review QRs, analytics, contact email, Railway cutover, dashboard access) and `server/README.md`.
+- Overview, commands and the toolchain are in `README.md`. Runbooks are in `docs/` (Shippo, review QRs, analytics, ads/SEO config and change log in `ADS_AND_SEO_CONFIG.md`, contact email, Railway cutover, dashboard access) and `server/README.md`.
 
 ## Tools
 - `.mcp.json` provides `shopify` (store admin), `shopify-dev` (docs + GraphQL validation), `railway`, `chrome-devtools` and `google-drive`. `.claude/settings.json` enables Shopify's AI Toolkit plugin. If a server is missing or unauthenticated, point the user at README → "Claude tools (MCP)" rather than working around it.
