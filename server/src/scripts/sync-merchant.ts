@@ -25,7 +25,9 @@ const argValue = (name: string) => {
 }
 
 const config = loadMerchantConfigFromEnv()
-const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim() || ''
+// Prefer a Merchant-only key so this never collides with the GA4 sync's service account.
+const serviceAccountJson =
+  process.env.MERCHANT_SERVICE_ACCOUNT_JSON?.trim() || process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim() || ''
 const dryRun = flag('--dry-run')
 
 function fail(msg: string): never {
@@ -34,7 +36,7 @@ function fail(msg: string): never {
 }
 
 if (!config.merchantId) fail('Set MERCHANT_CENTER_ID (e.g. 5685591896)')
-if (!dryRun && !serviceAccountJson) fail('Set GOOGLE_SERVICE_ACCOUNT_JSON')
+if (!dryRun && !serviceAccountJson) fail('Set MERCHANT_SERVICE_ACCOUNT_JSON (or GOOGLE_SERVICE_ACCOUNT_JSON)')
 
 if (flag('--register')) {
   const email = argValue('--register')
