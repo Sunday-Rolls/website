@@ -39,5 +39,6 @@ describe('review QR PDF helpers', () => {
     expect(pdf.subarray(0, 4).toString('utf8')).toBe('%PDF')
     expect(pdf.byteLength).toBeGreaterThan(1000)
     expect(REVIEW_QR_CUTOUT_HEADLINE).toBe('Leave a Review!')
-  })
+    // Renders a real multi-page PDF with QR images (~7s on CI runners).
+  }, 30_000)
 })
