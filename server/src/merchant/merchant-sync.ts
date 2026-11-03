@@ -57,6 +57,7 @@ export type ShopifyVariantNode = {
   availableForSale: boolean
   media?: { nodes: Array<{ image?: { url: string } | null }> }
   selectedOptions: Array<{ name: string; value: string }>
+  inventoryItem?: { measurement?: { weight?: { value: number; unit: string } | null } | null } | null
 }
 
 export type ShopifyProductNode = {
@@ -133,6 +134,7 @@ export async function fetchShopifyProductsForMerchant(
               id title sku barcode price compareAtPrice availableForSale
               media(first: 1) { nodes { ... on MediaImage { image { url } } } }
               selectedOptions { name value }
+              inventoryItem { measurement { weight { value unit } } }
             }
           }
         }
@@ -182,8 +184,12 @@ export type MerchantProductInput = {
     productTypes?: string[]
     color?: string
     size?: string
+    shippingWeight?: { value: number; unit: string }
   }
 }
+
+// Shopify WeightUnit → Merchant API shipping_weight unit.
+const WEIGHT_UNITS: Record<string, string> = { POUNDS: 'lb', OUNCES: 'oz', KILOGRAMS: 'kg', GRAMS: 'g' }
 
 export function gidNumber(gid: string): string {
   return gid.split('/').pop() ?? gid
@@ -243,6 +249,11 @@ export function shopifyProductToMerchantInputs(
     if (v.sku) attrs.mpn = v.sku
     // Own-brand handmade goods: no manufacturer GTIN exists.
     if (!attrs.gtins && !v.sku) attrs.identifierExists = false
+    // Weight-based shipping rates in Merchant Center disapprove items without it.
+    const weight = v.inventoryItem?.measurement?.weight
+    if (weight && weight.value > 0 && WEIGHT_UNITS[weight.unit]) {
+      attrs.shippingWeight = { value: weight.value, unit: WEIGHT_UNITS[weight.unit] }
+    }
     for (const o of options) {
       const name = o.name.toLowerCase()
       if (name === 'color' || name === 'colour') attrs.color = o.value
