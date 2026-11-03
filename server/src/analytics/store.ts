@@ -21,6 +21,8 @@ export type DeleteOrdersFilter = {
   source?: OrderSource
   start?: string | null
   end?: string | null
+  /** Only these external ids (combined with the other fields). */
+  externalIds?: string[]
 }
 
 type Queryable = {
@@ -484,6 +486,11 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         params.push(filter.end)
         clauses.push(`ordered_at::date <= $${params.length}::date`)
       }
+      if (filter.externalIds) {
+        if (filter.externalIds.length === 0) return 0
+        params.push(filter.externalIds)
+        clauses.push(`external_id = ANY($${params.length}::text[])`)
+      }
       if (clauses.length === 0) return 0
       const { rows } = await db.query(
         `DELETE FROM analytics_orders WHERE ${clauses.join(' AND ')} RETURNING id`,
@@ -903,7 +910,8 @@ function orderMatchesFilter(order: Order, filter: DeleteOrdersFilter): boolean {
   const day = order.orderedAt.slice(0, 10)
   if (filter.start && day < filter.start) return false
   if (filter.end && day > filter.end) return false
-  return Boolean(filter.channel || filter.source || filter.start || filter.end)
+  if (filter.externalIds && !filter.externalIds.includes(order.externalId)) return false
+  return Boolean(filter.channel || filter.source || filter.start || filter.end || filter.externalIds)
 }
 
 async function insertOrder(db: Queryable, order: Order) {

@@ -10,7 +10,16 @@ Hono service on Railway: contact form email, product reviews, and the internal a
 - `GET /dashboard/` — analytics UI (requires `DATABASE_URL`)
 - `POST /dashboard/api/login|logout`, `GET /dashboard/api/overview|pnl|roas|sync-status`
 - `GET /dashboard/api/review-qrs.pdf?target=pages|live` — printable review QR PDF (Data page → Export PDF)
-- `POST /webhooks/shopify` — Shopify product/inventory webhooks (HMAC-signed); re-syncs Google Merchant Center ([docs/GOOGLE_MERCHANT_SYNC.md](../docs/GOOGLE_MERCHANT_SYNC.md))
+- `POST /webhooks/shopify` — Shopify webhooks (HMAC-signed): product/inventory topics re-sync Google Merchant Center ([docs/GOOGLE_MERCHANT_SYNC.md](../docs/GOOGLE_MERCHANT_SYNC.md)); order topics re-sync dashboard orders (below)
+
+## Shopify order sync
+
+Dashboard orders come from the Shopify Admin API. contact-api syncs them by itself (no button needed):
+
+- on boot, then every `SHOPIFY_ORDER_SYNC_INTERVAL_MINUTES` (default 15);
+- about 10 seconds after an `orders/create`, `orders/updated` or `orders/cancelled` webhook (subscriptions live in `shopify.app.toml`; apply with `shopify app deploy`).
+
+Each run is the same full sync as **Data → Sync Shopify**: orders upsert by Shopify id, cancelled/voided/`analytics-test` orders are removed, and abandoned-cart totals refresh. Runs appear under the dashboard's sync status as `shopify`. Turn it off with `SHOPIFY_ORDER_SYNC_ENABLED=false`. The 15-minute timer is the fallback if webhooks aren't registered or a delivery is missed.
 
 ## Contact email (Resend free plan)
 

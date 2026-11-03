@@ -79,6 +79,12 @@ export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
   }
 }
 
+/** Orders that count toward revenue: not cancelled, not voided, not tagged `analytics-test`. */
+export function isCountedOrder(raw: ShopifyOrderRaw): boolean {
+  if (raw.cancelled_at || raw.financial_status === 'voided') return false
+  return !(raw.tags || '').toLowerCase().includes('analytics-test')
+}
+
 /** Pull Shopify orders + abandoned checkouts into analytics. */
 export async function syncShopifyToStore(
   store: AnalyticsStore,
@@ -92,11 +98,12 @@ export async function syncShopifyToStore(
     const createdAtMin = start ? `${start}T00:00:00Z` : undefined
     const createdAtMax = end ? `${end}T23:59:59Z` : undefined
     const raw = await fetchShopifyOrders(creds, { createdAtMin, createdAtMax })
-    const mapped = raw
-      .filter((o) => !o.cancelled_at && o.financial_status !== 'voided')
-      .filter((o) => !(o.tags || '').toLowerCase().includes('analytics-test'))
-      .map(mapShopifyOrder)
-    const count = await store.upsertOrders(mapped)
+    const count = await store.upsertOrders(raw.filter(isCountedOrder).map(mapShopifyOrder))
+    // An order cancelled, voided or tagged as a test after an earlier sync must leave the dashboard too.
+    const excludedIds = raw.filter((o) => !isCountedOrder(o)).map((o) => `shopify:${o.id}`)
+    const removedExcluded = excludedIds.length
+      ? await store.deleteOrders({ channel: 'shopify', source: 'shopify', externalIds: excludedIds })
+      : 0
     // Drop any Sales Tracker Shopify rows so history cannot double-count live Admin orders.
     const removedTracker = await store.deleteOrders({
       channel: 'shopify',
@@ -124,8 +131,8 @@ export async function syncShopifyToStore(
 
     const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders, ${abandonedOnly.length} abandoned, ${recovered.length} recovered${
       removedTracker ? `, removed ${removedTracker} tracker Shopify rows` : ''
-    }`
-    await store.finishSync(sync.id, 'ok', message, count + checkouts.length + removedTracker)
+    }${removedExcluded ? `, removed ${removedExcluded} cancelled/test orders` : ''}`
+    await store.finishSync(sync.id, 'ok', message, count + checkouts.length + removedTracker + removedExcluded)
     return {
       start,
       end,
