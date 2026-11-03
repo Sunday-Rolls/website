@@ -11,7 +11,6 @@ import { createMailer } from './mail.js'
 import { createPgReviewStore } from './reviews.js'
 import { loadShopifyCredentialsFromEnv } from './analytics/shopify.js'
 import { createMerchantSyncRunnerFromEnv } from './merchant/merchant-scheduler.js'
-import { createShopifyOrderSyncRunnerFromEnv } from './analytics/shopify-order-scheduler.js'
 
 const config = loadConfig()
 const { sendContactEmail } = createMailer(config)
@@ -111,15 +110,6 @@ if (merchant.runner) {
   console.log(`Merchant Center sync: off (${merchant.reason})`)
 }
 
-const orders = createShopifyOrderSyncRunnerFromEnv({ shopify, analytics })
-const orderRunner = orders.runner
-if (orderRunner) {
-  orderRunner.start()
-  console.log('Shopify order sync: on')
-} else {
-  console.log(`Shopify order sync: off (${orders.reason})`)
-}
-
 const app = createApp({
   config,
   sendContactEmail,
@@ -127,12 +117,8 @@ const app = createApp({
   reviews,
   analytics,
   shopifyWebhooks:
-    shopify && (merchantRunner || orderRunner)
-      ? {
-          secret: shopify.clientSecret,
-          onProductChange: merchantRunner ? (topic) => merchantRunner.trigger(topic) : undefined,
-          onOrderChange: orderRunner ? (topic) => orderRunner.trigger(topic) : undefined,
-        }
+    merchantRunner && shopify
+      ? { secret: shopify.clientSecret, onProductChange: (topic) => merchantRunner.trigger(topic) }
       : undefined,
 })
 

@@ -4,6 +4,7 @@ const state = {
   start: null,
   end: null,
   series: 'revenue',
+  page: 'overview',
   overview: null,
   pnl: null,
 }
@@ -569,9 +570,10 @@ function setPnLFeedback(message, isError = false) {
 }
 
 function currentPnLPeriod() {
+  // Local (browser) month, not UTC: the team is in Central, matching the store timezone.
   const now = new Date()
-  const year = now.getUTCFullYear()
-  const month = `${year}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+  const year = now.getFullYear()
+  const month = `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
   return { year, month }
 }
 
@@ -702,7 +704,49 @@ async function loadDataPage() {
   await Promise.all([loadShopifyStatus(), loadReviewQrMeta()])
 }
 
+let syncToastTimer = null
+
+/** Top-right floating status. `state`: 'busy' (animated bar), 'done', or 'error'; done/error fade out. */
+function setSyncToast(message, status = 'busy') {
+  const el = $('#sync-toast')
+  if (!el) return
+  clearTimeout(syncToastTimer)
+  el.querySelector('.sync-toast-text').textContent = message
+  el.classList.remove('leaving', 'done', 'error')
+  if (status !== 'busy') el.classList.add(status)
+  el.hidden = false
+  if (status === 'busy') return
+  syncToastTimer = setTimeout(() => {
+    el.classList.add('leaving')
+    syncToastTimer = setTimeout(() => (el.hidden = true), 300)
+  }, status === 'error' ? 6000 : 2500)
+}
+
+/** Pull the latest Shopify orders whenever someone opens the dashboard or logs in. */
+async function autoSyncShopify() {
+  setSyncToast('Syncing Shopify orders…')
+  try {
+    const { data } = await api('/sync/shopify', { method: 'POST', body: JSON.stringify({ auto: true }) })
+    if (data?.skipped) {
+      setSyncToast('Shopify orders up to date', 'done')
+      return
+    }
+    setSyncToast(`Shopify synced · ${data.orders} orders`, 'done')
+    // Redraw whatever page is open with the new orders.
+    if (state.user && state.page) setPage(state.page)
+  } catch (err) {
+    if (err.status === 503) {
+      // Shopify isn't configured here (local dev): nothing to sync, say nothing.
+      $('#sync-toast').hidden = true
+      return
+    }
+    setSyncToast(`Shopify sync failed: ${err.message}`, 'error')
+    if (err.status === 401 || err.status === 403) showError(err)
+  }
+}
+
 function setPage(page) {
+  state.page = page
   for (const btn of document.querySelectorAll('#nav button')) {
     btn.classList.toggle('active', btn.dataset.page === page)
   }
@@ -794,6 +838,7 @@ function bind() {
       $('#user-name').textContent = data.user.name
       show('dash')
       setPage('overview')
+      autoSyncShopify()
     } catch (err) {
       error.textContent = err.message
       error.hidden = false
@@ -1013,6 +1058,7 @@ async function boot() {
     $('#user-name').textContent = me.user.name
     show('dash')
     setPage('overview')
+    autoSyncShopify()
   } catch {
     show('login')
   }

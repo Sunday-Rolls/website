@@ -740,3 +740,50 @@ tr.section td {
   .page { padding: 0.75rem; border-radius: 18px; gap: 0.75rem; }
   .brand-logo { height: 1.9rem; }
 }
+
+/* Floating Shopify sync status (top right), shown while the dashboard auto-syncs on open/login. */
+.sync-toast {
+  position: fixed;
+  /* Below the header so it never covers the account/logout controls. */
+  top: 72px;
+  right: 16px;
+  z-index: 50;
+  min-width: 220px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 14px 12px;
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  font: 500 13px/1.3 var(--font);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.sync-toast[hidden] { display: none; }
+.sync-toast.leaving { opacity: 0; transform: translateY(-6px); }
+.sync-toast-bar {
+  display: block;
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  overflow: hidden;
+}
+.sync-toast-bar > span {
+  display: block;
+  height: 100%;
+  width: 40%;
+  border-radius: 3px;
+  background: var(--accent);
+  animation: sync-toast-slide 1.1s ease-in-out infinite;
+}
+.sync-toast.done .sync-toast-bar > span { width: 100%; animation: none; }
+.sync-toast.error { border-color: var(--down); }
+.sync-toast.error .sync-toast-bar > span { width: 100%; animation: none; background: var(--down); }
+@keyframes sync-toast-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sync-toast-bar > span { animation: none; width: 100%; opacity: 0.5; }
+}

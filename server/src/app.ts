@@ -1,6 +1,5 @@
 import { Hono, type Context } from 'hono'
 import { cors } from 'hono/cors'
-import { ORDER_WEBHOOK_TOPICS } from './analytics/shopify-order-scheduler.js'
 import type { AnalyticsStore } from './analytics/store.js'
 import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
@@ -24,14 +23,12 @@ export type AppDeps = {
   reviews?: ReviewStore
   analytics?: AnalyticsStore
   /**
-   * Shopify webhooks: product/inventory topics feed the Merchant Center sync,
-   * order topics feed the dashboard order sync. Omitted when neither sync is
-   * configured; the route then answers 503.
+   * Shopify product/inventory webhooks. Omitted when the Merchant Center sync
+   * isn't configured; the route then answers 503.
    */
   shopifyWebhooks?: {
     secret: string
-    onProductChange?: (topic: string) => void
-    onOrderChange?: (topic: string) => void
+    onProductChange: (topic: string) => void
   }
 }
 
@@ -90,8 +87,7 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
       return c.json({ ok: false, error: 'Invalid signature' }, 401)
     }
     const topic = c.req.header('x-shopify-topic') ?? ''
-    if (MERCHANT_WEBHOOK_TOPICS.has(topic)) shopifyWebhooks.onProductChange?.(topic)
-    if (ORDER_WEBHOOK_TOPICS.has(topic)) shopifyWebhooks.onOrderChange?.(topic)
+    if (MERCHANT_WEBHOOK_TOPICS.has(topic)) shopifyWebhooks.onProductChange(topic)
     // Always 200 a verified delivery, or Shopify retries and eventually drops the subscription.
     return c.json({ ok: true })
   })

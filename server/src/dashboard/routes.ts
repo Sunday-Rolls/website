@@ -31,10 +31,14 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
-import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
+import { rangeForCustom, rangeForPeriod, storeDay } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
 import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
-import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
+import {
+  loadShopifyCredentialsFromEnv,
+  syncShopifyToStore,
+  type ShopifySyncResult,
+} from '../analytics/shopify-sync.js'
 import { pingShopifyShop } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey, PublicUser } from '../analytics/types.js'
@@ -66,9 +70,13 @@ export type DashboardDeps = {
   contactToEmail?: string
 }
 
+/** A dashboard open/login within this long of the last good Shopify sync doesn't sync again. */
+const AUTO_SYNC_FRESH_MS = 5 * 60_000
+
 export function createDashboardRoutes(deps: DashboardDeps) {
   const app = new Hono()
   const { store, checkRateLimit, secureCookies } = deps
+  let autoShopifySync: Promise<ShopifySyncResult | { skipped: true; lastSyncedAt: string | null }> | null = null
 
   app.use('*', async (c, next) => {
     const path = c.req.path
@@ -370,6 +378,22 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       return c.json({ ok: false, error: 'End date must be on or after start date' }, 400)
     }
     try {
+      // `auto` is the sync the dashboard fires when someone opens it or logs in: full range,
+      // shared with any run already in flight, and skipped if one finished in the last few minutes.
+      if (body.auto === true) {
+        // Claim the slot before any await so simultaneous tabs share one check + run.
+        autoShopifySync ??= (async () => {
+          const last = (await store.latestSyncs()).find((s) => s.source === 'shopify')
+          const lastAt = last?.finishedAt ? Date.parse(last.finishedAt) : 0
+          if (last?.status === 'ok' && Date.now() - lastAt < AUTO_SYNC_FRESH_MS) {
+            return { skipped: true as const, lastSyncedAt: last.finishedAt }
+          }
+          return syncShopifyToStore(store, creds)
+        })().finally(() => {
+          autoShopifySync = null
+        })
+        return c.json({ ok: true, data: await autoShopifySync })
+      }
       const result = await syncShopifyToStore(store, creds, { start, end })
       return c.json({ ok: true, data: result })
     } catch (error) {
@@ -552,7 +576,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt))
       .slice(0, 25)
       .map((o) => ({
-        date: o.orderedAt.slice(0, 10),
+        date: storeDay(o.orderedAt),
         channel: o.channel,
         revenue: o.revenue,
         product: o.lines[0]?.productName ?? '',

@@ -7,6 +7,7 @@ import {
   type ShopifyCredentials,
   type ShopifyOrderRaw,
 } from './shopify.js'
+import { addUtcDays, formatUtcDate, parseUtcDate, storeMidnightUtc } from './period.js'
 import type { AnalyticsStore } from './store.js'
 
 export type ShopifySyncResult = {
@@ -95,8 +96,11 @@ export async function syncShopifyToStore(
   const end = options?.end || null
   const sync = await store.startSync('shopify')
   try {
-    const createdAtMin = start ? `${start}T00:00:00Z` : undefined
-    const createdAtMax = end ? `${end}T23:59:59Z` : undefined
+    // Dashboard days are store-timezone days, so the window runs Central midnight to midnight.
+    const createdAtMin = start ? storeMidnightUtc(start) : undefined
+    const createdAtMax = end
+      ? new Date(Date.parse(storeMidnightUtc(formatUtcDate(addUtcDays(parseUtcDate(end), 1)))) - 1000).toISOString()
+      : undefined
     const raw = await fetchShopifyOrders(creds, { createdAtMin, createdAtMax })
     const count = await store.upsertOrders(raw.filter(isCountedOrder).map(mapShopifyOrder))
     // An order cancelled, voided or tagged as a test after an earlier sync must leave the dashboard too.

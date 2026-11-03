@@ -1,3 +1,4 @@
+import { STORE_TIME_ZONE, storeDay } from './period.js'
 import { randomUUID } from 'node:crypto'
 import { ANALYTICS_SCHEMA_SQL } from './schema.js'
 import type {
@@ -480,11 +481,11 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       }
       if (filter.start) {
         params.push(filter.start)
-        clauses.push(`ordered_at::date >= $${params.length}::date`)
+        clauses.push(`${STORE_DAY_SQL} >= $${params.length}::date`)
       }
       if (filter.end) {
         params.push(filter.end)
-        clauses.push(`ordered_at::date <= $${params.length}::date`)
+        clauses.push(`${STORE_DAY_SQL} <= $${params.length}::date`)
       }
       if (filter.externalIds) {
         if (filter.externalIds.length === 0) return 0
@@ -904,10 +905,15 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
   }
 }
 
+/** SQL twin of storeDay(): exact UTC midnights are date-only imports; everything else is a store-timezone day. */
+const STORE_DAY_SQL = `(CASE WHEN (ordered_at AT TIME ZONE 'UTC')::time = '00:00'
+  THEN (ordered_at AT TIME ZONE 'UTC')::date
+  ELSE (ordered_at AT TIME ZONE '${STORE_TIME_ZONE}')::date END)`
+
 function orderMatchesFilter(order: Order, filter: DeleteOrdersFilter): boolean {
   if (filter.channel && order.channel !== filter.channel) return false
   if (filter.source && (order.source || 'sales-tracker') !== filter.source) return false
-  const day = order.orderedAt.slice(0, 10)
+  const day = storeDay(order.orderedAt)
   if (filter.start && day < filter.start) return false
   if (filter.end && day > filter.end) return false
   if (filter.externalIds && !filter.externalIds.includes(order.externalId)) return false

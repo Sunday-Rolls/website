@@ -6,20 +6,39 @@
  * - shortly after Shopify sends a product or inventory webhook, so a sell-out
  *   reaches Google in about a minute instead of waiting for the next tick.
  *
- * Scheduling (one run at a time, debounced webhook bursts) lives in ../sync-runner.ts.
+ * Only one sync runs at a time. A trigger that lands mid-run queues exactly one
+ * follow-up run, and bursts of webhooks (a bulk edit sends one per product)
+ * collapse into a single run.
  *
  * Runbook: docs/GOOGLE_MERCHANT_SYNC.md
  */
 import type { ShopifyCredentials } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
-import { createSyncRunner, loadSyncScheduleFromEnv, type SyncRunner, type SyncSchedule } from '../sync-runner.js'
 import { loadMerchantConfigFromEnv, syncMerchant, type MerchantSyncConfig, type SyncResult } from './merchant-sync.js'
 
-export type MerchantSchedule = SyncSchedule
-export type MerchantSyncRunner = SyncRunner
+export type MerchantSchedule = {
+  /** 0 disables the timer (webhooks still trigger runs). */
+  intervalMs: number
+  /** Wait this long after a webhook before syncing, to batch bursts. */
+  debounceMs: number
+}
 
 export function loadMerchantScheduleFromEnv(env: NodeJS.ProcessEnv = process.env): MerchantSchedule {
-  return loadSyncScheduleFromEnv(env, 'MERCHANT_SYNC', { intervalMinutes: 60, debounceSeconds: 60 })
+  const minutes = Number(env.MERCHANT_SYNC_INTERVAL_MINUTES ?? '60')
+  const seconds = Number(env.MERCHANT_SYNC_DEBOUNCE_SECONDS ?? '60')
+  return {
+    intervalMs: Number.isFinite(minutes) && minutes > 0 ? Math.max(5, minutes) * 60_000 : 0,
+    debounceMs: (Number.isFinite(seconds) && seconds >= 0 ? seconds : 60) * 1000,
+  }
+}
+
+export type MerchantSyncRunner = {
+  start(): void
+  stop(): void
+  /** Schedule a debounced run (webhooks). */
+  trigger(reason: string): void
+  /** Run now, or after the current run finishes. Resolves when that run is done. */
+  runNow(reason: string): Promise<void>
 }
 
 export function createMerchantSyncRunner(options: {
@@ -27,7 +46,63 @@ export function createMerchantSyncRunner(options: {
   schedule: MerchantSchedule
   log?: (msg: string) => void
 }): MerchantSyncRunner {
-  return createSyncRunner({ ...options, label: 'Merchant sync' })
+  const { run, schedule, log = console.log } = options
+  let interval: ReturnType<typeof setInterval> | null = null
+  let debounce: ReturnType<typeof setTimeout> | null = null
+  let current: Promise<void> | null = null
+  let queued: { reason: string; done: Promise<void> } | null = null
+
+  async function execute(reason: string) {
+    try {
+      await run(reason)
+    } catch (error) {
+      log(`Merchant sync (${reason}) failed: ${error instanceof Error ? error.message : error}`)
+    }
+  }
+
+  function runNow(reason: string): Promise<void> {
+    if (!current) {
+      current = execute(reason).finally(() => {
+        current = null
+      })
+      return current
+    }
+    // A run is in progress: data may have changed after it read Shopify, so queue one more.
+    if (!queued) {
+      const done = current.then(() => {
+        const next = queued!
+        queued = null
+        return runNow(next.reason)
+      })
+      queued = { reason, done }
+    }
+    return queued.done
+  }
+
+  return {
+    start() {
+      void runNow('boot')
+      if (schedule.intervalMs > 0) {
+        interval = setInterval(() => void runNow('schedule'), schedule.intervalMs)
+        interval.unref?.()
+      }
+    },
+    stop() {
+      if (interval) clearInterval(interval)
+      if (debounce) clearTimeout(debounce)
+      interval = null
+      debounce = null
+    },
+    trigger(reason) {
+      if (debounce) clearTimeout(debounce)
+      debounce = setTimeout(() => {
+        debounce = null
+        void runNow(reason)
+      }, schedule.debounceMs)
+      debounce.unref?.()
+    },
+    runNow,
+  }
 }
 
 /**

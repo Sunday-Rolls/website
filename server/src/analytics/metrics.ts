@@ -1,5 +1,5 @@
 import { orderSourceCounts, preferLiveOrders } from './orders.js'
-import { inRange, isWebsiteChannel, monthKey, type DateRange } from './period.js'
+import { inRange, isWebsiteChannel, monthKey, storeDay, type DateRange } from './period.js'
 import type {
   AbandonedCartStats,
   CashForecastRow,
@@ -181,7 +181,7 @@ export function buildOverview(input: {
     d = next.toISOString().slice(0, 10)
   }
   for (const o of curOrders) {
-    const day = o.orderedAt.slice(0, 10)
+    const day = storeDay(o.orderedAt)
     const row = dayMap.get(day)
     if (!row) continue
     row.revenue += o.revenue
@@ -376,10 +376,10 @@ export function buildPnL(input: {
   const year =
     month && /^\d{4}-\d{2}$/.test(month) ? Number(month.slice(0, 4)) : input.year
 
-  const ytdOrders = orders.filter((o) => o.orderedAt.startsWith(String(year)))
+  const ytdOrders = orders.filter((o) => storeDay(o.orderedAt).startsWith(String(year)))
   const monthOrders = month ? orders.filter((o) => monthKey(o.orderedAt) === month) : []
 
-  const ytdPrevOrders = orders.filter((o) => o.orderedAt.startsWith(String(year - 1)))
+  const ytdPrevOrders = orders.filter((o) => storeDay(o.orderedAt).startsWith(String(year - 1)))
   // Compare selected month vs previous calendar month for net income sparkline-style KPI
   const prevMonth = month
     ? (() => {
