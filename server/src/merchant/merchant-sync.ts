@@ -103,10 +103,11 @@ async function findPublicationId(
 ): Promise<string | null> {
   if (!match) return null
   const data = await shopifyGraphql<{
-    publications: { nodes: Array<{ id: string; catalog: { title: string } | null }> }
-  }>(creds, accessToken, `{ publications(first: 50) { nodes { id catalog { title } } } }`)
+    publications: { nodes: Array<{ id: string; name: string; catalog: { title: string } | null }> }
+  }>(creds, accessToken, `{ publications(first: 50) { nodes { id name catalog { title } } } }`)
+  // Channel apps (e.g. the Headless storefront) have no catalog, so match on the publication name too.
   const hit = data.publications.nodes.find((p) =>
-    (p.catalog?.title ?? '').toLowerCase().includes(match.toLowerCase()),
+    [p.catalog?.title, p.name].some((t) => (t ?? '').toLowerCase().includes(match.toLowerCase())),
   )
   if (!hit) throw new Error(`No Shopify sales channel matching "${match}" (set MERCHANT_SHOPIFY_CHANNEL= to sync all)`)
   return hit.id
