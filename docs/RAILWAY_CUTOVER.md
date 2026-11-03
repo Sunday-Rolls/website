@@ -42,7 +42,7 @@ Set these on the Railway **website** service, then redeploy/rebuild:
 |----------|------------|
 | `VITE_BASE_PATH` | `/` |
 | `VITE_GTM_ID` | `GTM-PPTR6V3B` |
-| `VITE_GA4_MEASUREMENT_ID` | Confirm in GA4 Admin (Railway API already uses property `513898453`; stream is `G-YKOBBOTPM4` there) |
+| `VITE_GA4_MEASUREMENT_ID` | Confirm in GA4 Admin (Railway API already uses property `513898453`; stream is `G-YK0BB0TPM4` there) |
 | `VITE_GA4_SEND_DIRECT` | `true` |
 | `VITE_CONTACT_API_URL` | `https://contact-api-production-9af6.up.railway.app` (or custom API domain) |
 | `VITE_CONTACT_API_KEY` | Match `CONTACT_API_KEY` on API if set |

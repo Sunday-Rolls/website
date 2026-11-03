@@ -111,13 +111,18 @@ function hasAdClickId(search: string): boolean {
 }
 
 /**
- * Defer GTM/gtag until the visitor interacts, or well after load.
- * Loading them during the initial trace adds seconds of main-thread work.
+ * Defer GTM/gtag until the visitor interacts, or shortly after load.
+ * Loading them during the initial trace adds seconds of main-thread work;
+ * a short post-load delay keeps that out of the trace without missing
+ * visitors who leave before interacting.
  * Events pushed before the script arrives stay queued on dataLayer.
  *
  * Ad landings boot right away: the click ID lives only in the landing URL,
  * and the first in-app navigation drops it before a deferred boot would run.
  */
+/** Delay after the load event before GTM boots for visitors who haven't interacted. */
+const GTM_POST_LOAD_DELAY_MS = 2_000
+
 export function initGtm(): void {
   if (typeof window === 'undefined') return
 
@@ -130,7 +135,7 @@ export function initGtm(): void {
   }
 
   const boot = () => loadAnalyticsScripts()
-  const cancelDelay = scheduleAfterLoad(boot, 15_000)
+  const cancelDelay = scheduleAfterLoad(boot, GTM_POST_LOAD_DELAY_MS)
 
   const onInteract = () => {
     cancelDelay()

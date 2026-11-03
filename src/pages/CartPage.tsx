@@ -153,7 +153,7 @@ export function CartPage() {
     trackedCartSignature.current = cartSignature
     trackViewCart(
       lines.map((item) => ({
-        id: item.variantId || item.id,
+        id: item.productId || item.variantId || item.id,
         title: item.title,
         price: item.price,
         quantity: item.quantity,
@@ -204,7 +204,7 @@ export function CartPage() {
   function handleCheckoutClick() {
     trackBeginCheckout(
       lines.map((item) => ({
-        id: item.variantId || item.id,
+        id: item.productId || item.variantId || item.id,
         title: item.title,
         price: item.price,
         quantity: item.quantity,
