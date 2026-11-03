@@ -9,6 +9,8 @@ import { loadConfig } from './env.js'
 import { createPgContactStore } from './contact-store.js'
 import { createMailer } from './mail.js'
 import { createPgReviewStore } from './reviews.js'
+import { loadShopifyCredentialsFromEnv } from './analytics/shopify.js'
+import { createMerchantSyncRunnerFromEnv } from './merchant/merchant-scheduler.js'
 
 const config = loadConfig()
 const { sendContactEmail } = createMailer(config)
@@ -98,12 +100,26 @@ if (pool) {
   console.warn('DATABASE_URL is not set; /reviews, contact persistence, and /dashboard will be unavailable')
 }
 
+const shopify = loadShopifyCredentialsFromEnv()
+const merchant = createMerchantSyncRunnerFromEnv({ shopify, analytics })
+const merchantRunner = merchant.runner
+if (merchant.runner) {
+  merchant.runner.start()
+  console.log(`Merchant Center sync: on (account ${merchant.config.merchantId})`)
+} else {
+  console.log(`Merchant Center sync: off (${merchant.reason})`)
+}
+
 const app = createApp({
   config,
   sendContactEmail,
   contacts,
   reviews,
   analytics,
+  shopifyWebhooks:
+    merchantRunner && shopify
+      ? { secret: shopify.clientSecret, onProductChange: (topic) => merchantRunner.trigger(topic) }
+      : undefined,
 })
 
 serve({ fetch: app.fetch, port: config.port }, (info) => {

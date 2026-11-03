@@ -10,6 +10,7 @@ Hono service on Railway: contact form email, product reviews, and the internal a
 - `GET /dashboard/` — analytics UI (requires `DATABASE_URL`)
 - `POST /dashboard/api/login|logout`, `GET /dashboard/api/overview|pnl|roas|sync-status`
 - `GET /dashboard/api/review-qrs.pdf?target=pages|live` — printable review QR PDF (Data page → Export PDF)
+- `POST /webhooks/shopify` — Shopify product/inventory webhooks (HMAC-signed); re-syncs Google Merchant Center ([docs/GOOGLE_MERCHANT_SYNC.md](../docs/GOOGLE_MERCHANT_SYNC.md))
 
 ## Contact email (Resend free plan)
 
