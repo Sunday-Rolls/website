@@ -20,9 +20,9 @@ Shipping and returns come from the Merchant Center account settings.
 
 ## One-time setup
 
-1. **Service account.** Use the one already in Railway's `GOOGLE_SERVICE_ACCOUNT_JSON`.
-   - In Google Cloud, enable the **Merchant API** for that service account's project.
-   - In Merchant Center, go to **Settings → People and access → Add person**. Add the service account's `client_email` with **Standard** (or Admin) access.
+1. **Service account.** The sync uses `merchant-sync@plasma-torus-513614-c7.iam.gserviceaccount.com`. It lives in Google Cloud project "My First Project" (`plasma-torus-513614-c7`), owned by stwolfe10@gmail.com, and the Merchant API is already enabled there.
+   - In Merchant Center, go to **Settings → People and access**. Under **People** (not Email-only access), add that email with **Standard** access.
+   - In Google Cloud, open **Service accounts → merchant-sync → Keys → Add key → JSON**. Paste the file's contents as a single line into `MERCHANT_SERVICE_ACCOUNT_JSON` on Railway `contact-api`. It's kept separate from `GOOGLE_SERVICE_ACCOUNT_JSON`, so the GA4 sync is unaffected.
 2. **Shopify app scopes.** The Dev Dashboard app (`SHOPIFY_CLIENT_ID`/`SECRET`) needs `read_products` and `read_publications`.
 3. **Env vars.** Set these on `contact-api` (see `server/.env.example`): `MERCHANT_CENTER_ID=5685591896`, plus the optional `MERCHANT_*` overrides.
 4. **Register the GCP project** with Merchant Center. Run this once, with a real Google account email (not the service account):
