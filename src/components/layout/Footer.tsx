@@ -16,13 +16,13 @@ export function Footer() {
 
   return (
     <footer className="mt-auto border-t border-sand bg-heritage-green text-cream">
-      <Container className="grid gap-10 py-12 md:grid-cols-[1.2fr_2fr]">
-        <div className="space-y-4">
+      <Container className="grid gap-6 py-8 md:grid-cols-[1.2fr_2fr] md:gap-10 md:py-12">
+        <div className="space-y-3 md:space-y-4">
           <p className="font-display text-xl">{brand.name}</p>
           <p className="font-body text-body-small text-cream/80">{brand.tagline}</p>
 
           {footer.contact && (
-            <div className="space-y-2 font-body text-body-small text-cream/85">
+            <div className="space-y-1 font-body text-body-small text-cream/85 md:space-y-2">
               {footer.contact?.email ? (
                 <p>
                   <a
@@ -46,14 +46,14 @@ export function Footer() {
             </div>
           )}
 
-          <SocialLinks className="pt-1" />
+          <SocialLinks className="pt-0.5 md:pt-1" />
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-4 sm:gap-8">
           {columns.map((column) => (
-            <div key={column.title} className="space-y-3">
+            <div key={column.title} className="space-y-2 sm:space-y-3">
               <p className="font-body text-label text-soft-gold-bright">{column.title}</p>
-              <ul className="space-y-2">
+              <ul className="space-y-1 sm:space-y-2">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
