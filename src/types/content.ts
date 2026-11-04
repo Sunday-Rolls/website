@@ -71,6 +71,28 @@ export interface HomeContent {
   values: {
     items: Array<{ label: string; icon?: ValueIcon }>
   }
+  /** Rotating Gaussian-splat banner for the flagship product. */
+  featured?: {
+    eyebrow?: string
+    title: string
+    tagline?: string
+    lines: string[]
+    colorways: Array<{
+      label: string
+      /** CSS colour for the swatch button. */
+      swatch: string
+      href: string
+      /** `.srsp` file built by scripts/build-splat.mjs. */
+      splat: string
+      /** Shown until the splat loads and wherever WebGL2 is missing. */
+      poster: string
+      /** Overrides `motion` for this colourway (a real capture can `spin`). */
+      motion?: 'sway' | 'spin'
+    }>
+    /** `sway` rocks side to side (photo placeholders); `spin` turns a full capture. */
+    motion: 'sway' | 'spin'
+    cta: ContentLink
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

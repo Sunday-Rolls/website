@@ -202,6 +202,7 @@ Check status any time with `/mcp`. Servers you don't need can stay disabled. The
 | [`docs/DASHBOARD_ACCESS.md`](docs/DASHBOARD_ACCESS.md) | Access checklist, IDs, punch list |
 | [`docs/ANALYTICS.md`](docs/ANALYTICS.md) | GTM / GA4 demo vs live |
 | [`docs/ADS_AND_SEO_CONFIG.md`](docs/ADS_AND_SEO_CONFIG.md) | GTM, Google Ads, Merchant Center, Search Console: IDs, change log, how to revert; old-URL redirects and sitemap |
+| [`docs/RETRO_ROLLER_SPLAT.md`](docs/RETRO_ROLLER_SPLAT.md) | Home page Retro Roller splat banner: placeholder splats, capturing a real one, converting it |
 | [`docs/SHIPPO.md`](docs/SHIPPO.md) | Shippo ↔ Shopify labels |
 | [`docs/REVIEW_QR_CODES.md`](docs/REVIEW_QR_CODES.md) | QR generation and print |
 | [`docs/SHOPIFY_WEB_PIXEL.md`](docs/SHOPIFY_WEB_PIXEL.md) | Purchase pixel |
