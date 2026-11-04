@@ -13,6 +13,29 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
 
+## Change log: 2026-11-03
+
+Each entry lists what it was before, so it can be put back.
+
+**Why:** the GA4 ID had been entered as `G-YKOBBOTPM4` (letter O). The real stream in property `513898453` is `G-YK0BB0TPM4` (zeros), so every GA4 ecommerce event and the checkout-pixel purchase went to a stream that doesn't exist. Page views still arrived, because the `AW-17744695066` Google tag ("Sunday Rolls") already lists `G-YK0BB0TPM4` as a destination.
+
+### Tag Manager: version 17
+
+- **GA4 - ecommerce funnel** and **Google Analytics Purchases**: Measurement ID `G-YKOBBOTPM4` → `G-YK0BB0TPM4`.
+- Paused the Google tag named **G-YKOBBOTPM4** (was firing on Initialization - All Pages). Changing it to the zero ID instead would double page views, since the Sunday Rolls Google tag already sends them. **Tag to Analytics** stays paused for the same reason.
+- **Purchase v2**: turned off *Provide product-level sales data* (Merchant ID was `{{Product ID}}`), *Provide new customer data* (New Customer was `{{Email}}`) and *Provide shipping data* (`{{Shipping}}` read `eventModel.shipping`, which the site never pushes).
+- **User-Provided Data** variable: Phone was `{{Customer Number}}` (DOM element `#customer-phone-number`, not on the site). Now unset; Email stays.
+
+### Shopify
+
+- Custom pixel `GA4_MEASUREMENT_ID` (Settings → Customer events): `GA4_MEASUREMENT_ID` `'G-YKOBBOTPM4'` → `'G-YK0BB0TPM4'`.
+- Store name (Settings → General → Store contact details): `My Store` → `Sunday Rolls`. Checkout showed "Checkout - My Store".
+
+### Site code (this repo)
+
+- `view_cart` and `begin_checkout` send the product GID as `item_id`, like the other events. They sent the variant GID (`CartLineItem.productId`, from `merchandise.product.id`).
+- GTM and the Meta pixel boot 2 s after the load event for visitors who haven't interacted (`GTM_POST_LOAD_DELAY_MS`). It was 15 s, so quick bounces weren't counted.
+
 ## Change log: 2026-11-02
 
 Each entry lists what it was before, so it can be put back.
@@ -108,7 +131,7 @@ Property `https://www.sundayrollsgolf.com/`.
 
 To add one, edit `scripts/lib/legacy-redirects.mjs`, add a case to `scripts/lib/legacy-redirects.test.mjs`, and run `node --test scripts/lib/legacy-redirects.test.mjs`. Railway's `website` watch patterns don't include `scripts/lib/**`. A change only there won't redeploy on its own: redeploy `website` from Railway, or ship it with another file it watches.
 
-**Ad click IDs.** `initGtm()` in `src/lib/gtm.ts` normally defers GTM and the Meta pixel until the first interaction or 15 s. If the landing URL has `gclid`, `gbraid`, `wbraid` or `fbclid`, it loads them immediately, so `_gcl_aw` / `_fbc` are set before the first in-app navigation drops the query. The list is `AD_CLICK_PARAMS`.
+**Ad click IDs.** `initGtm()` in `src/lib/gtm.ts` normally defers GTM and the Meta pixel until the first interaction or 2 s after the page load event (`GTM_POST_LOAD_DELAY_MS`). If the landing URL has `gclid`, `gbraid`, `wbraid` or `fbclid`, it loads them immediately, so `_gcl_aw` / `_fbc` are set before the first in-app navigation drops the query. The list is `AD_CLICK_PARAMS`.
 
 **Canonical URLs and sitemap.**
 - `build:railway` in `package.json` sets `VITE_SITE_ORIGIN=https://www.sundayrollsgolf.com`.
@@ -151,4 +174,4 @@ For ad clicks, open `https://www.sundayrollsgolf.com/shop/?gclid=TEST`. Without 
 - Search Console: request indexing for the top products, and ask the owner to add devops to the domain property `sundayrollsgolf.com` too.
 - Remove the old `Shopping Cart` / `Begin checkout (Page load …/checkout)` Ads actions once the site-event actions record.
 - Meta ROAS in the dashboard: there is no Meta spend sync yet. It needs a Marketing API token and the ad account id ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md#5-meta-marketing-api-token--meta-business-admin)).
-- Confirm GA4 property `513898453` is the `G-YK0BB0TPM4` stream (devops has no GA4 access).
+- ~~Confirm GA4 property `513898453` is the `G-YK0BB0TPM4` stream.~~ Confirmed 2026-11-03: stream `13024044957`, ID with zeros.

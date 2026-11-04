@@ -14,7 +14,7 @@ Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY
 | Site | `https://sunday-rolls.github.io/website/` | Railway `website` + DNS → `www.sundayrollsgolf.com` ([RAILWAY_CUTOVER.md](./RAILWAY_CUTOVER.md)) |
 | Contact API | Railway `contact-api` (Resend free plan for email) | same |
 | `VITE_GTM_ID` | `GTM-PQSG4NXT` | `GTM-PPTR6V3B` (live) |
-| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` (confirm in GA4 Admin) |
+| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` (zeros; confirmed in GA4 Admin) |
 | `VITE_BASE_PATH` | `/website/` | `/` |
 | GA4 property | Demo / devops | `properties/513898453` |
 | Shopify pixel ID | `G-ET6SXZWE8E` | same as live measurement ID |

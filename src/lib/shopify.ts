@@ -73,6 +73,8 @@ export interface CartLineItem {
   title: string
   handle: string
   variantId: string
+  /** Storefront product GID; analytics item_id so cart events match product events. */
+  productId: string
   /** Formatted unit merchandise price. */
   price: string
   /** Formatted line total after quantity (and line discounts when present). */
@@ -211,6 +213,7 @@ const CART_SELECTION = `
             altText
           }
           product {
+            id
             title
             handle
           }
@@ -328,7 +331,7 @@ type CartNode = {
         title: string
         price: Money
         image?: { url: string; altText?: string | null } | null
-        product: { title: string; handle: string }
+        product: { id: string; title: string; handle: string }
       }
     }>
   }
@@ -486,6 +489,7 @@ function mapCart(node: CartNode): ShopifyCart {
         title: line.merchandise.product.title,
         handle: line.merchandise.product.handle,
         variantId: line.merchandise.id,
+        productId: line.merchandise.product.id,
         price: formatPrice(unitMoney.amount, unitMoney.currencyCode),
         lineTotal: formatPrice(lineMoney.amount, lineMoney.currencyCode),
         imageUrl: line.merchandise.image?.url,

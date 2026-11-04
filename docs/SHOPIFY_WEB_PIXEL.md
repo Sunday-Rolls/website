@@ -6,7 +6,7 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 
 | Platform | ID |
 |----------|----|
-| GA4 | `G-YK0BB0TPM4` (zeros, not the letter O) |
+| GA4 | `G-YK0BB0TPM4` (zeros, not the letter O; confirmed in GA4 Admin → Data streams, 2026-11-03) |
 | Google Ads | `AW-17744695066`, purchase label `PznHCIOf2-EbEJqeqo1C` |
 | Meta Pixel | `1274109674861464` |
 
