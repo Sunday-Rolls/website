@@ -1,6 +1,6 @@
 # A/B testing plan
 
-Status: **proposal, nothing built yet.** Written 2026-11-03 against `main` at `6c0381a` (after PR #100, ad attribution).
+Status: **approved direction, nothing built yet.** Owner decisions are in §12. Written 2026-11-03 against `main` at `6c0381a` (after PR #100, ad attribution).
 
 Goal: a developer can open a PR, mark it as an A/B test, and have the site serve it to a share of visitors. Every metric (GA4 events, Shopify orders, contact messages) then carries the experiment and variant, and admins read the results and pause, stop, promote or remove tests from the existing `server/` dashboard.
 
@@ -24,7 +24,7 @@ Ship variants **as code flags inside the one SPA bundle**. Assign visitors **on 
 | Order sync | `server/src/analytics/shopify-sync.ts` reads `note_attributes` (`_sr_source` and the rest) | The same parser picks up `_sr_exp` and `_sr_vid`. |
 | Purchase pixel | Shopify Customer events pixel (`docs/SHOPIFY_WEB_PIXEL.md`) | It can read `checkout.attributes` and add the variant to the GA4 `purchase` event. Changing it is a Shopify Admin write. |
 | Contact form | `src/lib/contact-api.ts` → `POST /contact` → `contact_messages` | Add `visitorId` and `experiments` fields. |
-| Dashboard | Hono `/dashboard`, hash router, page modules in `ui/pages/<name>.js`, `requireAdmin`, `is_admin` flag | A new `pages/experiments.js` plugs into the router; admin-only actions reuse `requireAdmin`. |
+| Dashboard | Hono `/dashboard`, hash router, page modules in `ui/pages/<name>.js`, `requireAdmin`, `is_admin` flag | A new `pages/experiments.js` plugs into the router; actions need a signed-in session, not `requireAdmin`. |
 | Rate limit + CORS | `server/src/app.ts`, `rate-limit.ts` | Reused for the public exposure beacon. |
 
 ---
@@ -71,7 +71,7 @@ Both read the same assignment, so the analytics are identical.
                          ┌──────────────── contact-api (Railway, Hono) ─────────────────┐
                          │ GET  /experiments/config   (public, cached 30 s)             │
                          │ POST /experiments/events   (beacon: exposure + funnel steps) │
-                         │ /dashboard/api/experiments/*   (admin: CRUD, start/pause/…)  │
+                         │ /dashboard/api/experiments/*   (signed in: start/pause/…)    │
                          │ /dashboard/api/experiments/ci  (CI token: upsert drafts)     │
                          │            │                                                 │
                          │        Postgres: experiments, variants, exposures, events,   │
@@ -278,14 +278,14 @@ New sidebar entry **Experiments** (flask icon), following the page-module contra
 - Cumulative chart (existing `lib/charts.js`): primary-metric rate per arm over time, with a shaded credible interval.
 - Stats card: lift with 95% interval, chance to beat control, expected loss, sample progress bar toward `min_visitors_per_arm` and `min_days`, SRM p-value.
 - Breakdown toggles: device, landing source (from PR #100's touch), new vs returning.
-- **Actions (admin only, confirm dialog, written to `experiment_audit`):**
+- **Actions (any dashboard user, confirm dialog, written to `experiment_audit`):**
   - **Start**: draft → running; sets `started_at`.
   - **Pause / Resume**: paused serves everyone control and freezes counting. Resuming keeps the seed, so assignments come back unchanged.
   - **Stop**: ends the test with no winner; everyone gets control; sends the cleanup dispatch.
   - **Promote `<arm>`**: everyone gets that arm right away through config; sends the cleanup dispatch. Once the cleanup PR has merged, archive the experiment.
   - **Traffic %**: allowed while running; weight changes are not.
   - **Archive / Remove**: hides the experiment from the list and keeps its data. Hard delete only from draft, and only if no exposures exist.
-- Non-admin dashboard users can see results but not act.
+- Every signed-in dashboard user can see results and use these actions (owner decision, §12). They still go through the confirm dialog and the audit log.
 
 ---
 
@@ -309,7 +309,7 @@ Replace the baselines with real numbers from the dashboard funnel in Phase 0. Th
 - **Decision rule (shown on the page, not automated):** call a winner only when (a) `min_days` ≥ 14 (two full weekly cycles) **and** `min_visitors_per_arm` are both met, (b) P(beat control) ≥ 95% on the primary metric, and (c) no guardrail (purchase rate, RPV) has P(worse) ≥ 80%. Before the gate is met the numbers are greyed and labelled "early, don't act", which takes the sting out of peeking.
 - **SRM check**: chi-square on exposure counts vs weights. If p < 0.001, show a red banner and don't trust the results; it usually means a bot, caching or assignment bug.
 - **Frequentist cross-check**: a two-proportion z-test p-value shown in a details row, for anyone who wants it.
-- **Concurrency**: tests on different pages can overlap (randomisation is independent because each has its own seed). Two tests on the same page need a shared "layer" so they're mutually exclusive. That's a Phase 4 feature; until then the UI warns when two running tests share targeted paths.
+- **Concurrency** (owner decision: overlap allowed from day one): tests on different pages run at the same time, and randomisation stays independent because each test has its own seed. A visitor can be in several tests; each test's result counts only that visitor's conversions after their exposure to it. Two tests on the **same** page stay blocked: Start refuses while another running test shares a targeted path. Mutually exclusive layers that would allow same-page overlap are Phase 4.
 
 ---
 
@@ -324,7 +324,7 @@ Replace the baselines with real numbers from the dashboard funnel in Phase 0. Th
 | **Bundle weight** | Variant code ships to everyone. Lazy-load heavy arms (`React.lazy`, as the splat viewer should be anyway). |
 | **Carts created before exposure** | Carts persist in `localStorage`; re-stamp attributes when exposures change (§6). Orders count only if placed after the visitor's first exposure. |
 | **Cross-device / cleared cookies** | The visitor is re-randomised and could see both arms. This is accepted noise at this scale and reduces effect sizes slightly. |
-| **Ad blockers / consent** | GA4 numbers undercount, but the beacon goes to our own `contact-api` domain and orders come from Shopify, so results don't depend on GA4. If a consent banner is added later, the beacon and `sr_vid` must respect it, which needs a decision (see open questions). |
+| **Ad blockers / consent** | GA4 numbers undercount, but the beacon goes to our own `contact-api` domain and orders come from Shopify, so results don't depend on GA4. No consent banner is planned (§12), so `sr_vid` and the beacon run for everyone. If a banner is added later, gate both on it. |
 | **Privacy policy** | `sr_vid` is a new first-party identifier. Update the privacy page to mention testing. No email or PII goes into exposure tables; the dashboard never shows visitor ids alongside customer emails. |
 | **Low traffic → inconclusive tests** | Funnel-step primary metrics, the sample-size estimate at creation time, bold changes (not button colours), and a max duration (e.g. 6 weeks) after which the UI suggests Stop. |
 | **Stale flags** | The weekly cleanup job and the "flag still in code" health badge. |
@@ -346,7 +346,7 @@ Replace the baselines with real numbers from the dashboard funnel in Phase 0. Th
 - `contact-api`: tables, `GET /experiments/config`, `POST /experiments/events` (CORS allowlist, rate limit, payload validation), order-sync parsing of `_sr_vid` / `_sr_exp`, contact fields.
 - `gtm.ts` params, cart attributes, contact payload.
 - **Run an A/A test** (`aa-check`, two identical arms on `/`) for 1–2 weeks. Expect no lift and no SRM, with orders carrying `_sr_exp`. This proves the pipeline before any real decision rides on it.
-- Live-config writes in this phase, each confirmed separately: Railway env vars, GTM publish, GA4 custom dimensions, Shopify pixel update.
+- Live-config writes in this phase: Railway env vars, GTM publish, GA4 custom dimensions, Shopify pixel update. The owner approved these in principle (§12); still confirm each one at the moment it's applied, per the repo rules.
 
 **Phase 2: dashboard** (~3 days)
 - `pages/experiments.js` list and detail views, the stats module (`server/src/experiments/stats.ts`, with tests against known Beta-Binomial results), admin actions and the audit log.
@@ -365,12 +365,16 @@ Replace the baselines with real numbers from the dashboard funnel in Phase 0. Th
 
 ---
 
-## 12. Open questions for the owner
+## 12. Owner decisions (2026-11-03)
 
-1. **"Instead of a merge"**: is merge dark + start from the dashboard acceptable, or must a test run without merging (branch builds, §3b B, which is costlier and riskier)?
-2. **Who can start/stop tests**: all `is_admin` dashboard users, or a narrower role?
-3. **Traffic**: are you OK with tests that target add-to-cart and checkout rates, since purchase-level tests will usually need 4+ weeks at current traffic?
-4. **Consent**: is a cookie/consent banner planned (EU/CA visitors)? It decides whether `sr_vid` and the beacon wait for consent.
-5. **Live-config changes** needed in Phase 1, each needing your go-ahead: GTM container publish, GA4 custom dimensions, Shopify Customer-events pixel edit, Railway variables on `website` and `contact-api`, and a GitHub token for the cleanup dispatch.
-6. **Concurrency**: one test at a time to start (simplest, cleanest reads), or allow tests on different pages to overlap from day one?
-7. **First test**: is the Retro Roller banner (PR #89) the right first real experiment after the A/A check, or is there a higher-stakes question (cart upsell, free-shipping threshold copy, product page layout)?
+| # | Question | Decision |
+|---|----------|----------|
+| 1 | Run tests without merging, or merge first? | **Merge it, then turn it on and off** from the dashboard (merge dark, §7). Branch-build variants stay a Phase 4 option. |
+| 2 | Who can start/stop tests? | **Everyone** with a dashboard login, not only `is_admin`. Every action is still confirmed and audited. |
+| 3 | Target funnel-step metrics given the traffic? | **Yes.** Default primary metric is add-to-cart (or begin-checkout); purchase and revenue per visitor are guardrails. |
+| 4 | Consent banner planned? | **No, not at the moment.** `sr_vid` and the beacon are not gated; the privacy page still gets a line about testing. |
+| 5 | Live-config changes (GTM, GA4 dimensions, Shopify pixel, Railway vars, GitHub token)? | **Okay** in principle. Each is still confirmed when it's actually applied. |
+| 6 | One test at a time, or overlap? | **Let tests on different pages overlap** from day one. Same-page tests stay mutually blocked (§9). |
+| 7 | First real test? | **Yes: the Retro Roller banner** (PR #89, `home-banner`), after the A/A check. |
+
+Remaining unknowns to settle in Phase 0: real 90-day baselines per page (they set `min_visitors_per_arm`), and whether PR #89 merges dark under this system or waits until Phase 1 lands.
