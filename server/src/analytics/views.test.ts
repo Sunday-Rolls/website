@@ -186,6 +186,28 @@ describe('buildProductsView', () => {
     expect(view.trend).toHaveLength(31)
     expect(view.trend.find((t) => t.date === '2026-10-02')!.units).toBe(2)
   })
+
+  it('names tracker "Headcover" marketplace sales and merges dash spellings', () => {
+    const line = (productName: string, revenue: number) => [
+      { productName, productSku: null, category: productName, quantity: 1, unitPrice: revenue, lineRevenue: revenue },
+    ]
+    const view = buildProductsView({
+      range,
+      orders: [
+        order('2026-10-02', 90, { channel: 'etsy', source: 'sales-tracker', lines: line('Headcover', 90) }),
+        order('2026-10-03', 85, { channel: 'ebay', source: 'sales-tracker', lines: line('Headcover', 85) }),
+        order('2026-10-04', 80, { lines: line('Retro Roller – Grey', 80) }),
+        order('2026-10-05', 80, { lines: line('Retro Roller - Grey', 80) }),
+      ],
+      productViews: [{ date: '2026-10-02', productName: 'Retro Roller – Grey', category: null, views: 8 }],
+    })
+    expect(view.products.map((p) => [p.name, p.units, p.views])).toEqual([
+      ['Retro Roller - Grey', 2, 8],
+      ['Etsy sale (design not recorded)', 1, null],
+      ['eBay sale (design not recorded)', 1, null],
+    ])
+    expect(view.categories[0]).toEqual({ category: 'Design not recorded', units: 2, revenue: 175 })
+  })
 })
 
 describe('buildMarketingView', () => {

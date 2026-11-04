@@ -179,4 +179,19 @@ describe('preferLiveOrders', () => {
     const preferred = preferLiveOrders(orders)
     expect(preferred.map((o) => o.id).sort()).toEqual(['e1', 'm1'])
   })
+
+  it('keeps tracker squarespace rows dated after the manual backfill ends', () => {
+    const base = {
+      fees: 0, shippingCost: 0, marketingCost: 0, state: null, customerEmail: null,
+      isReturning: false, trafficSource: null, lines: [],
+    }
+    const orders: Order[] = [
+      { ...base, id: 'm1', externalId: 'squarespace:1', channel: 'squarespace', source: 'manual', orderedAt: '2026-10-15T20:27:25.000Z', revenue: 80 },
+      // Same store day as the last manual order: covered by the backfill, dropped.
+      { ...base, id: 't1', externalId: 'squarespace:sheet-1', channel: 'squarespace', source: 'sales-tracker', orderedAt: '2026-10-15T00:00:00.000Z', revenue: 80 },
+      // After the backfill: only the tracker knows about it, kept.
+      { ...base, id: 't2', externalId: 'squarespace:sheet-2', channel: 'squarespace', source: 'sales-tracker', orderedAt: '2026-10-16T00:00:00.000Z', revenue: 90 },
+    ]
+    expect(preferLiveOrders(orders).map((o) => o.id).sort()).toEqual(['m1', 't2'])
+  })
 })
