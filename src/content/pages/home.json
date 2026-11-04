@@ -36,26 +36,21 @@
         "label": "Grey",
         "swatch": "#cfc9bd",
         "href": "/products/retro-roller-grey",
-        "splat": "/assets/home/splats/retro-roller-grey.srsp",
-        "poster": "/assets/products/retro-roller-grey.jpg",
-        "motion": "spin"
+        "image": "/assets/home/featured/retro-roller-grey.webp"
       },
       {
         "label": "Purple",
         "swatch": "#5b2a86",
         "href": "/products/retro-roller-purple",
-        "splat": "/assets/home/splats/retro-roller-purple.srsp",
-        "poster": "/assets/products/retro-roller-purple.jpg"
+        "image": "/assets/home/featured/retro-roller-purple.webp"
       },
       {
         "label": "Yellow",
         "swatch": "#e8c547",
         "href": "/products/retro-roller-yellow",
-        "splat": "/assets/home/splats/retro-roller-yellow.srsp",
-        "poster": "/assets/products/retro-roller-yellow.jpg"
+        "image": "/assets/home/featured/retro-roller-yellow.webp"
       }
     ],
-    "motion": "sway",
     "cta": {
       "label": "Shop the Retro Roller",
       "href": "/products/retro-roller-grey"
