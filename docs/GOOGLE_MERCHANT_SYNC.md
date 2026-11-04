@@ -36,15 +36,31 @@ Shipping and returns come from the Merchant Center account settings.
 
 ## Running
 
+Once steps 1–5 are done, `contact-api` keeps Merchant Center in line on its own. There's no cron service to set up.
+
+- **On boot and every hour** (`MERCHANT_SYNC_INTERVAL_MINUTES`, default 60, minimum 5; `0` leaves webhooks only), it re-sends every active product with current price, sale price and stock, and removes products that are no longer active.
+- **About a minute after a Shopify change** (`MERCHANT_SYNC_DEBOUNCE_SECONDS`, default 60), it runs again. `shopify.app.toml` subscribes `products/create`, `products/update`, `products/delete` and `inventory_levels/update` to `POST /webhooks/shopify`, which checks Shopify's HMAC signature against `SHOPIFY_CLIENT_SECRET`. A sell-out therefore reaches Google within minutes, not at the next daily feed fetch. Bulk edits send one webhook per product, and those collapse into a single run.
+- Only one sync runs at a time. A change that arrives mid-run queues one more run.
+- Each run shows as **merchant-center** in the dashboard's sync status, with any failed offer IDs in the Railway logs.
+- The boot log says `Merchant Center sync: on (account 5685591896)`, or `off (missing …)` with the env var it still needs. Set `MERCHANT_SYNC_ENABLED=false` to turn it off without removing the config.
+
+**Apply the webhook subscriptions** once (and again whenever `shopify.app.toml` changes) from the repo root, signed in to the Partner/Dev Dashboard account that owns the `sundayrolls` app:
+
+```bash
+shopify app deploy
+```
+
+Without that, the hourly sync still runs; stock changes just take up to an hour to show.
+
+The CLI is still there for setup and one-offs:
+
 ```bash
 npm run merchant:sync -- --dry-run   # print every offer; only needs Shopify creds
-npm run merchant:sync                # push to Merchant Center
+npm run merchant:sync                # push to Merchant Center now
 npm run merchant:sync -- --no-prune  # push without removing anything
 ```
 
-Exit code 1 means at least one product failed. In that case nothing is pruned.
-
-Schedule it as a Railway cron service on the `server/` image. Use the command `npm run merchant:sync` and a schedule of `0 9 * * *` (daily). Run it right after bulk product edits too.
+Exit code 1 means at least one product failed. A run with a failure, or one where Shopify returned no products, prunes nothing, so an outage can't empty the feed.
 
 ## Cutting over from Squarespace
 
