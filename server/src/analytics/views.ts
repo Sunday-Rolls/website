@@ -267,13 +267,18 @@ function productKey(name: string): string {
 }
 
 /**
- * The Sales Tracker records Etsy and eBay sales as a bare "Headcover" with no design, so on its own
- * that row looks like a best-seller. Name it for what it is: marketplace sales of unknown design.
+ * The Sales Tracker records most sales (Etsy, eBay and website alike) as a bare "Headcover" with no
+ * design, so on its own that row looks like a best-seller. Name it for what it is: a sale of unknown
+ * design, by channel. Live Shopify and Squarespace CSV rows carry real product names and are left alone.
  */
 function productLabel(order: Order, line: { productName: string; category: string | null }): { name: string; category: string | null } {
   const name = productKey(line.productName)
-  if (/^headcovers?$/i.test(name) && order.channel !== 'shopify' && order.channel !== 'squarespace') {
-    const where = order.channel === 'etsy' ? 'Etsy' : order.channel === 'ebay' ? 'eBay' : 'Other'
+  if (/^headcovers?$/i.test(name) && (order.source ?? 'sales-tracker') === 'sales-tracker') {
+    const where =
+      order.channel === 'etsy' ? 'Etsy'
+      : order.channel === 'ebay' ? 'eBay'
+      : order.channel === 'squarespace' || order.channel === 'shopify' ? 'Website'
+      : 'Other'
     return { name: `${where} sale (design not recorded)`, category: 'Design not recorded' }
   }
   return { name, category: line.category ? productKey(line.category) : null }
