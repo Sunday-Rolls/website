@@ -137,6 +137,36 @@ export async function runGa4Report(
   }
 }
 
+/**
+ * Google Ads rows from a GA4 report of date × sessionCampaignName with
+ * [advertiserAdCost, sessions, purchaseRevenue, ecommercePurchases].
+ * Paid campaigns are the ones with cost somewhere in the report; organic and Meta utm campaigns stay out.
+ */
+export function adSpendFromRows(rows: Array<{ dims: string[]; metrics: string[] }>): Ga4AdSpendRow[] {
+  const paidCampaigns = new Set(rows.filter((row) => num(row.metrics[0]) > 0).map((row) => (row.dims[1] || '').trim()))
+  const adSpend: Ga4AdSpendRow[] = []
+  for (const row of rows) {
+    const date = gaDateToIso(row.dims[0])
+    const campaign = (row.dims[1] || 'Unassigned').trim() || 'Unassigned'
+    const spend = num(row.metrics[0])
+    const revenue = num(row.metrics[2])
+    const purchases = num(row.metrics[3])
+    // Keep a paid campaign's days with spend, and days it earned revenue without spending.
+    if (!paidCampaigns.has((row.dims[1] || '').trim()) || (spend <= 0 && revenue <= 0)) continue
+    // Skip placeholder campaign names that aren't real Ads campaigns
+    if (campaign.startsWith('(') && campaign.endsWith(')')) continue
+    adSpend.push({
+      date,
+      platform: 'Google Ads',
+      campaign,
+      spend: Math.round(spend * 100) / 100,
+      platformReportedSales: Math.round(revenue * 100) / 100,
+      platformReportedOrders: purchases,
+    })
+  }
+  return adSpend
+}
+
 export async function fetchGa4TrafficBundle(
   creds: Ga4Credentials,
   startDate: string,
@@ -199,7 +229,8 @@ export async function fetchGa4TrafficBundle(
     runGa4Report(token, property, {
       dateRanges: [range],
       dimensions: [{ name: 'date' }, { name: 'sessionCampaignName' }],
-      metrics: [{ name: 'advertiserAdCost' }, { name: 'sessions' }],
+      // Purchase revenue is credited to the session's campaign; the checkout pixel sends the purchase.
+      metrics: [{ name: 'advertiserAdCost' }, { name: 'sessions' }, { name: 'purchaseRevenue' }, { name: 'ecommercePurchases' }],
       limit: 50_000,
     }),
   ])
@@ -262,23 +293,7 @@ export async function fetchGa4TrafficBundle(
     if (cur) cur.productPageViews = views
   }
 
-  const adSpend: Ga4AdSpendRow[] = []
-  for (const row of ads.rows) {
-    const date = gaDateToIso(row.dims[0])
-    const campaign = (row.dims[1] || 'Unassigned').trim() || 'Unassigned'
-    const spend = num(row.metrics[0])
-    if (spend <= 0) continue
-    // Skip placeholder campaign names that aren't real Ads campaigns
-    if (campaign.startsWith('(') && campaign.endsWith(')')) continue
-    adSpend.push({
-      date,
-      platform: 'Google Ads',
-      campaign,
-      spend: Math.round(spend * 100) / 100,
-      platformReportedSales: 0,
-      platformReportedOrders: 0,
-    })
-  }
+  const adSpend = adSpendFromRows(ads.rows)
 
   return {
     traffic: [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date)),
