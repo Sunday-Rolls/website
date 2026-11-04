@@ -302,7 +302,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     ])
     return c.json({
       ok: true,
-      data: buildPnL({ year, month, orders, expenses, cashForecast }),
+      data: buildPnL({ year, month, orders, expenses, cashForecast, today: storeDateOf(new Date()) }),
     })
   })
 

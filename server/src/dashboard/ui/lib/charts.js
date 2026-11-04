@@ -93,17 +93,31 @@ function base(t, { animate = true } = {}) {
 }
 
 function categoryAxis(t, categories, el) {
-  // Roughly one label per 72px so dates never collide on narrow screens.
-  const fit = Math.max(2, Math.floor((el?.clientWidth || 600) / 72))
+  // Category axes can't hide overlapping labels, so show every Nth one based on the widest label.
+  const width = el?.clientWidth || 600
+  const longest = Math.max(1, ...categories.map((c) => String(c).length))
+  const fit = Math.max(2, Math.floor((width - 60) / (longest * 7 + 18)))
+  const every = Math.max(1, Math.ceil(categories.length / fit))
+  const shown = new Set(categories.filter((_, i) => i % every === 0).map(String))
   return {
     type: 'category',
     categories,
     axisBorder: { show: false },
     axisTicks: { show: false },
     tooltip: { enabled: false },
-    tickAmount: categories.length > fit ? fit : undefined,
-    labels: { rotate: 0, hideOverlappingLabels: true, style: { colors: t.muted, fontSize: '12px' } },
+    labels: {
+      rotate: 0,
+      hideOverlappingLabels: false,
+      trim: false,
+      style: { colors: t.muted, fontSize: '12px' },
+      formatter: (v) => (shown.has(String(v)) ? v : ''),
+    },
   }
+}
+
+/** Tooltip header with the full category even when its axis label is hidden. */
+function tooltipX(categories) {
+  return { show: true, formatter: (v, opts) => categories[opts?.dataPointIndex] ?? v }
 }
 
 function valueAxis(t, fmt, series = []) {
@@ -206,7 +220,7 @@ export function areaChart(el, { series = [], categories = [], format = 'num', he
       legend: { ...o.legend, show: series.length > 1 },
       xaxis: categoryAxis(t, categories, el),
       yaxis: valueAxis(t, fmt, series),
-      tooltip: { ...o.tooltip, x: { show: true }, y: { formatter: (v) => fmt(v) } },
+      tooltip: { ...o.tooltip, x: tooltipX(categories), y: { formatter: (v) => fmt(v) } },
     }
   })
 }
@@ -260,14 +274,59 @@ export function barChart(
         ? { ...axis, labels: { ...axis.labels, formatter: (v) => compact(Number(v), fmt) } }
         : axis,
       yaxis: horizontal ? { labels: { style: { colors: [t.muted], fontSize: '12px' }, maxWidth: 180 } } : valueAxis(t, fmt, series),
-      tooltip: { ...o.tooltip, y: { formatter: (v) => fmt(v) } },
+      tooltip: { ...o.tooltip, ...(horizontal ? {} : { x: tooltipX(categories) }), y: { formatter: (v) => fmt(v) } },
+    }
+  })
+}
+
+/**
+ * Bars on the left axis with a line on its own right axis (e.g. visits and conversion rate).
+ * bar / line: { name, data: number[], format }.
+ */
+export function comboChart(el, { bar, line, categories = [], height = 300 } = {}) {
+  const barFmt = formatter(bar.format ?? 'num')
+  const lineFmt = formatter(line.format ?? 'pct')
+  return create(el, (animate) => {
+    const t = theme()
+    const o = base(t, { animate })
+    return {
+      ...o,
+      chart: { ...o.chart, type: 'line', height },
+      colors: [t.brand300, t.gold],
+      series: [
+        { name: bar.name, type: 'column', data: bar.data },
+        { name: line.name, type: 'line', data: line.data },
+      ],
+      plotOptions: { bar: { columnWidth: '55%', borderRadius: 4, borderRadiusApplication: 'end' } },
+      stroke: { width: [0, 3], curve: 'smooth' },
+      markers: { size: 0, strokeColors: t.card, strokeWidth: 2, hover: { size: 5 } },
+      legend: { ...o.legend, show: true },
+      xaxis: categoryAxis(t, categories, el),
+      yaxis: [
+        { ...valueAxis(t, barFmt, [bar]), title: { text: undefined } },
+        {
+          opposite: true,
+          min: 0,
+          forceNiceScale: true,
+          labels: { style: { colors: [t.muted], fontSize: '12px' }, formatter: (v) => (Number.isFinite(v) ? lineFmt(v) : '') },
+        },
+      ],
+      tooltip: { ...o.tooltip, shared: true, intersect: false, x: tooltipX(categories), y: { formatter: (v, { seriesIndex }) => (seriesIndex === 0 ? barFmt(v) : lineFmt(v)) } },
     }
   })
 }
 
 /** Donut. series: number[]; labels: string[]. Centre shows the total. */
-export function donutChart(el, { series = [], labels = [], format = 'num', height = 300 } = {}) {
+export function donutChart(el, { series = [], labels = [], format = 'num', height = 300, maxSlices = 6 } = {}) {
   const fmt = formatter(format)
+  // Keep the biggest slices and fold the rest into "Other" so the legend stays short.
+  if (series.length > maxSlices) {
+    const ranked = series.map((v, i) => [Number(v) || 0, labels[i]]).sort((a, b) => b[0] - a[0])
+    const top = ranked.slice(0, maxSlices - 1)
+    const rest = ranked.slice(maxSlices - 1)
+    series = [...top.map((r) => r[0]), rest.reduce((a, r) => a + r[0], 0)]
+    labels = [...top.map((r) => r[1]), `Other (${rest.length})`]
+  }
   return create(el, (animate) => {
     const t = theme()
     const o = base(t, { animate })

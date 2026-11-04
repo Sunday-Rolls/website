@@ -84,6 +84,12 @@ export type PnLResponse = {
     grossMarginYtd: MetricDelta
     netIncomeYtd: MetricDelta
     cashOnHand: number
+    /** Month end of the forecast row cash comes from (latest one already past). */
+    cashAsOf: string | null
+    /** Last day of the previous-year window the YTD deltas compare against. */
+    comparedThrough: string
+    /** True when the year has no Manufacturing expenses, so COGS is units × unit cost. */
+    cogsEstimated: boolean
   }
   incomeStatement: Array<{
     section: string
@@ -218,8 +224,11 @@ export function buildOverview(input: {
   const visits = sum(curTraffic.map((t) => t.visits))
   const prevVisits = sum(prevTraffic.map((t) => t.visits))
   const uniqueVisitors = sum(curTraffic.map((t) => t.uniqueVisitors))
-  const conversionRate = visits ? (orderCount / visits) * 100 : 0
-  const prevConversion = prevVisits ? (prevOrderCount / prevVisits) * 100 : 0
+  // Conversion is website orders over website visits: Etsy/eBay/in-person buyers never visit the site.
+  const webCount = curOrders.filter((o) => isWebsiteChannel(o.channel)).length
+  const prevWebCount = prevOrders.filter((o) => isWebsiteChannel(o.channel)).length
+  const conversionRate = visits ? (webCount / visits) * 100 : 0
+  const prevConversion = prevVisits ? (prevWebCount / prevVisits) * 100 : 0
 
   const dayMap = new Map<string, { revenue: number; orders: number; visits: number }>()
   for (let d = range.start; d <= range.end; ) {
@@ -245,7 +254,7 @@ export function buildOverview(input: {
   const checkouts = sum(curTraffic.map((t) => t.checkouts))
   const ga4Purchases = sum(curTraffic.map((t) => t.purchases))
   const funnelOrderSource: OverviewResponse['funnelOrderSource'] = ga4Purchases > 0 ? 'ga4' : 'orders'
-  const purchases = ga4Purchases || orderCount
+  const purchases = ga4Purchases || webCount
   const sourceCounts = orderSourceCounts(curOrders)
   const orderSources = {
     salesTracker: sourceCounts['sales-tracker'] ?? 0,
@@ -383,140 +392,152 @@ function channelLabel(channel: string): string {
   }
 }
 
+/** Expense categories each P&L line draws from; anything else lands in "Legal & other". */
+const PNL_CATEGORIES = {
+  packaging: [['cogs', 'Shipping Boxes'], ['cogs', 'Stickers'], ['cogs', 'Cards']],
+  fees: [['cogs', 'Fees']],
+  freight: [['cogs', 'Freight']],
+  ads: [['sga', 'Ads'], ['sga', 'Marketing']],
+  website: [['sga', 'Website']],
+  design: [['cogs', 'Vector File'], ['cogs', 'Prototype'], ['sga', 'Other Expenses']],
+  manufacturing: [['cogs', 'Manufacturing']],
+} as const
+
+const MAPPED = new Set(Object.values(PNL_CATEGORIES).flat().map(([b, c]) => `${b}:${c}`))
+
+type Statement = {
+  revenue: number
+  manufacturing: number
+  packaging: number
+  gross: number
+  fees: number
+  ship: number
+  ads: number
+  website: number
+  design: number
+  other: number
+  opex: number
+  net: number
+  units: number
+}
+
+/**
+ * One income statement for a set of orders and expenses. Manufacturing is the booked
+ * Manufacturing expense when `estimateCogs` is false, otherwise units × unitCogs (used only
+ * when the whole year has no Manufacturing expense, so months always add up to the year).
+ */
+function statementFor(orders: Order[], expenses: Expense[], estimateCogs: boolean, unitCogs: number): Statement {
+  const pick = (pairs: ReadonlyArray<readonly [string, string]>) =>
+    sum(expenses.filter((e) => pairs.some(([b, c]) => e.bucket === b && e.category === c)).map((e) => e.amount))
+  const units = sum(orders.flatMap((o) => o.lines.map((l) => l.quantity)))
+  const revenue = sum(orders.map((o) => o.revenue))
+  const manufacturing = estimateCogs ? units * unitCogs : pick(PNL_CATEGORIES.manufacturing)
+  const packaging = pick(PNL_CATEGORIES.packaging)
+  const gross = revenue - manufacturing - packaging
+  const fees = sum(orders.map((o) => o.fees)) + pick(PNL_CATEGORIES.fees)
+  const ship = sum(orders.map((o) => o.shippingCost)) + pick(PNL_CATEGORIES.freight)
+  const ads = sum(orders.map((o) => o.marketingCost)) + pick(PNL_CATEGORIES.ads)
+  const website = pick(PNL_CATEGORIES.website)
+  const design = pick(PNL_CATEGORIES.design)
+  const other = sum(expenses.filter((e) => !MAPPED.has(`${e.bucket}:${e.category}`)).map((e) => e.amount))
+  const opex = fees + ship + ads + website + design + other
+  return { revenue, manufacturing, packaging, gross, fees, ship, ads, website, design, other, opex, net: gross - opex, units }
+}
+
 export function buildPnL(input: {
   year: number
   month: string | null
   orders: Order[]
   expenses: Expense[]
   cashForecast: CashForecastRow[]
-  /** Unit manufacturing cost used for per-unit profit when line COGS unavailable. */
+  /** Store-local YYYY-MM-DD. YTD comparisons run Jan 1 → this day of the previous year; cash is as of it. */
+  today?: string
+  /** Unit manufacturing cost, used only when a year has no Manufacturing expenses at all. */
   unitCogs?: number
 }): PnLResponse {
   const { month, expenses, cashForecast } = input
   const orders = preferLiveOrders(input.orders)
   const unitCogs = input.unitCogs ?? 15
+  const today = input.today ?? new Date().toISOString().slice(0, 10)
 
   // Prefer year from YYYY-MM so a mismatched year query can't zero out the Month column.
   const year =
     month && /^\d{4}-\d{2}$/.test(month) ? Number(month.slice(0, 4)) : input.year
 
+  // The current year runs through today; a past year is compared in full.
+  const throughMd = String(year) === today.slice(0, 4) ? today.slice(5) : '12-31'
+  const inYear = (day: string, y: number) => day >= `${y}-01-01` && day <= `${y}-${throughMd}`
   const ytdOrders = orders.filter((o) => storeDay(o.orderedAt).startsWith(String(year)))
-  const monthOrders = month ? orders.filter((o) => monthKey(o.orderedAt) === month) : []
-
-  const ytdPrevOrders = orders.filter((o) => storeDay(o.orderedAt).startsWith(String(year - 1)))
-  // Compare selected month vs previous calendar month for net income sparkline-style KPI
-  const prevMonth = month
-    ? (() => {
-        const [y, m] = month.split('-').map(Number)
-        const d = new Date(Date.UTC(y, m - 2, 1))
-        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
-      })()
-    : null
-  const prevMonthOrders = prevMonth ? orders.filter((o) => monthKey(o.orderedAt) === prevMonth) : []
-
-  const sumRev = (list: Order[]) => sum(list.map((o) => o.revenue))
-  const sumFees = (list: Order[]) => sum(list.map((o) => o.fees))
-  const sumShip = (list: Order[]) => sum(list.map((o) => o.shippingCost))
-  const sumMkt = (list: Order[]) => sum(list.map((o) => o.marketingCost))
-  const units = (list: Order[]) => sum(list.flatMap((o) => o.lines.map((l) => l.quantity)))
-
   const ytdExpenses = expenses.filter((e) => e.spentAt.startsWith(String(year)))
+  const prevOrders = orders.filter((o) => inYear(storeDay(o.orderedAt), year - 1))
+  const prevExpenses = expenses.filter((e) => inYear(e.spentAt.slice(0, 10), year - 1))
+  const monthOrders = month ? orders.filter((o) => monthKey(o.orderedAt) === month) : []
   const monthExpenses = month ? expenses.filter((e) => e.spentAt.startsWith(month)) : []
 
-  const expenseTotal = (list: Expense[], bucket: 'cogs' | 'sga', category?: string) =>
-    sum(
-      list
-        .filter((e) => e.bucket === bucket && (!category || e.category === category))
-        .map((e) => e.amount),
-    )
-
-  const manufacturingYtd = expenseTotal(ytdExpenses, 'cogs', 'Manufacturing') || units(ytdOrders) * unitCogs
-  const packagingYtd =
-    expenseTotal(ytdExpenses, 'cogs', 'Shipping Boxes') +
-    expenseTotal(ytdExpenses, 'cogs', 'Stickers') +
-    expenseTotal(ytdExpenses, 'cogs', 'Cards')
-  const manufacturingMonth =
-    expenseTotal(monthExpenses, 'cogs', 'Manufacturing') || units(monthOrders) * unitCogs
-  const packagingMonth =
-    expenseTotal(monthExpenses, 'cogs', 'Shipping Boxes') +
-    expenseTotal(monthExpenses, 'cogs', 'Stickers') +
-    expenseTotal(monthExpenses, 'cogs', 'Cards')
-
-  const revenueYtd = sumRev(ytdOrders)
-  const revenueMonth = sumRev(monthOrders)
-  const cogsYtd = manufacturingYtd + packagingYtd
-  const cogsMonth = manufacturingMonth + packagingMonth
-  const grossYtd = revenueYtd - cogsYtd
-  const grossMonth = revenueMonth - cogsMonth
-
-  const feesYtd = sumFees(ytdOrders) + expenseTotal(ytdExpenses, 'cogs', 'Fees')
-  const shipYtd = sumShip(ytdOrders) + expenseTotal(ytdExpenses, 'cogs', 'Freight')
-  const adsYtd = sumMkt(ytdOrders) + expenseTotal(ytdExpenses, 'sga', 'Ads') + expenseTotal(ytdExpenses, 'sga', 'Marketing')
-  const websiteYtd = expenseTotal(ytdExpenses, 'sga', 'Website')
-  const designYtd =
-    expenseTotal(ytdExpenses, 'cogs', 'Vector File') +
-    expenseTotal(ytdExpenses, 'cogs', 'Prototype') +
-    expenseTotal(ytdExpenses, 'sga', 'Other Expenses')
-
-  const feesMonth = sumFees(monthOrders) + expenseTotal(monthExpenses, 'cogs', 'Fees')
-  const shipMonth = sumShip(monthOrders) + expenseTotal(monthExpenses, 'cogs', 'Freight')
-  const adsMonth =
-    sumMkt(monthOrders) + expenseTotal(monthExpenses, 'sga', 'Ads') + expenseTotal(monthExpenses, 'sga', 'Marketing')
-  const websiteMonth = expenseTotal(monthExpenses, 'sga', 'Website')
-  const designMonth =
-    expenseTotal(monthExpenses, 'cogs', 'Vector File') +
-    expenseTotal(monthExpenses, 'cogs', 'Prototype') +
-    expenseTotal(monthExpenses, 'sga', 'Other Expenses')
-
-  const opexYtd = feesYtd + shipYtd + adsYtd + websiteYtd + designYtd
-  const opexMonth = feesMonth + shipMonth + adsMonth + websiteMonth + designMonth
-  const netYtd = grossYtd - opexYtd
-  const netMonth = grossMonth - opexMonth
-  const prevNetMonth = (() => {
-    const rev = sumRev(prevMonthOrders)
-    const cogs = units(prevMonthOrders) * unitCogs
-    const opex =
-      sumFees(prevMonthOrders) + sumShip(prevMonthOrders) + sumMkt(prevMonthOrders)
-    return rev - cogs - opex
-  })()
+  const hasMfg = (list: Expense[]) => list.some((e) => e.bucket === 'cogs' && e.category === 'Manufacturing')
+  const estimateThisYear = !hasMfg(ytdExpenses)
+  const ytd = statementFor(ytdOrders, ytdExpenses, estimateThisYear, unitCogs)
+  const mon = statementFor(monthOrders, monthExpenses, estimateThisYear, unitCogs)
+  const prev = statementFor(
+    prevOrders,
+    prevExpenses,
+    !hasMfg(expenses.filter((e) => e.spentAt.startsWith(String(year - 1)))),
+    unitCogs,
+  )
 
   const pct = (amount: number, base: number) => (base ? (amount / base) * 100 : null)
+  const line = (section: string, label: string, m: number, y: number, emphasize = false) => ({
+    section,
+    label,
+    monthAmount: m,
+    monthPct: pct(Math.abs(m), mon.revenue),
+    ytdAmount: y,
+    ytdPct: pct(Math.abs(y), ytd.revenue),
+    ...(emphasize ? { emphasize: true } : {}),
+  })
+  const signed = (m: number, y: number) => [m, y] as const
+  const byChannel = (list: Order[], channel: string) => sum(list.filter((o) => o.channel === channel).map((o) => o.revenue))
+  const channels = [
+    ['Etsy', 'etsy'],
+    ['Squarespace', 'squarespace'],
+    ['Shopify', 'shopify'],
+    ['eBay', 'ebay'],
+    ['In person & other', 'other'],
+  ] as const
 
   const incomeStatement: PnLResponse['incomeStatement'] = [
-    { section: 'REVENUE', label: 'Etsy', monthAmount: sumRev(monthOrders.filter((o) => o.channel === 'etsy')), monthPct: null, ytdAmount: sumRev(ytdOrders.filter((o) => o.channel === 'etsy')), ytdPct: null },
-    { section: 'REVENUE', label: 'Squarespace', monthAmount: sumRev(monthOrders.filter((o) => o.channel === 'squarespace')), monthPct: null, ytdAmount: sumRev(ytdOrders.filter((o) => o.channel === 'squarespace')), ytdPct: null },
-    { section: 'REVENUE', label: 'Shopify', monthAmount: sumRev(monthOrders.filter((o) => o.channel === 'shopify')), monthPct: null, ytdAmount: sumRev(ytdOrders.filter((o) => o.channel === 'shopify')), ytdPct: null },
-    { section: 'REVENUE', label: 'eBay', monthAmount: sumRev(monthOrders.filter((o) => o.channel === 'ebay')), monthPct: null, ytdAmount: sumRev(ytdOrders.filter((o) => o.channel === 'ebay')), ytdPct: null },
-    { section: 'REVENUE', label: 'In person & other', monthAmount: sumRev(monthOrders.filter((o) => o.channel === 'other')), monthPct: null, ytdAmount: sumRev(ytdOrders.filter((o) => o.channel === 'other')), ytdPct: null },
-    { section: 'REVENUE', label: 'Total revenue', monthAmount: revenueMonth, monthPct: 100, ytdAmount: revenueYtd, ytdPct: 100, emphasize: true },
-    { section: 'COST OF GOODS SOLD', label: 'Product manufacturing', monthAmount: -manufacturingMonth, monthPct: pct(manufacturingMonth, revenueMonth), ytdAmount: -manufacturingYtd, ytdPct: pct(manufacturingYtd, revenueYtd) },
-    { section: 'COST OF GOODS SOLD', label: 'Packaging', monthAmount: -packagingMonth, monthPct: pct(packagingMonth, revenueMonth), ytdAmount: -packagingYtd, ytdPct: pct(packagingYtd, revenueYtd) },
-    { section: 'COST OF GOODS SOLD', label: 'Gross profit', monthAmount: grossMonth, monthPct: pct(grossMonth, revenueMonth), ytdAmount: grossYtd, ytdPct: pct(grossYtd, revenueYtd), emphasize: true },
-    { section: 'OPERATING EXPENSES', label: 'Platform & payment fees', monthAmount: -feesMonth, monthPct: pct(feesMonth, revenueMonth), ytdAmount: -feesYtd, ytdPct: pct(feesYtd, revenueYtd) },
-    { section: 'OPERATING EXPENSES', label: 'Shipping & freight', monthAmount: -shipMonth, monthPct: pct(shipMonth, revenueMonth), ytdAmount: -shipYtd, ytdPct: pct(shipYtd, revenueYtd) },
-    { section: 'OPERATING EXPENSES', label: 'Marketing & ads', monthAmount: -adsMonth, monthPct: pct(adsMonth, revenueMonth), ytdAmount: -adsYtd, ytdPct: pct(adsYtd, revenueYtd) },
-    { section: 'OPERATING EXPENSES', label: 'Website & software', monthAmount: -websiteMonth, monthPct: pct(websiteMonth, revenueMonth), ytdAmount: -websiteYtd, ytdPct: pct(websiteYtd, revenueYtd) },
-    { section: 'OPERATING EXPENSES', label: 'Design & prototypes', monthAmount: -designMonth, monthPct: pct(designMonth, revenueMonth), ytdAmount: -designYtd, ytdPct: pct(designYtd, revenueYtd) },
-    { section: 'OPERATING EXPENSES', label: 'Total operating expenses', monthAmount: -opexMonth, monthPct: pct(opexMonth, revenueMonth), ytdAmount: -opexYtd, ytdPct: pct(opexYtd, revenueYtd), emphasize: true },
-    { section: 'NET', label: 'Net income', monthAmount: netMonth, monthPct: pct(netMonth, revenueMonth), ytdAmount: netYtd, ytdPct: pct(netYtd, revenueYtd), emphasize: true },
+    ...channels.map(([label, ch]) => ({
+      section: 'REVENUE',
+      label,
+      monthAmount: byChannel(monthOrders, ch),
+      monthPct: pct(byChannel(monthOrders, ch), mon.revenue),
+      ytdAmount: byChannel(ytdOrders, ch),
+      ytdPct: pct(byChannel(ytdOrders, ch), ytd.revenue),
+    })),
+    { section: 'REVENUE', label: 'Total revenue', monthAmount: mon.revenue, monthPct: 100, ytdAmount: ytd.revenue, ytdPct: 100, emphasize: true },
+    line('COST OF GOODS SOLD', 'Product manufacturing', ...signed(-mon.manufacturing, -ytd.manufacturing)),
+    line('COST OF GOODS SOLD', 'Packaging', ...signed(-mon.packaging, -ytd.packaging)),
+    { ...line('COST OF GOODS SOLD', 'Gross profit', mon.gross, ytd.gross, true), monthPct: pct(mon.gross, mon.revenue), ytdPct: pct(ytd.gross, ytd.revenue) },
+    line('OPERATING EXPENSES', 'Platform & payment fees', -mon.fees, -ytd.fees),
+    line('OPERATING EXPENSES', 'Shipping & freight', -mon.ship, -ytd.ship),
+    line('OPERATING EXPENSES', 'Marketing & ads', -mon.ads, -ytd.ads),
+    line('OPERATING EXPENSES', 'Website & software', -mon.website, -ytd.website),
+    line('OPERATING EXPENSES', 'Design & prototypes', -mon.design, -ytd.design),
+    line('OPERATING EXPENSES', 'Legal & other', -mon.other, -ytd.other),
+    line('OPERATING EXPENSES', 'Total operating expenses', -mon.opex, -ytd.opex, true),
+    { ...line('NET', 'Net income', mon.net, ytd.net, true), monthPct: pct(mon.net, mon.revenue), ytdPct: pct(ytd.net, ytd.revenue) },
   ]
-
-  for (const row of incomeStatement) {
-    if (row.section === 'REVENUE' && row.label !== 'Total revenue') {
-      row.monthPct = pct(row.monthAmount, revenueMonth)
-      row.ytdPct = pct(row.ytdAmount, revenueYtd)
-    }
-  }
 
   const channelStats = (['etsy', 'squarespace', 'shopify', 'ebay', 'other'] as const).map((channel) => {
     const list = ytdOrders.filter((o) => o.channel === channel)
-    const rev = sumRev(list)
-    const u = units(list) || 1
-    const profit = rev - u * unitCogs - sumFees(list) - sumShip(list) - sumMkt(list)
+    const rev = sum(list.map((o) => o.revenue))
+    const u = sum(list.flatMap((o) => o.lines.map((l) => l.quantity))) || 1
+    const profit =
+      rev - u * unitCogs - sum(list.map((o) => o.fees)) - sum(list.map((o) => o.shippingCost)) - sum(list.map((o) => o.marketingCost))
     return {
       channel: channelLabel(channel),
       revenue: rev,
-      share: revenueYtd ? (rev / revenueYtd) * 100 : 0,
+      share: ytd.revenue ? (rev / ytd.revenue) * 100 : 0,
       revenuePerUnit: rev / u,
       profitPerUnit: profit / u,
     }
@@ -533,26 +554,23 @@ export function buildPnL(input: {
     monthMap.set(m, row)
   }
 
-  const cashOnHand = cashForecast.length
-    ? [...cashForecast].sort((a, b) => a.monthEnd.localeCompare(b.monthEnd)).at(-1)!.endingBalance
-    : 0
+  // Cash on hand is the latest month that has ended, not a future forecast month.
+  const sortedCash = [...cashForecast].sort((a, b) => a.monthEnd.localeCompare(b.monthEnd))
+  const cashRow = sortedCash.filter((r) => r.monthEnd.slice(0, 10) <= today).at(-1) ?? null
 
-  const grossMarginYtd = revenueYtd ? (grossYtd / revenueYtd) * 100 : 0
-  const prevGrossMargin = (() => {
-    const rev = sumRev(ytdPrevOrders)
-    if (!rev) return 0
-    const cogs = units(ytdPrevOrders) * unitCogs
-    return ((rev - cogs) / rev) * 100
-  })()
+  const margin = (st: Statement) => (st.revenue ? (st.gross / st.revenue) * 100 : 0)
 
   return {
     year,
     month,
     kpis: {
-      revenueYtd: delta(revenueYtd, sumRev(ytdPrevOrders)),
-      grossMarginYtd: delta(grossMarginYtd, prevGrossMargin, true),
-      netIncomeYtd: delta(netYtd, prevNetMonth),
-      cashOnHand,
+      revenueYtd: delta(ytd.revenue, prev.revenue),
+      grossMarginYtd: delta(margin(ytd), margin(prev), true),
+      netIncomeYtd: delta(ytd.net, prev.net),
+      cashOnHand: cashRow ? cashRow.endingBalance : 0,
+      cashAsOf: cashRow ? cashRow.monthEnd.slice(0, 10) : null,
+      comparedThrough: `${year - 1}-${throughMd}`,
+      cogsEstimated: estimateThisYear,
     },
     incomeStatement,
     revenueByChannel: channelStats,
@@ -560,7 +578,7 @@ export function buildPnL(input: {
       .filter(([m]) => m.startsWith(String(year)))
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([m, v]) => ({ month: m, ...v })),
-    cashForecast: [...cashForecast].sort((a, b) => a.monthEnd.localeCompare(b.monthEnd)),
+    cashForecast: sortedCash,
   }
 }
 

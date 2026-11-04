@@ -97,14 +97,18 @@ function kpis(data) {
       icon: 'users',
       label: 'New customers',
       value: num(data.newCustomers),
-      hint: 'First-time buyers in this range',
+      hint: data.unknownCustomerOrders > 0
+        ? `First-time buyers by email · ${num(data.unknownCustomerOrders)} orders without an email (Etsy, eBay, sheet) not counted`
+        : 'First-time buyers by email in this range',
       className: 'col-3',
     }),
     kpiCard({
       icon: 'target',
       label: 'New-customer cost',
       value: isNum(data.newCustomerCac) ? moneyExact(data.newCustomerCac) : '—',
-      hint: 'Ad spend ÷ new customers',
+      hint: data.websiteOrdersWithoutEmail > 0
+        ? `Needs customer emails: ${num(data.websiteOrdersWithoutEmail)} website orders in this range have none`
+        : 'Ad spend ÷ new customers',
       className: 'col-3',
     }),
   ].join('')
@@ -214,7 +218,10 @@ function notConnectedCards(connected = {}) {
 
 // ---------- Keywords ----------
 
-function keywordsCard(keywords) {
+const SHORT_DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+const shortDay = (iso) => SHORT_DAY.format(new Date(`${iso}T00:00:00Z`))
+
+function keywordsCard(keywords, period) {
   if (!keywords.length) {
     return notConnected({
       title: 'Search keywords',
@@ -224,7 +231,9 @@ function keywordsCard(keywords) {
   }
   return card({
     title: 'Search keywords',
-    subtitle: 'Google searches that led to the site (Search Console)',
+    subtitle: period
+      ? `Google searches that led to the site, ${shortDay(period.start)} – ${shortDay(period.end)} (Search Console)`
+      : 'Google searches that led to the site (Search Console)',
     className: 'col-6',
     body: table({
       columns: [
@@ -264,7 +273,7 @@ export async function render(root, ctx) {
       className: 'col-6',
       body: sources.length ? '<div id="mkt-sources-chart" class="chart-box"></div>' : emptyState('No traffic data from Google Analytics in this range.'),
     }),
-    keywordsCard(data.keywords ?? []),
+    keywordsCard(data.keywords ?? [], data.keywordsPeriod),
   ].join('')
 
   // MER tone badge next to the value (kpiCard has no badge slot of its own).

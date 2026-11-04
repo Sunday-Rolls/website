@@ -1,41 +1,38 @@
-// Funnel: shopping funnel, abandoned checkouts, new vs returning customers, top states and regions.
-import { barChart, donutChart } from '../lib/charts.js'
-import { badge, card, emptyState, escapeHtml, money, notConnected, num, table } from '../lib/ui.js'
+// Funnel: website conversion, abandoned checkouts, new vs returning customers, top states and regions.
+import { barChart, comboChart, donutChart } from '../lib/charts.js'
+import { card, emptyState, escapeHtml, money, notConnected, num, table } from '../lib/ui.js'
 
 const isNum = (n) => typeof n === 'number' && Number.isFinite(n)
 
 const STEPS = [
   { key: 'visits', label: 'Visits', noun: 'visits' },
   { key: 'productViews', label: 'Product views', noun: 'product views' },
-  { key: 'addToCarts', label: 'Add to cart', noun: 'add-to-carts' },
-  { key: 'checkouts', label: 'Checkout', noun: 'checkouts' },
-  { key: 'purchases', label: 'Purchase', noun: 'purchases' },
+  { key: 'addToCarts', label: 'Added to cart', noun: 'add-to-carts' },
+  { key: 'checkouts', label: 'Started checkout', noun: 'checkouts' },
+  { key: 'purchases', label: 'Website orders', noun: 'orders' },
 ]
 
 const STYLE = `
-.fun-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
-.fun-step-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 8px; }
-.fun-step-name { font-size: 14px; font-weight: 500; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
-.fun-step-nums { font-size: 13px; color: var(--muted); }
-.fun-step-nums strong { font-size: 16px; font-weight: 600; color: var(--ink); margin-right: 8px; }
-.fun-track { height: 12px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
-.fun-fill { height: 100%; min-width: 4px; border-radius: 99px; background: linear-gradient(90deg, var(--chart-1), var(--chart-1-light)); }
-.fun-step.is-drop .fun-fill { background: var(--warn); }
-.fun-step.is-untracked .fun-step-name { color: var(--muted); }
-.fun-step.is-untracked .fun-track { background: repeating-linear-gradient(135deg, var(--surface-2) 0 8px, transparent 8px 14px); border: 1px dashed var(--border); }
-.fun-step.is-untracked .fun-fill { display: none; }
-.fun-untracked { font-size: 13px; color: var(--faint); font-style: italic; }
-.fun-note { margin: 14px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; line-height: 1.5; }
-.fun-headline { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0 0 22px; }
-.fun-headline div { display: flex; flex-direction: column; }
-.fun-headline dt { font-size: 12px; color: var(--muted); }
-.fun-headline dd { margin: 0; font-size: 22px; font-weight: 600; color: var(--ink); }
-.fun-sentence { margin: 20px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; }
+.fun-flow { display: flex; align-items: stretch; gap: 0; margin: 0 0 22px; padding: 0; list-style: none; flex-wrap: wrap; row-gap: 12px; }
+.fun-flow > li:not(.fun-link) { flex: 1 1 140px; min-width: 120px; display: flex; }
+.fun-node { flex: 1; margin: 0; padding: 14px 16px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border-soft); }
+.fun-node dt { font-size: 12px; color: var(--muted); margin: 0 0 4px; }
+.fun-node dd { margin: 0; font-size: 24px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.fun-node.is-goal { background: color-mix(in srgb, var(--chart-1) 14%, var(--surface-2)); border-color: color-mix(in srgb, var(--chart-1) 35%, transparent); }
+.fun-link { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 10px; gap: 2px; }
+.fun-rate { font-size: 13px; font-weight: 600; color: var(--ink); padding: 3px 9px; border-radius: 99px; background: var(--card); border: 1px solid var(--border); white-space: nowrap; }
+.fun-rate.is-low { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-bg); }
+.fun-arrow { color: var(--faint); font-size: 14px; line-height: 1; }
+.fun-chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 4px; }
+.fun-chart-head h4 { margin: 0; font-size: 14px; font-weight: 500; color: var(--ink); }
+.fun-chart-head span { font-size: 13px; color: var(--muted); }
+.fun-note { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; line-height: 1.5; }
 .fun-stats { display: flex; flex-direction: column; gap: 16px; margin: 0; }
 .fun-stat { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border-soft); }
 .fun-stat dt { font-size: 14px; color: var(--muted); }
 .fun-stat dd { margin: 0; font-size: 20px; font-weight: 600; color: var(--ink); }
 .fun-hint { margin: 16px 0 0; font-size: 13px; color: var(--muted); }
+@media (max-width: 640px) { .fun-link { flex-direction: row; width: 100%; padding: 2px 0; } .fun-arrow { transform: rotate(90deg); } }
 `
 
 function injectStyle() {
@@ -46,100 +43,79 @@ function injectStyle() {
   document.head.appendChild(el)
 }
 
-/** "42 of 70 checkouts" when the previous step is small, otherwise "56% of visits". */
-function stepConversion(count, prev, prevNoun) {
-  if (!(prev > 0)) return ''
-  if (prev < 100) return `${num(count)} of ${num(prev)} ${prevNoun}`
+const rateText = (count, prev) => {
+  if (!(prev > 0)) return '—'
   const p = (count / prev) * 100
-  return `${p.toFixed(p < 10 ? 1 : 0)}% of ${prevNoun}`
+  return `${p.toFixed(p < 1 ? 2 : p < 10 ? 1 : 0)}%`
 }
+
+const DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+const dayLabel = (iso) => DAY.format(new Date(`${iso}T00:00:00Z`))
 
 // ---------- Funnel ----------
 
-function funnelCard(f, tracked = {}, purchasesFrom = 'ga4') {
+/**
+ * Website conversion: the measured steps as a flow (counts with the step-to-step rate between them),
+ * then visits vs conversion over time. Steps GA4 doesn't measure are named in a note, not drawn.
+ */
+function funnelCard(f, tracked = {}, purchasesFrom = 'ga4', trend = []) {
   if (!f || !(f.visits > 0)) {
     return notConnected({
-      title: 'Shopping funnel',
-      detail: 'Google Analytics (GA4) isn’t reporting visits for this range yet. Once it is, this shows how many shoppers make it from visit to purchase.',
+      title: 'Website conversion',
+      detail: 'Google Analytics (GA4) isn’t reporting visits for this range yet. Once it is, this shows how many website visitors go on to order.',
       className: 'col-8',
     })
   }
-  const counts = STEPS.map((s) => (isNum(f[s.key]) ? f[s.key] : 0))
-  // A step is untracked when GA4 isn't receiving that event: it reads 0 while a later step has activity.
-  const isTracked = STEPS.map((s) => tracked[s.key] !== false)
-  const measured = STEPS.map((_, i) => i).filter((i) => isTracked[i])
-  const prevMeasured = (i) => [...measured].reverse().find((j) => j < i)
+  const steps = STEPS.filter((s) => tracked[s.key] !== false && isNum(f[s.key]))
+  const missing = STEPS.filter((s) => tracked[s.key] === false).map((s) => s.label.toLowerCase())
 
-  // Biggest drop-off, only between steps that are actually measured.
-  let drop = -1
-  let worst = Infinity
-  for (const i of measured) {
-    const p = prevMeasured(i)
-    if (p === undefined || !(counts[p] > 0)) continue
-    const rate = counts[i] / counts[p]
-    if (rate < worst) {
-      worst = rate
-      drop = i
-    }
-  }
+  // The weakest step-to-step rate gets the warning colour.
+  const rates = steps.slice(1).map((s, i) => (steps[i] && f[steps[i].key] > 0 ? f[s.key] / f[steps[i].key] : Infinity))
+  const weakest = rates.length > 1 ? rates.indexOf(Math.min(...rates)) : -1
 
-  const items = STEPS.map((s, i) => {
-    const count = counts[i]
-    if (!isTracked[i]) {
-      return `<li class="fun-step is-untracked">
-  <div class="fun-step-top">
-    <span class="fun-step-name">${escapeHtml(s.label)}</span>
-    <span class="fun-untracked">Not tracked yet</span>
-  </div>
-  <div class="fun-track"></div>
-</li>`
-    }
-    const p = prevMeasured(i)
-    const width = Math.max(0, Math.min(100, (count / counts[0]) * 100))
-    const conv = p === undefined ? 'Everyone who reached the site' : stepConversion(count, counts[p], STEPS[p].noun)
-    const isDrop = i === drop
-    return `<li class="fun-step${isDrop ? ' is-drop' : ''}">
-  <div class="fun-step-top">
-    <span class="fun-step-name">${escapeHtml(s.label)}${isDrop ? badge('Biggest drop-off', 'warning') : ''}</span>
-    <span class="fun-step-nums"><strong>${num(count)}</strong>${escapeHtml(conv)}</span>
-  </div>
-  <div class="fun-track"><div class="fun-fill" style="width:${width.toFixed(1)}%"></div></div>
-</li>`
-  }).join('')
+  const flow = steps
+    .map((s, i) => {
+      const node = `<li><dl class="fun-node${s.key === 'purchases' ? ' is-goal' : ''}"><dt>${escapeHtml(s.label)}</dt><dd>${num(f[s.key])}</dd></dl></li>`
+      if (i === 0) return node
+      const prev = steps[i - 1]
+      const link = `<li class="fun-link" aria-label="${escapeHtml(`${rateText(f[s.key], f[prev.key])} of ${prev.noun}`)}">
+  <span class="fun-rate${i - 1 === weakest ? ' is-low' : ''}">${rateText(f[s.key], f[prev.key])}</span><span class="fun-arrow" aria-hidden="true">→</span></li>`
+      return link + node
+    })
+    .join('')
 
-  const p = drop > 0 ? prevMeasured(drop) : undefined
-  const sentence =
-    drop > 0 && p !== undefined
-      ? `<p class="fun-sentence">The biggest loss is between ${escapeHtml(STEPS[p].label)} and ${escapeHtml(STEPS[drop].label)}: ${escapeHtml(
-          stepConversion(counts[drop], counts[p], STEPS[p].noun),
-        )} get there.</p>`
-      : ''
-
-  const missing = STEPS.filter((_, i) => !isTracked[i]).map((s) => s.label.toLowerCase())
+  const overall = rateText(f.purchases, f.visits)
+  const bucketLabel = trend.length && trend[0].start !== trend[0].end ? 'per week' : 'per day'
   const notes = []
   if (missing.length) {
-    notes.push(
-      `Google Analytics isn’t receiving ${escapeHtml(missing.join(' or '))} events from the site yet, so ${missing.length === 1 ? 'that step is' : 'those steps are'} left out instead of showing a false drop to zero.`,
-    )
+    notes.push(`Add-to-cart and checkout steps will appear once Google Analytics receives ${escapeHtml(missing.join(' and '))} events from the site.`)
   }
-  if (purchasesFrom === 'orders') notes.push('Purchases are website orders from Shopify (Etsy, eBay and in-person sales aren’t part of this funnel).')
-  const note = notes.length ? `<p class="fun-note">${notes.join(' ')}</p>` : ''
-
-  const visitToBuy = counts[0] > 0 ? (counts[4] / counts[0]) * 100 : null
-  const viewToBuy = isTracked[1] && counts[1] > 0 ? (counts[4] / counts[1]) * 100 : null
-  const fmt = (v) => (v == null ? '—' : `${v.toFixed(v < 1 ? 2 : 1)}%`)
-  const headline = `<dl class="fun-headline">
-  <div><dt>Visits</dt><dd>${num(counts[0])}</dd></div>
-  <div><dt>Purchases</dt><dd>${num(counts[4])}</dd></div>
-  <div><dt>Visit → purchase</dt><dd>${fmt(visitToBuy)}</dd></div>
-  <div><dt>Product view → purchase</dt><dd>${fmt(viewToBuy)}</dd></div>
-</dl>`
+  if (purchasesFrom === 'orders') notes.push('Orders are website orders from Shopify; Etsy, eBay and in-person sales aren’t counted here.')
 
   return card({
-    title: 'Shopping funnel',
-    subtitle: 'How far website shoppers get, from first visit to order',
+    title: 'Website conversion',
+    subtitle: `${overall} of website visits ended in an order`,
     className: 'col-8',
-    body: `${headline}<ol class="fun-steps">${items}</ol>${sentence}${note}`,
+    body: `<ol class="fun-flow">${flow}</ol>
+<div class="fun-chart-head"><h4>Visits and conversion rate</h4><span>${bucketLabel}</span></div>
+${trend.length ? '<div id="fun-trend-chart" class="chart-box"></div>' : emptyState('No daily data for this range.')}
+${notes.length ? `<p class="fun-note">${notes.join(' ')}</p>` : ''}`,
+  })
+}
+
+function drawTrend(root, trend) {
+  const el = root.querySelector('#fun-trend-chart')
+  if (!el) return
+  const weekly = trend.length && trend[0].start !== trend[0].end
+  comboChart(el, {
+    categories: trend.map((t) => (weekly ? `${dayLabel(t.start)}–${dayLabel(t.end)}` : dayLabel(t.start))),
+    bar: { name: 'Visits', data: trend.map((t) => t.visits), format: 'num' },
+    line: {
+      name: 'Conversion',
+      data: trend.map((t) => (t.visits > 0 ? Number(((t.orders / t.visits) * 100).toFixed(2)) : 0)),
+      format: (v) => `${Number(v).toFixed(2)}%`,
+    },
+    height: 260,
   })
 }
 
@@ -163,7 +139,9 @@ function abandonedCard(a) {
   ]
   return card({
     title: 'Abandoned checkouts',
-    subtitle: 'Checkouts started on the website but not finished',
+    subtitle: a.periodStart
+      ? `Website checkouts not finished, ${dayLabel(a.periodStart)}${a.periodEnd && a.periodEnd !== a.periodStart ? ` – ${dayLabel(a.periodEnd)}` : ''} (Shopify)`
+      : 'Checkouts started on the website but not finished',
     className: 'col-4',
     body: `<dl class="fun-stats">${stats
       .map(([k, v]) => `<div class="fun-stat"><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`)
@@ -185,13 +163,15 @@ export async function render(root, ctx) {
   const regions = (data.regions ?? []).filter((r) => r.sessions > 0).slice(0, 8)
 
   root.innerHTML = [
-    funnelCard(data.funnel, data.tracked, data.purchasesFrom),
+    funnelCard(data.funnel, data.tracked, data.purchasesFrom, data.trend ?? []),
     abandonedCard(data.abandoned),
     card({
       title: 'New vs returning',
-      subtitle: 'Customers who ordered in this range',
+      subtitle: cust.unknownOrders > 0
+        ? `Customers matched by email · ${num(cust.unknownOrders)} orders had no email`
+        : 'Customers who ordered in this range, matched by email',
       className: 'col-4',
-      body: hasCustomers ? '<div id="fun-customers-chart" class="chart-box"></div>' : emptyState('No orders in this range yet.'),
+      body: hasCustomers ? '<div id="fun-customers-chart" class="chart-box"></div>' : emptyState('No orders with a customer email in this range.'),
     }),
     card({
       title: 'Top states',
@@ -214,6 +194,8 @@ export async function render(root, ctx) {
       body: regions.length ? '<div id="fun-regions-chart" class="chart-box"></div>' : emptyState('No region data from Google Analytics in this range.'),
     }),
   ].join('')
+
+  drawTrend(root, data.trend ?? [])
 
   if (hasCustomers) {
     donutChart(root.querySelector('#fun-customers-chart'), {
