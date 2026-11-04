@@ -195,6 +195,7 @@ function fillIcons(root = document) {
 // ---------- Views ----------
 
 function showLogin(message = '') {
+  hideSyncCard()
   destroyCharts()
   $('#shell').classList.add('hidden')
   $('#login-view').classList.remove('hidden')
@@ -316,6 +317,101 @@ function progress(fraction, { error = false, done = false } = {}) {
 }
 
 /** Run every source's quiet sync in parallel, driving the top bar. `force` re-syncs fresh sources. */
+// ---------- Floating sync card (top right) ----------
+// Shows each source's progress while a sync runs. Quiet on-open syncs that finish fast with
+// nothing new never show it; a forced Refresh always does. Errors keep it open until dismissed.
+
+const SYNC_DETAIL = { queued: 'Waiting', running: 'Syncing', fresh: 'Up to date', unconfigured: 'Not set up', error: 'Failed' }
+const ORB_SPIN = '<circle class="orb-track" cx="12" cy="12" r="9"/><circle class="orb-arc" cx="12" cy="12" r="9"/>'
+const ORB_DONE = '<circle class="orb-ring" cx="12" cy="12" r="9"/><path class="orb-mark" d="m8 12.4 2.7 2.7L16.2 9.6"/>'
+const ORB_ERROR = '<circle class="orb-ring" cx="12" cy="12" r="9"/><path class="orb-mark" d="M12 7.6v5.2M12 16.2v.1"/>'
+let syncCardTimer = null
+let syncCardShowTimer = null
+
+function syncCardHtml() {
+  const rows = SYNC_SOURCES.map(
+    (s, i) =>
+      `<li class="sync-row" data-key="${s.key}" data-state="queued" style="--i:${i}"><span class="sync-dot" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="m4.2 8.3 2.4 2.4 5.2-5.3"/></svg></span><span class="sync-name">${escapeHtml(s.label)}</span><span class="sync-detail">${SYNC_DETAIL.queued}</span></li>`,
+  ).join('')
+  return `<div class="sync-head">
+      <svg class="sync-orb" data-state="running" viewBox="0 0 24 24" aria-hidden="true">${ORB_SPIN}</svg>
+      <div class="sync-text"><p class="sync-title">Syncing your data</p><p class="sync-sub">0 of ${SYNC_SOURCES.length} sources</p></div>
+      <button type="button" class="sync-close" aria-label="Dismiss"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 4.5 7 7m0-7-7 7"/></svg></button>
+    </div>
+    <div class="sync-track"><span class="sync-fill"></span></div>
+    <ul class="sync-list">${rows}</ul>`
+}
+
+function hideSyncCard() {
+  const el = $('#sync-card')
+  clearTimeout(syncCardTimer)
+  clearTimeout(syncCardShowTimer)
+  if (el.hidden) return
+  el.classList.add('leaving')
+  syncCardTimer = setTimeout(() => {
+    el.hidden = true
+    el.classList.remove('leaving')
+  }, 240)
+}
+
+function startSyncCard({ immediate }) {
+  const el = $('#sync-card')
+  clearTimeout(syncCardTimer)
+  clearTimeout(syncCardShowTimer)
+  el.classList.remove('leaving', 'is-done', 'is-error')
+  el.innerHTML = syncCardHtml()
+  el.querySelector('.sync-close').addEventListener('click', hideSyncCard)
+  const show = () => {
+    el.hidden = false
+    // restart the entrance animation
+    el.classList.remove('entering')
+    void el.offsetWidth
+    el.classList.add('entering')
+  }
+  el.hidden = true
+  if (immediate) show()
+  else syncCardShowTimer = setTimeout(show, 350)
+  return show
+}
+
+function updateSyncRow(key, rowState, detail) {
+  const row = $(`#sync-card .sync-row[data-key="${key}"]`)
+  if (!row) return
+  row.dataset.state = rowState
+  const text = row.querySelector('.sync-detail')
+  text.textContent = detail || SYNC_DETAIL[rowState] || ''
+  text.title = detail || ''
+}
+
+function updateSyncCount(finished, total) {
+  const el = $('#sync-card')
+  el.querySelector('.sync-sub').textContent = `${finished} of ${total} sources`
+  el.querySelector('.sync-fill').style.width = `${Math.max(6, Math.round((finished / total) * 100))}%`
+}
+
+function finishSyncCard({ failures, changed, show }) {
+  const el = $('#sync-card')
+  clearTimeout(syncCardShowTimer)
+  const orb = el.querySelector('.sync-orb')
+  const title = el.querySelector('.sync-title')
+  const sub = el.querySelector('.sync-sub')
+  if (failures.length) {
+    show()
+    el.classList.add('is-error')
+    orb.dataset.state = 'error'
+    orb.innerHTML = ORB_ERROR
+    title.textContent = failures.length === 1 ? '1 source had a problem' : `${failures.length} sources had problems`
+    sub.innerHTML = 'Details in <a href="#/tools">Tools → Connections</a>'
+    return // stays until dismissed
+  }
+  el.classList.add('is-done')
+  orb.dataset.state = 'done'
+  orb.innerHTML = ORB_DONE
+  title.textContent = changed ? 'Data updated' : 'Everything is up to date'
+  sub.textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  if (!el.hidden) syncCardTimer = setTimeout(hideSyncCard, 2600)
+}
+
 async function syncAll({ force = false } = {}) {
   if (state.syncing || !state.user) return
   state.syncing = true
@@ -328,21 +424,32 @@ async function syncAll({ force = false } = {}) {
   let changed = false
   const failures = []
   progress(0)
+  const showCard = startSyncCard({ immediate: force })
 
   await Promise.all(
     SYNC_SOURCES.map(async (source) => {
+      updateSyncRow(source.key, 'running')
       try {
         const { data } = await api(`/sync/auto/${source.key}${force ? '?force=1' : ''}`, { method: 'POST' })
-        if (data?.status === 'synced') changed = true
+        if (data?.status === 'synced') {
+          changed = true
+          showCard()
+          updateSyncRow(source.key, 'synced', data.summary || 'Synced')
+        } else {
+          updateSyncRow(source.key, data?.status === 'unconfigured' ? 'unconfigured' : 'fresh')
+        }
       } catch (err) {
         if (err.status !== 401 && err.status !== 403) failures.push({ source: source.label, message: err.message })
+        updateSyncRow(source.key, 'error', err.message || 'Failed')
       }
       finished += 1
       progress(finished / total, { error: failures.length > 0 })
+      updateSyncCount(finished, total)
     }),
   )
 
   progress(1, { error: failures.length > 0, done: true })
+  finishSyncCard({ failures, changed, show: showCard })
   state.syncing = false
   btn.removeAttribute('aria-busy')
   btn.disabled = false

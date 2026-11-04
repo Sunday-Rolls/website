@@ -201,6 +201,312 @@ html.dark .progress-fill {
   background: var(--down);
 }
 
+/* ---------- Floating sync card ---------- */
+
+.sync-card {
+  position: fixed;
+  top: calc(var(--header-h) + 12px);
+  right: 24px;
+  z-index: 90;
+  width: 300px;
+  padding: 14px 16px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  color: var(--ink);
+  transform-origin: top right;
+}
+.sync-card[hidden] {
+  display: none;
+}
+.sync-card.entering {
+  animation: sync-in 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+.sync-card.leaving {
+  animation: sync-out 0.24s var(--ease) both;
+}
+@keyframes sync-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sync-out {
+  to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+}
+
+.sync-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sync-text {
+  flex: 1;
+  min-width: 0;
+}
+.sync-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.sync-sub {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.sync-sub a {
+  color: var(--accent);
+  font-weight: 500;
+}
+.sync-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.sync-close:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.sync-close svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* Orb: spinning arc while running, ring + drawn mark when done */
+.sync-orb {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.sync-orb .orb-track {
+  opacity: 0.18;
+}
+.sync-orb .orb-arc {
+  stroke-dasharray: 18 40;
+  transform-origin: 12px 12px;
+  animation: orb-spin 0.9s linear infinite;
+}
+.sync-orb .orb-ring {
+  stroke-dasharray: 57;
+  stroke-dashoffset: 57;
+  animation: draw 0.5s var(--ease) forwards;
+}
+.sync-orb .orb-mark {
+  stroke-dasharray: 14;
+  stroke-dashoffset: 14;
+  animation: draw 0.35s var(--ease) 0.3s forwards;
+}
+.sync-orb[data-state='done'] {
+  animation: pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.sync-orb[data-state='error'] {
+  background: var(--down-bg);
+  color: var(--down);
+  animation: nudge 0.4s var(--ease);
+}
+@keyframes orb-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes pop {
+  40% { transform: scale(1.12); }
+}
+@keyframes nudge {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+/* Overall progress: brand gradient with a moving sheen while syncing */
+.sync-track {
+  position: relative;
+  height: 6px;
+  margin: 12px 0 10px;
+  border-radius: 999px;
+  background: var(--chart-track);
+  overflow: hidden;
+}
+.sync-fill {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: 6%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand-400), var(--brand-500));
+  transition: width 0.5s var(--ease), background 0.3s;
+  overflow: hidden;
+}
+.sync-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: translateX(-100%);
+  animation: sheen 1.3s var(--ease) infinite;
+}
+.sync-card.is-done .sync-fill::after,
+.sync-card.is-error .sync-fill::after {
+  animation: none;
+}
+.sync-card.is-error .sync-fill {
+  background: var(--down);
+}
+@keyframes sheen {
+  to { transform: translateX(100%); }
+}
+
+/* Per-source rows */
+.sync-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sync-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+  animation: row-in 0.35s var(--ease) both;
+  animation-delay: calc(var(--i) * 60ms + 120ms);
+}
+@keyframes row-in {
+  from { opacity: 0; transform: translateX(8px); }
+}
+.sync-name {
+  flex: 1;
+  font-weight: 500;
+}
+.sync-detail {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+.sync-dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  transition: background-color 0.25s, border-color 0.25s;
+}
+.sync-dot svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: var(--on-brand);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 12;
+  stroke-dashoffset: 12;
+  opacity: 0;
+}
+.sync-row[data-state='queued'] .sync-dot {
+  animation: breathe 1.6s var(--ease) infinite;
+}
+.sync-row[data-state='running'] .sync-dot {
+  border-color: var(--chart-track);
+  border-top-color: var(--brand-500);
+  animation: orb-spin 0.8s linear infinite;
+}
+.sync-row[data-state='running'] .sync-detail {
+  color: var(--accent);
+}
+.sync-row[data-state='synced'] .sync-dot,
+.sync-row[data-state='fresh'] .sync-dot {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+  animation: pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.sync-row[data-state='fresh'] .sync-dot {
+  background: var(--brand-300);
+  border-color: var(--brand-300);
+}
+.sync-row[data-state='synced'] .sync-dot svg,
+.sync-row[data-state='fresh'] .sync-dot svg {
+  opacity: 1;
+  animation: draw 0.3s var(--ease) 0.1s forwards;
+}
+.sync-row[data-state='synced'] .sync-detail {
+  color: var(--up);
+}
+.sync-row[data-state='unconfigured'] .sync-dot {
+  border-style: dashed;
+}
+.sync-row[data-state='unconfigured'] .sync-name,
+.sync-row[data-state='unconfigured'] .sync-detail {
+  color: var(--faint);
+}
+.sync-row[data-state='error'] .sync-dot {
+  background: var(--down);
+  border-color: var(--down);
+  animation: nudge 0.4s var(--ease);
+}
+.sync-row[data-state='error'] .sync-dot::after {
+  content: '!';
+  color: var(--on-brand);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+.sync-row[data-state='error'] .sync-detail {
+  color: var(--down);
+}
+@keyframes breathe {
+  50% { border-color: var(--brand-300); }
+}
+
+html.dark .sync-fill {
+  background: linear-gradient(90deg, var(--brand-500), var(--brand-400));
+}
+html.dark .sync-fill::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+}
+
+@media (max-width: 640px) {
+  .sync-card {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    transform-origin: bottom center;
+  }
+  @keyframes sync-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
 /* ---------- Buttons & fields ---------- */
 
 .btn {
