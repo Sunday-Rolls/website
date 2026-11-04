@@ -5,6 +5,7 @@ import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
 import type { ContactStore } from './contact-store.js'
 import type { ContactPayload } from './mail.js'
+import { MERCHANT_WEBHOOK_TOPICS, verifyShopifyWebhook } from './merchant/shopify-webhook.js'
 import { createRateLimiter } from './rate-limit.js'
 import { isValidHandle, parseReviewBody, REVIEW_LIMITS, type ReviewStore } from './reviews.js'
 
@@ -21,9 +22,17 @@ export type AppDeps = {
   /** Omitted when DATABASE_URL is not set; review routes then answer 503. */
   reviews?: ReviewStore
   analytics?: AnalyticsStore
+  /**
+   * Shopify product/inventory webhooks. Omitted when the Merchant Center sync
+   * isn't configured; the route then answers 503.
+   */
+  shopifyWebhooks?: {
+    secret: string
+    onProductChange: (topic: string) => void
+  }
 }
 
-export function createApp({ config, sendContactEmail, contacts, reviews, analytics }: AppDeps) {
+export function createApp({ config, sendContactEmail, contacts, reviews, analytics, shopifyWebhooks }: AppDeps) {
   const app = new Hono()
   const checkRateLimit = createRateLimiter()
   const allowlist = new Set(config.corsOrigins)
@@ -69,6 +78,19 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
     )
     app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))
   }
+
+  // Server-to-server from Shopify: no browser origin, authenticated by HMAC instead.
+  app.post('/webhooks/shopify', async (c) => {
+    if (!shopifyWebhooks) return c.json({ ok: false, error: 'Webhooks not configured' }, 503)
+    const raw = await c.req.text()
+    if (!verifyShopifyWebhook(raw, c.req.header('x-shopify-hmac-sha256'), shopifyWebhooks.secret)) {
+      return c.json({ ok: false, error: 'Invalid signature' }, 401)
+    }
+    const topic = c.req.header('x-shopify-topic') ?? ''
+    if (MERCHANT_WEBHOOK_TOPICS.has(topic)) shopifyWebhooks.onProductChange(topic)
+    // Always 200 a verified delivery, or Shopify retries and eventually drops the subscription.
+    return c.json({ ok: true })
+  })
 
   app.post('/contact', async (c) => {
     if (!hasAllowedBrowserOrigin(c)) {

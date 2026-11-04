@@ -14,7 +14,7 @@ Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY
 | Site | `https://sunday-rolls.github.io/website/` | Railway `website` + DNS → `www.sundayrollsgolf.com` ([RAILWAY_CUTOVER.md](./RAILWAY_CUTOVER.md)) |
 | Contact API | Railway `contact-api` (Resend free plan for email) | same |
 | `VITE_GTM_ID` | `GTM-PQSG4NXT` | `GTM-PPTR6V3B` (live) |
-| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YKOBBOTPM4` (confirm in GA4 Admin) |
+| `VITE_GA4_MEASUREMENT_ID` | `G-ET6SXZWE8E` | `G-YK0BB0TPM4` (zeros; confirmed in GA4 Admin) |
 | `VITE_BASE_PATH` | `/website/` | `/` |
 | GA4 property | Demo / devops | `properties/513898453` |
 | Shopify pixel ID | `G-ET6SXZWE8E` | same as live measurement ID |
@@ -26,7 +26,7 @@ Purchase on Shopify checkout is covered by the [Customer events pixel](./SHOPIFY
 
 ```bash
 VITE_GTM_ID=GTM-PPTR6V3B
-VITE_GA4_MEASUREMENT_ID=G-YKOBBOTPM4
+VITE_GA4_MEASUREMENT_ID=G-YK0BB0TPM4
 VITE_GA4_SEND_DIRECT=true
 VITE_CONTACT_API_URL=https://contact-api-production-9af6.up.railway.app
 ```
@@ -66,7 +66,7 @@ Each ecommerce event is one dataLayer push, preceded by a bare `{ ecommerce: nul
 
 | Tag | Trigger | Sends |
 |-----|---------|-------|
-| GA4 - ecommerce funnel | `CE - GA4 ecommerce funnel` (regex: the six events from `view_item_list` to `begin_checkout`) | `{{Event}}` + dataLayer ecommerce → `G-YKOBBOTPM4` |
+| GA4 - ecommerce funnel | `CE - GA4 ecommerce funnel` (regex: the six events from `view_item_list` to `begin_checkout`) | `{{Event}}` + dataLayer ecommerce → `G-YK0BB0TPM4` |
 | Ads - Add to cart (site event) | `CE - add_to_cart` | Google Ads `AW-17744695066/jF7_CK6g-LAdEJqeqo1C`, secondary |
 | Ads - Begin checkout (site event) | `CE - begin_checkout` | Google Ads `AW-17744695066/oKa5CLGg-LAdEJqeqo1C`, secondary |
 | Purchase v2 / Google Analytics Purchases | `Trigger Purchase` | SPA thank-you page only; real checkouts report through the Shopify pixel |

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   dataSourceName,
+  matchPublication,
   shopifyProductToMerchantInputs,
   toMicros,
   type ShopifyProductNode,
@@ -139,5 +140,31 @@ describe('merchant sync mapping', () => {
   it('builds data source names', () => {
     expect(dataSourceName('5685591896', '123')).toBe('accounts/5685591896/dataSources/123')
     expect(dataSourceName('5685591896', 'accounts/1/dataSources/2')).toBe('accounts/1/dataSources/2')
+  })
+})
+
+describe('matchPublication', () => {
+  // The live store's channels (Nov 2026): none of them has a catalog.
+  const channels = [
+    { id: 'gid://shopify/Publication/228648452254', name: 'Online Store', catalog: null },
+    { id: 'gid://shopify/Publication/228648485022', name: 'Point of Sale', catalog: null },
+    { id: 'gid://shopify/Publication/228648517790', name: 'Shop', catalog: null },
+    { id: 'gid://shopify/Publication/228651794590', name: 'Sunday Rolls', catalog: null },
+    { id: 'gid://shopify/Publication/236387270814', name: 'Google & YouTube', catalog: null },
+  ]
+
+  it('finds a channel by its name when it has no catalog', () => {
+    expect(matchPublication(channels, 'Sunday Rolls')?.id).toBe('gid://shopify/Publication/228651794590')
+    expect(matchPublication(channels, ' sunday rolls ')?.id).toBe('gid://shopify/Publication/228651794590')
+  })
+
+  it('prefers an exact name over a partial match', () => {
+    const reordered = [{ id: 'a', name: 'Shop Pay Channel' }, { id: 'b', name: 'Shop' }]
+    expect(matchPublication(reordered, 'Shop')?.id).toBe('b')
+  })
+
+  it('still matches a catalog title, and returns null when nothing matches', () => {
+    expect(matchPublication([{ id: 'c', name: null, catalog: { title: 'Headless storefront' } }], 'Headless')?.id).toBe('c')
+    expect(matchPublication(channels, 'Headless')).toBeNull()
   })
 })
