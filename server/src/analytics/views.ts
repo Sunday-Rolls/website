@@ -12,6 +12,7 @@ import { inRange, isWebsiteChannel, storeDay, type DateRange } from './period.js
 import type {
   AbandonedCartStats,
   CashForecastRow,
+  CustomerOrder,
   DailyAdSpend,
   DailyProductView,
   DailyTraffic,
@@ -56,25 +57,30 @@ function daysInMonth(year: number, month1: number): number {
 
 /**
  * Customers who ordered in the range, by email: new when their first-ever order is in the range,
- * returning when they ordered before it. Orders without an email (Etsy, eBay, Sales Tracker rows)
- * can't be matched to a person, so they are counted as `unknownOrders` instead of guessed.
+ * returning when they ordered before it. Emails come from live orders (Shopify) and from imported
+ * customer history (Squarespace, Etsy exports). Orders without an email on a channel that has no
+ * customer history can't be matched to a person, so they are `unknownOrders`, not guesses.
  */
-export function customerSplit(allOrders: Order[], range: Range): { new: number; returning: number; unknownOrders: number } {
+export function customerSplit(
+  allOrders: Order[],
+  range: Range,
+  customerOrders: CustomerOrder[] = [],
+): { new: number; returning: number; unknownOrders: number } {
+  const identities = [
+    ...customerOrders.map((o) => ({ email: o.email, day: storeDay(o.orderedAt) })),
+    ...preferLiveOrders(allOrders)
+      .filter((o) => o.customerEmail?.trim())
+      .map((o) => ({ email: o.customerEmail!.trim().toLowerCase(), day: storeDay(o.orderedAt) })),
+  ]
   const first = new Map<string, string>()
-  for (const o of preferLiveOrders(allOrders)) {
-    const email = o.customerEmail?.trim().toLowerCase()
-    if (!email) continue
-    const day = storeDay(o.orderedAt)
-    if (!first.has(email) || day < first.get(email)!) first.set(email, day)
-  }
-  const inRangeOrders = liveOrdersIn(allOrders, range)
   const emails = new Set<string>()
-  let unknownOrders = 0
-  for (const o of inRangeOrders) {
-    const email = o.customerEmail?.trim().toLowerCase()
-    if (email) emails.add(email)
-    else unknownOrders += 1
+  for (const { email, day } of identities) {
+    const key = email.trim().toLowerCase()
+    if (!first.has(key) || day < first.get(key)!) first.set(key, day)
+    if (day >= range.start && day <= range.end) emails.add(key)
   }
+  const covered = new Set(customerOrders.map((o) => o.channel))
+  const unknownOrders = liveOrdersIn(allOrders, range).filter((o) => !o.customerEmail?.trim() && !covered.has(o.channel)).length
   let fresh = 0
   for (const email of emails) if (first.get(email)! >= range.start) fresh += 1
   return { new: fresh, returning: emails.size - fresh, unknownOrders }
@@ -352,13 +358,17 @@ export function buildMarketingView(input: {
   adSpend: DailyAdSpend[]
   traffic: DailyTraffic[]
   keywords: SearchKeyword[]
+  customerOrders?: CustomerOrder[]
 }): MarketingView {
   const { range } = input
   const { revenue, adSpend, mer } = buildMer(input)
   const orders = liveOrdersIn(input.orders, range)
-  const customers = customerSplit(input.orders, range)
+  const customers = customerSplit(input.orders, range, input.customerOrders)
+  const covered = new Set((input.customerOrders ?? []).map((o) => o.channel))
   const newCustomers = customers.new
-  const websiteOrdersWithoutEmail = orders.filter((o) => isWebsiteChannel(o.channel) && !o.customerEmail?.trim()).length
+  const websiteOrdersWithoutEmail = orders.filter(
+    (o) => isWebsiteChannel(o.channel) && !o.customerEmail?.trim() && !covered.has(o.channel),
+  ).length
 
   const trend = new Map(daysOf(range).map((d) => [d, { spend: 0, revenue: 0 }]))
   for (const r of adSpendIn(input.adSpend, range)) {
@@ -426,6 +436,7 @@ export function buildFunnelView(input: {
   orders: Order[]
   traffic: DailyTraffic[]
   abandoned: AbandonedCartStats | null
+  customerOrders?: CustomerOrder[]
 }): FunnelView {
   const { range } = input
   const traffic = input.traffic.filter((t) => t.date >= range.start && t.date <= range.end)
@@ -488,7 +499,7 @@ export function buildFunnelView(input: {
     trend,
     purchasesFrom: ga4Purchases > 0 ? 'ga4' : 'orders',
     abandoned: input.abandoned,
-    customers: customerSplit(input.orders, range),
+    customers: customerSplit(input.orders, range, input.customerOrders),
     states: [...stateMap.entries()]
       .map(([state, s]) => ({ state, ...s }))
       .sort((a, b) => b.orders - a.orders || b.revenue - a.revenue),

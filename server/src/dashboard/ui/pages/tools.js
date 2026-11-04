@@ -17,6 +17,13 @@ const CSV_KINDS = [
   { kind: 'revenue', endpoint: '/import/revenue', title: 'Sales', detail: 'Many Etsy, eBay, Squarespace or in-person sales at once' },
   { kind: 'expenses', endpoint: '/import/expenses', title: 'Expenses', detail: 'Costs like manufacturing, ads and software' },
   { kind: 'cash', endpoint: '/import/cash', title: 'Month-end cash', detail: 'Cash balance and money in and out for each month' },
+  {
+    kind: 'customers',
+    endpoint: '/import/customer-orders',
+    title: 'Customer history',
+    detail: 'Squarespace orders export (Orders → Download CSV). Adds customer emails for new vs returning; revenue is unchanged',
+    noTemplate: true,
+  },
 ]
 
 const WORKFLOWS = [
@@ -275,7 +282,7 @@ function addDataCard(manual) {
     (k) => `<li>
   <span class="tools-list-text"><strong>${escapeHtml(k.title)}</strong><span>${escapeHtml(k.detail)}</span></span>
   <span class="tools-list-actions">
-    <button type="button" class="btn btn-outline" data-template="${k.kind}">${icon('download', { size: 18 })}Get the template</button>
+    ${k.noTemplate ? '' : `<button type="button" class="btn btn-outline" data-template="${k.kind}">${icon('download', { size: 18 })}Get the template</button>`}
     <button type="button" class="btn btn-outline" data-upload-csv="${k.kind}">${icon('upload', { size: 18 })}Upload CSV</button>
     <input type="file" accept=".csv,text/csv" hidden data-csv-input="${k.kind}" />
   </span>
@@ -583,7 +590,10 @@ export async function render(root, ctx) {
         body.append('file', file)
         const res = await rawFetch(ctx, meta.endpoint, { method: 'POST', body })
         const json = await readJson(res, `${meta.title} upload failed.`)
-        setStatus(status, `${meta.title}: saved ${plural(json.data?.rows ?? 0, 'row')} from ${file.name}${warningText(json.data?.warnings)}`, 'ok')
+        const saved = meta.kind === 'customers'
+          ? `${plural(json.data?.rows ?? 0, 'order')} from ${plural(json.data?.customers ?? 0, 'customer')}`
+          : plural(json.data?.rows ?? 0, 'row')
+        setStatus(status, `${meta.title}: saved ${saved} from ${file.name}${warningText(json.data?.warnings)}`, 'ok')
         if (meta.kind === 'revenue') await reloadManual()
       } catch (err) {
         setStatus(status, err.message || `${meta.title} upload failed.`, 'error')

@@ -98,7 +98,7 @@ function kpis(data) {
       label: 'New customers',
       value: num(data.newCustomers),
       hint: data.unknownCustomerOrders > 0
-        ? `First-time buyers by email · ${num(data.unknownCustomerOrders)} orders without an email (Etsy, eBay, sheet) not counted`
+        ? `First-time buyers by email · ${num(data.unknownCustomerOrders)} Etsy/eBay/in-person orders have no email yet`
         : 'First-time buyers by email in this range',
       className: 'col-3',
     }),

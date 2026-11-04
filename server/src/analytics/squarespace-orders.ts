@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { parseCsv } from './manual-import.js'
-import type { Order, OrderLine } from './types.js'
+import type { CustomerOrder, Order, OrderLine } from './types.js'
 
 export type SquarespaceImportResult = {
   rows: Order[]
@@ -224,4 +224,32 @@ export function parseSquarespaceOrdersCsv(text: string): SquarespaceImportResult
 
   rows.sort((a, b) => a.orderedAt.localeCompare(b.orderedAt))
   return { rows, warnings, skipped }
+}
+
+/**
+ * Customer history from a Squarespace orders export: one row per paid order with an email.
+ * Revenue is what the customer paid for goods and shipping, matching how the Sales Tracker counts it.
+ */
+export function customerOrdersFromSquarespaceCsv(text: string): { rows: CustomerOrder[]; warnings: string[]; skipped: number } {
+  const parsed = parseSquarespaceOrdersCsv(text)
+  const rows: CustomerOrder[] = []
+  let noEmail = 0
+  for (const o of parsed.rows) {
+    const email = o.customerEmail?.trim().toLowerCase()
+    if (!email) {
+      noEmail += 1
+      continue
+    }
+    rows.push({
+      channel: 'squarespace',
+      externalId: o.externalId,
+      orderedAt: o.orderedAt,
+      email,
+      revenue: Math.round((o.revenue + o.shippingCost) * 100) / 100,
+      units: o.lines.reduce((n, l) => n + l.quantity, 0),
+    })
+  }
+  const warnings = [...parsed.warnings]
+  if (noEmail) warnings.push(`${noEmail} orders had no email and were skipped`)
+  return { rows, warnings, skipped: parsed.skipped + noEmail }
 }

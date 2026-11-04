@@ -138,6 +138,16 @@ CREATE TABLE IF NOT EXISTS analytics_cash_forecast (
   ending_balance numeric(12,2) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS analytics_customer_orders (
+  channel text NOT NULL,
+  external_id text NOT NULL,
+  ordered_at timestamptz NOT NULL,
+  email text NOT NULL,
+  revenue numeric(12,2) NOT NULL DEFAULT 0,
+  units integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (channel, external_id)
+);
+
 CREATE TABLE IF NOT EXISTS analytics_abandoned_carts (
   period_start date NOT NULL,
   period_end date NOT NULL,

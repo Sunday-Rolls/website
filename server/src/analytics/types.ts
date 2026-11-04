@@ -142,3 +142,17 @@ export type PublicUser = {
   name: string
   isAdmin: boolean
 }
+
+/**
+ * One order from a platform export that carries the buyer's email (Squarespace, Etsy).
+ * Used only to tell new from returning customers; revenue and P&L stay on the Sales Tracker.
+ */
+export type CustomerOrder = {
+  channel: string
+  externalId: string
+  orderedAt: string
+  email: string
+  /** What the customer paid for goods and shipping. */
+  revenue: number
+  units: number
+}
