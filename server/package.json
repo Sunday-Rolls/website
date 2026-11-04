@@ -15,7 +15,8 @@
     "analytics:import-squarespace": "tsx src/scripts/import-squarespace-orders.ts",
     "analytics:sync-ga4": "tsx src/scripts/sync-ga4.ts",
     "merchant:sync": "tsx src/scripts/sync-merchant.ts",
-    "ebay:auth": "tsx src/scripts/ebay-auth.ts"
+    "ebay:auth": "tsx src/scripts/ebay-auth.ts",
+    "experiments:seed-demo": "tsx src/scripts/seed-ab-demo.ts"
   },
   "engines": {
     "node": ">=20"
