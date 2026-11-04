@@ -3,11 +3,10 @@ import { resolveLinkLabel, usePageContent } from '@/lib/content'
 import { assetUrl } from '@/lib/asset-url'
 import { trackCtaClick } from '@/lib/gtm'
 import { cn } from '@/lib/utils'
-import { SplatViewer } from '@/components/splat/SplatViewer'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 
-/** Flagship-product banner: copy on one side, a slowly turning Gaussian splat on the other. */
+/** Flagship-product banner: copy on one side, the cover swaying under a spotlight on the other. */
 export function FeaturedProductBanner() {
   const { featured } = usePageContent('home')
   const [active, setActive] = useState(0)
@@ -94,22 +93,37 @@ export function FeaturedProductBanner() {
             </Button>
           </div>
 
-          <div className="relative order-1 mx-auto w-full max-w-[34rem] lg:order-2">
-            {/* Spotlight behind the cover. */}
+          <div className="relative order-1 mx-auto aspect-square w-full max-w-[34rem] lg:order-2">
+            {/* Spotlight: a soft cone from above, a glow behind the cover and a pool of light on the floor. */}
             <div
               aria-hidden="true"
-              className="absolute -inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(246,242,232,0.9)_0%,rgba(231,222,206,0.5)_34%,rgba(176,141,87,0.12)_55%,rgba(26,26,26,0)_70%)]"
+              className="pointer-events-none absolute inset-x-[14%] -top-[18%] bottom-[12%] [clip-path:polygon(38%_0,62%_0,100%_100%,0_100%)] bg-[linear-gradient(to_bottom,rgba(246,242,232,0.34),rgba(246,242,232,0.08)_70%,rgba(246,242,232,0))] blur-xl"
             />
-            <SplatViewer
-              src={assetUrl(colorway.splat)}
-              poster={assetUrl(colorway.poster)}
-              alt={`${featured.title} putter cover in ${colorway.label.toLowerCase()}`}
-              motion={colorway.motion ?? featured.motion}
-              className="aspect-square w-full [&_img]:scale-[1.9] [&_img]:[mask-image:radial-gradient(circle,black_28%,transparent_42%)]"
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle_at_50%_45%,rgba(246,242,232,0.42)_0%,rgba(231,222,206,0.16)_38%,rgba(26,26,26,0)_68%)]"
             />
-            <p className="mt-2 text-center font-body text-label uppercase tracking-widest text-cream/45" aria-hidden="true">
-              Drag to turn
-            </p>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-[8%] bottom-[6%] h-[16%] rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(246,242,232,0.3)_0%,rgba(246,242,232,0.08)_45%,rgba(26,26,26,0)_72%)]"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-[27%] bottom-[11%] h-[5%] rounded-[50%] bg-black/55 blur-md motion-safe:animate-[featured-shadow_6s_ease-in-out_infinite]"
+            />
+
+            <div className="absolute inset-[13%] bottom-[17%] origin-[50%_0%] motion-safe:animate-[featured-sway_6s_ease-in-out_infinite]">
+              <img
+                key={colorway.label}
+                src={assetUrl(colorway.image)}
+                alt={`${featured.title} putter cover in ${colorway.label.toLowerCase()}`}
+                width={1024}
+                height={1024}
+                fetchPriority="low"
+                decoding="async"
+                className="h-full w-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,0.55)] motion-safe:animate-[featured-in_450ms_ease-out]"
+              />
+            </div>
           </div>
         </div>
       </Container>

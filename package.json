@@ -20,7 +20,6 @@
     "catalog:sync": "python3 scripts/sync-product-catalog.py",
     "catalog:port-shopify": "node scripts/port-catalog-to-shopify.mjs",
     "assets:scrape": "python3 scripts/scrape-sundayrolls-assets.py",
-    "splat:build": "node scripts/build-splat.mjs",
     "reviews:scrape": "node scripts/scrape-etsy-reviews.mjs",
     "reviews:tag-handles": "node scripts/tag-review-product-handles.mjs",
     "reviews:qr": "node scripts/generate-product-review-qrs.mjs",
