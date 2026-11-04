@@ -66,6 +66,40 @@ npm run analytics:import-sheet -- "/path/to/Sunday Rolls Sales Tracker.xlsx"
 
 Access / integration checklist: [docs/DASHBOARD_ACCESS.md](../docs/DASHBOARD_ACCESS.md).
 
+## A/B testing demo (local only)
+
+Run the whole A/B flow on your machine with fake data. It never touches Railway, Shopify, GTM or GA4.
+
+1. Start a throwaway Postgres and create a database, e.g. on port 54330:
+   ```bash
+   initdb -D /tmp/sr-pg -U postgres -A trust && pg_ctl -D /tmp/sr-pg -o "-p 54330" -l /tmp/sr-pg.log start
+   createdb -h localhost -p 54330 -U postgres abdemo
+   ```
+2. Seed it. The script refuses any host but localhost, and replaces only its own demo rows:
+   ```bash
+   DATABASE_URL=postgres://postgres@localhost:54330/abdemo npm run experiments:seed-demo
+   ```
+   You get:
+   - `home-banner` (PR #89's Retro Roller banner): running 18 days, ~2,400 visitors per arm, with orders and contact messages
+   - `aa-pilot`: stopped
+   - `aa-check`: a draft, and the test the home page is wired to
+   - `cart-upsell`: a draft
+3. Start the API against it, without `railway run`, so no live keys load:
+   ```bash
+   DATABASE_URL=postgres://postgres@localhost:54330/abdemo DASHBOARD_ENABLED=true \
+   DASHBOARD_BOOTSTRAP_USERS=dev@example.test:Dev DASHBOARD_DEMO_PASSWORD=local-dashboard-dev \
+   CORS_ORIGINS=http://localhost:8091 MERCHANT_SYNC_ENABLED=false GA4_SYNC_ON_BOOT=false PORT=3021 npx tsx src/index.ts
+   ```
+4. From the repo root, build the site against the local API and serve it with assignment switched on:
+   ```bash
+   VITE_CONTACT_API_URL=http://localhost:3021 npm run build:railway
+   EXPERIMENTS_CONFIG_URL=http://localhost:3021/experiments/config PORT=8091 node scripts/serve-spa.mjs
+   ```
+5. Open `http://localhost:3021/dashboard/#/experiments` and sign in as `dev@example.test` / `local-dashboard-dev`.
+   - To watch your own visits count, pause `home-banner` and start `aa-check` (two tests on the same page can't run at once).
+   - Then open `http://localhost:8091/`. The site server picks up changes within 30 s.
+   - `window.__SR_EXP__` in the browser console shows your version.
+
 ## Tests
 
 ```bash

@@ -36,6 +36,7 @@ Build it from `$ARGUMENTS` or what they described, using the prefixes already in
 - `feature/` for something new (`feature/gift-card-banner`)
 - `fix/` for something broken (`fix/cart-total-rounding`)
 - `chore/` for docs, tooling, cleanup
+- `feature/ab-<key>` for a change that will run as an A/B test (`feature/ab-home-banner`); `/website-change` has the extra steps
 
 Lowercase, dashes, a few words. If you can't tell what the change is, ask in one short question rather than guessing.
 

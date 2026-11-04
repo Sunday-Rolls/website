@@ -7,6 +7,7 @@ import contactContent from '@/content/pages/contact.json'
 import cartContent from '@/content/pages/cart.json'
 import notFoundContent from '@/content/pages/not-found.json'
 import theme from '@/theme/theme.json'
+import { useExperimentContent } from '@/lib/experiment-content'
 import type {
   HomeContent,
   PageContentMap,
@@ -62,8 +63,9 @@ export function useSiteContent(): SiteContent {
   return getSiteContent()
 }
 
+/** Page content with the visitor's experiment arm applied (see experiment-content.ts). */
 export function usePageContent<K extends PageKey>(page: K): PageContentMap[K] {
-  return getPageContent(page)
+  return useExperimentContent(getPageContent(page))
 }
 
 export function useTheme(): Theme {

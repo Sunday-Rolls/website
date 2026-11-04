@@ -18,7 +18,8 @@
  *                              Error with `.status` on non-2xx. 401/403 send the user to login.
  *     ctx.rangeQuery()         'period=30d' | 'period=year' | 'start=YYYY-MM-DD&end=YYYY-MM-DD'
  *     ctx.range                { period: '7d'|'30d'|'90d'|'year'|null, start: string|null, end: string|null }
- *     ctx.navigate(name)       go to another page, e.g. ctx.navigate('products')
+ *     ctx.params               URLSearchParams from the hash query (`#/experiments?key=x` → get('key'))
+ *     ctx.navigate(name)       go to another page, e.g. ctx.navigate('products') or 'experiments?key=x'
  *     ctx.refresh()            re-render the current page (no sync)
  *     ctx.setRangeLabel(range) optional: show the API's resolved { start, end } in the range bar
  * - The shell calls `destroyCharts()` and clears `root` before every render (route change, range
@@ -119,6 +120,7 @@ const ICONS = {
   trend: '<path d="m3.5 16.5 5.5-5.5 4 4 7.5-7.5"/><path d="M15 7.5h5.5V13"/>',
   wallet:
     '<path d="M4 7.5V18a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 18v-8.5A1.5 1.5 0 0 0 18.5 8H5.5A1.5 1.5 0 0 1 4 6.5 1.5 1.5 0 0 1 5.5 5H17"/><path d="M16 13.75h.1"/>',
+  flask: '<path d="M9.5 3.5h5M10 3.5v5.2L4.6 18a1.6 1.6 0 0 0 1.4 2.5h12a1.6 1.6 0 0 0 1.4-2.5L14 8.7V3.5"/><path d="M7.2 14.5h9.6"/>',
   target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".75" fill="currentColor"/>',
 }
 

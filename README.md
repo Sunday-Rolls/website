@@ -133,6 +133,23 @@ In Claude Code, `/website-change <what you want>` walks this whole loop. The ste
 
 Custom domain cutover (`www.sundayrollsgolf.com` → Railway, `dashboard.sundayrollsgolf.com` → API): [`docs/RAILWAY_CUTOVER.md`](docs/RAILWAY_CUTOVER.md).
 
+### A/B tests
+
+A change can ship **dark** behind an experiment flag and be started, paused, stopped or promoted from Dashboard → Experiments without a deploy. Plan and reasons: [`docs/AB_TESTING_PLAN.md`](docs/AB_TESTING_PLAN.md); exact formats shared by the SPA, `serve-spa` and `contact-api`: [`docs/EXPERIMENTS_CONTRACT.md`](docs/EXPERIMENTS_CONTRACT.md).
+
+- **Developer:** add `src/experiments/<key>.json` (schema `src/experiments/schema.json`, example `aa-check.json`), gate the change with `<Variant>` / `useVariant` from `@/components/experiments` or a content-JSON `experiments` block, and label the PR `ab-test`. `/website-change` walks it ("Run it as an A/B test"). `npm test` fails if a key used in `src/` has no valid registry file.
+- **CI:** [`.github/workflows/experiments.yml`](.github/workflows/experiments.yml) (logic in `.github/scripts/experiments.mjs`, tests: `node --test .github/scripts/*.test.mjs`) checks the registry, comments one `?sr_force=<key>:<arm>` preview link per arm, creates a draft in the dashboard, marks it merged or archives it when the PR closes, and opens a cleanup issue when a test is promoted or stopped (plus a weekly check for concluded tests still in code). PRs without the label are skipped.
+- **Operators:** `/admin-handoff` → Operations → "A/B tests".
+
+**One-time setup (each is a live change: confirm with the owner before applying it).** Until 1–2 are done, the workflow still validates and comments previews, and says the dashboard sync is not set up.
+
+1. GitHub label `ab-test` on `Sunday-Rolls/website` (Issues → Labels → New label).
+2. GitHub Actions secret `EXPERIMENTS_CI_TOKEN`: a long random value, identical to the `EXPERIMENTS_CI_TOKEN` variable on Railway `contact-api` (set both together; generate it, don't reuse another secret).
+3. Optional GitHub Actions variable `EXPERIMENTS_API_URL` (no trailing slash) when `contact-api` moves off `https://contact-api-production-9af6.up.railway.app`, e.g. after the dashboard subdomain cutover.
+4. Railway `contact-api` variable `GITHUB_DISPATCH_TOKEN`: a fine-grained personal access token scoped to only `Sunday-Rolls/website` with **Contents: Read and write** (the permission `POST /repos/{repo}/dispatches` requires; Metadata: Read is added automatically). It needs nothing else: the cleanup issue is opened by the workflow's own token. Set an expiry and a reminder to rotate it. Optional `GITHUB_REPOSITORY` (default `Sunday-Rolls/website`). Without the token, Promote / Stop still work but no cleanup issue is opened, so the weekly job (which needs step 2) is the fallback.
+
+`repository_dispatch` and `schedule` only run once `experiments.yml` is on `main`.
+
 ### Operations (day-to-day)
 
 | Job | Where |
@@ -207,6 +224,8 @@ Check status any time with `/mcp`. Servers you don't need can stay disabled. The
 | [`docs/SHOPIFY_WEB_PIXEL.md`](docs/SHOPIFY_WEB_PIXEL.md) | Purchase pixel |
 | [`docs/CONTACT_EMAIL.md`](docs/CONTACT_EMAIL.md) | Resend contact path |
 | [`docs/E2E_ORDER_ANALYTICS.md`](docs/E2E_ORDER_ANALYTICS.md) | Order → analytics E2E |
+| [`docs/AB_TESTING_PLAN.md`](docs/AB_TESTING_PLAN.md) | A/B testing plan: architecture, stats, PR → test lifecycle |
+| [`docs/EXPERIMENTS_CONTRACT.md`](docs/EXPERIMENTS_CONTRACT.md) | Experiments contract: assignment, config, events, registry, CI endpoints |
 | [`server/README.md`](server/README.md) | API endpoints, dashboard, Railway |
 
 ---

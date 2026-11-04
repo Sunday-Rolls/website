@@ -49,6 +49,10 @@ export function loadConfig() {
     ga4SyncDays: Math.max(1, Math.min(Number(optional('GA4_SYNC_DAYS', '90')) || 90, 365)),
     salesTrackerDriveFileId: optional('SALES_TRACKER_DRIVE_FILE_ID') || null,
     salesTrackerDriveFolderId: optional('SALES_TRACKER_DRIVE_FOLDER_ID') || null,
+    // A/B tests ↔ GitHub (docs/EXPERIMENTS_CONTRACT.md). Blank disables each side.
+    experimentsCiToken: optional('EXPERIMENTS_CI_TOKEN'),
+    githubDispatchToken: optional('GITHUB_DISPATCH_TOKEN'),
+    githubRepository: optional('GITHUB_REPOSITORY') || 'Sunday-Rolls/website',
   }
 }
 

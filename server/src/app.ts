@@ -3,7 +3,18 @@ import { cors } from 'hono/cors'
 import type { AnalyticsStore } from './analytics/store.js'
 import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
-import type { ContactStore } from './contact-store.js'
+import type { ContactExperimentContext, ContactStore } from './contact-store.js'
+import { applyCiRequest, bearerMatches, listStale } from './experiments/ci.js'
+import { createConclusionDispatcher } from './experiments/dispatch.js'
+import { buildPublicConfig, ingestBeacon } from './experiments/public.js'
+import type { ExperimentStore } from './experiments/store.js'
+import {
+  isVisitorId,
+  MAX_BEACON_BYTES,
+  parseBeacon,
+  parseCiRequest,
+  parseExperimentsField,
+} from './experiments/validation.js'
 import type { ContactPayload } from './mail.js'
 import { MERCHANT_WEBHOOK_TOPICS, verifyShopifyWebhook } from './merchant/shopify-webhook.js'
 import { createRateLimiter } from './rate-limit.js'
@@ -15,6 +26,11 @@ export type AppDeps = {
     websiteCutoverAt?: string | null
     resendApiKey?: string
     contactToEmail?: string
+    /** Bearer for `/experiments/ci*`; blank → those routes answer 503. */
+    experimentsCiToken?: string
+    /** Conclusion dispatch to GitHub on promote/stop; blank token → off. */
+    githubDispatchToken?: string
+    githubRepository?: string
   }
   sendContactEmail: (payload: ContactPayload) => Promise<void>
   /** Persists contact form submissions (Postgres). Preferred path on Railway Hobby. */
@@ -22,6 +38,10 @@ export type AppDeps = {
   /** Omitted when DATABASE_URL is not set; review routes then answer 503. */
   reviews?: ReviewStore
   analytics?: AnalyticsStore
+  /** A/B tests (Postgres). Omitted without DATABASE_URL; the /experiments routes then don't exist. */
+  experiments?: ExperimentStore
+  /** `fetch` for the GitHub conclusion dispatch (tests inject a fake). */
+  githubFetch?: typeof fetch
   /**
    * Shopify product/inventory webhooks. Omitted when the Merchant Center sync
    * isn't configured; the route then answers 503.
@@ -32,7 +52,16 @@ export type AppDeps = {
   }
 }
 
-export function createApp({ config, sendContactEmail, contacts, reviews, analytics, shopifyWebhooks }: AppDeps) {
+export function createApp({
+  config,
+  sendContactEmail,
+  contacts,
+  reviews,
+  analytics,
+  experiments,
+  githubFetch,
+  shopifyWebhooks,
+}: AppDeps) {
   const app = new Hono()
   const checkRateLimit = createRateLimiter()
   const allowlist = new Set(config.corsOrigins)
@@ -61,6 +90,16 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
 
   app.get('/health', (c) => c.json({ ok: true }))
 
+  const experimentsDispatch =
+    experiments && config.githubDispatchToken
+      ? createConclusionDispatcher({
+          token: config.githubDispatchToken,
+          repository: config.githubRepository,
+          store: experiments,
+          fetch: githubFetch,
+        })
+      : null
+
   if (analytics) {
     app.route(
       '/dashboard',
@@ -74,9 +113,94 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
         sendContactEmail,
         resendApiKey: config.resendApiKey,
         contactToEmail: config.contactToEmail,
+        experiments,
+        experimentsDispatch,
       }),
     )
     app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))
+  }
+
+  if (experiments) {
+    // Polled by serve-spa every 30 s and by the browser fallback (docs/EXPERIMENTS_CONTRACT.md).
+    app.get('/experiments/config', async (c) => {
+      try {
+        const body = await buildPublicConfig(experiments)
+        c.header('Cache-Control', 'public, max-age=30')
+        return c.json(body)
+      } catch (error) {
+        console.error('Failed to load experiments config', error)
+        c.header('Cache-Control', 'no-store')
+        return c.json({ ok: false, error: 'Experiments unavailable' }, 502)
+      }
+    })
+
+    // sendBeacon posts text/plain (no CORS preflight), so the body is parsed as JSON whatever the type.
+    app.post('/experiments/events', async (c) => {
+      if (!hasAllowedBrowserOrigin(c)) {
+        return c.json({ ok: false, error: 'Forbidden origin' }, 403)
+      }
+      const rate = checkRateLimit(`experiment-events:${clientIp(c)}`, { limit: 120 })
+      if (!rate.ok) {
+        c.header('Retry-After', String(rate.retryAfterSec))
+        return c.json({ ok: false, error: 'Too many requests' }, 429)
+      }
+      const text = await c.req.text()
+      if (text.length > MAX_BEACON_BYTES) return c.json({ ok: false, error: 'Payload too large' }, 413)
+      let body: unknown
+      try {
+        body = JSON.parse(text)
+      } catch {
+        return c.json({ ok: false, error: 'Invalid JSON body' }, 400)
+      }
+      const parsed = parseBeacon(body)
+      if (!parsed.ok) return c.json({ ok: false, error: parsed.error }, 400)
+      try {
+        const accepted = await ingestBeacon(experiments, parsed.value)
+        return c.json({ ok: true, accepted })
+      } catch (error) {
+        console.error('Failed to store experiment events', error)
+        return c.json({ ok: false, error: 'Failed to store events' }, 502)
+      }
+    })
+
+    // GitHub Actions → contact-api (server to server: bearer token, no browser origin).
+    const ciGate = (c: Context): Response | null => {
+      const token = config.experimentsCiToken ?? ''
+      if (!token) return c.json({ ok: false, error: 'Experiments CI is not configured' }, 503)
+      const rate = checkRateLimit(`experiments-ci:${clientIp(c)}`, { limit: 30 })
+      if (!rate.ok) {
+        c.header('Retry-After', String(rate.retryAfterSec))
+        return c.json({ ok: false, error: 'Too many requests' }, 429)
+      }
+      if (!bearerMatches(c.req.header('authorization'), token)) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+      return null
+    }
+
+    app.post('/experiments/ci', async (c) => {
+      const denied = ciGate(c)
+      if (denied) return denied
+      const body = await c.req.json().catch(() => undefined)
+      if (body === undefined) return c.json({ ok: false, error: 'Invalid JSON body' }, 400)
+      const parsed = parseCiRequest(body)
+      if (!parsed.ok) return c.json({ ok: false, error: parsed.error }, 400)
+      try {
+        return c.json({ ok: true, results: await applyCiRequest(experiments, parsed.value) })
+      } catch (error) {
+        console.error('Experiments CI sync failed', error)
+        return c.json({ ok: false, error: 'Failed to sync experiments' }, 502)
+      }
+    })
+
+    app.get('/experiments/ci/stale', async (c) => {
+      const denied = ciGate(c)
+      if (denied) return denied
+      try {
+        return c.json({ ok: true, experiments: await listStale(experiments) })
+      } catch (error) {
+        console.error('Failed to list stale experiments', error)
+        return c.json({ ok: false, error: 'Failed to list experiments' }, 502)
+      }
+    })
   }
 
   // Server-to-server from Shopify: no browser origin, authenticated by HMAC instead.
@@ -132,7 +256,7 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
 
     if (contacts) {
       try {
-        await contacts.create(parsed.value, emailDelivered)
+        await contacts.create(parsed.value, emailDelivered, parsed.context)
         return c.json({ ok: true, emailed: emailDelivered })
       } catch (error) {
         console.error('Failed to store contact message', error)
@@ -240,7 +364,7 @@ function safeOrigin(url: string): string | undefined {
 
 export function parseContactBody(
   body: unknown,
-): { ok: true; value: ContactPayload } | { ok: false; error: string } {
+): { ok: true; value: ContactPayload; context: ContactExperimentContext } | { ok: false; error: string } {
   if (!body || typeof body !== 'object') {
     return { ok: false, error: 'Expected JSON object' }
   }
@@ -267,7 +391,15 @@ export function parseContactBody(
     return { ok: false, error: 'Invalid email' }
   }
 
-  return { ok: true, value: { name, email, subject, message } }
+  // A/B context is stored but never emailed. A malformed value is dropped rather than
+  // blocking a customer's message.
+  const experiments = parseExperimentsField(record.experiments)
+  const context: ContactExperimentContext = {
+    visitorId: isVisitorId(record.visitorId) ? record.visitorId : null,
+    experiments: experiments.ok ? experiments.value : null,
+  }
+
+  return { ok: true, value: { name, email, subject, message }, context }
 }
 
 export function asTrimmedString(value: unknown): string | null {

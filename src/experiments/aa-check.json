@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "key": "aa-check",
+  "name": "A/A pipeline check",
+  "hypothesis": "Two identical arms on the home page show no lift and no sample-ratio mismatch, which proves assignment, exposure logging and order tagging end to end before a real test relies on them.",
+  "variants": [
+    { "key": "control", "name": "Home page", "weight": 50 },
+    { "key": "b", "name": "Home page (identical)", "weight": 50 }
+  ],
+  "primaryMetric": "add_to_cart",
+  "paths": ["/"],
+  "minVisitorsPerArm": 1000,
+  "minDays": 14
+}

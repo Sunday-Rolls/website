@@ -4,11 +4,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import type { ShopifyCart } from '@/lib/shopify'
-import { cartAttributes, cartNeedsAttributes, markCartAttributed } from '@/lib/attribution'
+import { allCartAttributes, cartNeedsStamp, markCartStamped } from '@/lib/cart-attributes'
+import { experimentString, useExperimentsSnapshot } from '@/lib/experiments'
 
 const shopifyConfigured = Boolean(
   import.meta.env.VITE_SHOPIFY_STORE_DOMAIN && import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
@@ -101,6 +103,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // A new exposure (e.g. on the cart page) after the cart exists: re-stamp in the background.
+  // Attributes don't change lines or totals, so the cart state is left alone.
+  const { seen, vid } = useExperimentsSnapshot()
+  const restamping = useRef(false)
+  const [restampTick, setRestampTick] = useState(0)
+  const cartId = cart?.id
+  useEffect(() => {
+    if (!shopifyConfigured || !cartId || restamping.current) return
+    if (!cartNeedsStamp(cartId)) return
+    restamping.current = true
+    const sent = experimentString()
+    void loadShopify()
+      .then(({ updateCartAttributes }) => updateCartAttributes(cartId, allCartAttributes()))
+      .then(() => {
+        // Only claim the stamp if no exposure landed while the request was in flight.
+        if (experimentString() === sent) markCartStamped(cartId)
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        restamping.current = false
+        if (experimentString() !== sent) setRestampTick((n) => n + 1)
+      })
+  }, [cartId, seen, vid, restampTick])
+
   const persistCart = useCallback((next: ShopifyCart) => {
     setCart(next)
     writeStoredCartId(next.id)
@@ -122,13 +148,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const line = { merchandiseId: variantId, quantity }
         let next = cart
           ? await addCartLines(cart.id, [line])
-          : await createCart([line], cartAttributes())
-        if (!cart) markCartAttributed(next.id)
-        else if (cartNeedsAttributes(next.id)) {
-          // A cart from an earlier visit: tag it with the ad that brought the visitor back.
+          : await createCart([line], allCartAttributes())
+        if (!cart) markCartStamped(next.id)
+        else if (cartNeedsStamp(next.id)) {
+          // A cart from an earlier visit, or new exposures since: re-tag it with the ad that
+          // brought the visitor back and the experiments they've seen.
           try {
-            next = await updateCartAttributes(next.id, cartAttributes())
-            markCartAttributed(next.id)
+            next = await updateCartAttributes(next.id, allCartAttributes())
+            markCartStamped(next.id)
           } catch {
             // Best-effort: never block adding to cart over attribution.
           }

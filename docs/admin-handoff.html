@@ -197,6 +197,27 @@ tr:last-child td { border-bottom: 0; }
       <p>Contact form submissions go to Resend → <code>CONTACT_TO_EMAIL</code> and are stored in Postgres. Product reviews also land in Postgres (and email). Use Dashboard → Tests to smoke-test contact, reviews and a tagged $0 order. See <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/CONTACT_EMAIL.md">CONTACT_EMAIL.md</a>.</p>
     </section>
 
+    <section id="ab-tests">
+      <h2>A/B tests</h2>
+      <p>Tests arrive in <a href="https://contact-api-production-9af6.up.railway.app/dashboard/">Dashboard → Experiments</a> as <strong>drafts</strong> from pull requests labelled <code>ab-test</code>. The code is merged <strong>dark</strong>: everyone sees <code>control</code> until someone presses Start. Any dashboard user can act; each action asks for confirmation and is written to the audit log.</p>
+      <div class="table-wrap"><table>
+        <tr><th>Action</th><th>When</th><th>Effect</th></tr>
+        <tr><td>Start</td><td>After the PR has merged and the site has redeployed</td><td>Draft → running. Refused while another running test targets the same page.</td></tr>
+        <tr><td>Pause / Resume</td><td>Something looks broken</td><td>Paused: everyone sees control and counting freezes. Resume keeps each visitor’s arm.</td></tr>
+        <tr><td>Stop</td><td>No difference, guardrail fail, or past the maximum run time</td><td>Ends with no winner; everyone sees control; opens a GitHub cleanup issue.</td></tr>
+        <tr><td>Promote an arm</td><td>The verdict is Winner</td><td>Everyone sees that arm right away, with no deploy; opens a cleanup issue. Archive the test once the cleanup PR merges.</td></tr>
+      </table></div>
+      <details id="ab-verdict" open><summary>Reading the verdict</summary><div>
+        <ul>
+          <li><strong>Early</strong>: not enough data yet (at least 14 days and 1,000 visitors per arm by default). The numbers are greyed out; don’t act on them.</li>
+          <li><strong>Winner</strong>: an arm has at least a 95% chance to beat control on the main metric and no guardrail is failing. Promote it.</li>
+          <li><strong>No difference</strong>: enough data, no clear winner. Stop it (control stays), unless there’s another reason to prefer the new version.</li>
+          <li><strong>Guardrail fail</strong>: an arm is at least 80% likely to hurt purchase rate or revenue per visitor. Stop it.</li>
+          <li><strong>SRM fail</strong>: the traffic split doesn’t match the plan, which means a bug. Don’t trust the results; pause it and tell a developer.</li>
+        </ul>
+        <p class="muted">Run the <code>aa-check</code> A/A test first (two identical versions of the home page): expect No difference and no SRM warning. Background: <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/AB_TESTING_PLAN.md">docs/AB_TESTING_PLAN.md</a>.</p>
+      </div></details>
+    </section>
     <section>
       <h2>Weekly operator checklist</h2>
       <p class="muted">Click a row to cycle pending → in progress → done. Progress is saved in this browser.</p>
@@ -264,6 +285,20 @@ tr:last-child td { border-bottom: 0; }
       </div>
     </section>
 
+    <section id="ab-workflow">
+      <h2>Ship a change as an A/B test</h2>
+      <p>Same loop, run through <code>/website-change</code> (“Run it as an A/B test”): add <code>src/experiments/&lt;key&gt;.json</code>, wrap the change in <code>&lt;Variant&gt;</code> / <code>useVariant</code> or a content <code>experiments</code> block, check both arms with <code>?sr_force=&lt;key&gt;:b</code>, open the PR and add the <code>ab-test</code> label. The Experiments workflow comments one preview link per arm and creates the dashboard draft. Merging ships it dark; Start it from Dashboard → Experiments. After Promote or Stop, a GitHub issue lists the code to clean up.</p>
+      <details id="ab-setup"><summary>One-time GitHub setup (owner confirms each)</summary><div>
+        <p class="muted">Each of these is a live change. Until 1 and 2 are done the workflow still checks the registry and comments previews, and says the dashboard sync is not set up.</p>
+        <ol>
+          <li>Label <code>ab-test</code> on Sunday-Rolls/website.</li>
+          <li>Actions secret <code>EXPERIMENTS_CI_TOKEN</code>, the same value as the Railway <code>contact-api</code> variable of that name.</li>
+          <li>Optional Actions variable <code>EXPERIMENTS_API_URL</code> if contact-api moves off its Railway URL.</li>
+          <li>Railway <code>contact-api</code> variable <code>GITHUB_DISPATCH_TOKEN</code>: a fine-grained token for this repo only, with Contents: Read and write (what repository dispatch needs). It opens the cleanup issue on Promote / Stop.</li>
+        </ol>
+        <p class="muted">Details: README → “A/B tests” and <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/EXPERIMENTS_CONTRACT.md">docs/EXPERIMENTS_CONTRACT.md</a>.</p>
+      </div></details>
+    </section>
     <section>
       <h2>Where docs live</h2>
       <div class="table-wrap"><table>
@@ -274,6 +309,8 @@ tr:last-child td { border-bottom: 0; }
         <tr><td><code>docs/SHOPIFY_WEB_PIXEL.md</code></td><td>Purchase pixel install</td></tr>
         <tr><td><code>docs/CONTACT_EMAIL.md</code></td><td>Resend contact path</td></tr>
         <tr><td><code>docs/RAILWAY_CUTOVER.md</code></td><td>SPA → Railway production cutover</td></tr>
+        <tr><td><code>docs/AB_TESTING_PLAN.md</code></td><td>A/B testing plan, stats, PR → test lifecycle</td></tr>
+        <tr><td><code>docs/EXPERIMENTS_CONTRACT.md</code></td><td>Experiment formats, registry, CI endpoints</td></tr>
         <tr><td><code>server/README.md</code></td><td>API endpoints, dashboard, Railway</td></tr>
       </table></div>
     </section>
@@ -301,6 +338,7 @@ const LISTS = {
     ["ops-sync", "If numbers look stale, press Refresh in the dashboard header"],
     ["ops-qr", "When packaging, print review QR sheets from Dashboard → Data"],
     ["ops-contact", "Skim contact inbox (CONTACT_TO_EMAIL) and dashboard reviews"],
+    ["ops-ab", "Check Dashboard → Experiments: act only on a Winner, No difference, Guardrail or SRM verdict"],
   ],
   setup: [
     ["wf-node", "Confirm Node 22+ (node -v)"],

@@ -14,7 +14,8 @@
     "analytics:import-sheet": "tsx src/scripts/import-sheet.ts",
     "analytics:import-squarespace": "tsx src/scripts/import-squarespace-orders.ts",
     "analytics:sync-ga4": "tsx src/scripts/sync-ga4.ts",
-    "merchant:sync": "tsx src/scripts/sync-merchant.ts"
+    "merchant:sync": "tsx src/scripts/sync-merchant.ts",
+    "experiments:seed-demo": "tsx src/scripts/seed-ab-demo.ts"
   },
   "engines": {
     "node": ">=20"

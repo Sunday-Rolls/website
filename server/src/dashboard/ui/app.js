@@ -9,6 +9,7 @@ const ROUTES = [
   { name: 'products', label: 'Products', icon: 'package', group: 'MENU' },
   { name: 'marketing', label: 'Marketing', icon: 'megaphone', group: 'MENU' },
   { name: 'funnel', label: 'Funnel', icon: 'filter', group: 'MENU' },
+  { name: 'experiments', label: 'Experiments', icon: 'flask', group: 'MENU', ownRange: true },
   { name: 'money', label: 'Money', icon: 'coins', group: 'MENU', ownRange: true },
   { name: 'tools', label: 'Tools', icon: 'tool', group: 'OTHERS', ownRange: true },
 ]
@@ -226,6 +227,12 @@ function currentRoute() {
   return ROUTES.some((r) => r.name === name) ? name : DEFAULT_ROUTE
 }
 
+/** The `?…` part of the hash (`#/experiments?key=home-banner` → 'key=home-banner'), or ''. */
+function currentQuery() {
+  const i = location.hash.indexOf('?')
+  return i === -1 ? '' : location.hash.slice(i + 1)
+}
+
 function loadingSkeleton() {
   return `${'<div class="skeleton col-3" style="height:180px"></div>'.repeat(4)}
   <div class="skeleton col-8" style="height:380px"></div>
@@ -236,7 +243,10 @@ async function renderRoute() {
   if (!state.user) return
   const name = currentRoute()
   const meta = ROUTES.find((r) => r.name === name)
-  if (location.hash !== `#/${name}`) history.replaceState(null, '', `#/${name}`)
+  // Keep a query on a known route (pages read it from ctx.params); drop it when falling back.
+  const query = location.hash.replace(/^#\/?/, '').split('?')[0].toLowerCase() === name ? currentQuery() : ''
+  const canonical = `#/${name}${query ? `?${query}` : ''}`
+  if (location.hash !== canonical) history.replaceState(null, '', canonical)
   state.route = name
   const token = ++state.renderToken
 
@@ -266,6 +276,7 @@ async function renderRoute() {
     api,
     rangeQuery,
     range: { ...state.range },
+    params: new URLSearchParams(query),
     navigate: (to) => {
       location.hash = `#/${to}`
     },

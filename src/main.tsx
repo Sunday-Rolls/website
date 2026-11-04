@@ -8,9 +8,11 @@ import '@fontsource/inter/latin-600.css'
 import './index.css'
 import App from '@/App'
 import { captureAttribution } from '@/lib/attribution'
+import { bootExperiments } from '@/lib/experiments'
 import { initGtm } from '@/lib/gtm'
 
 captureAttribution()
+bootExperiments()
 initGtm()
 
 createRoot(document.getElementById('root')!).render(
