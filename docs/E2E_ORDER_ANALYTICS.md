@@ -1,6 +1,6 @@
 # E2E: order → dashboard analytics
 
-Optional Playwright path that places a real Shopify checkout (Bogus Gateway) and asserts the product appears in dashboard Overview after **Sync Shopify**.
+Optional Playwright path that places a real Shopify checkout (Bogus Gateway) and asserts the product appears on the dashboard Products page after **Refresh**.
 
 Gated behind `E2E_ORDER_ANALYTICS=1` so default `npm run test:e2e` stays green.
 
@@ -37,7 +37,7 @@ Root `.env` is loaded automatically by the Playwright config. Do not commit secr
 2. Homepage → Shop → The Birdie Machine → Add to Cart → Checkout.
 3. Unlocks the storefront password gate if shown.
 4. Completes hosted checkout with Bogus card values (`1` / future expiry / any CVV).
-5. Logs into the dashboard → **Data → Sync Shopify** → **Overview** and asserts the product table.
+5. Logs into the dashboard → **Refresh** (forced sync) → **Products** (7d) and asserts the product is listed.
 6. **`finally`**: opens Payments again and deactivates Bogus (best-effort).
 
 ## 2FA / first run

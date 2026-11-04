@@ -9,12 +9,16 @@ Hono service on Railway: contact form email, product reviews, and the internal a
 - `GET|POST /reviews` — product reviews (requires `DATABASE_URL`)
 - `GET /dashboard/` — analytics UI (requires `DATABASE_URL`)
 - `POST /dashboard/api/login|logout`, `GET /dashboard/api/overview|pnl|roas|sync-status`
-- `GET /dashboard/api/review-qrs.pdf?target=pages|live` — printable review QR PDF (Data page → Export PDF)
+- `GET /dashboard/api/review-qrs.pdf?target=pages|live` — printable review QR PDF (Tools → Review QR codes)
 - `POST /webhooks/shopify` — Shopify product/inventory webhooks (HMAC-signed); re-syncs Google Merchant Center ([docs/GOOGLE_MERCHANT_SYNC.md](../docs/GOOGLE_MERCHANT_SYNC.md))
 
 ## Sync on open
 
-Opening the dashboard (or logging in) syncs every data source in parallel, with a progress pill under the header listing each one: Shopify orders, Sales Tracker (Drive `SALES_TRACKER_DRIVE_FILE_ID`), GA4 traffic and Search Console. Each is `POST /dashboard/api/sync/auto/:source` ([src/dashboard/auto-sync.ts](src/dashboard/auto-sync.ts)): it runs the same sync as the Data page buttons, is skipped while its last good sync is fresh (Shopify 5 min, Sales Tracker and GA4 30 min, Search Console 6 h), shares one run between tabs, and reports "not set up" when credentials are missing. The page redraws when anything changed.
+Opening the dashboard (or logging in) syncs every data source in parallel, driving a thin progress bar at the top of the page: Shopify orders, Sales Tracker (Drive `SALES_TRACKER_DRIVE_FILE_ID`), GA4 traffic and Search Console. Each is `POST /dashboard/api/sync/auto/:source` ([src/dashboard/auto-sync.ts](src/dashboard/auto-sync.ts)): it is skipped while its last good sync is fresh (Shopify 5 min, Sales Tracker and GA4 30 min, Search Console 6 h), shares one run between tabs, and reports "not set up" when credentials are missing. The **Refresh** button in the header runs the same calls with `?force=1`, which syncs even fresh sources. The page redraws when anything changed. Tools → Connections shows each source's status from `GET /dashboard/api/health`.
+
+## Dashboard pages
+
+The UI is plain HTML/CSS/JS with no build step: the shell is `src/dashboard/ui/app.js`, shared helpers are in `ui/lib/` (`ui.js` documents the page-module contract, `charts.js` wraps ApexCharts, served from `/dashboard/vendor/apexcharts.js`), and each page is one module in `ui/pages/`: Overview, Sales (`/api/orders`), Products (`/api/products`), Marketing (`/api/marketing`), Funnel (`/api/funnel`), Money (`/api/pnl`) and Tools (review QR PDFs, manual entries, workbook import/export, connections, checks). The page data builders are in `src/analytics/views.ts`.
 
 Shopify orders upsert by Shopify id; cancelled, voided and `analytics-test` orders are removed. Dashboard days and months are **America/Chicago** calendar days (`STORE_TIME_ZONE` in `src/analytics/period.ts`).
 

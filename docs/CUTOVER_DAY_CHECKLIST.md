@@ -72,7 +72,7 @@ Run right after step 4, before announcing the new site.
 - [ ] Real order on `https://www.sundayrollsgolf.com`: product → cart → checkout on `shop.` → pay → thank-you page. Either a real card refunded afterwards, or the Bogus Gateway via [E2E_ORDER_ANALYTICS.md](./E2E_ORDER_ANALYTICS.md) (`npm run test:e2e:order-analytics`). Bogus disables real payments while it's on, so confirm it's switched off after.
 - [ ] Order appears in Shopify Admin and isn't tagged `analytics-test`.
 - [ ] GA4 Realtime shows `purchase`; Google Ads conversion `AW-17744695066` fires.
-- [ ] Dashboard → Data → Sync Shopify → the order shows on Overview.
+- [ ] Dashboard → Refresh → the order shows on Sales and Products.
 - [ ] Refund or cancel the test order.
 
 ## After

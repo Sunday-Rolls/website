@@ -3,7 +3,7 @@
  * (POST /dashboard/api/sync/auto/:source) so the UI can show each one's progress.
  *
  * Each source runs at most once at a time (simultaneous tabs share the run) and is
- * skipped while its last good sync is fresher than `freshMs`. A source without
+ * skipped while its last good sync is fresher than `freshMs` (unless forced). A source without
  * credentials answers `unconfigured` instead of failing.
  */
 import { extractDriveFileId } from '../analytics/drive.js'
@@ -90,7 +90,8 @@ export function createAutoSync(
 ) {
   const inFlight = new Map<AutoSyncSource, Promise<AutoSyncOutcome>>()
 
-  return function run(source: AutoSyncSource): Promise<AutoSyncOutcome> {
+  /** `force` skips the freshness check; a call made while a run is in flight still shares that run. */
+  return function run(source: AutoSyncSource, options: { force?: boolean } = {}): Promise<AutoSyncOutcome> {
     const existing = inFlight.get(source)
     if (existing) return existing
     const def = sources[source]
@@ -100,7 +101,7 @@ export function createAutoSync(
       if (missing) return { status: 'unconfigured', reason: `missing ${missing}` }
       const last = (await store.latestSyncs()).find((s) => s.source === source)
       const lastAt = last?.finishedAt ? Date.parse(last.finishedAt) : 0
-      if (last?.status === 'ok' && now() - lastAt < def.freshMs) {
+      if (!options.force && last?.status === 'ok' && now() - lastAt < def.freshMs) {
         return { status: 'fresh', lastSyncedAt: last.finishedAt }
       }
       return { status: 'synced', summary: await def.run(store) }

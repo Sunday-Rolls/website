@@ -34,15 +34,15 @@ Explain the two hubs, then go deep only on what they asked:
 |-----|-----|
 | Shopify Admin `https://admin.shopify.com/store/chrgrk-ff` | Orders, refunds, discounts, products, checkout shipping rates |
 | Shippo ([app](https://apps.shopify.com/shippo)) | Buy/print labels; sync tracking + fulfilled back to Shopify |
-| Dashboard `https://contact-api-production-9af6.up.railway.app/dashboard/` | Sync Shopify/GA4, P&L, review QR PDF, Tests |
+| Dashboard `https://contact-api-production-9af6.up.railway.app/dashboard/` | Syncs on open (Refresh to force), Sales, Products, Marketing, Money (P&L), Tools: review QR PDF, manual entries, checks |
 
 Key facts:
 
 - This SPA does **not** buy labels or manage discount codes — Shippo + Shopify.
 - Shipping setup runbook: `docs/SHIPPO.md`. As of 2026-10-27 Shippo was **not** installed on `chrgrk-ff`; location street address incomplete.
 - Day-to-day: order in Shopify → label in Shippo → tracking syncs; refunds stay in Shopify.
-- Website sales source of truth: Shopify → dashboard **Sync Shopify**.
-- Review QRs: Dashboard → Data → Review QR codes → Export PDF (preferred). CLI: `npm run reviews:qr:pages` / `reviews:qr:live`.
+- Website sales source of truth: Shopify → dashboard (syncs automatically on open; **Refresh** in the header forces it).
+- Review QRs: Dashboard → Tools → Review QR codes → Download QR code PDF (preferred). CLI: `npm run reviews:qr:pages` / `reviews:qr:live`.
 - Contact mail: Resend → `CONTACT_TO_EMAIL`; see `docs/CONTACT_EMAIL.md`.
 - With the `shopify` MCP connected, you can look up orders, products and discounts directly. Confirm with the user before any write (discounts, refunds, fulfillments).
 - Never invent or paste secrets. Point at Railway env, `.env.example`, or Shopify Admin.

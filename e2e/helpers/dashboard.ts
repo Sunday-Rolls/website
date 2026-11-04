@@ -11,35 +11,37 @@ export async function loginDashboard(page: Page): Promise<void> {
   const password = requireEnv('E2E_DASHBOARD_PASSWORD')
   await page.goto(dashboardBaseUrl(), { waitUntil: 'domcontentloaded' })
 
-  const loginView = page.locator('#login-view')
+  const shell = page.locator('#shell:not(.hidden)')
   // Already signed in
-  if (await page.locator('#dash-view:not(.hidden)').isVisible().catch(() => false)) {
-    return
-  }
+  if (await shell.isVisible().catch(() => false)) return
 
-  await expect(loginView).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('#login-view')).toBeVisible({ timeout: 30_000 })
   await page.locator('#login-email').fill(email)
   await page.locator('#login-password').fill(password)
   await page.locator('#login-form button[type="submit"]').click()
-  await expect(page.locator('#dash-view:not(.hidden)')).toBeVisible({ timeout: 30_000 })
+  await expect(shell).toBeVisible({ timeout: 30_000 })
 }
 
+/** Force a sync of every source with the header Refresh button and wait for it to finish without a Shopify error. */
 export async function syncShopifyFromDashboard(page: Page): Promise<void> {
-  await page.getByRole('button', { name: /^Data$/i }).click()
-  await expect(page.locator('#sync-shopify-btn')).toBeVisible()
-  await page.locator('#sync-shopify-btn').click()
-  await expect(page.locator('#sync-feedback')).toContainText(/Shopify synced/i, { timeout: 120_000 })
+  const refresh = page.locator('#refresh-btn')
+  // The quiet sync that runs on login must finish before Refresh accepts a click.
+  await expect(refresh).not.toHaveAttribute('aria-busy', 'true', { timeout: 120_000 })
+  await refresh.click()
+  await expect(refresh).toHaveAttribute('aria-busy', 'true')
+  await expect(refresh).not.toHaveAttribute('aria-busy', 'true', { timeout: 120_000 })
+  expect(await refresh.getAttribute('title')).not.toMatch(/Shopify/i)
 }
 
 export async function assertProductInOverview(
   page: Page,
   productName: string | RegExp,
 ): Promise<void> {
-  await page.getByRole('button', { name: /^Overview$/i }).click()
-  await page.locator('#period-pills button[data-period="7d"]').click()
-  // Wait for products table to refresh
-  await expect(page.locator('#products-table tbody')).toBeVisible({ timeout: 30_000 })
+  await page.goto(`${dashboardBaseUrl()}#/products`)
+  await page.locator('#range-pills button[data-period="7d"]').click()
+  const root = page.locator('#page-root[data-page="products"]')
+  await expect(root).not.toHaveAttribute('aria-busy', 'true', { timeout: 30_000 })
   await expect
-    .poll(async () => page.locator('#products-table tbody').innerText(), { timeout: 60_000 })
+    .poll(async () => root.innerText(), { timeout: 60_000 })
     .toMatch(productName instanceof RegExp ? productName : new RegExp(productName, 'i'))
 }

@@ -131,7 +131,7 @@ Also unlock the storefront password (“Opening soon”) before public traffic, 
 
 1. **Apply IaC / create `website` service** and attach a Railway `*.up.railway.app` URL.
 2. **Set live `VITE_*` on `website`**, deploy, verify on the Railway URL (not DNS yet).
-3. **Stage analytics:** Realtime on production GA4 while shopping the Railway URL; Sync GA4 on the dashboard (Railway URL or existing API host is fine before DNS).
+3. **Stage analytics:** Realtime on production GA4 while shopping the Railway URL; open the dashboard or press Refresh to sync GA4 (Railway URL or existing API host is fine before DNS).
 4. **Flip Shopify pixel** to the live measurement ID; place a test order / thank-you hit.
 5. **Expand `CORS_ORIGINS`** on `contact-api` for the production storefront hostnames; redeploy API.
 6. **Attach storefront custom domains + DNS** on `website`; confirm HTTPS and deep links.
