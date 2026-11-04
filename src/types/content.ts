@@ -73,17 +73,22 @@ export interface HomeContent {
   }
   /** Flagship-product banner: copy beside a spotlit cutout of the cover. */
   featured?: {
-    eyebrow?: string
     title: string
     tagline?: string
     lines: string[]
-    colorways: Array<{
+    /** Putter fits (center-shafted, mallet), each with the colourways it comes in. */
+    fits: Array<{
       label: string
-      /** CSS colour for the swatch button. */
-      swatch: string
-      href: string
-      /** Square cutout of the cover on a transparent background (WebP). */
-      image: string
+      /** Which putters it fits, shown under the picker. */
+      note?: string
+      colorways: Array<{
+        label: string
+        /** CSS colour for the swatch button. */
+        swatch: string
+        href: string
+        /** Square cutout of the cover on a transparent background (WebP). */
+        image: string
+      }>
     }>
     cta: ContentLink
   }
