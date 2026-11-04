@@ -96,19 +96,42 @@ async function shopifyGraphql<T>(
   return json.data as T
 }
 
+export type ShopifyPublicationNode = { id: string; name?: string | null; catalog?: { title?: string | null } | null }
+
+/**
+ * Pick the sales channel whose name (or catalog title) matches `match`, case-insensitively.
+ * Sales channels like "Sunday Rolls" or "Online Store" have no catalog, so the channel
+ * name is what identifies them. An exact name wins over a partial one.
+ */
+export function matchPublication(nodes: ShopifyPublicationNode[], match: string): ShopifyPublicationNode | null {
+  const want = match.trim().toLowerCase()
+  const labels = (p: ShopifyPublicationNode) =>
+    [p.name, p.catalog?.title].filter((v): v is string => Boolean(v)).map((v) => v.toLowerCase())
+  return (
+    nodes.find((p) => labels(p).includes(want)) ??
+    nodes.find((p) => labels(p).some((label) => label.includes(want))) ??
+    null
+  )
+}
+
 async function findPublicationId(
   creds: ShopifyCredentials,
   accessToken: string,
   match: string,
 ): Promise<string | null> {
   if (!match) return null
-  const data = await shopifyGraphql<{
-    publications: { nodes: Array<{ id: string; catalog: { title: string } | null }> }
-  }>(creds, accessToken, `{ publications(first: 50) { nodes { id catalog { title } } } }`)
-  const hit = data.publications.nodes.find((p) =>
-    (p.catalog?.title ?? '').toLowerCase().includes(match.toLowerCase()),
+  const data = await shopifyGraphql<{ publications: { nodes: ShopifyPublicationNode[] } }>(
+    creds,
+    accessToken,
+    `{ publications(first: 50) { nodes { id name catalog { title } } } }`,
   )
-  if (!hit) throw new Error(`No Shopify sales channel matching "${match}" (set MERCHANT_SHOPIFY_CHANNEL= to sync all)`)
+  const hit = matchPublication(data.publications.nodes, match)
+  if (!hit) {
+    const names = data.publications.nodes.map((p) => p.name || p.catalog?.title).filter(Boolean).join(', ')
+    throw new Error(
+      `No Shopify sales channel matching "${match}" (channels: ${names || 'none'}; set MERCHANT_SHOPIFY_CHANNEL= to sync all)`,
+    )
+  }
   return hit.id
 }
 
