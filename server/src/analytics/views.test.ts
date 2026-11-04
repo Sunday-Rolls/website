@@ -196,6 +196,7 @@ describe('buildProductsView', () => {
       orders: [
         order('2026-10-02', 90, { channel: 'etsy', source: 'sales-tracker', lines: line('Headcover', 90) }),
         order('2026-10-03', 85, { channel: 'ebay', source: 'sales-tracker', lines: line('Headcover', 85) }),
+        order('2026-10-03', 60, { channel: 'squarespace', source: 'sales-tracker', lines: line('Headcover', 60) }),
         order('2026-10-04', 80, { lines: line('Retro Roller – Grey', 80) }),
         order('2026-10-05', 80, { lines: line('Retro Roller - Grey', 80) }),
       ],
@@ -205,8 +206,9 @@ describe('buildProductsView', () => {
       ['Retro Roller - Grey', 2, 8],
       ['Etsy sale (design not recorded)', 1, null],
       ['eBay sale (design not recorded)', 1, null],
+      ['Website sale (design not recorded)', 1, null],
     ])
-    expect(view.categories[0]).toEqual({ category: 'Design not recorded', units: 2, revenue: 175 })
+    expect(view.categories[0]).toEqual({ category: 'Design not recorded', units: 3, revenue: 235 })
   })
 })
 
