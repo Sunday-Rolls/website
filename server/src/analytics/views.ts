@@ -261,6 +261,24 @@ export type ProductsView = {
  * Sales by product, joined to GA4 product views by exact product name (as the overview
  * keys them). Products that were viewed but not sold are included with zero units.
  */
+/** One spelling per product: Squarespace and Shopify mix "-" and "–" in the same names. */
+function productKey(name: string): string {
+  return name.replace(/\s*[–—]\s*/g, ' - ').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * The Sales Tracker records Etsy and eBay sales as a bare "Headcover" with no design, so on its own
+ * that row looks like a best-seller. Name it for what it is: marketplace sales of unknown design.
+ */
+function productLabel(order: Order, line: { productName: string; category: string | null }): { name: string; category: string | null } {
+  const name = productKey(line.productName)
+  if (/^headcovers?$/i.test(name) && order.channel !== 'shopify' && order.channel !== 'squarespace') {
+    const where = order.channel === 'etsy' ? 'Etsy' : order.channel === 'ebay' ? 'eBay' : 'Other'
+    return { name: `${where} sale (design not recorded)`, category: 'Design not recorded' }
+  }
+  return { name, category: line.category ? productKey(line.category) : null }
+}
+
 export function buildProductsView(input: {
   range: DateRange
   orders: Order[]
@@ -272,9 +290,10 @@ export function buildProductsView(input: {
   for (const o of orders) {
     const day = storeDay(o.orderedAt)
     for (const line of o.lines) {
-      const p = sales.get(line.productName) ?? {
-        name: line.productName,
-        category: line.category,
+      const label = productLabel(o, line)
+      const p = sales.get(label.name) ?? {
+        name: label.name,
+        category: label.category,
         units: 0,
         revenue: 0,
         orders: new Set<string>(),
@@ -282,13 +301,18 @@ export function buildProductsView(input: {
       p.units += line.quantity
       p.revenue += line.lineRevenue
       p.orders.add(o.id || `${o.channel}:${o.externalId}`)
-      if (!p.category && line.category) p.category = line.category
-      sales.set(line.productName, p)
+      if (!p.category && label.category) p.category = label.category
+      sales.set(label.name, p)
       if (trend.has(day)) trend.set(day, trend.get(day)! + line.quantity)
     }
   }
 
-  const views = productViewsByName(input.productViews, input.range)
+  const views = new Map<string, { views: number; category: string | null }>()
+  for (const [name, v] of productViewsByName(input.productViews, input.range)) {
+    const key = productKey(name)
+    const prev = views.get(key)
+    views.set(key, prev ? { ...prev, views: prev.views + v.views } : { ...v })
+  }
   const names = new Set([...sales.keys(), ...views.keys()])
   const products = [...names]
     .map((name) => {
