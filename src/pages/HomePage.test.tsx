@@ -30,6 +30,18 @@ vi.mock('@/lib/reviews-api', () => ({
 }))
 
 describe('HomePage', () => {
+  it('renders the featured Retro Roller banner with its colorways', () => {
+    renderWithRouter(<HomePage />)
+
+    const featured = homeContent.featured
+    const heading = screen.getByRole('heading', { level: 2, name: featured.title })
+    const section = heading.closest('section') as HTMLElement
+    for (const colorway of featured.colorways) {
+      expect(within(section).getByRole('button', { name: colorway.label })).toBeInTheDocument()
+    }
+    expect(within(section).getByRole('img', { name: /retro roller putter cover in grey/i })).toBeInTheDocument()
+  })
+
   it('renders hero content from home.json', () => {
     renderWithRouter(<HomePage />)
 

@@ -23,6 +23,44 @@
       { "label": "Made to Last", "icon": "shield" }
     ]
   },
+  "featured": {
+    "eyebrow": "Player One Pick",
+    "title": "The Retro Roller",
+    "tagline": "Insert coin. Sink putt.",
+    "lines": [
+      "Our flagship cover, stitched like the handheld you wore out as a kid. Soft velvet lining, reinforced stitching and a magnetic closure that snaps shut like a cartridge.",
+      "Cut for the L.A.B. DF3, with a mallet version for the Spider and putters like it."
+    ],
+    "colorways": [
+      {
+        "label": "Grey",
+        "swatch": "#cfc9bd",
+        "href": "/products/retro-roller-grey",
+        "splat": "/assets/home/splats/retro-roller-grey.srsp",
+        "poster": "/assets/products/retro-roller-grey.jpg",
+        "motion": "spin"
+      },
+      {
+        "label": "Purple",
+        "swatch": "#5b2a86",
+        "href": "/products/retro-roller-purple",
+        "splat": "/assets/home/splats/retro-roller-purple.srsp",
+        "poster": "/assets/products/retro-roller-purple.jpg"
+      },
+      {
+        "label": "Yellow",
+        "swatch": "#e8c547",
+        "href": "/products/retro-roller-yellow",
+        "splat": "/assets/home/splats/retro-roller-yellow.srsp",
+        "poster": "/assets/products/retro-roller-yellow.jpg"
+      }
+    ],
+    "motion": "sway",
+    "cta": {
+      "label": "Shop the Retro Roller",
+      "href": "/products/retro-roller-grey"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
