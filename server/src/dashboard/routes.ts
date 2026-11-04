@@ -920,7 +920,9 @@ function resolveRange(
 async function file(c: Context, name: string, contentType: string) {
   try {
     const body = await readFile(join(UI_DIR, name))
-    return c.body(body, 200, { 'Content-Type': contentType })
+    // no-cache: browsers and Cloudflare must revalidate, so a deploy never mixes a new index.html
+    // with a stale app.js or page module (Cloudflare otherwise keeps them for hours).
+    return c.body(body, 200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' })
   } catch {
     return c.text('Not found', 404)
   }
