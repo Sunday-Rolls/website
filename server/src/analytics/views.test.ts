@@ -10,6 +10,7 @@ import {
   buildOrdersView,
   buildPace,
   buildProductsView,
+  customerSplit,
 } from './views.js'
 
 let seq = 0
@@ -320,5 +321,32 @@ describe('buildHealth', () => {
         lastSync: { status: 'ok', at: 'f', message: 'm' },
       },
     ])
+  })
+})
+
+describe('customerSplit with customer history', () => {
+  it('counts Squarespace buyers by email and stops calling covered channels unknown', () => {
+    const orders = [
+      order('2026-10-05', 90, { channel: 'squarespace', source: 'sales-tracker' }),
+      order('2026-10-06', 90, { channel: 'squarespace', source: 'sales-tracker' }),
+      order('2026-10-07', 40, { channel: 'etsy', source: 'sales-tracker' }),
+      order('2026-10-08', 95, { channel: 'shopify', customerEmail: 'Old@x.test' }),
+    ]
+    const history = [
+      { channel: 'squarespace', externalId: 'squarespace:1', orderedAt: '2026-08-01T15:00:00.000Z', email: 'old@x.test', revenue: 87.5, units: 1 },
+      { channel: 'squarespace', externalId: 'squarespace:2', orderedAt: '2026-10-05T15:00:00.000Z', email: 'new@x.test', revenue: 87.5, units: 1 },
+      { channel: 'squarespace', externalId: 'squarespace:3', orderedAt: '2026-10-06T15:00:00.000Z', email: 'new@x.test', revenue: 87.5, units: 1 },
+    ]
+    // new@ first ordered in range; old@ first ordered in August, back via Shopify; the Etsy order has no email.
+    expect(customerSplit(orders, range, history)).toEqual({ new: 1, returning: 1, unknownOrders: 1 })
+    const view = buildMarketingView({
+      range,
+      orders,
+      adSpend: [spend('2026-10-02', 'Google Ads', 60)],
+      traffic: [],
+      keywords: [],
+      customerOrders: history,
+    })
+    expect(view).toMatchObject({ newCustomers: 1, websiteOrdersWithoutEmail: 0, newCustomerCac: 60 })
   })
 })

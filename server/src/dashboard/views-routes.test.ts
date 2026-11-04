@@ -140,3 +140,26 @@ describe('redesign dashboard endpoints', () => {
     expect((await res.json()).data.status).toBe('unconfigured')
   })
 })
+
+describe('POST /api/import/customer-orders', () => {
+  const csv = `"Order ID","Email","Financial Status","Paid at","Subtotal","Shipping","Created at","Lineitem quantity","Lineitem name","Lineitem price"
+"1001","A@x.test","PAID","2026-10-02 10:00:00 -0500","80.00","7.50","2026-10-02 10:00:00 -0500","1","Headcover","80.00"
+"1002","b@x.test","PAID","2026-10-03 10:00:00 -0500","80.00","7.50","2026-10-03 10:00:00 -0500","1","Headcover","80.00"`
+
+  it('stores customer history without touching orders', async () => {
+    const { app, store, cookie } = await setup()
+    const ordersBefore = (await store.listOrders()).length
+    const body = new FormData()
+    body.append('file', new Blob([csv], { type: 'text/csv' }), 'orders.csv')
+    const res = await app.request('/dashboard/api/import/customer-orders', { method: 'POST', body, headers: { Cookie: cookie } })
+    expect(res.status).toBe(200)
+    expect((await res.json()).data).toMatchObject({ rows: 2, customers: 2 })
+    expect((await store.listCustomerOrders()).map((o) => o.email).sort()).toEqual(['a@x.test', 'b@x.test'])
+    expect((await store.listOrders()).length).toBe(ordersBefore)
+  })
+
+  it('requires a session', async () => {
+    const { app } = await setup()
+    expect((await app.request('/dashboard/api/import/customer-orders', { method: 'POST' })).status).toBe(401)
+  })
+})

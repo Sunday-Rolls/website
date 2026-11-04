@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { parseSquarespaceOrdersCsv } from './squarespace-orders.js'
+import { customerOrdersFromSquarespaceCsv, parseSquarespaceOrdersCsv } from './squarespace-orders.js'
 
 const sample = `"Order ID","Email","Financial Status","Paid at","Fulfillment Status","Fulfilled at","Currency","Subtotal","Shipping","Taxes","Amount Refunded","Total","Discount Code","Discount Amount","Shipping Method","Created at","Lineitem quantity","Lineitem name","Lineitem price","Lineitem sku","Lineitem variant","Lineitem requires shipping","Lineitem taxable","Lineitem fulfillment status","Billing Name","Billing Address1","Billing Address2","Billing City","Billing Zip","Billing Province","Billing Country","Billing Phone","Shipping Name","Shipping Address1","Shipping Address2","Shipping City","Shipping Zip","Shipping Province","Shipping Country","Shipping Phone","Cancelled at","Private Notes","Channel Type","Channel Name","Channel Order Number"
 "00458","a@example.com","refunded","2026-10-15 16:38:39 -0500","","","USD","60.00","20.50","6.54","87.04","87.04","","0.00","","2026-10-15 16:38:39 -0500","1","Towel Blue","30.00","SQ1","","true","true","","A","1","","City","55044","MN","United States","","A","1","","City","55044","MN","United States","","2026-10-15 17:09:40 -0500","","ONLINE","Squarespace","00458"
@@ -54,5 +54,18 @@ describe('parseSquarespaceOrdersCsv', () => {
     // smoke: no duplicate external ids
     expect(new Set(rows.map((r) => r.externalId)).size).toBe(rows.length)
     void warnings
+  })
+})
+
+describe('customerOrdersFromSquarespaceCsv', () => {
+  it('keeps paid orders with an email, with goods + shipping as revenue', () => {
+    const { rows } = customerOrdersFromSquarespaceCsv(sample)
+    expect(rows.map((r) => r.externalId).sort()).toEqual(['squarespace:00451', 'squarespace:00457'])
+    expect(rows.find((r) => r.externalId === 'squarespace:00451')).toMatchObject({
+      channel: 'squarespace',
+      email: 'c@example.com',
+      revenue: 535,
+      units: 3,
+    })
   })
 })

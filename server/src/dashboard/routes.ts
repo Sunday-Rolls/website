@@ -32,6 +32,7 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
+import { customerOrdersFromSquarespaceCsv } from '../analytics/squarespace-orders.js'
 import { rangeForCustom, rangeForPeriod, storeDateOf, storeDay } from '../analytics/period.js'
 import {
   buildAttention,
@@ -243,13 +244,14 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const range = rangeOrError(c)
     if (range instanceof Response) return range
-    const [orders, adSpend, traffic, keywords] = await Promise.all([
+    const [orders, adSpend, traffic, keywords, customerOrders] = await Promise.all([
       store.listOrders(),
       store.listAdSpend(),
       store.listTraffic(),
       store.listKeywords(),
+      store.listCustomerOrders(),
     ])
-    return c.json({ ok: true, data: buildMarketingView({ range, orders, adSpend, traffic, keywords }) })
+    return c.json({ ok: true, data: buildMarketingView({ range, orders, adSpend, traffic, keywords, customerOrders }) })
   })
 
   app.get('/api/funnel', async (c) => {
@@ -257,12 +259,13 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const range = rangeOrError(c)
     if (range instanceof Response) return range
-    const [orders, traffic, abandoned] = await Promise.all([
+    const [orders, traffic, abandoned, customerOrders] = await Promise.all([
       store.listOrders(),
       store.listTraffic(),
       store.getAbandoned(range.start, range.end),
+      store.listCustomerOrders(),
     ])
-    return c.json({ ok: true, data: buildFunnelView({ range, orders, traffic, abandoned }) })
+    return c.json({ ok: true, data: buildFunnelView({ range, orders, traffic, abandoned, customerOrders }) })
   })
 
   app.get('/api/health', async (c) => {
@@ -764,6 +767,31 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       return c.json({ ok: true, data: { rows: n, warnings: parsed.warnings } })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Revenue import failed'
+      await store.finishSync(sync.id, 'error', message, 0)
+      return c.json({ ok: false, error: message }, 502)
+    }
+  })
+
+  // Customer history (emails) from a platform orders export. Doesn't touch revenue or the P&L.
+  app.post('/api/import/customer-orders', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const text = await readUploadText(c)
+    if (!text) return c.json({ ok: false, error: 'Upload a CSV as field "file" or JSON { csv }' }, 400)
+    const sync = await store.startSync('customer-history')
+    try {
+      const parsed = customerOrdersFromSquarespaceCsv(text)
+      if (!parsed.rows.length) {
+        const error = parsed.warnings[0] || 'No orders with an email found. Is this a Squarespace orders export?'
+        await store.finishSync(sync.id, 'error', error, 0)
+        return c.json({ ok: false, error, warnings: parsed.warnings }, 400)
+      }
+      const n = await store.upsertCustomerOrders(parsed.rows)
+      const customers = new Set(parsed.rows.map((r) => r.email)).size
+      await store.finishSync(sync.id, 'ok', `Squarespace customer history: ${n} orders, ${customers} customers`, n)
+      return c.json({ ok: true, data: { rows: n, customers, warnings: parsed.warnings } })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Customer history import failed'
       await store.finishSync(sync.id, 'error', message, 0)
       return c.json({ ok: false, error: message }, 502)
     }

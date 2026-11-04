@@ -2,6 +2,7 @@ import { STORE_TIME_ZONE, storeDay } from './period.js'
 import { randomUUID } from 'node:crypto'
 import { ANALYTICS_SCHEMA_SQL } from './schema.js'
 import type {
+  CustomerOrder,
   AbandonedCartStats,
   CashForecastRow,
   DailyAdSpend,
@@ -66,6 +67,9 @@ export type AnalyticsStore = {
   replaceCashForecast(rows: CashForecastRow[]): Promise<number>
   upsertCashForecast(rows: CashForecastRow[]): Promise<number>
   listCashForecast(): Promise<CashForecastRow[]>
+  /** Insert or update by (channel, externalId). */
+  upsertCustomerOrders(rows: CustomerOrder[]): Promise<number>
+  listCustomerOrders(): Promise<CustomerOrder[]>
   replaceAbandoned(stats: AbandonedCartStats): Promise<void>
   getAbandoned(periodStart: string, periodEnd: string): Promise<AbandonedCartStats | null>
   startSync(source: string): Promise<SyncRun>
@@ -96,6 +100,7 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let expenses: Expense[] = []
   let cash: CashForecastRow[] = []
   let abandoned: AbandonedCartStats[] = []
+  let customerOrders: CustomerOrder[] = []
   let syncs: SyncRun[] = []
 
   return {
@@ -278,6 +283,17 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       return cash
     },
 
+    async upsertCustomerOrders(rows) {
+      const map = new Map(customerOrders.map((r) => [`${r.channel}:${r.externalId}`, r]))
+      for (const row of rows) map.set(`${row.channel}:${row.externalId}`, row)
+      customerOrders = [...map.values()]
+      return rows.length
+    },
+
+    async listCustomerOrders() {
+      return customerOrders
+    },
+
     async replaceAbandoned(stats) {
       abandoned = [stats]
     },
@@ -340,6 +356,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           analytics_daily_product_views,
           analytics_expenses,
           analytics_cash_forecast,
+          analytics_customer_orders,
           analytics_abandoned_carts,
           analytics_sync_runs
         RESTART IDENTITY CASCADE
@@ -830,6 +847,32 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         )
       }
       return rows.length
+    },
+
+    async upsertCustomerOrders(rows) {
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_customer_orders (channel, external_id, ordered_at, email, revenue, units)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (channel, external_id) DO UPDATE SET
+             ordered_at = EXCLUDED.ordered_at, email = EXCLUDED.email,
+             revenue = EXCLUDED.revenue, units = EXCLUDED.units`,
+          [r.channel, r.externalId, r.orderedAt, r.email, r.revenue, r.units],
+        )
+      }
+      return rows.length
+    },
+
+    async listCustomerOrders() {
+      const { rows } = await db.query(`SELECT * FROM analytics_customer_orders ORDER BY ordered_at`)
+      return rows.map((row) => ({
+        channel: str(row.channel),
+        externalId: str(row.external_id),
+        orderedAt: new Date(row.ordered_at as string).toISOString(),
+        email: str(row.email),
+        revenue: num(row.revenue),
+        units: num(row.units),
+      }))
     },
 
     async listCashForecast() {
