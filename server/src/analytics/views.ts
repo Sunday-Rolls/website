@@ -421,7 +421,7 @@ export function buildMarketingView(input: {
     // spend ÷ new customers would be inflated, so leave it blank rather than mislead.
     newCustomerCac: newCustomers > 0 && websiteOrdersWithoutEmail === 0 ? adSpend / newCustomers : null,
     websiteOrdersWithoutEmail,
-    platforms: buildRoas({ range, orders: input.orders, adSpend: input.adSpend }),
+    platforms: buildRoas({ range, orders: input.orders, adSpend: input.adSpend, traffic: input.traffic }),
     spendTrend: [...trend.entries()].map(([date, v]) => ({ date, ...v })),
     sources: trafficSourceBreakdown(input.traffic.filter((t) => t.date >= range.start && t.date <= range.end)),
     keywords: topSearchKeywords(input.keywords, range),

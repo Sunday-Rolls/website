@@ -637,8 +637,8 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       for (const row of rows) {
         await db.query(
           `INSERT INTO analytics_daily_ad_spend
-            (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders)
-           VALUES ($1,$2,$3,$4,$5,$6)`,
+            (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders, sessions)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           [
             row.date,
             row.platform,
@@ -646,6 +646,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
             row.spend,
             row.platformReportedSales,
             row.platformReportedOrders,
+            row.sessions ?? 0,
           ],
         )
       }
@@ -656,12 +657,13 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       for (const row of rows) {
         await db.query(
           `INSERT INTO analytics_daily_ad_spend
-            (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders)
-           VALUES ($1,$2,$3,$4,$5,$6)
+            (date, platform, campaign, spend, platform_reported_sales, platform_reported_orders, sessions)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
            ON CONFLICT (date, platform, campaign) DO UPDATE SET
              spend = EXCLUDED.spend,
              platform_reported_sales = EXCLUDED.platform_reported_sales,
-             platform_reported_orders = EXCLUDED.platform_reported_orders`,
+             platform_reported_orders = EXCLUDED.platform_reported_orders,
+             sessions = EXCLUDED.sessions`,
           [
             row.date,
             row.platform,
@@ -669,6 +671,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
             row.spend,
             row.platformReportedSales,
             row.platformReportedOrders,
+            row.sessions ?? 0,
           ],
         )
       }
@@ -684,6 +687,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         spend: num(row.spend),
         platformReportedSales: num(row.platform_reported_sales),
         platformReportedOrders: num(row.platform_reported_orders),
+        sessions: num(row.sessions ?? 0),
       }))
     },
 

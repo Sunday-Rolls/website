@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { ShopifyCart } from '@/lib/shopify'
+import { cartAttributes, cartNeedsAttributes, markCartAttributed } from '@/lib/attribution'
 
 const shopifyConfigured = Boolean(
   import.meta.env.VITE_SHOPIFY_STORE_DOMAIN && import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
@@ -117,11 +118,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setError(null)
 
       try {
-        const { addCartLines, createCart } = await loadShopify()
+        const { addCartLines, createCart, updateCartAttributes } = await loadShopify()
         const line = { merchandiseId: variantId, quantity }
-        const next = cart
+        let next = cart
           ? await addCartLines(cart.id, [line])
-          : await createCart([line])
+          : await createCart([line], cartAttributes())
+        if (!cart) markCartAttributed(next.id)
+        else if (cartNeedsAttributes(next.id)) {
+          // A cart from an earlier visit: tag it with the ad that brought the visitor back.
+          try {
+            next = await updateCartAttributes(next.id, cartAttributes())
+            markCartAttributed(next.id)
+          } catch {
+            // Best-effort: never block adding to cart over attribution.
+          }
+        }
         return persistCart(next)
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unable to add to cart'

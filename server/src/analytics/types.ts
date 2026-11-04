@@ -80,6 +80,8 @@ export type DailyAdSpend = {
   spend: number
   platformReportedSales: number
   platformReportedOrders: number
+  /** Website sessions GA4 credits to this campaign that day (0 when unknown). */
+  sessions?: number
 }
 
 export type SearchKeyword = {
