@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import ExcelJS from 'exceljs'
 import { mapChannel } from './sheet-import.js'
 import type { AnalyticsStore } from './store.js'
+import { storeDay } from './period.js'
 import type { CashForecastRow, Expense, Order, OrderSource, SalesChannel } from './types.js'
 
 const REVENUE_HEADERS = [
@@ -159,7 +160,7 @@ export async function buildManualWorkbook(store: AnalyticsStore): Promise<Buffer
     .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt))
   for (const order of editable) {
     revenueSheet.addRow([
-      order.orderedAt.slice(0, 10),
+      storeDay(order.orderedAt),
       order.channel,
       order.source,
       order.revenue,

@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs'
 import { parseCashRows, parseExpenseRows, parseSalesRows, type SheetImportResult } from './sheet-import.js'
+import { storeDay } from './period.js'
 import type { CashForecastRow, Expense, Order } from './types.js'
 
 export type ParseWorkbookOptions = {
@@ -42,7 +43,7 @@ export async function parseWorkbookBuffer(
 export function filterOrdersByDate(orders: Order[], start?: string | null, end?: string | null): Order[] {
   if (!start && !end) return orders
   return orders.filter((o) => {
-    const day = o.orderedAt.slice(0, 10)
+    const day = storeDay(o.orderedAt)
     if (start && day < start) return false
     if (end && day > end) return false
     return true

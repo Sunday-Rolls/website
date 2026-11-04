@@ -31,10 +31,11 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
-import { rangeForCustom, rangeForPeriod } from '../analytics/period.js'
+import { rangeForCustom, rangeForPeriod, storeDay } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
 import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
+import { createAutoSync, isAutoSyncSource, type AutoSyncSource, type AutoSyncSourceDef } from './auto-sync.js'
 import { pingShopifyShop } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey, PublicUser } from '../analytics/types.js'
@@ -64,11 +65,14 @@ export type DashboardDeps = {
   sendContactEmail?: (payload: ContactPayload) => Promise<void>
   resendApiKey?: string
   contactToEmail?: string
+  /** Override the on-open sync sources (tests). Defaults read credentials from env. */
+  autoSyncSources?: Record<AutoSyncSource, AutoSyncSourceDef>
 }
 
 export function createDashboardRoutes(deps: DashboardDeps) {
   const app = new Hono()
   const { store, checkRateLimit, secureCookies } = deps
+  const autoSync = createAutoSync(store, deps.autoSyncSources)
 
   app.use('*', async (c, next) => {
     const path = c.req.path
@@ -380,6 +384,19 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     }
   })
 
+  /** One source of the sync the dashboard runs on open/login (see auto-sync.ts). */
+  app.post('/api/sync/auto/:source', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const source = c.req.param('source')
+    if (!isAutoSyncSource(source)) return c.json({ ok: false, error: `Unknown source: ${source}` }, 404)
+    try {
+      return c.json({ ok: true, data: await autoSync(source) })
+    } catch (error) {
+      return c.json({ ok: false, error: error instanceof Error ? error.message : `${source} sync failed` }, 502)
+    }
+  })
+
   app.get('/api/shopify/status', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
@@ -552,7 +569,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt))
       .slice(0, 25)
       .map((o) => ({
-        date: o.orderedAt.slice(0, 10),
+        date: storeDay(o.orderedAt),
         channel: o.channel,
         revenue: o.revenue,
         product: o.lines[0]?.productName ?? '',

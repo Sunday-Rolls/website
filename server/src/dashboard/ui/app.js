@@ -4,6 +4,7 @@ const state = {
   start: null,
   end: null,
   series: 'revenue',
+  page: 'overview',
   overview: null,
   pnl: null,
 }
@@ -569,9 +570,10 @@ function setPnLFeedback(message, isError = false) {
 }
 
 function currentPnLPeriod() {
+  // Local (browser) month, not UTC: the team is in Central, matching the store timezone.
   const now = new Date()
-  const year = now.getUTCFullYear()
-  const month = `${year}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+  const year = now.getFullYear()
+  const month = `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`
   return { year, month }
 }
 
@@ -702,7 +704,94 @@ async function loadDataPage() {
   await Promise.all([loadShopifyStatus(), loadReviewQrMeta()])
 }
 
+let syncToastTimer = null
+
+/** Top-right floating status. `state`: 'busy' (animated bar), 'done', or 'error'; done/error fade out. */
+function setSyncToast(message, status = 'busy') {
+  const el = $('#sync-toast')
+  if (!el) return
+  clearTimeout(syncToastTimer)
+  el.querySelector('.sync-toast-text').textContent = message
+  el.classList.remove('leaving', 'done', 'error')
+  if (status !== 'busy') el.classList.add(status)
+  el.hidden = false
+  if (status === 'busy') return
+  syncToastTimer = setTimeout(() => {
+    el.classList.add('leaving')
+    syncToastTimer = setTimeout(() => (el.hidden = true), 300)
+  }, status === 'error' ? 10000 : 2500)
+}
+
+const AUTO_SYNC_SOURCES = [
+  { key: 'shopify', label: 'Shopify orders' },
+  { key: 'sales-tracker', label: 'Sales Tracker' },
+  { key: 'ga4', label: 'GA4 traffic' },
+  { key: 'search-console', label: 'Search Console' },
+]
+
+function renderSyncSteps(steps) {
+  const list = $('#sync-toast .sync-toast-steps')
+  if (!list) return
+  list.replaceChildren(
+    ...steps.map((s) => {
+      const li = document.createElement('li')
+      li.className = s.cls
+      const label = document.createElement('span')
+      label.className = 'label'
+      label.textContent = s.label
+      const detail = document.createElement('span')
+      detail.className = 'detail'
+      detail.textContent = s.detail
+      detail.title = s.detail
+      li.append(label, detail)
+      return li
+    }),
+  )
+}
+
+/** Sync every data source whenever someone opens the dashboard or logs in, showing each one's progress. */
+async function autoSyncAll() {
+  const steps = AUTO_SYNC_SOURCES.map((s) => ({ ...s, cls: 'busy', detail: 'syncing…' }))
+  const total = steps.length
+  let done = 0
+  let changed = false
+  let failed = 0
+  const update = () => {
+    renderSyncSteps(steps)
+    if (done < total) setSyncToast(`Syncing data · ${done}/${total}`)
+  }
+  update()
+
+  await Promise.all(
+    steps.map(async (step) => {
+      try {
+        const { data } = await api(`/sync/auto/${step.key}`, { method: 'POST' })
+        if (data.status === 'synced') {
+          Object.assign(step, { cls: 'ok', detail: `✓ ${data.summary}` })
+          changed = true
+        } else if (data.status === 'fresh') {
+          Object.assign(step, { cls: 'ok', detail: '✓ up to date' })
+        } else {
+          Object.assign(step, { cls: 'off', detail: 'not set up' })
+        }
+      } catch (err) {
+        failed += 1
+        Object.assign(step, { cls: 'fail', detail: `✗ ${err.message}` })
+        if (err.status === 401 || err.status === 403) showError(err)
+      }
+      done += 1
+      update()
+    }),
+  )
+
+  if (failed) setSyncToast(`Synced with ${failed} error${failed > 1 ? 's' : ''}`, 'error')
+  else setSyncToast(changed ? 'All data synced' : 'All data up to date', 'done')
+  // Redraw whatever page is open with the new data.
+  if (changed && state.user && state.page) setPage(state.page)
+}
+
 function setPage(page) {
+  state.page = page
   for (const btn of document.querySelectorAll('#nav button')) {
     btn.classList.toggle('active', btn.dataset.page === page)
   }
@@ -794,6 +883,7 @@ function bind() {
       $('#user-name').textContent = data.user.name
       show('dash')
       setPage('overview')
+      autoSyncAll()
     } catch (err) {
       error.textContent = err.message
       error.hidden = false
@@ -1013,6 +1103,7 @@ async function boot() {
     $('#user-name').textContent = me.user.name
     show('dash')
     setPage('overview')
+    autoSyncAll()
   } catch {
     show('login')
   }

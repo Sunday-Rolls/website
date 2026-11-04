@@ -11,7 +11,7 @@ What we already have, and what still needs a human. Checked against Drive, the l
 | Devops Drive access (`sundayrollsdevops@gmail.com`) | Done | Connected in the Google Drive MCP (`@piotr-agier/google-drive-mcp`) as account alias `sundayrolls`. |
 | P&L / Sales Tracker sheet | Readable | [Sunday Rolls Sales Tracker](https://docs.google.com/spreadsheets/d/1v18ftrLt5jcyGJsKFq37CwIYYY04aKIDeeEp0F5_XMU/edit) — owned by **Derick** (`derickkuchera04@gmail.com`). Devops can **view/download** (not edit). Shortcut in shared folder: `1U1hXKGwaYT1epkaPbgkswFLajq0-svuC`. |
 | Weekly Sales Dashboard folder | Writable by devops | Folder id `1DfwrYHjTfi55woSst1O9d9D9JvYm5o-Y`. Devops is already a **writer**. Also has writers: Alex (`funk20alex@gmail.com`), Ben (`Benjamin.Weir4@gmail.com`), Nick, Sam (`stwolfe10@gmail.com`). |
-| Live Squarespace analytics IDs | Found | Site loads **GTM-PPTR6V3B** → GA4 **G-YKOBBOTPM4**, Google Ads **AW-17744695066**, Meta Pixel (`fbq`). |
+| Live Squarespace analytics IDs | Found | Site loads **GTM-PPTR6V3B** → GA4 **G-YK0BB0TPM4**, Google Ads **AW-17744695066**, Meta Pixel (`fbq`). |
 | Demo / new-site analytics IDs | Documented | [ANALYTICS.md](./ANALYTICS.md): GTM-PQSG4NXT / G-ET6SXZWE8E. Local `.env` still points at the **demo** GTM — must switch at cutover. |
 | Contact API on Railway | Healthy + linked | Workspace **sundayrolls's Projects** → project **sunday-rolls-contact** → service **contact-api** (online). Ethan (`ebettenga`) is a workspace member; CLI linked from `server/`. Postgres + reviews + **Resend free plan** (`RESEND_API_KEY`) for contact email (Hobby blocks SMTP). |
 | Headcover Stock sheet | Readable + editable by devops | Drive id `1x1TRv9P6KQ6nCVr_JQPurihemNV9hJPQ` (Derick owns). Useful for inventory cover later. |
@@ -46,7 +46,7 @@ Sign in to [Google Cloud Console](https://console.cloud.google.com/) as **`sunda
 
 ### 2. GA4 + Search Console access for that service account — **whoever owns the property**
 
-Property to grant: **G-YKOBBOTPM4** (live Squarespace).
+Property to grant: **G-YK0BB0TPM4** (live Squarespace).
 
 1. Open [Google Analytics](https://analytics.google.com/) → Admin → Property access management → add service account as **Viewer**.
 2. Open [Search Console](https://search.google.com/search-console) for `sundayrollsgolf.com` (and `www` if separate) → add service account as **Full** or **Restricted** (read is enough).
@@ -102,7 +102,7 @@ Hard cutover (no parallel Squarespace + Shopify traffic). Need:
 | Field | Value |
 |-------|--------|
 | Cutover date (and timezone) | _TBD_ |
-| New site will send hits to | Prefer keep **GTM-PPTR6V3B** / **G-YKOBBOTPM4** (preserve history). Do **not** launch on demo GTM-PQSG4NXT / G-ET6SXZWE8E. |
+| New site will send hits to | Prefer keep **GTM-PPTR6V3B** / **G-YK0BB0TPM4** (preserve history). Do **not** launch on demo GTM-PQSG4NXT / G-ET6SXZWE8E. |
 | Squarespace export before cancel | Orders, customers, abandoned carts, analytics CSV (backup even though GA4 has traffic history) |
 | Shopify purchase pixel | Custom pixel / customer events → GA4 `purchase` + Google Ads conversion **AW-17744695066** |
 
@@ -132,7 +132,7 @@ Password set/reset: server CLI only (`npm run user:set-password -- <email>`). No
 ## IDs quick reference
 
 ```
-GA4 measurement ID (prod):     G-YKOBBOTPM4
+GA4 measurement ID (prod):     G-YK0BB0TPM4
 GTM (prod / Squarespace):      GTM-PPTR6V3B
 Google Ads:                    AW-17744695066
 GA4 (demo / github.io):        G-ET6SXZWE8E

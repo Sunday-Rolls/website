@@ -6,7 +6,7 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 
 | Platform | ID |
 |----------|----|
-| GA4 | `G-YKOBBOTPM4` (letter **O**, not zero) |
+| GA4 | `G-YK0BB0TPM4` (zeros, not the letter O) |
 | Google Ads | `AW-17744695066`, purchase label `PznHCIOf2-EbEJqeqo1C` |
 | Meta Pixel | `1274109674861464` |
 
@@ -21,7 +21,7 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 ## Pixel script
 
 ```javascript
-const GA4_MEASUREMENT_ID = 'G-YKOBBOTPM4'
+const GA4_MEASUREMENT_ID = 'G-YK0BB0TPM4'
 const ADS_ID = 'AW-17744695066'
 const ADS_PURCHASE_LABEL = 'PznHCIOf2-EbEJqeqo1C'
 const META_PIXEL_ID = '1274109674861464'

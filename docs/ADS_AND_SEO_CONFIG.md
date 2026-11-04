@@ -7,7 +7,7 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | System | ID | Open it | Devops (`sundayrollsdevops@gmail.com`) access |
 |--------|----|---------|------------------------------------------------|
 | Google Tag Manager | `GTM-PPTR6V3B` (account `6333037927`, container `240141963`) | [tagmanager.google.com](https://tagmanager.google.com/#/container/accounts/6333037927/containers/240141963) | Publish (granted by Sam) |
-| GA4 | `G-YKOBBOTPM4` (letter **O**); dashboard reads property `513898453` | [analytics.google.com](https://analytics.google.com) | None |
+| GA4 | `G-YK0BB0TPM4` (zeros, not the letter O); dashboard reads property `513898453` | [analytics.google.com](https://analytics.google.com) | None |
 | Google Ads | `AW-17744695066` (URL `ocid=7809216417`) | [ads.google.com](https://ads.google.com/aw/overview?ocid=7809216417) | Can edit (made the changes below) |
 | Merchant Center | `5685591896` "Sunday Rolls", linked to Ads since 2025-11-19 | [merchants.google.com](https://merchants.google.com/mc/overview?a=5685591896) | User (invited by Sam, accepted 2026-11-02) |
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
@@ -151,4 +151,4 @@ For ad clicks, open `https://www.sundayrollsgolf.com/shop/?gclid=TEST`. Without 
 - Search Console: request indexing for the top products, and ask the owner to add devops to the domain property `sundayrollsgolf.com` too.
 - Remove the old `Shopping Cart` / `Begin checkout (Page load …/checkout)` Ads actions once the site-event actions record.
 - Meta ROAS in the dashboard: there is no Meta spend sync yet. It needs a Marketing API token and the ad account id ([DASHBOARD_ACCESS.md](./DASHBOARD_ACCESS.md#5-meta-marketing-api-token--meta-business-admin)).
-- Confirm GA4 property `513898453` is the `G-YKOBBOTPM4` stream (devops has no GA4 access).
+- Confirm GA4 property `513898453` is the `G-YK0BB0TPM4` stream (devops has no GA4 access).

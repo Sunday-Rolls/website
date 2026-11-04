@@ -12,6 +12,12 @@ Hono service on Railway: contact form email, product reviews, and the internal a
 - `GET /dashboard/api/review-qrs.pdf?target=pages|live` — printable review QR PDF (Data page → Export PDF)
 - `POST /webhooks/shopify` — Shopify product/inventory webhooks (HMAC-signed); re-syncs Google Merchant Center ([docs/GOOGLE_MERCHANT_SYNC.md](../docs/GOOGLE_MERCHANT_SYNC.md))
 
+## Sync on open
+
+Opening the dashboard (or logging in) syncs every data source in parallel, with a progress pill under the header listing each one: Shopify orders, Sales Tracker (Drive `SALES_TRACKER_DRIVE_FILE_ID`), GA4 traffic and Search Console. Each is `POST /dashboard/api/sync/auto/:source` ([src/dashboard/auto-sync.ts](src/dashboard/auto-sync.ts)): it runs the same sync as the Data page buttons, is skipped while its last good sync is fresh (Shopify 5 min, Sales Tracker and GA4 30 min, Search Console 6 h), shares one run between tabs, and reports "not set up" when credentials are missing. The page redraws when anything changed.
+
+Shopify orders upsert by Shopify id; cancelled, voided and `analytics-test` orders are removed. Dashboard days and months are **America/Chicago** calendar days (`STORE_TIME_ZONE` in `src/analytics/period.ts`).
+
 ## Contact email (Resend free plan)
 
 **Current production setup:** contact mail goes through **[Resend](https://resend.com)** over HTTPS (`RESEND_API_KEY`), not Gmail SMTP.
