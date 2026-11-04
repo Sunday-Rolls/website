@@ -14,13 +14,13 @@ Hono service on Railway: contact form email, product reviews, and the internal a
 
 ## Sync on open
 
-Opening the dashboard (or logging in) syncs every data source in parallel, driving a thin progress bar at the top of the page: Shopify orders, Sales Tracker (Drive `SALES_TRACKER_DRIVE_FILE_ID`), GA4 traffic and Search Console. Each is `POST /dashboard/api/sync/auto/:source` ([src/dashboard/auto-sync.ts](src/dashboard/auto-sync.ts)): it is skipped while its last good sync is fresh (Shopify 5 min, Sales Tracker and GA4 30 min, Search Console 6 h), shares one run between tabs, and reports "not set up" when credentials are missing. The **Refresh** button in the header runs the same calls with `?force=1`, which syncs even fresh sources. The page redraws when anything changed. Tools → Connections shows each source's status from `GET /dashboard/api/health`.
+Opening the dashboard (or logging in) syncs every data source in parallel, driving a thin progress bar at the top of the page: Shopify orders, Etsy orders ([docs/ETSY_SYNC.md](../docs/ETSY_SYNC.md)), Sales Tracker (Drive `SALES_TRACKER_DRIVE_FILE_ID`), GA4 traffic and Search Console. Each is `POST /dashboard/api/sync/auto/:source` ([src/dashboard/auto-sync.ts](src/dashboard/auto-sync.ts)): it is skipped while its last good sync is fresh (Shopify 5 min, Etsy 15 min, Sales Tracker and GA4 30 min, Search Console 6 h), shares one run between tabs, and reports "not set up" when credentials are missing. The **Refresh** button in the header runs the same calls with `?force=1`, which syncs even fresh sources. The page redraws when anything changed. Tools → Connections shows each source's status from `GET /dashboard/api/health`.
 
 ## Dashboard pages
 
 The UI is plain HTML/CSS/JS with no build step: the shell is `src/dashboard/ui/app.js`, shared helpers are in `ui/lib/` (`ui.js` documents the page-module contract, `charts.js` wraps ApexCharts, served from `/dashboard/vendor/apexcharts.js`), and each page is one module in `ui/pages/`: Overview, Sales (`/api/orders`), Products (`/api/products`), Marketing (`/api/marketing`), Funnel (`/api/funnel`), Money (`/api/pnl`) and Tools (review QR PDFs, manual entries, workbook import/export, connections, checks). The page data builders are in `src/analytics/views.ts`.
 
-Shopify orders upsert by Shopify id; cancelled, voided and `analytics-test` orders are removed. Dashboard days and months are **America/Chicago** calendar days (`STORE_TIME_ZONE` in `src/analytics/period.ts`).
+Shopify orders upsert by Shopify id; cancelled, voided and `analytics-test` orders are removed. Etsy receipts only fill in orders the Sales Tracker doesn't have yet; a sheet row always replaces the live one. Dashboard days and months are **America/Chicago** calendar days (`STORE_TIME_ZONE` in `src/analytics/period.ts`).
 
 ## Contact email (Resend free plan)
 

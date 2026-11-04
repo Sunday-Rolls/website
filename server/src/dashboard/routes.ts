@@ -902,6 +902,7 @@ async function requireAdmin(c: Context, store: AnalyticsStore): Promise<Response
 
 const AUTO_SYNC_LABELS: Record<AutoSyncSource, string> = {
   shopify: 'Shopify',
+  etsy: 'Etsy',
   'sales-tracker': 'Sales Tracker',
   ga4: 'Google Analytics 4',
   'search-console': 'Google Search Console',

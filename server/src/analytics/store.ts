@@ -44,8 +44,12 @@ export type AnalyticsStore = {
   deleteSession(id: string): Promise<void>
   // data
   replaceOrders(orders: Order[]): Promise<number>
-  /** Insert or update by (channel, externalId). Leaves other orders untouched. */
-  upsertOrders(orders: Order[]): Promise<number>
+  /**
+   * Insert or update by (channel, externalId). Leaves other orders untouched.
+   * `onlyReplaceSource`: leave an existing row alone unless it came from that source.
+   * Returns how many rows were written.
+   */
+  upsertOrders(orders: Order[], options?: { onlyReplaceSource?: OrderSource }): Promise<number>
   /** Delete orders matching filter (used to drop tracker Shopify after live sync). */
   deleteOrders(filter: DeleteOrdersFilter): Promise<number>
   listOrders(): Promise<Order[]>
@@ -75,6 +79,9 @@ export type AnalyticsStore = {
   startSync(source: string): Promise<SyncRun>
   finishSync(id: string, status: 'ok' | 'error', message: string | null, rowsTouched: number): Promise<void>
   latestSyncs(): Promise<SyncRun[]>
+  /** Saved state for one integration (null when never saved). */
+  getIntegrationState(key: string): Promise<Record<string, unknown> | null>
+  setIntegrationState(key: string, value: Record<string, unknown>): Promise<void>
 }
 
 function num(value: unknown): number {
@@ -102,6 +109,7 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let abandoned: AbandonedCartStats[] = []
   let customerOrders: CustomerOrder[] = []
   let syncs: SyncRun[] = []
+  const integrationState = new Map<string, Record<string, unknown>>()
 
   return {
     async migrate() {},
@@ -163,11 +171,18 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       return next.length
     },
 
-    async upsertOrders(next) {
+    async upsertOrders(next, options) {
       const map = new Map(orders.map((o) => [`${o.channel}|${o.externalId}`, o]))
-      for (const order of next) map.set(`${order.channel}|${order.externalId}`, order)
+      let written = 0
+      for (const order of next) {
+        const key = `${order.channel}|${order.externalId}`
+        const existing = map.get(key)
+        if (existing && options?.onlyReplaceSource && (existing.source || 'sales-tracker') !== options.onlyReplaceSource) continue
+        map.set(key, order)
+        written += 1
+      }
       orders = [...map.values()]
-      return next.length
+      return written
     },
 
     async deleteOrders(filter) {
@@ -336,6 +351,15 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       }
       return [...bySource.values()]
     },
+
+    async getIntegrationState(key) {
+      const value = integrationState.get(key)
+      return value ? structuredClone(value) : null
+    },
+
+    async setIntegrationState(key, value) {
+      integrationState.set(key, structuredClone(value))
+    },
   }
 }
 
@@ -433,13 +457,18 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
       return orders.length
     },
 
-    async upsertOrders(orders) {
+    async upsertOrders(orders, options) {
+      let written = 0
       for (const order of orders) {
         const { rows } = await db.query(
-          `SELECT id FROM analytics_orders WHERE channel = $1 AND external_id = $2`,
+          `SELECT id, source FROM analytics_orders WHERE channel = $1 AND external_id = $2`,
           [order.channel, order.externalId],
         )
         const existingId = rows[0] ? str(rows[0].id) : null
+        if (existingId && options?.onlyReplaceSource && str(rows[0].source || 'sales-tracker') !== options.onlyReplaceSource) {
+          continue
+        }
+        written += 1
         if (existingId) {
           await db.query(`DELETE FROM analytics_order_lines WHERE order_id = $1`, [existingId])
           await db.query(
@@ -482,7 +511,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           await insertOrder(db, order)
         }
       }
-      return orders.length
+      return written
     },
 
     async deleteOrders(filter) {
@@ -948,6 +977,20 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
          ORDER BY source, started_at DESC`,
       )
       return rows.map(rowToSync)
+    },
+
+    async getIntegrationState(key) {
+      const { rows } = await db.query(`SELECT value FROM analytics_integration_state WHERE key = $1`, [key])
+      const value = rows[0]?.value
+      return value && typeof value === 'object' ? (value as Record<string, unknown>) : null
+    },
+
+    async setIntegrationState(key, value) {
+      await db.query(
+        `INSERT INTO analytics_integration_state (key, value, updated_at) VALUES ($1, $2::jsonb, now())
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
+        [key, JSON.stringify(value)],
+      )
     },
   }
 }

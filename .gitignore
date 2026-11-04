@@ -47,3 +47,8 @@ public/assets/shop/banner-1200.webp
 
 # local python venv for SA probes
 server/.venv/
+
+# Etsy sign-in script output (secrets + exported data)
+etsy_config.json
+etsy_tokens.json
+etsy_*.csv

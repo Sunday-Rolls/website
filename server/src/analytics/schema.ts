@@ -170,4 +170,11 @@ CREATE TABLE IF NOT EXISTS analytics_sync_runs (
 );
 CREATE INDEX IF NOT EXISTS analytics_sync_runs_source_started_idx
   ON analytics_sync_runs (source, started_at DESC);
+
+-- Small per-integration state (e.g. Etsy's rotating OAuth refresh token), keyed by integration name.
+CREATE TABLE IF NOT EXISTS analytics_integration_state (
+  key text PRIMARY KEY,
+  value jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 `

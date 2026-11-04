@@ -116,6 +116,7 @@ describe('redesign dashboard endpoints', () => {
     const { data } = await res.json()
     expect(data.sources.map((s: { source: string }) => s.source)).toEqual([
       'shopify',
+      'etsy',
       'sales-tracker',
       'ga4',
       'search-console',

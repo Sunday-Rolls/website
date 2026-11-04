@@ -16,6 +16,7 @@ const DEFAULT_ROUTE = 'overview'
 const PERIODS = ['7d', '30d', '90d', 'year']
 const SYNC_SOURCES = [
   { key: 'shopify', label: 'Shopify' },
+  { key: 'etsy', label: 'Etsy' },
   { key: 'sales-tracker', label: 'Sales Tracker' },
   { key: 'ga4', label: 'GA4' },
   { key: 'search-console', label: 'Search Console' },

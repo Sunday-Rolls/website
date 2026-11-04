@@ -28,6 +28,7 @@ const CHANNEL_LABELS = {
 
 const SYNC_LABELS = {
   shopify: 'Shopify',
+  etsy: 'Etsy',
   'sales-tracker': 'Sales Tracker',
   ga4: 'Google Analytics',
   'search-console': 'Search Console',
