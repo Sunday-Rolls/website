@@ -403,8 +403,9 @@ export async function syncMerchant(options: {
     }
   }
 
-  // Only prune when every insert succeeded, so a partial outage never wipes the feed.
-  if (prune && result.failed.length === 0) {
+  // Only prune when every insert succeeded and Shopify returned something, so a
+  // partial outage or an empty channel response never wipes the feed.
+  if (prune && result.failed.length === 0 && inputs.length > 0) {
     const current = new Set(inputs.map((i) => i.offerId))
     for (const p of await listOwnedProducts(token, config)) {
       if (current.has(p.offerId)) continue
