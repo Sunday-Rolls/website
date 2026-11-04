@@ -53,7 +53,7 @@ describe('merchant sync mapping', () => {
   })
 
   it('maps a single-variant product onto the storefront domain', () => {
-    const [input] = shopifyProductToMerchantInputs(product(), config)
+    const [input] = shopifyProductToMerchantInputs(product(), config, {})
     expect(input.offerId).toBe('shopify_8879169110174_48257257308318')
     expect(input.feedLabel).toBe('US')
     const a = input.productAttributes
@@ -106,6 +106,35 @@ describe('merchant sync mapping', () => {
     expect(inputs[1].productAttributes.link).toBe(
       'https://www.sundayrollsgolf.com/products/retro-roller-grey/?variant=2',
     )
+  })
+
+  it('reuses the legacy listing ID and title for a single-variant product', () => {
+    const legacy = { 'retro-roller-grey': { offerId: 'legacy-uuid', title: 'Retro Roller Grey | Sunday Rolls' } }
+    const [input] = shopifyProductToMerchantInputs(product(), config, legacy)
+    expect(input.offerId).toBe('legacy-uuid')
+    expect(input.productAttributes.title).toBe('Retro Roller Grey | Sunday Rolls')
+    expect(input.productAttributes.link).toBe('https://www.sundayrollsgolf.com/products/retro-roller-grey/')
+  })
+
+  it('ignores legacy listings for multi-variant products', () => {
+    const base = product().variants.nodes[0]
+    const p = product({
+      variants: { nodes: [{ ...base, id: 'gid://shopify/ProductVariant/1' }, { ...base, id: 'gid://shopify/ProductVariant/2' }] },
+    })
+    const legacy = { 'retro-roller-grey': { offerId: 'legacy-uuid', title: 'Legacy' } }
+    expect(shopifyProductToMerchantInputs(p, config, legacy).map((i) => i.offerId)).toEqual([
+      'shopify_8879169110174_1',
+      'shopify_8879169110174_2',
+    ])
+  })
+
+  it('sends shipping weight in Merchant units', () => {
+    const p = product()
+    p.variants.nodes[0] = { ...p.variants.nodes[0], inventoryItem: { measurement: { weight: { value: 0.5, unit: 'POUNDS' } } } }
+    expect(shopifyProductToMerchantInputs(p, config, {})[0].productAttributes.shippingWeight).toEqual({
+      value: 0.5,
+      unit: 'lb',
+    })
   })
 
   it('builds data source names', () => {
