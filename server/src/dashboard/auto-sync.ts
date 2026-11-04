@@ -22,6 +22,7 @@ import { syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
 import { loadReportsSheetCredentialsFromEnv, reportsSheetMissingEnv, syncReportsSheet } from '../analytics/reports-sheet.js'
 import type { AnalyticsStore } from '../analytics/store.js'
+import type { ExperimentOrderSink } from '../experiments/store.js'
 
 export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'ebay', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'reddit-ads', 'search-console', 'reports-sheet'] as const
 export type AutoSyncSource = (typeof AUTO_SYNC_SOURCES)[number]
@@ -43,13 +44,18 @@ export type AutoSyncSourceDef = {
 
 const MIN = 60_000
 
-export function defaultAutoSyncSources(env: NodeJS.ProcessEnv = process.env): Record<AutoSyncSource, AutoSyncSourceDef> {
+export function defaultAutoSyncSources(
+  env: NodeJS.ProcessEnv = process.env,
+  deps: { experiments?: ExperimentOrderSink } = {},
+): Record<AutoSyncSource, AutoSyncSourceDef> {
   return {
     shopify: {
       freshMs: 5 * MIN,
       missing: () => (loadShopifyCredentialsFromEnv(env) ? null : 'SHOPIFY_CLIENT_ID/SECRET'),
       run: async (store) => {
-        const r = await syncShopifyToStore(store, loadShopifyCredentialsFromEnv(env)!)
+        const r = await syncShopifyToStore(store, loadShopifyCredentialsFromEnv(env)!, {
+          experiments: deps.experiments,
+        })
         return `${r.orders} orders`
       },
     },

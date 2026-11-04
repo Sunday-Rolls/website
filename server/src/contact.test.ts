@@ -143,6 +143,52 @@ describe('POST /contact', () => {
   })
 })
 
+describe('POST /contact A/B context', () => {
+  it('stores visitorId and experiments on the message but never emails them', async () => {
+    const { app, sendContactEmail, contacts } = setup({}, { withContactStore: true })
+    const create = vi.spyOn(contacts!, 'create')
+
+    const response = await postContact(app, {
+      ...validBody,
+      visitorId: 'AbCdEfGhIjKlMnOpQrStUv',
+      experiments: 'home-banner:b|other:control',
+    })
+
+    expect(response.status).toBe(200)
+    expect(sendContactEmail).toHaveBeenCalledWith(validBody)
+    const saved = await create.mock.results[0]!.value
+    expect(saved.visitorId).toBe('AbCdEfGhIjKlMnOpQrStUv')
+    expect(saved.experiments).toEqual({ 'home-banner': 'b', other: 'control' })
+  })
+
+  it('drops malformed A/B fields without rejecting the message', async () => {
+    const { app, contacts } = setup({}, { withContactStore: true })
+    const create = vi.spyOn(contacts!, 'create')
+
+    const response = await postContact(app, {
+      ...validBody,
+      visitorId: 'bad id!',
+      experiments: 'Home Banner:b',
+    })
+
+    expect(response.status).toBe(200)
+    const saved = await create.mock.results[0]!.value
+    expect(saved.visitorId).toBeNull()
+    expect(saved.experiments).toBeNull()
+  })
+
+  it('rejects an experiments string over 500 characters as absent', async () => {
+    const { app, contacts } = setup({}, { withContactStore: true })
+    const create = vi.spyOn(contacts!, 'create')
+    const long = Array.from({ length: 60 }, (_, i) => `exp-${i}:b`).join('|')
+    expect(long.length).toBeGreaterThan(500)
+
+    await postContact(app, { ...validBody, experiments: long })
+
+    expect((await create.mock.results[0]!.value).experiments).toBeNull()
+  })
+})
+
 describe('GET /health', () => {
   it('reports ok', async () => {
     const { app } = setup()
