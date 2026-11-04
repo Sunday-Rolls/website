@@ -1,14 +1,27 @@
 import { randomUUID } from 'node:crypto'
 import type { ContactPayload } from './mail.js'
 
+/** Stored with the message for A/B results; never put in the email. */
+export type ContactExperimentContext = {
+  visitorId: string | null
+  /** `{ "home-banner": "b" }`, parsed from the `_sr_exp`-format `experiments` field. */
+  experiments: Record<string, string> | null
+}
+
 export type StoredContactMessage = ContactPayload & {
   id: string
   createdAt: string
   emailDelivered: boolean
+  visitorId: string | null
+  experiments: Record<string, string> | null
 }
 
 export interface ContactStore {
-  create(message: ContactPayload, emailDelivered: boolean): Promise<StoredContactMessage>
+  create(
+    message: ContactPayload,
+    emailDelivered: boolean,
+    context?: ContactExperimentContext,
+  ): Promise<StoredContactMessage>
   deleteById(id: string): Promise<boolean>
 }
 
@@ -28,6 +41,8 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 );
 CREATE INDEX IF NOT EXISTS contact_messages_created_idx
   ON contact_messages (created_at DESC);
+ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS visitor_id text;
+ALTER TABLE contact_messages ADD COLUMN IF NOT EXISTS experiments jsonb;
 `
 
 export function createPgContactStore(db: Queryable): ContactStore & { migrate(): Promise<void> } {
@@ -36,11 +51,11 @@ export function createPgContactStore(db: Queryable): ContactStore & { migrate():
       await db.query(CONTACT_SCHEMA_SQL)
     },
 
-    async create(message, emailDelivered) {
+    async create(message, emailDelivered, context) {
       const { rows } = await db.query(
-        `INSERT INTO contact_messages (id, name, email, subject, body, email_delivered)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, name, email, subject, body, email_delivered, created_at`,
+        `INSERT INTO contact_messages (id, name, email, subject, body, email_delivered, visitor_id, experiments)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+         RETURNING id, name, email, subject, body, email_delivered, visitor_id, experiments, created_at`,
         [
           randomUUID(),
           message.name,
@@ -48,6 +63,8 @@ export function createPgContactStore(db: Queryable): ContactStore & { migrate():
           message.subject,
           message.message,
           emailDelivered,
+          context?.visitorId ?? null,
+          context?.experiments ? JSON.stringify(context.experiments) : null,
         ],
       )
       const row = rows[0]
@@ -59,6 +76,8 @@ export function createPgContactStore(db: Queryable): ContactStore & { migrate():
         subject: String(row.subject),
         message: String(row.body),
         emailDelivered: Boolean(row.email_delivered),
+        visitorId: row.visitor_id == null ? null : String(row.visitor_id),
+        experiments: (row.experiments as Record<string, string> | null) ?? null,
         createdAt: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
       }
     },
@@ -74,12 +93,14 @@ export function createMemoryContactStore(): ContactStore {
   const messages: StoredContactMessage[] = []
 
   return {
-    async create(message, emailDelivered) {
+    async create(message, emailDelivered, context) {
       const saved: StoredContactMessage = {
         ...message,
         id: randomUUID(),
         createdAt: new Date().toISOString(),
         emailDelivered,
+        visitorId: context?.visitorId ?? null,
+        experiments: context?.experiments ?? null,
       }
       messages.unshift(saved)
       return saved

@@ -9,6 +9,9 @@ import {
 } from './shopify.js'
 import { addUtcDays, formatUtcDate, parseUtcDate, storeMidnightUtc } from './period.js'
 import type { AnalyticsStore } from './store.js'
+import type { ExperimentOrderSink } from '../experiments/store.js'
+import type { ExperimentOrderRow } from '../experiments/types.js'
+import { isVisitorId, parseExperimentsAttr } from '../experiments/validation.js'
 
 export type ShopifySyncResult = {
   start: string | null
@@ -77,6 +80,40 @@ export function orderAttribution(raw: ShopifyOrderRaw): string | null {
   return [source.toLowerCase(), (medium || '(none)').toLowerCase(), campaign].filter(Boolean).join(' / ')
 }
 
+/** Cart attributes the storefront sets for A/B tests (docs/EXPERIMENTS_CONTRACT.md). */
+const EXP_ATTR = { visitor: '_sr_vid', experiments: '_sr_exp' }
+
+/**
+ * The visitor id and experiment arms an order carries, or null when it carries neither
+ * (orders from before tagging, POS, drafts).
+ */
+export function orderExperimentAttribution(
+  raw: ShopifyOrderRaw,
+): { visitorId: string | null; experiments: Record<string, string> } | null {
+  const attrs = new Map(
+    (raw.note_attributes ?? []).map((a) => [(a.name ?? '').trim(), (a.value ?? '').trim()] as const),
+  )
+  const vid = attrs.get(EXP_ATTR.visitor)
+  const visitorId = isVisitorId(vid) ? vid : null
+  const experiments = parseExperimentsAttr(attrs.get(EXP_ATTR.experiments)) ?? {}
+  if (!visitorId && !Object.keys(experiments).length) return null
+  return { visitorId, experiments }
+}
+
+/** The experiment_orders row for a counted Shopify order, or null when it has no experiment tags. */
+export function experimentOrderFromShopify(raw: ShopifyOrderRaw, order: Order): ExperimentOrderRow | null {
+  const tags = orderExperimentAttribution(raw)
+  if (!tags) return null
+  return {
+    channel: order.channel,
+    externalId: order.externalId,
+    orderedAt: order.orderedAt,
+    revenue: order.revenue,
+    visitorId: tags.visitorId,
+    experiments: tags.experiments,
+  }
+}
+
 export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
   const revenue = num(raw.total_price)
   const shipping = num(raw.total_shipping_price_set?.shop_money?.amount)
@@ -141,7 +178,12 @@ export function isCountedOrder(raw: ShopifyOrderRaw): boolean {
 export async function syncShopifyToStore(
   store: AnalyticsStore,
   creds: ShopifyCredentials,
-  options?: { start?: string | null; end?: string | null },
+  options?: {
+    start?: string | null
+    end?: string | null
+    /** When given, orders tagged `_sr_vid` / `_sr_exp` are also written to experiment_orders. */
+    experiments?: ExperimentOrderSink
+  },
 ): Promise<ShopifySyncResult> {
   const start = options?.start || null
   const end = options?.end || null
@@ -153,9 +195,14 @@ export async function syncShopifyToStore(
       ? new Date(Date.parse(storeMidnightUtc(formatUtcDate(addUtcDays(parseUtcDate(end), 1)))) - 1000).toISOString()
       : undefined
     const raw = await fetchShopifyOrders(creds, { createdAtMin, createdAtMax })
-    const count = await store.upsertOrders(raw.filter(isCountedOrder).map(mapShopifyOrder))
+    const counted = raw.filter(isCountedOrder)
+    const mapped = counted.map(mapShopifyOrder)
+    const count = await store.upsertOrders(mapped)
     // An order cancelled, voided or tagged as a test after an earlier sync must leave the dashboard too.
     const excludedIds = raw.filter((o) => !isCountedOrder(o)).map((o) => `shopify:${o.id}`)
+    if (options?.experiments) {
+      await syncExperimentOrders(options.experiments, counted, mapped, excludedIds)
+    }
     const removedExcluded = excludedIds.length
       ? await store.deleteOrders({ channel: 'shopify', source: 'shopify', externalIds: excludedIds })
       : 0
@@ -199,6 +246,24 @@ export async function syncShopifyToStore(
     const message = error instanceof Error ? error.message : 'Shopify sync failed'
     await store.finishSync(sync.id, 'error', message, 0)
     throw error
+  }
+}
+
+/** Best effort: an experiments failure must never fail the analytics sync. */
+async function syncExperimentOrders(
+  sink: ExperimentOrderSink,
+  counted: ShopifyOrderRaw[],
+  mapped: Order[],
+  excludedIds: string[],
+): Promise<void> {
+  try {
+    const rows = counted
+      .map((raw, i) => experimentOrderFromShopify(raw, mapped[i]!))
+      .filter((row): row is ExperimentOrderRow => row !== null)
+    if (rows.length) await sink.upsertOrders(rows)
+    if (excludedIds.length) await sink.deleteOrders('shopify', excludedIds)
+  } catch (error) {
+    console.error('Experiment order sync failed:', error instanceof Error ? error.message : error)
   }
 }
 

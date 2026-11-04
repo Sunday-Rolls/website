@@ -93,6 +93,7 @@ export default defineRailway(() => {
         '/tsconfig.app.json',
         '/tsconfig.node.json',
         '/scripts/serve-spa.mjs',
+        '/scripts/lib/**',
         '/scripts/emit-spa-shells.mjs',
       ],
     },

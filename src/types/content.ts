@@ -318,6 +318,12 @@ export interface NotFoundContent {
   cta: ContentLink
 }
 
+/**
+ * Optional `experiments` block in a page JSON: experiment key → arm → partial content that
+ * deep-merges over the page for visitors in that arm. Stripped by `usePageContent`.
+ */
+export type PageExperiments = Record<string, Record<string, Record<string, unknown>>>
+
 export type PageContentMap = {
   home: HomeContent
   shop: ShopContent

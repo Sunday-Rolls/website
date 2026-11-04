@@ -1,6 +1,6 @@
 # A/B testing plan
 
-Status: **approved direction, nothing built yet.** Owner decisions are in §12. Written 2026-11-03 against `main` at `6c0381a` (after PR #100, ad attribution).
+Status: **Phase 1 (assignment and tagging foundation) built on `feature/ab-testing-foundation`, not yet deployed.** Owner decisions are in §12. The cross-component contract is [EXPERIMENTS_CONTRACT.md](./EXPERIMENTS_CONTRACT.md). Written 2026-11-03 against `main` at `6c0381a` (after PR #100, ad attribution).
 
 Goal: a developer can open a PR, mark it as an A/B test, and have the site serve it to a share of visitors. Every metric (GA4 events, Shopify orders, contact messages) then carries the experiment and variant, and admins read the results and pause, stop, promote or remove tests from the existing `server/` dashboard.
 

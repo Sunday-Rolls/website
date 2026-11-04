@@ -1,3 +1,4 @@
+import { experimentString, isExperimentFunnelEvent, trackExperimentEvent } from '@/lib/experiments'
 import { scheduleAfterLoad } from '@/lib/schedule'
 
 type Fbq = ((...args: unknown[]) => void) & {
@@ -199,7 +200,18 @@ export function pushEvent(
   if (typeof window === 'undefined') return
 
   window.dataLayer = window.dataLayer ?? []
-  window.dataLayer.push({ event, ...payload })
+  window.dataLayer.push({ event, ...payload, ...expVariantsParam() })
+
+  if (isExperimentFunnelEvent(event)) {
+    const ecommerce = payload.ecommerce as { value?: unknown } | undefined
+    trackExperimentEvent(event, typeof ecommerce?.value === 'number' ? ecommerce.value : undefined)
+  }
+}
+
+/** `{ exp_variants: 'home-banner:b|…' }`, or nothing when the visitor has no exposures. */
+function expVariantsParam(): { exp_variants?: string } {
+  const expVariants = experimentString()
+  return expVariants ? { exp_variants: expVariants } : {}
 }
 
 function toItem(product: TrackableProduct, quantity = 1): EcommerceItem {
@@ -216,6 +228,7 @@ function sendGa4Ecommerce(event: string, ecommerce: Record<string, unknown>): vo
   window.gtag('event', event, {
     send_to: ga4MeasurementId,
     ...ecommerce,
+    ...expVariantsParam(),
   })
 }
 
@@ -241,6 +254,7 @@ export function trackPageView(path: string, title?: string): void {
       send_to: ga4MeasurementId,
       page_path: path,
       page_title: title ?? document.title,
+      ...expVariantsParam(),
     })
   }
 }

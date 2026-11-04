@@ -63,6 +63,8 @@ import type { PeriodKey, PublicUser } from '../analytics/types.js'
 import type { ContactStore } from '../contact-store.js'
 import type { ContactPayload } from '../mail.js'
 import type { ReviewStore } from '../reviews.js'
+import { createExperimentDashboardRoutes } from '../experiments/dashboard-routes.js'
+import type { ExperimentStore } from '../experiments/store.js'
 import { isWorkflowName, runWorkflow } from './workflows.js'
 import { clientIp } from '../app.js'
 import type { RateLimiter } from '../rate-limit.js'
@@ -89,20 +91,41 @@ export type DashboardDeps = {
   contactToEmail?: string
   /** Override the on-open sync sources (tests). Defaults read credentials from env. */
   autoSyncSources?: Record<AutoSyncSource, AutoSyncSourceDef>
+  /** A/B tests. Omitted without Postgres; /api/experiments then answers 503. */
+  experiments?: ExperimentStore
 }
 
 export function createDashboardRoutes(deps: DashboardDeps) {
   const app = new Hono()
   const { store, checkRateLimit, secureCookies } = deps
-  const autoSync = createAutoSync(store, deps.autoSyncSources)
+  const syncSources = () =>
+    deps.autoSyncSources ?? defaultAutoSyncSources(process.env, { experiments: deps.experiments })
+  const autoSync = createAutoSync(store, syncSources())
 
   app.use('*', async (c, next) => {
     const path = c.req.path
     if (!path.includes('/api/') || /\/api\/(login|logout|me)$/.test(path)) return next()
+    // Experiments: any signed-in dashboard user, not only admins (owner decision, AB_TESTING_PLAN §12).
+    // The sub-router checks the session itself.
+    if (/\/api\/experiments(\/|$)/.test(path)) return next()
     const gate = await requireAdmin(c, store)
     if (gate instanceof Response) return gate
     return next()
   })
+
+  if (deps.experiments) {
+    app.route(
+      '/api/experiments',
+      createExperimentDashboardRoutes({ experiments: deps.experiments, currentUser: (c) => currentUser(c, store) }),
+    )
+  } else {
+    const unavailable = async (c: Context) => {
+      if (!(await currentUser(c, store))) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+      return c.json({ ok: false, error: 'Experiments need Postgres (DATABASE_URL)' }, 503)
+    }
+    app.all('/api/experiments', unavailable)
+    app.all('/api/experiments/*', unavailable)
+  }
 
   app.get('/', async (c) => file(c, 'index.html', 'text/html; charset=utf-8'))
   app.get('/styles.css', async (c) => file(c, 'styles.css', 'text/css; charset=utf-8'))
@@ -271,7 +294,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   app.get('/api/health', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
-    const defs = deps.autoSyncSources ?? defaultAutoSyncSources()
+    const defs = syncSources()
     const merchantInterval = loadMerchantScheduleFromEnv().intervalMs
     const sources = [
       ...AUTO_SYNC_SOURCES.map((source) => ({
@@ -496,7 +519,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       return c.json({ ok: false, error: 'End date must be on or after start date' }, 400)
     }
     try {
-      const result = await syncShopifyToStore(store, creds, { start, end })
+      const result = await syncShopifyToStore(store, creds, { start, end, experiments: deps.experiments })
       return c.json({ ok: true, data: result })
     } catch (error) {
       return c.json(

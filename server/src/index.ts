@@ -7,6 +7,7 @@ import { createApp } from './app.js'
 import { ensureBootstrapUsers } from './dashboard/routes.js'
 import { loadConfig } from './env.js'
 import { createPgContactStore } from './contact-store.js'
+import { createPgExperimentStore, type ExperimentStore } from './experiments/store.js'
 import { createMailer } from './mail.js'
 import { createPgReviewStore } from './reviews.js'
 import { loadShopifyCredentialsFromEnv } from './analytics/shopify.js'
@@ -34,6 +35,7 @@ const pool = config.databaseUrl
 let contacts: ReturnType<typeof createPgContactStore> | undefined
 let reviews: ReturnType<typeof createPgReviewStore> | undefined
 let analytics: AnalyticsStore | undefined
+let experiments: ExperimentStore | undefined
 
 const bootstrapUsers = config.dashboardBootstrapUsers.length
   ? config.dashboardBootstrapUsers
@@ -88,6 +90,9 @@ if (pool) {
     console.log(`Seeded ${seeded} product reviews into Postgres`)
   }
 
+  experiments = createPgExperimentStore(pool)
+  await experiments.migrate()
+
   if (config.dashboardEnabled) {
     analytics = createPgAnalyticsStore(pool)
     await setupDashboard(analytics, 'postgres')
@@ -116,6 +121,7 @@ const app = createApp({
   contacts,
   reviews,
   analytics,
+  experiments,
   shopifyWebhooks:
     merchantRunner && shopify
       ? { secret: shopify.clientSecret, onProductChange: (topic) => merchantRunner.trigger(topic) }

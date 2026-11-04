@@ -3,7 +3,10 @@ import { cors } from 'hono/cors'
 import type { AnalyticsStore } from './analytics/store.js'
 import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
-import type { ContactStore } from './contact-store.js'
+import type { ContactExperimentContext, ContactStore } from './contact-store.js'
+import { buildPublicConfig, ingestBeacon } from './experiments/public.js'
+import type { ExperimentStore } from './experiments/store.js'
+import { isVisitorId, MAX_BEACON_BYTES, parseBeacon, parseExperimentsField } from './experiments/validation.js'
 import type { ContactPayload } from './mail.js'
 import { MERCHANT_WEBHOOK_TOPICS, verifyShopifyWebhook } from './merchant/shopify-webhook.js'
 import { createRateLimiter } from './rate-limit.js'
@@ -22,6 +25,8 @@ export type AppDeps = {
   /** Omitted when DATABASE_URL is not set; review routes then answer 503. */
   reviews?: ReviewStore
   analytics?: AnalyticsStore
+  /** A/B tests (Postgres). Omitted without DATABASE_URL; the /experiments routes then don't exist. */
+  experiments?: ExperimentStore
   /**
    * Shopify product/inventory webhooks. Omitted when the Merchant Center sync
    * isn't configured; the route then answers 503.
@@ -32,7 +37,15 @@ export type AppDeps = {
   }
 }
 
-export function createApp({ config, sendContactEmail, contacts, reviews, analytics, shopifyWebhooks }: AppDeps) {
+export function createApp({
+  config,
+  sendContactEmail,
+  contacts,
+  reviews,
+  analytics,
+  experiments,
+  shopifyWebhooks,
+}: AppDeps) {
   const app = new Hono()
   const checkRateLimit = createRateLimiter()
   const allowlist = new Set(config.corsOrigins)
@@ -74,9 +87,54 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
         sendContactEmail,
         resendApiKey: config.resendApiKey,
         contactToEmail: config.contactToEmail,
+        experiments,
       }),
     )
     app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))
+  }
+
+  if (experiments) {
+    // Polled by serve-spa every 30 s and by the browser fallback (docs/EXPERIMENTS_CONTRACT.md).
+    app.get('/experiments/config', async (c) => {
+      try {
+        const body = await buildPublicConfig(experiments)
+        c.header('Cache-Control', 'public, max-age=30')
+        return c.json(body)
+      } catch (error) {
+        console.error('Failed to load experiments config', error)
+        c.header('Cache-Control', 'no-store')
+        return c.json({ ok: false, error: 'Experiments unavailable' }, 502)
+      }
+    })
+
+    // sendBeacon posts text/plain (no CORS preflight), so the body is parsed as JSON whatever the type.
+    app.post('/experiments/events', async (c) => {
+      if (!hasAllowedBrowserOrigin(c)) {
+        return c.json({ ok: false, error: 'Forbidden origin' }, 403)
+      }
+      const rate = checkRateLimit(`experiment-events:${clientIp(c)}`, { limit: 120 })
+      if (!rate.ok) {
+        c.header('Retry-After', String(rate.retryAfterSec))
+        return c.json({ ok: false, error: 'Too many requests' }, 429)
+      }
+      const text = await c.req.text()
+      if (text.length > MAX_BEACON_BYTES) return c.json({ ok: false, error: 'Payload too large' }, 413)
+      let body: unknown
+      try {
+        body = JSON.parse(text)
+      } catch {
+        return c.json({ ok: false, error: 'Invalid JSON body' }, 400)
+      }
+      const parsed = parseBeacon(body)
+      if (!parsed.ok) return c.json({ ok: false, error: parsed.error }, 400)
+      try {
+        const accepted = await ingestBeacon(experiments, parsed.value)
+        return c.json({ ok: true, accepted })
+      } catch (error) {
+        console.error('Failed to store experiment events', error)
+        return c.json({ ok: false, error: 'Failed to store events' }, 502)
+      }
+    })
   }
 
   // Server-to-server from Shopify: no browser origin, authenticated by HMAC instead.
@@ -132,7 +190,7 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
 
     if (contacts) {
       try {
-        await contacts.create(parsed.value, emailDelivered)
+        await contacts.create(parsed.value, emailDelivered, parsed.context)
         return c.json({ ok: true, emailed: emailDelivered })
       } catch (error) {
         console.error('Failed to store contact message', error)
@@ -240,7 +298,7 @@ function safeOrigin(url: string): string | undefined {
 
 export function parseContactBody(
   body: unknown,
-): { ok: true; value: ContactPayload } | { ok: false; error: string } {
+): { ok: true; value: ContactPayload; context: ContactExperimentContext } | { ok: false; error: string } {
   if (!body || typeof body !== 'object') {
     return { ok: false, error: 'Expected JSON object' }
   }
@@ -267,7 +325,15 @@ export function parseContactBody(
     return { ok: false, error: 'Invalid email' }
   }
 
-  return { ok: true, value: { name, email, subject, message } }
+  // A/B context is stored but never emailed. A malformed value is dropped rather than
+  // blocking a customer's message.
+  const experiments = parseExperimentsField(record.experiments)
+  const context: ContactExperimentContext = {
+    visitorId: isVisitorId(record.visitorId) ? record.visitorId : null,
+    experiments: experiments.ok ? experiments.value : null,
+  }
+
+  return { ok: true, value: { name, email, subject, message }, context }
 }
 
 export function asTrimmedString(value: unknown): string | null {

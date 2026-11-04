@@ -71,6 +71,14 @@ function read(storage: Storage, now: number): Touch | null {
   }
 }
 
+/** The stored touch, if any and still inside the 30-day window. */
+export function currentTouch(
+  storage: Storage = window.localStorage,
+  now = Date.now(),
+): Touch | null {
+  return read(storage, now)
+}
+
 function isPaid(t: Touch): boolean {
   return Boolean(t.click) || /cpc|ppc|paid/i.test(t.medium)
 }
