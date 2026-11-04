@@ -43,8 +43,8 @@ describe('adSpendFromRows', () => {
         row('20261104', '(organic)', 0, 200, 2),
       ]),
     ).toEqual([
-      { date: '2026-11-04', platform: 'Google Ads', campaign: 'Sales-Performance Max-NEW', spend: 34.81, platformReportedSales: 94.7, platformReportedOrders: 1 },
-      { date: '2026-11-05', platform: 'Google Ads', campaign: 'Sales-Performance Max-NEW', spend: 0, platformReportedSales: 86.68, platformReportedOrders: 1 },
+      { date: '2026-11-04', platform: 'Google Ads', campaign: 'Sales-Performance Max-NEW', spend: 34.81, platformReportedSales: 94.7, platformReportedOrders: 1, sessions: 10 },
+      { date: '2026-11-05', platform: 'Google Ads', campaign: 'Sales-Performance Max-NEW', spend: 0, platformReportedSales: 86.68, platformReportedOrders: 1, sessions: 10 },
     ])
   })
 })

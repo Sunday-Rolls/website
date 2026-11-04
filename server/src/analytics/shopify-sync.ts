@@ -23,6 +23,60 @@ function num(value: string | undefined | null): number {
   return Number.isFinite(n) ? n : 0
 }
 
+/** Cart attributes the storefront sets from the visitor's landing URL (see src/lib/attribution.ts). */
+const ATTR = { source: '_sr_source', medium: '_sr_medium', campaign: '_sr_campaign', click: '_sr_click' }
+
+/** Which ad network a click ID belongs to. */
+const CLICK_IDS: Record<string, { source: string; medium: string }> = {
+  gclid: { source: 'google', medium: 'cpc' },
+  gbraid: { source: 'google', medium: 'cpc' },
+  wbraid: { source: 'google', medium: 'cpc' },
+  fbclid: { source: 'facebook', medium: 'paid' },
+}
+
+/**
+ * Where the order came from, as "source / medium" plus " / campaign" when known
+ * (e.g. "google / cpc / Sales-Performance Max-NEW"). Order of preference: the storefront's
+ * cart attributes, then UTM / click IDs on Shopify's landing URL, then the referring site.
+ * Null when nothing says (direct visits, or orders from before tagging).
+ */
+export function orderAttribution(raw: ShopifyOrderRaw): string | null {
+  const attrs = new Map(
+    (raw.note_attributes ?? []).map((a) => [(a.name ?? '').trim(), (a.value ?? '').trim()] as const),
+  )
+  let source = attrs.get(ATTR.source) || ''
+  let medium = attrs.get(ATTR.medium) || ''
+  let campaign = attrs.get(ATTR.campaign) || ''
+  const click = CLICK_IDS[attrs.get(ATTR.click) || '']
+
+  if (!source && raw.landing_site) {
+    try {
+      const params = new URL(raw.landing_site, 'https://shop.invalid').searchParams
+      source = params.get('utm_source')?.trim() || ''
+      medium = params.get('utm_medium')?.trim() || ''
+      campaign = params.get('utm_campaign')?.trim() || ''
+      const id = Object.keys(CLICK_IDS).find((k) => params.has(k))
+      if (!source && id) ({ source, medium } = CLICK_IDS[id])
+    } catch {
+      // Unparseable landing URL: fall through to the referrer.
+    }
+  }
+  if (!source && click) ({ source, medium } = click)
+  if (!source && raw.referring_site) {
+    try {
+      const host = new URL(raw.referring_site).hostname.replace(/^www\./, '')
+      if (host && !/sundayrollsgolf\.com$|myshopify\.com$/.test(host)) {
+        source = host
+        medium = 'referral'
+      }
+    } catch {
+      // Not a URL: ignore.
+    }
+  }
+  if (!source) return null
+  return [source.toLowerCase(), (medium || '(none)').toLowerCase(), campaign].filter(Boolean).join(' / ')
+}
+
 export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
   const revenue = num(raw.total_price)
   const shipping = num(raw.total_shipping_price_set?.shop_money?.amount)
@@ -44,11 +98,8 @@ export function mapShopifyOrder(raw: ShopifyOrderRaw): Order {
     raw.shipping_address?.province?.trim() ||
     null
   const email = raw.email?.trim() || raw.customer?.email?.trim() || null
-  const trafficSource =
-    raw.source_name?.trim() ||
-    raw.referring_site?.trim() ||
-    raw.landing_site?.trim() ||
-    null
+  // source_name is Shopify's sales channel id (e.g. "channel:21037214"), not where the buyer came from.
+  const trafficSource = orderAttribution(raw)
 
   return {
     id: randomUUID(),

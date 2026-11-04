@@ -82,6 +82,8 @@ CREATE TABLE IF NOT EXISTS analytics_daily_ad_spend (
   PRIMARY KEY (date, platform, campaign)
 );
 
+ALTER TABLE analytics_daily_ad_spend ADD COLUMN IF NOT EXISTS sessions integer NOT NULL DEFAULT 0;
+
 -- Upgrade older installs that used (date, platform) only
 DO $$
 BEGIN

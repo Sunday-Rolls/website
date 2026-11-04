@@ -323,8 +323,8 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     } catch (error) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
     }
-    const [orders, adSpend] = await Promise.all([store.listOrders(), store.listAdSpend()])
-    return c.json({ ok: true, data: { range, platforms: buildRoas({ range, orders, adSpend }) } })
+    const [orders, adSpend, traffic] = await Promise.all([store.listOrders(), store.listAdSpend(), store.listTraffic()])
+    return c.json({ ok: true, data: { range, platforms: buildRoas({ range, orders, adSpend, traffic }) } })
   })
 
   app.get('/api/sync-status', async (c) => {

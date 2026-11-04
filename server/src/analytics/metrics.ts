@@ -589,6 +589,11 @@ export type RoasCampaign = {
   platformRoas: number | null
   platformReportedOrders: number
   shareOfPlatformSpend: number
+  /** Website sales linked to this campaign: exact (tagged orders) plus estimated. */
+  siteSales: number
+  siteSalesEstimated: number
+  siteTaggedOrders: number
+  siteRoas: number | null
 }
 
 export type RoasPlatform = {
@@ -597,37 +602,132 @@ export type RoasPlatform = {
   platformReportedSales: number
   platformRoas: number | null
   siteObservedSales: number
+  /** Part of siteObservedSales credited by share of visits rather than from a tagged order. */
+  siteSalesEstimated: number
+  siteTaggedOrders: number
   siteRoas: number | null
   campaigns: RoasCampaign[]
   /** True when this platform has a live spend sync configured. */
   connected: boolean
   /**
-   * Why sales/ROAS may be blank:
-   * - ok: real numbers (including true zero sales with spend)
-   * - no_conversion_value: spend synced but GA4/Ads has no purchase revenue
-   * - unattributed: orders exist but lack ad-source tags
+   * How site sales were found:
+   * - ok: from orders tagged with this platform's click / UTM (or the marketplace's own sales)
+   * - estimated: some or all credited by the platform's share of each day's website visits
+   * - unattributed: spend, but no website sales linked to it in this range
    * - not_connected: platform token/sync missing
    */
-  salesStatus: 'ok' | 'no_conversion_value' | 'unattributed' | 'not_connected'
+  salesStatus: 'ok' | 'estimated' | 'unattributed' | 'not_connected'
   note: string | null
+}
+
+const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`
+
+const GOOGLE_PAID = /^google \/ (cpc|ppc|paid)/i
+const META_PAID = /^(facebook|fb|ig|instagram|meta)[^/]* \/ (paid|cpc|ppc)/i
+
+/** Campaign named in an attribution string ("source / medium / campaign"), if any. */
+function taggedCampaign(trafficSource: string): string {
+  return trafficSource.split(' / ').slice(2).join(' / ').trim().toLowerCase()
+}
+
+/**
+ * Link website orders to ad campaigns:
+ * - an order tagged with the platform's click/UTM counts in full (to its named campaign, else split
+ *   across that day's campaigns by their visits);
+ * - an untagged order (older orders, other devices) is credited by each campaign's share of that
+ *   day's website visits, and counted as estimated;
+ * - an order tagged with some other source counts for nothing here.
+ */
+function linkSiteSales(input: {
+  orders: Order[]
+  isPaid: RegExp
+  campaignSessions: Map<string, Map<string, number>>
+  campaignSpend: Map<string, Map<string, number>>
+  visitsByDay: Map<string, number>
+}): { byCampaign: Map<string, { exact: number; estimated: number; tagged: number }>; exact: number; estimated: number; tagged: number } {
+  const byCampaign = new Map<string, { exact: number; estimated: number; tagged: number }>()
+  const credit = (campaign: string, amount: number, kind: 'exact' | 'estimated', tagged = 0) => {
+    const c = byCampaign.get(campaign) ?? { exact: 0, estimated: 0, tagged: 0 }
+    c[kind] += amount
+    c.tagged += tagged
+    byCampaign.set(campaign, c)
+  }
+  let exact = 0
+  let estimated = 0
+  let tagged = 0
+  for (const o of input.orders) {
+    const day = storeDay(o.orderedAt)
+    const sessions = input.campaignSessions.get(day) ?? new Map<string, number>()
+    const daySessions = sum([...sessions.values()])
+    const source = o.trafficSource?.trim() ?? ''
+    if (source.includes(' / ')) {
+      if (!input.isPaid.test(source)) continue
+      exact += o.revenue
+      tagged += 1
+      const named = taggedCampaign(source)
+      const match = [...(input.campaignSpend.get(day)?.keys() ?? []), ...sessions.keys()].find(
+        (c) => named && c.toLowerCase() === named,
+      )
+      if (match) {
+        credit(match, o.revenue, 'exact', 1)
+        continue
+      }
+      // Auto-tagged clicks carry no campaign name: split by that day's visits, else spend.
+      const weights = daySessions > 0 ? sessions : (input.campaignSpend.get(day) ?? new Map<string, number>())
+      const total = sum([...weights.values()])
+      if (total <= 0) {
+        credit('Unassigned', o.revenue, 'exact', 1)
+        continue
+      }
+      // The order counts once, against the campaign with the biggest share of it.
+      const top = [...weights.entries()].sort((x, y) => y[1] - x[1])[0][0]
+      for (const [c, w] of weights) credit(c, (o.revenue * w) / total, 'exact', c === top ? 1 : 0)
+      continue
+    }
+    if (source) continue // tagged in an older format we can't read: don't guess
+    const visits = input.visitsByDay.get(day) ?? 0
+    if (visits <= 0 || daySessions <= 0) continue
+    for (const [c, n] of sessions) {
+      const amount = o.revenue * Math.min(1, n / visits)
+      estimated += amount
+      credit(c, amount, 'estimated')
+    }
+  }
+  return { byCampaign, exact, estimated, tagged }
 }
 
 export function buildRoas(input: {
   range: DateRange
   adSpend: DailyAdSpend[]
   orders: Order[]
+  /** GA4 daily website visits; needed to estimate sales for untagged orders. */
+  traffic?: DailyTraffic[]
 }): RoasPlatform[] {
   const orders = preferLiveOrders(input.orders)
+  const inRangeOrders = ordersIn(orders, input.range.start, input.range.end)
+  const websiteOrders = inRangeOrders.filter((o) => isWebsiteChannel(o.channel))
   const spendRows = input.adSpend.filter((r) => r.date >= input.range.start && r.date <= input.range.end)
-  const platforms = new Map<
-    string,
-    { spend: number; reported: number; campaigns: Map<string, { spend: number; reported: number; orders: number }> }
-  >()
+  const visitsByDay = new Map(
+    (input.traffic ?? [])
+      .filter((t) => t.date >= input.range.start && t.date <= input.range.end)
+      .map((t) => [t.date, t.visits] as const),
+  )
+
+  type Acc = {
+    spend: number
+    reported: number
+    campaigns: Map<string, { spend: number; reported: number; orders: number }>
+    sessions: Map<string, Map<string, number>>
+    spendByDay: Map<string, Map<string, number>>
+  }
+  const platforms = new Map<string, Acc>()
   for (const row of spendRows) {
-    const cur = platforms.get(row.platform) ?? {
+    const cur: Acc = platforms.get(row.platform) ?? {
       spend: 0,
       reported: 0,
       campaigns: new Map(),
+      sessions: new Map(),
+      spendByDay: new Map(),
     }
     cur.spend += row.spend
     cur.reported += row.platformReportedSales
@@ -637,76 +737,92 @@ export function buildRoas(input: {
     camp.reported += row.platformReportedSales
     camp.orders += row.platformReportedOrders
     cur.campaigns.set(campaignName, camp)
+    const add = (m: Map<string, Map<string, number>>, v: number) => {
+      if (v <= 0) return
+      const day = m.get(row.date) ?? new Map<string, number>()
+      day.set(campaignName, (day.get(campaignName) ?? 0) + v)
+      m.set(row.date, day)
+    }
+    add(cur.sessions, row.sessions ?? 0)
+    add(cur.spendByDay, row.spend)
     platforms.set(row.platform, cur)
   }
 
-  const websiteSales = sum(
-    ordersIn(orders, input.range.start, input.range.end)
-      .filter((o) => isWebsiteChannel(o.channel))
-      .map((o) => o.revenue),
-  )
-  const etsySales = sum(
-    ordersIn(orders, input.range.start, input.range.end)
-      .filter((o) => o.channel === 'etsy')
-      .map((o) => o.revenue),
-  )
-  const ebaySales = sum(
-    ordersIn(orders, input.range.start, input.range.end)
-      .filter((o) => o.channel === 'ebay')
-      .map((o) => o.revenue),
-  )
-
-  const siteFor = (platform: string): { sales: number; matched: boolean } => {
-    const p = platform.toLowerCase()
-    if (p.includes('google')) {
-      const matched = ordersIn(orders, input.range.start, input.range.end).filter(
-        (o) => isWebsiteChannel(o.channel) && /google/i.test(o.trafficSource ?? ''),
-      )
-      return { sales: sum(matched.map((o) => o.revenue)), matched: matched.length > 0 }
-    }
-    if (p.includes('meta') || p.includes('facebook')) {
-      const matched = ordersIn(orders, input.range.start, input.range.end).filter(
-        (o) =>
-          isWebsiteChannel(o.channel) && /social|instagram|facebook|meta|ig\b|fb\b/i.test(o.trafficSource ?? ''),
-      )
-      return { sales: sum(matched.map((o) => o.revenue)), matched: matched.length > 0 }
-    }
-    if (p.includes('etsy')) return { sales: etsySales, matched: etsySales > 0 }
-    if (p.includes('ebay')) return { sales: ebaySales, matched: ebaySales > 0 }
-    return { sales: websiteSales, matched: websiteSales > 0 }
-  }
+  const channelSales = (channel: string) =>
+    sum(inRangeOrders.filter((o) => o.channel === channel).map((o) => o.revenue))
 
   const rows: RoasPlatform[] = [...platforms.entries()]
     .map(([platform, v]): RoasPlatform => {
-      const site = siteFor(platform)
-      const hasConversionValue = v.reported > 0
+      const p = platform.toLowerCase()
+      const isGoogle = p.includes('google')
+      const isMeta = p.includes('meta') || p.includes('facebook')
+      let linked: ReturnType<typeof linkSiteSales> | null = null
+      let marketplaceSales = 0
+      if (isGoogle || isMeta) {
+        linked = linkSiteSales({
+          orders: websiteOrders,
+          isPaid: isGoogle ? GOOGLE_PAID : META_PAID,
+          // Visit-share estimates need per-campaign visits, which GA4 gives for Google Ads only.
+          campaignSessions: isGoogle ? v.sessions : new Map(),
+          campaignSpend: v.spendByDay,
+          visitsByDay,
+        })
+      } else if (p.includes('etsy')) marketplaceSales = channelSales('etsy')
+      else if (p.includes('ebay')) marketplaceSales = channelSales('ebay')
+      else marketplaceSales = sum(websiteOrders.map((o) => o.revenue))
+
+      const siteSales = linked ? linked.exact + linked.estimated : marketplaceSales
+      const estimated = linked?.estimated ?? 0
       let salesStatus: RoasPlatform['salesStatus'] = 'ok'
       let note: string | null = null
-      if (v.spend > 0 && !hasConversionValue) {
-        salesStatus = 'no_conversion_value'
-        note =
-          'Spend is live from GA4/Ads. Platform sales/ROAS stay blank until purchase revenue lands in GA4 (Shopify ecommerce / Ads conversion value).'
-      } else if (v.spend > 0 && hasConversionValue && !site.matched) {
+      if (v.spend > 0 && siteSales <= 0) {
         salesStatus = 'unattributed'
-        note = 'Platform sales available, but site orders are not tagged with this ad source yet.'
+        note = isGoogle
+          ? 'No website sales linked to these ads in this range yet.'
+          : 'No website orders tagged with this platform’s ads in this range yet.'
+      } else if (linked && estimated > 0) {
+        salesStatus = 'estimated'
+        const share = (() => {
+          let paid = 0
+          let total = 0
+          for (const [day, visits] of visitsByDay) {
+            total += visits
+            paid += sum([...(v.sessions.get(day)?.values() ?? [])])
+          }
+          return total > 0 ? (paid / total) * 100 : 0
+        })()
+        note =
+          `${linked.tagged ? `${money(linked.exact)} from ${linked.tagged} order${linked.tagged === 1 ? '' : 's'} tagged with an ad click, plus ` : ''}` +
+          `${money(estimated)} estimated: website orders without an ad tag are credited by these campaigns’ share of each day’s visits (${share.toFixed(0)}% over this range).`
       }
+
       const campaigns = [...v.campaigns.entries()]
-        .map(([campaign, c]) => ({
-          campaign,
-          spend: c.spend,
-          platformReportedSales: c.reported,
-          platformRoas: c.spend > 0 && c.reported > 0 ? c.reported / c.spend : null,
-          platformReportedOrders: c.orders,
-          shareOfPlatformSpend: v.spend ? (c.spend / v.spend) * 100 : 0,
-        }))
+        .map(([campaign, c]) => {
+          const l = linked?.byCampaign.get(campaign)
+          const siteSalesC = l ? l.exact + l.estimated : 0
+          return {
+            campaign,
+            spend: c.spend,
+            platformReportedSales: c.reported,
+            platformRoas: c.spend > 0 && c.reported > 0 ? c.reported / c.spend : null,
+            platformReportedOrders: c.orders,
+            shareOfPlatformSpend: v.spend ? (c.spend / v.spend) * 100 : 0,
+            siteSales: siteSalesC,
+            siteSalesEstimated: l?.estimated ?? 0,
+            siteTaggedOrders: l?.tagged ?? 0,
+            siteRoas: c.spend > 0 && siteSalesC > 0 ? siteSalesC / c.spend : null,
+          }
+        })
         .sort((a, b) => b.spend - a.spend)
       return {
         platform,
         spend: v.spend,
         platformReportedSales: v.reported,
         platformRoas: v.spend > 0 && v.reported > 0 ? v.reported / v.spend : null,
-        siteObservedSales: site.sales,
-        siteRoas: v.spend > 0 && site.sales > 0 ? site.sales / v.spend : null,
+        siteObservedSales: siteSales,
+        siteSalesEstimated: estimated,
+        siteTaggedOrders: linked?.tagged ?? 0,
+        siteRoas: v.spend > 0 && siteSales > 0 ? siteSales / v.spend : null,
         campaigns,
         connected: true,
         salesStatus,
@@ -723,6 +839,8 @@ export function buildRoas(input: {
       platformReportedSales: 0,
       platformRoas: null,
       siteObservedSales: 0,
+      siteSalesEstimated: 0,
+      siteTaggedOrders: 0,
       siteRoas: null,
       campaigns: [],
       connected: false,

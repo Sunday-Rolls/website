@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildOverview, buildPnL, buildRoas } from './metrics.js'
 import { rangeForPeriod } from './period.js'
 import { buildDemoDataset } from './seed.js'
-import type { DailyAdSpend } from './types.js'
+import type { DailyAdSpend, DailyTraffic, Order } from './types.js'
 
 describe('buildOverview', () => {
   it('computes KPIs and funnel from demo data', () => {
@@ -33,8 +33,70 @@ describe('buildOverview', () => {
   })
 })
 
+describe('buildRoas site sales', () => {
+  const range = { start: '2026-11-01', end: '2026-11-02' }
+  const spendRow = (date: string, campaign: string, spend: number, sessions: number): DailyAdSpend => ({
+    date, platform: 'Google Ads', campaign, spend, platformReportedSales: 0, platformReportedOrders: 0, sessions,
+  })
+  const order = (orderedAt: string, revenue: number, trafficSource: string | null): Order => ({
+    id: `${orderedAt}-${revenue}`, externalId: `x-${orderedAt}-${revenue}`, channel: 'shopify', source: 'shopify',
+    orderedAt, revenue, fees: 0, shippingCost: 0, marketingCost: 0, state: null, customerEmail: null,
+    isReturning: false, trafficSource, lines: [],
+  })
+  const traffic = (date: string, visits: number): DailyTraffic => ({
+    date, channel: 'website', visits, uniqueVisitors: visits, productViews: 0, addToCarts: 0, checkouts: 0,
+    purchases: 0, sourceBreakdown: {},
+  })
+
+  it('counts tagged orders in full and credits untagged ones by visit share', () => {
+    const platforms = buildRoas({
+      range,
+      adSpend: [spendRow('2026-11-01', 'PMax', 50, 30), spendRow('2026-11-01', 'Brand', 10, 10), spendRow('2026-11-02', 'PMax', 40, 25)],
+      traffic: [traffic('2026-11-01', 100), traffic('2026-11-02', 100)],
+      orders: [
+        // Tagged with its campaign: all of it to PMax.
+        order('2026-11-01T18:00:00.000Z', 100, 'google / cpc / pmax'),
+        // gclid only, no campaign: split 30:10 by that day's visits, counted once (PMax).
+        order('2026-11-01T19:00:00.000Z', 80, 'google / cpc'),
+        // Untagged: 40% of visits on Nov 1 came from these campaigns → $40 estimated (30 PMax, 10 Brand).
+        order('2026-11-01T20:00:00.000Z', 100, null),
+        // Tagged with another source: not Google's.
+        order('2026-11-02T18:00:00.000Z', 90, 'instagram / paid'),
+        // Untagged on Nov 2: 25% → $25 estimated to PMax.
+        order('2026-11-02T19:00:00.000Z', 100, null),
+      ],
+    })
+    const google = platforms.find((p) => p.platform === 'Google Ads')!
+    expect(google.siteTaggedOrders).toBe(2)
+    expect(google.siteSalesEstimated).toBeCloseTo(65)
+    expect(google.siteObservedSales).toBeCloseTo(245)
+    expect(google.siteRoas).toBeCloseTo(245 / 100)
+    expect(google.salesStatus).toBe('estimated')
+    expect(google.note).toContain('$180 from 2 orders tagged')
+    const pmax = google.campaigns.find((c) => c.campaign === 'PMax')!
+    expect(pmax.siteSales).toBeCloseTo(100 + 60 + 30 + 25)
+    expect(pmax.siteTaggedOrders).toBe(2)
+    const brand = google.campaigns.find((c) => c.campaign === 'Brand')!
+    expect(brand.siteSales).toBeCloseTo(20 + 10)
+    expect(brand.siteSalesEstimated).toBeCloseTo(10)
+  })
+
+  it('is exact (ok) when every linked sale is tagged', () => {
+    const platforms = buildRoas({
+      range,
+      adSpend: [spendRow('2026-11-01', 'PMax', 50, 30)],
+      traffic: [],
+      orders: [order('2026-11-01T18:00:00.000Z', 100, 'google / cpc'), order('2026-11-01T19:00:00.000Z', 70, null)],
+    })
+    const google = platforms.find((p) => p.platform === 'Google Ads')!
+    expect(google.salesStatus).toBe('ok')
+    expect(google.siteObservedSales).toBe(100)
+    expect(google.note).toBeNull()
+  })
+})
+
 describe('buildRoas', () => {
-  it('leaves ROAS blank when spend exists but conversion value is missing', () => {
+  it('leaves ROAS blank when spend exists but no website sales link to it', () => {
     const range = rangeForPeriod('7d', '2026-10-11')
     const adSpend: DailyAdSpend[] = [
       {
@@ -51,7 +113,8 @@ describe('buildRoas', () => {
     expect(google?.connected).toBe(true)
     expect(google?.spend).toBe(100)
     expect(google?.platformRoas).toBeNull()
-    expect(google?.salesStatus).toBe('no_conversion_value')
+    expect(google?.siteRoas).toBeNull()
+    expect(google?.salesStatus).toBe('unattributed')
     const meta = platforms.find((p) => p.platform === 'Meta')
     expect(meta?.connected).toBe(false)
     expect(meta?.salesStatus).toBe('not_connected')

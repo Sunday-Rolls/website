@@ -224,8 +224,22 @@ const CART_SELECTION = `
 `
 
 const CART_CREATE = `#graphql
-  mutation CartCreate($lines: [CartLineInput!]) {
-    cartCreate(input: { lines: $lines }) {
+  mutation CartCreate($lines: [CartLineInput!], $attributes: [AttributeInput!]) {
+    cartCreate(input: { lines: $lines, attributes: $attributes }) {
+      cart {
+        ${CART_SELECTION}
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`
+
+const CART_ATTRIBUTES_UPDATE = `#graphql
+  mutation CartAttributesUpdate($cartId: ID!, $attributes: [AttributeInput!]!) {
+    cartAttributesUpdate(cartId: $cartId, attributes: $attributes) {
       cart {
         ${CART_SELECTION}
       }
@@ -608,11 +622,12 @@ async function requestProductByHandle(handle: string): Promise<ShopifyProduct | 
 
 export async function createCart(
   lines: Array<{ merchandiseId: string; quantity: number }> = [],
+  attributes: Array<{ key: string; value: string }> = [],
 ): Promise<ShopifyCart> {
   if (!shopifyClient) throw new Error('Shopify is not configured')
 
   const { data, errors } = await shopifyClient.request(CART_CREATE, {
-    variables: { lines },
+    variables: { lines, attributes },
   })
 
   const payload = data?.cartCreate
@@ -639,6 +654,25 @@ export async function fetchCart(cartId: string): Promise<ShopifyCart | null> {
   }
 
   return data?.cart ? mapCart(data.cart) : null
+}
+
+/** Replace the cart's attributes (used for the hidden `_sr_*` ad-source tags). */
+export async function updateCartAttributes(
+  cartId: string,
+  attributes: Array<{ key: string; value: string }>,
+): Promise<ShopifyCart> {
+  if (!shopifyClient) throw new Error('Shopify is not configured')
+
+  const { data, errors } = await shopifyClient.request(CART_ATTRIBUTES_UPDATE, {
+    variables: { cartId, attributes },
+  })
+
+  const payload = data?.cartAttributesUpdate
+  if (errors || !payload?.cart || payload.userErrors?.length) {
+    throw new Error(userErrorMessage(payload?.userErrors, 'Unable to update cart'))
+  }
+
+  return mapCart(payload.cart)
 }
 
 export async function addCartLines(

@@ -13,7 +13,8 @@ const STYLE = `
 .mkt-platform-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin: 0 0 8px; }
 .mkt-platform-head h4 { margin: 0; font-size: 15px; font-weight: 600; color: var(--ink); }
 .mkt-platform-head span { font-size: 13px; color: var(--muted); }
-.mkt-platform-note { margin: 0 0 8px; font-size: 13px; color: var(--warn); }
+.mkt-platform-note { margin: 0 0 8px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.mkt-platform-note.is-warn { color: var(--warn); }
 .mkt-platform .table { table-layout: fixed; min-width: 560px; }
 .mkt-platform .table th:first-child { width: 40%; }
 .mkt-roas { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; }
@@ -132,8 +133,7 @@ function campaignBlurb(platform, campaign) {
 
 function roasTone(roas, status) {
   if (status === 'not_connected') return { tone: 'warning', label: 'Not connected' }
-  if (status === 'no_conversion_value') return { tone: 'warning', label: 'Spend only, no sales value yet' }
-  if (status === 'unattributed') return { tone: 'warning', label: 'Sales not matched to orders' }
+  if (status === 'unattributed') return { tone: 'warning', label: 'No sales linked yet' }
   if (roas == null) return { tone: 'neutral', label: 'No sales yet' }
   if (roas >= BREAK_EVEN_ROAS * 1.4) return { tone: 'success', label: 'Strong' }
   if (roas >= BREAK_EVEN_ROAS) return { tone: 'success', label: 'Above break-even' }
@@ -143,10 +143,11 @@ function roasTone(roas, status) {
 
 function platformTable(p) {
   const rows = (p.campaigns ?? []).map((c) => ({ ...c, platform: p.platform, salesStatus: p.salesStatus }))
-  const roasText = isNum(p.platformRoas) ? ` · ${p.platformRoas.toFixed(1)}x ROAS` : ''
+  const est = p.salesStatus === 'estimated' ? ' (est.)' : ''
+  const roasText = isNum(p.siteRoas) ? ` · ${money(p.siteObservedSales)} sales · ${p.siteRoas.toFixed(2)}x ROAS${est}` : ''
   return `<div class="mkt-platform">
   <div class="mkt-platform-head"><h4>${escapeHtml(p.platform)}</h4><span>${escapeHtml(`${money(p.spend)} spent${roasText}`)}</span></div>
-  ${p.note ? `<p class="mkt-platform-note">${escapeHtml(p.note)}</p>` : ''}
+  ${p.note ? `<p class="mkt-platform-note${p.salesStatus === 'unattributed' ? ' is-warn' : ''}">${escapeHtml(p.note)}</p>` : ''}
   ${table({
     columns: [
       {
@@ -161,21 +162,24 @@ function platformTable(p) {
         format: (v, r) => `${money(v)}<span class="cell-sub mkt-hide-sm">${pct(r.shareOfPlatformSpend, 0)} of ${escapeHtml(r.platform)}</span>`,
       },
       {
-        key: 'platformReportedSales',
-        label: 'Platform sales',
+        key: 'siteSales',
+        label: 'Sales',
         align: 'right',
         format: (v, r) => {
-          if (!(v > 0)) return `—<span class="cell-sub">No sales reported</span>`
-          const n = r.platformReportedOrders ?? 0
-          return `${money(v)}<span class="cell-sub">${num(n)} order${n === 1 ? '' : 's'}</span>`
+          if (!(v > 0)) return `—<span class="cell-sub">None linked</span>`
+          const n = r.siteTaggedOrders ?? 0
+          const parts = []
+          if (n) parts.push(`${num(n)} tagged order${n === 1 ? '' : 's'}`)
+          if (r.siteSalesEstimated > 0) parts.push(`${money(r.siteSalesEstimated)} est.`)
+          return `${money(v)}<span class="cell-sub">${escapeHtml(parts.join(' · '))}</span>`
         },
       },
       {
-        key: 'platformRoas',
+        key: 'siteRoas',
         label: 'ROAS',
         align: 'right',
         format: (v, r) => {
-          const t = roasTone(v, r.platformReportedSales > 0 ? 'ok' : r.salesStatus)
+          const t = roasTone(v, v == null && r.spend > 0 ? 'unattributed' : 'ok')
           return `<span class="mkt-roas"><strong>${isNum(v) ? `${v.toFixed(2)}x` : '—'}</strong>${badge(t.label, t.tone)}</span>`
         },
       },
@@ -188,10 +192,10 @@ function platformTable(p) {
 
 function campaignsCard(platforms) {
   const live = platforms.filter((p) => p.connected && (p.campaigns ?? []).length)
-  const note = `<p class="mkt-note">Each platform counts the sales it thinks it caused, so the same order can be counted twice. MER above is the honest number. ROAS = platform-reported sales ÷ spend; break-even is about ${BREAK_EVEN_ROAS}x.</p>`
+  const note = `<p class="mkt-note">Sales are website orders linked to each campaign: in full when the order carries the ad’s click or UTM tag, otherwise estimated from the campaign’s share of that day’s visits. ROAS = sales ÷ spend; break-even is about ${BREAK_EVEN_ROAS}x. MER above covers every channel.</p>`
   return card({
     title: 'Campaigns',
-    subtitle: 'Spend and platform-reported results by campaign',
+    subtitle: 'Spend and the website sales linked to each campaign',
     className: 'col-12',
     body: live.length ? note + live.map(platformTable).join('') : emptyState('No campaign spend in this range.'),
   })

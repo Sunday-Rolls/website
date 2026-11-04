@@ -35,6 +35,7 @@ export type Ga4AdSpendRow = {
   spend: number
   platformReportedSales: number
   platformReportedOrders: number
+  sessions: number
 }
 
 type RunReportBody = Record<string, unknown>
@@ -162,6 +163,7 @@ export function adSpendFromRows(rows: Array<{ dims: string[]; metrics: string[] 
       spend: Math.round(spend * 100) / 100,
       platformReportedSales: Math.round(revenue * 100) / 100,
       platformReportedOrders: purchases,
+      sessions: num(row.metrics[1]),
     })
   }
   return adSpend
