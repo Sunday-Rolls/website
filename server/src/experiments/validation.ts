@@ -1,12 +1,17 @@
 import { randomBytes } from 'node:crypto'
 import {
   BEACON_EVENT_TYPES,
+  DEFAULT_MAX_DAYS,
+  DEFAULT_MIN_DAYS,
+  DEFAULT_MIN_VISITORS_PER_ARM,
   PRIMARY_METRICS,
   STATUS_ACTIONS,
   type AuditAction,
   type BeaconEventType,
   type Experiment,
+  type ExperimentLimits,
   type ExperimentPatch,
+  type ExperimentPrLink,
   type ExperimentVariant,
   type FunnelEventKind,
   type StatusAction,
@@ -161,8 +166,20 @@ export type CreateExperimentInput = {
   primaryMetric: string
   trafficPct: number
   variants: ExperimentVariant[]
-}
+} & ExperimentLimits &
+  ExperimentPrLink
 
+export const MAX_PATHS = 10
+export const MAX_PATH_LENGTH = 300
+export const MAX_DAYS_LIMIT = 365
+export const MAX_MIN_VISITORS = 10_000_000
+const SHA_RE = /^[0-9a-f]{7,64}$/i
+const BRANCH_RE = /^[^\s~^:?*\[\\]{1,255}$/
+
+/**
+ * Also the registry-file rules (`src/experiments/<key>.json`, CI `upsert`): the registry carries no
+ * `trafficPct`, so it defaults to 100.
+ */
 export function parseCreateExperiment(body: unknown): Result<CreateExperimentInput> {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false, error: 'Expected JSON object' }
   const r = body as Record<string, unknown>
@@ -187,7 +204,155 @@ export function parseCreateExperiment(body: unknown): Result<CreateExperimentInp
   if (!traffic.ok) return traffic
   const variants = parseVariants(r.variants)
   if (!variants.ok) return variants
-  return { ok: true, value: { key, name, hypothesis, primaryMetric, trafficPct: traffic.value, variants: variants.value } }
+  const limits = parseLimits(r)
+  if (!limits.ok) return limits
+  const pr = parsePrLink(r)
+  if (!pr.ok) return pr
+  return {
+    ok: true,
+    value: {
+      key,
+      name,
+      hypothesis,
+      primaryMetric,
+      trafficPct: traffic.value,
+      variants: variants.value,
+      ...limits.value,
+      ...pr.value,
+    },
+  }
+}
+
+/** `paths` (each starts with `/`, at most 10; a trailing slash is dropped) and the sample gate limits. */
+export function parseLimits(r: Record<string, unknown>): Result<ExperimentLimits> {
+  const paths = parsePaths(r.paths)
+  if (!paths.ok) return paths
+  const minVisitors = intField(r.minVisitorsPerArm, DEFAULT_MIN_VISITORS_PER_ARM, 1, MAX_MIN_VISITORS)
+  if (minVisitors === null) return { ok: false, error: `minVisitorsPerArm must be an integer from 1 to ${MAX_MIN_VISITORS}` }
+  const minDays = intField(r.minDays, DEFAULT_MIN_DAYS, 0, MAX_DAYS_LIMIT)
+  if (minDays === null) return { ok: false, error: `minDays must be an integer from 0 to ${MAX_DAYS_LIMIT}` }
+  const maxDays = intField(r.maxDays, Math.max(DEFAULT_MAX_DAYS, minDays), 1, MAX_DAYS_LIMIT)
+  if (maxDays === null || maxDays < minDays) {
+    return { ok: false, error: `maxDays must be an integer from minDays to ${MAX_DAYS_LIMIT}` }
+  }
+  return { ok: true, value: { paths: paths.value, minVisitorsPerArm: minVisitors, minDays, maxDays } }
+}
+
+export function parsePaths(value: unknown): Result<string[]> {
+  if (value === undefined || value === null) return { ok: true, value: [] }
+  if (!Array.isArray(value) || value.length > MAX_PATHS) {
+    return { ok: false, error: `paths must be a list of at most ${MAX_PATHS} paths` }
+  }
+  const out: string[] = []
+  for (const raw of value) {
+    const path = typeof raw === 'string' ? normalizePath(raw.trim()) : ''
+    if (!path.startsWith('/') || path.length > MAX_PATH_LENGTH || /[\s?#]/.test(path)) {
+      return { ok: false, error: `Invalid path "${String(raw)}": paths start with / and have no query or spaces` }
+    }
+    if (!out.includes(path)) out.push(path)
+  }
+  return { ok: true, value: out }
+}
+
+function normalizePath(path: string): string {
+  return path.length > 1 ? path.replace(/\/+$/, '') || '/' : path
+}
+
+function intField(value: unknown, fallback: number, min: number, max: number): number | null {
+  if (value === undefined || value === null) return fallback
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) return null
+  return value
+}
+
+/** Optional `prNumber`, `prUrl`, `branch`, `mergeSha` (dashboard create). */
+export function parsePrLink(r: Record<string, unknown>): Result<ExperimentPrLink> {
+  const prNumber = r.prNumber === undefined || r.prNumber === null ? null : r.prNumber
+  if (prNumber !== null && (typeof prNumber !== 'number' || !Number.isInteger(prNumber) || prNumber < 1)) {
+    return { ok: false, error: 'prNumber must be a positive integer' }
+  }
+  const prUrl = optionalString(r.prUrl, 500, (s) => /^https:\/\/\S+$/.test(s))
+  if (prUrl === false) return { ok: false, error: 'prUrl must be an https URL' }
+  const branch = optionalString(r.branch, 255, (s) => BRANCH_RE.test(s))
+  if (branch === false) return { ok: false, error: 'Invalid branch name' }
+  const mergeSha = optionalString(r.mergeSha, 64, (s) => SHA_RE.test(s))
+  if (mergeSha === false) return { ok: false, error: 'mergeSha must be a git commit hash' }
+  return { ok: true, value: { prNumber: prNumber as number | null, prUrl, branch, mergeSha } }
+}
+
+/** null when absent/empty, false when present but invalid. */
+function optionalString(value: unknown, max: number, check: (s: string) => boolean): string | null | false {
+  if (value === undefined || value === null || value === '') return null
+  if (typeof value !== 'string') return false
+  const s = value.trim()
+  if (!s || s.length > max || !check(s)) return false
+  return s
+}
+
+// ---------- Overlap rule ----------
+
+/**
+ * Keys of other `running` experiments that share a targeted path with `exp`.
+ * A site-wide experiment (no paths) conflicts with every other running one.
+ */
+export function findPathConflicts(exp: Pick<Experiment, 'id' | 'paths'>, others: Experiment[]): string[] {
+  return others
+    .filter((o) => o.id !== exp.id && o.status === 'running')
+    .filter((o) => !exp.paths.length || !o.paths.length || o.paths.some((p) => exp.paths.includes(p)))
+    .map((o) => o.key)
+    .sort()
+}
+
+// ---------- CI (GitHub Actions) ----------
+
+export const CI_ACTIONS = ['upsert', 'merged', 'closed'] as const
+export type CiAction = (typeof CI_ACTIONS)[number]
+export const MAX_CI_EXPERIMENTS = 50
+
+export type CiRequest = {
+  action: CiAction
+  pr: { number: number; url: string | null; branch: string | null; mergeSha: string | null }
+  experiments: CreateExperimentInput[]
+}
+
+/** `POST /experiments/ci` body. Registry objects follow the dashboard create rules. */
+export function parseCiRequest(body: unknown): Result<CiRequest> {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false, error: 'Expected JSON object' }
+  const r = body as Record<string, unknown>
+  if (typeof r.action !== 'string' || !(CI_ACTIONS as readonly string[]).includes(r.action)) {
+    return { ok: false, error: `action must be one of ${CI_ACTIONS.join(', ')}` }
+  }
+  const action = r.action as CiAction
+  if (!r.pr || typeof r.pr !== 'object' || Array.isArray(r.pr)) return { ok: false, error: 'pr is required' }
+  const rawPr = r.pr as Record<string, unknown>
+  const link = parsePrLink({ prNumber: rawPr.number, prUrl: rawPr.url, branch: rawPr.branch, mergeSha: rawPr.mergeSha })
+  if (!link.ok) return { ok: false, error: link.error.replace(/^prNumber/, 'pr.number').replace(/^prUrl/, 'pr.url') }
+  if (link.value.prNumber === null) return { ok: false, error: 'pr.number is required' }
+  if (action === 'merged' && !link.value.mergeSha) return { ok: false, error: 'pr.mergeSha is required when merged' }
+  const list = r.experiments === undefined ? [] : r.experiments
+  if (!Array.isArray(list) || list.length > MAX_CI_EXPERIMENTS) {
+    return { ok: false, error: `experiments must be a list of at most ${MAX_CI_EXPERIMENTS} registry objects` }
+  }
+  if (action === 'upsert' && !list.length) return { ok: false, error: 'upsert needs at least one experiment' }
+  const experiments: CreateExperimentInput[] = []
+  const keys = new Set<string>()
+  for (const [index, raw] of list.entries()) {
+    const parsed = parseCreateExperiment(raw)
+    const label = raw && typeof raw === 'object' && typeof (raw as { key?: unknown }).key === 'string'
+      ? (raw as { key: string }).key
+      : `#${index}`
+    if (!parsed.ok) return { ok: false, error: `experiments[${index}] (${label}): ${parsed.error}` }
+    if (keys.has(parsed.value.key)) return { ok: false, error: `Duplicate experiment key "${parsed.value.key}"` }
+    keys.add(parsed.value.key)
+    experiments.push(parsed.value)
+  }
+  return {
+    ok: true,
+    value: {
+      action,
+      pr: { number: link.value.prNumber, url: link.value.prUrl, branch: link.value.branch, mergeSha: link.value.mergeSha },
+      experiments,
+    },
+  }
 }
 
 export function parseTrafficPct(value: unknown): Result<number> {

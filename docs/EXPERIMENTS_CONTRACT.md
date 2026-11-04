@@ -105,3 +105,85 @@ The order sync reads both from `note_attributes`.
 ## Contact form
 
 `POST /contact` accepts optional `visitorId` (vid regex) and `experiments` (`_sr_exp` format, max 500 chars). They're stored on `contact_messages` and never put in the email.
+
+---
+
+# Phase 2 and 3 additions
+
+## Experiment fields (added to the store, API and `GET /dashboard/api/experiments[/:key]`)
+
+`paths: string[]` (targeted paths such as `["/"]`; empty means site-wide), `minVisitorsPerArm` (default 1000), `minDays` (default 14), `maxDays` (default 42), `prNumber`, `prUrl`, `branch`, `mergeSha` (all nullable), `source: "dashboard" | "github"`.
+
+**Overlap rule:** `start` and `resume` return 409 `{ error, conflicts: [key…] }` when another `running` experiment shares a path. A site-wide experiment conflicts with every other running one.
+
+## `GET /dashboard/api/experiments/:key/results` (extends the Phase 1 shape)
+
+```jsonc
+{ "ok": true, "data": {
+  "key": "home-banner", "status": "running", "startedAt": "…", "endedAt": null,
+  "primaryMetric": "add_to_cart",
+  "arms": [ /* Phase 1 ArmResults, plus: */ { "variant": "b", "revenuePerVisitor": 1.23, "aov": 41.0,
+             "rates": { "add_to_cart": 0.061, "begin_checkout": 0.03, "contact_submit": 0.001,
+                        "newsletter_subscribe": 0.004, "purchase": 0.014 } } ],
+  "stats": {
+    "comparisons": [ {
+      "variant": "b", "metric": "add_to_cart",
+      "controlRate": 0.058, "variantRate": 0.064, "lift": 0.103,          // relative
+      "liftInterval": [-0.04, 0.26],                                    // 95% credible, relative
+      "probBeatsControl": 0.91, "expectedLoss": 0.0004,                 // absolute rate
+      "pValue": 0.18                                                    // two-proportion z-test
+    } ],                                       // one per non-control arm × (primary + every rate metric)
+    "rpv": [ { "variant": "b", "controlRpv": 0.9, "variantRpv": 1.2, "lift": 0.33,
+               "liftInterval": [-0.2, 0.9], "probBeatsControl": 0.8 } ],   // bootstrap, revenue capped at p99
+    "srm": { "pValue": 0.42, "ok": true },     // chi-square vs weights, ok = p >= 0.001
+    "gate": { "days": 9, "minDays": 14, "minVisitorsPerArm": 1000, "smallestArm": 812,
+              "ready": false, "overMaxDays": false },
+    "verdict": "early" | "winner" | "no_difference" | "guardrail_fail" | "srm_fail",
+    "winner": "b" | null
+  },
+  "daily": [ { "date": "2026-11-04", "arms": { "control": { "visitors": 120, "conversions": 7 },
+                                               "b": { "visitors": 118, "conversions": 9 } } } ]
+  // cumulative per day, primary metric
+} }
+```
+
+**Verdict:** `srm_fail` if SRM is not ok. Otherwise `early` until the gate is ready. Then `guardrail_fail` if any arm has P(worse) ≥ 0.8 on purchase rate or revenue per visitor, `winner` when some arm has P(beats control) ≥ 0.95 on the primary metric, and `no_difference` otherwise. Monte Carlo uses 20,000 draws with a seeded PRNG, so results are deterministic per request.
+
+## GitHub integration
+
+### Registry: `src/experiments/<key>.json`
+
+```json
+{ "key": "home-banner", "name": "Retro Roller banner", "hypothesis": "…",
+  "variants": [{ "key": "control", "name": "Current home", "weight": 50 }, { "key": "b", "name": "Splat banner", "weight": 50 }],
+  "primaryMetric": "add_to_cart", "paths": ["/"], "minVisitorsPerArm": 1000, "minDays": 14 }
+```
+
+The schema is at `src/experiments/schema.json`. A vitest check, `src/experiments/registry.test.ts`, ensures every file matches the schema with a key equal to the filename, and that every `useVariant('k')`, `<Variant experiment="k">` and content-JSON `experiments.k` in `src/` has a registry file. Its `listRegistry()` helper is exported for the workflow script.
+
+### CI endpoint: `POST {contact-api}/experiments/ci`
+
+- Auth: `Authorization: Bearer $EXPERIMENTS_CI_TOKEN`, compared in constant time. Answers 503 when the server's env var is unset and 401 when the token is wrong.
+- Body: `{ "action": "upsert" | "merged" | "closed", "pr": { "number", "url", "branch", "mergeSha"? }, "experiments": [registry objects] }`.
+  - `upsert`: create missing ones as `draft` (source `github`). Update name, hypothesis, variants, paths and limits **only while draft**, and set the PR fields.
+  - `merged`: set `mergeSha`.
+  - `closed` (not merged): archive drafts still linked to that PR.
+  - Every change writes an audit row with actor `github-actions`.
+- Returns `{ ok, results: [{ key, outcome: "created" | "updated" | "unchanged" | "locked" | "archived" }] }`.
+
+### Dashboard → GitHub: conclusion dispatch
+
+When an experiment is promoted or stopped, and `GITHUB_DISPATCH_TOKEN` and `GITHUB_REPOSITORY` (default `Sunday-Rolls/website`) are set on contact-api, the server POSTs to `https://api.github.com/repos/{repo}/dispatches` with `{ event_type: "experiment-concluded", client_payload: { key, outcome: "promoted" | "stopped", winner, prNumber } }`. It's fire-and-forget: a failure is logged and recorded in the audit as `dispatch_failed` but never blocks the action. The `fetch` is injectable for tests.
+
+### Workflows: `.github/workflows/experiments.yml`
+
+| Trigger | Does |
+|---------|------|
+| `pull_request` [labeled, synchronize, opened, reopened] with label `ab-test` | `npm ci` → `npx vitest run src/experiments`. Finds the registry files the PR adds or changes (`git diff origin/main...HEAD -- src/experiments/*.json`). If there are none, it fails with a clear message. Comments one marker-tagged comment (updated in place) with preview links for each arm: `https://sunday-rolls.github.io/website/previews/pr-N/<first path>?sr_force=<key>:<arm>`. Calls the CI endpoint (`upsert`) when the `EXPERIMENTS_CI_TOKEN` secret exists, and otherwise notes in the comment that the dashboard sync is not set up. |
+| `pull_request` [closed] with `ab-test` | `merged` or `closed` to the CI endpoint, plus a comment: "Merged dark. Start it from Dashboard → Experiments." |
+| `repository_dispatch` [experiment-concluded] | Opens an issue "Clean up experiment `<key>`: keep `<winner \| control>`". The issue lists files referencing the key (`git grep`), links the PR, and gives the steps. |
+| `schedule` weekly (Mon 14:00 UTC) + `workflow_dispatch` | Optional, only when the secret is set: GET `/experiments/ci/stale` (same bearer) lists promoted or stopped experiments ended more than 14 days ago. For each one still referenced in `src/`, it opens or updates an issue (deduped by title). |
+
+`GET /experiments/ci/stale` returns `{ ok, experiments: [{ key, status, winner, endedAt, prNumber }] }`.
+
+The workflow uses `actions/github-script@v7` and `actions/checkout@v4`, matching `deploy-staging.yml`, with `permissions: contents: read, pull-requests: write, issues: write`. The base URL comes from the `EXPERIMENTS_API_URL` repo variable, falling back to `https://contact-api-production-9af6.up.railway.app`.

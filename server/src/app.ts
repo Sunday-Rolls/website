@@ -4,9 +4,17 @@ import type { AnalyticsStore } from './analytics/store.js'
 import { createDashboardRoutes } from './dashboard/routes.js'
 import type { Config } from './env.js'
 import type { ContactExperimentContext, ContactStore } from './contact-store.js'
+import { applyCiRequest, bearerMatches, listStale } from './experiments/ci.js'
+import { createConclusionDispatcher } from './experiments/dispatch.js'
 import { buildPublicConfig, ingestBeacon } from './experiments/public.js'
 import type { ExperimentStore } from './experiments/store.js'
-import { isVisitorId, MAX_BEACON_BYTES, parseBeacon, parseExperimentsField } from './experiments/validation.js'
+import {
+  isVisitorId,
+  MAX_BEACON_BYTES,
+  parseBeacon,
+  parseCiRequest,
+  parseExperimentsField,
+} from './experiments/validation.js'
 import type { ContactPayload } from './mail.js'
 import { MERCHANT_WEBHOOK_TOPICS, verifyShopifyWebhook } from './merchant/shopify-webhook.js'
 import { createRateLimiter } from './rate-limit.js'
@@ -18,6 +26,11 @@ export type AppDeps = {
     websiteCutoverAt?: string | null
     resendApiKey?: string
     contactToEmail?: string
+    /** Bearer for `/experiments/ci*`; blank → those routes answer 503. */
+    experimentsCiToken?: string
+    /** Conclusion dispatch to GitHub on promote/stop; blank token → off. */
+    githubDispatchToken?: string
+    githubRepository?: string
   }
   sendContactEmail: (payload: ContactPayload) => Promise<void>
   /** Persists contact form submissions (Postgres). Preferred path on Railway Hobby. */
@@ -27,6 +40,8 @@ export type AppDeps = {
   analytics?: AnalyticsStore
   /** A/B tests (Postgres). Omitted without DATABASE_URL; the /experiments routes then don't exist. */
   experiments?: ExperimentStore
+  /** `fetch` for the GitHub conclusion dispatch (tests inject a fake). */
+  githubFetch?: typeof fetch
   /**
    * Shopify product/inventory webhooks. Omitted when the Merchant Center sync
    * isn't configured; the route then answers 503.
@@ -44,6 +59,7 @@ export function createApp({
   reviews,
   analytics,
   experiments,
+  githubFetch,
   shopifyWebhooks,
 }: AppDeps) {
   const app = new Hono()
@@ -74,6 +90,16 @@ export function createApp({
 
   app.get('/health', (c) => c.json({ ok: true }))
 
+  const experimentsDispatch =
+    experiments && config.githubDispatchToken
+      ? createConclusionDispatcher({
+          token: config.githubDispatchToken,
+          repository: config.githubRepository,
+          store: experiments,
+          fetch: githubFetch,
+        })
+      : null
+
   if (analytics) {
     app.route(
       '/dashboard',
@@ -88,6 +114,7 @@ export function createApp({
         resendApiKey: config.resendApiKey,
         contactToEmail: config.contactToEmail,
         experiments,
+        experimentsDispatch,
       }),
     )
     app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))
@@ -133,6 +160,45 @@ export function createApp({
       } catch (error) {
         console.error('Failed to store experiment events', error)
         return c.json({ ok: false, error: 'Failed to store events' }, 502)
+      }
+    })
+
+    // GitHub Actions → contact-api (server to server: bearer token, no browser origin).
+    const ciGate = (c: Context): Response | null => {
+      const token = config.experimentsCiToken ?? ''
+      if (!token) return c.json({ ok: false, error: 'Experiments CI is not configured' }, 503)
+      const rate = checkRateLimit(`experiments-ci:${clientIp(c)}`, { limit: 30 })
+      if (!rate.ok) {
+        c.header('Retry-After', String(rate.retryAfterSec))
+        return c.json({ ok: false, error: 'Too many requests' }, 429)
+      }
+      if (!bearerMatches(c.req.header('authorization'), token)) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+      return null
+    }
+
+    app.post('/experiments/ci', async (c) => {
+      const denied = ciGate(c)
+      if (denied) return denied
+      const body = await c.req.json().catch(() => undefined)
+      if (body === undefined) return c.json({ ok: false, error: 'Invalid JSON body' }, 400)
+      const parsed = parseCiRequest(body)
+      if (!parsed.ok) return c.json({ ok: false, error: parsed.error }, 400)
+      try {
+        return c.json({ ok: true, results: await applyCiRequest(experiments, parsed.value) })
+      } catch (error) {
+        console.error('Experiments CI sync failed', error)
+        return c.json({ ok: false, error: 'Failed to sync experiments' }, 502)
+      }
+    })
+
+    app.get('/experiments/ci/stale', async (c) => {
+      const denied = ciGate(c)
+      if (denied) return denied
+      try {
+        return c.json({ ok: true, experiments: await listStale(experiments) })
+      } catch (error) {
+        console.error('Failed to list stale experiments', error)
+        return c.json({ ok: false, error: 'Failed to list experiments' }, 502)
       }
     })
   }

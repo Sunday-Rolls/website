@@ -143,9 +143,10 @@ describe('validation', () => {
 describe('GET /experiments/config', () => {
   it('lists running and promoted experiments only, cached 30 s', async () => {
     const ctx = await setup()
-    await createRunning(ctx)
+    // Different pages, so the overlap rule lets both run.
+    await createRunning(ctx, { ...draft, paths: ['/'] })
     await ctx.api('', { body: { ...draft, key: 'still-draft' } })
-    await createRunning(ctx, { ...draft, key: 'shipped' })
+    await createRunning(ctx, { ...draft, key: 'shipped', paths: ['/shop'] })
     await ctx.api('/shipped/status', { body: { action: 'promote', variant: 'b' } })
 
     const res = await ctx.app.request('/experiments/config')
@@ -415,7 +416,7 @@ describe('dashboard /api/experiments', () => {
     const { data } = await res.json()
     expect(data.key).toBe('home-banner')
     const [control, b] = data.arms
-    expect(control).toEqual({
+    expect(control).toMatchObject({
       variant: 'control',
       visitors: 2,
       forcedVisitors: 0,
@@ -426,7 +427,7 @@ describe('dashboard /api/experiments', () => {
       taggedOrders: 1,
       beaconMissingOrders: 0,
     })
-    expect(b).toEqual({
+    expect(b).toMatchObject({
       variant: 'b',
       visitors: 1,
       forcedVisitors: 1,

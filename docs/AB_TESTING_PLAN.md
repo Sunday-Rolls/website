@@ -1,6 +1,6 @@
 # A/B testing plan
 
-Status: **Phase 1 (assignment and tagging foundation) built on `feature/ab-testing-foundation`, not yet deployed.** Owner decisions are in §12. The cross-component contract is [EXPERIMENTS_CONTRACT.md](./EXPERIMENTS_CONTRACT.md). Written 2026-11-03 against `main` at `6c0381a` (after PR #100, ad attribution).
+Status: **Phases 1–3 built on `feature/ab-testing-foundation` (PR #101), not yet deployed:** assignment and tagging, the Dashboard → Experiments page with stats, and the GitHub lifecycle. The one-time GitHub/Railway setup (README → "A/B tests") is not done yet. Owner decisions are in §12. The cross-component contract is [EXPERIMENTS_CONTRACT.md](./EXPERIMENTS_CONTRACT.md). Written 2026-11-03 against `main` at `6c0381a` (after PR #100, ad attribution).
 
 Goal: a developer can open a PR, mark it as an A/B test, and have the site serve it to a share of visitors. Every metric (GA4 events, Shopify orders, contact messages) then carries the experiment and variant, and admins read the results and pause, stop, promote or remove tests from the existing `server/` dashboard.
 
@@ -251,7 +251,7 @@ Out of scope for v1. Optionally pass `exp_variants` as a custom parameter later.
 
 So "instead of a normal merge" means **merge dark**: the PR still merges to `main` (the only way code reaches Railway `website`), but its effect is gated until an admin starts the test. That keeps one production build and one deploy pipeline.
 
-**Secrets / env (writes, need sign-off):** GitHub secret `EXPERIMENTS_CI_TOKEN`, the same value as a new `contact-api` Railway variable. `contact-api` needs a GitHub token (fine-grained, `issues:write` + `contents:read` on this repo) to send `repository_dispatch`. `website` needs `EXPERIMENTS_CONFIG_URL`. Railway's `website` watch patterns skip `scripts/lib/**` (see `ADS_AND_SEO_CONFIG.md`), so put the serve-spa assignment code where a change triggers a redeploy, or update the watch patterns.
+**Secrets / env (writes, need sign-off):** GitHub secret `EXPERIMENTS_CI_TOKEN`, the same value as a new `contact-api` Railway variable. `contact-api` needs a GitHub token (fine-grained, this repo only, **Contents: read and write**, which `POST /repos/{repo}/dispatches` requires; the cleanup issue itself is opened by the workflow's own token) to send `repository_dispatch`. `website` needs `EXPERIMENTS_CONFIG_URL`. Railway's `website` watch patterns skip `scripts/lib/**` (see `ADS_AND_SEO_CONFIG.md`), so put the serve-spa assignment code where a change triggers a redeploy, or update the watch patterns.
 
 ---
 

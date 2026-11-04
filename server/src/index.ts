@@ -128,6 +128,13 @@ const app = createApp({
       : undefined,
 })
 
+if (experiments) {
+  console.log(
+    `Experiments: CI sync ${config.experimentsCiToken ? 'on' : 'off (EXPERIMENTS_CI_TOKEN unset)'}, ` +
+      `GitHub dispatch ${config.githubDispatchToken ? `on (${config.githubRepository})` : 'off (GITHUB_DISPATCH_TOKEN unset)'}`,
+  )
+}
+
 serve({ fetch: app.fetch, port: config.port }, (info) => {
   console.log(`Sunday Rolls API listening on :${info.port}`)
   console.log(`CORS allowlist: ${config.corsOrigins.join(', ') || '(empty)'}`)

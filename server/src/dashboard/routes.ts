@@ -64,6 +64,7 @@ import type { ContactStore } from '../contact-store.js'
 import type { ContactPayload } from '../mail.js'
 import type { ReviewStore } from '../reviews.js'
 import { createExperimentDashboardRoutes } from '../experiments/dashboard-routes.js'
+import type { ConclusionDispatcher } from '../experiments/dispatch.js'
 import type { ExperimentStore } from '../experiments/store.js'
 import { isWorkflowName, runWorkflow } from './workflows.js'
 import { clientIp } from '../app.js'
@@ -93,6 +94,8 @@ export type DashboardDeps = {
   autoSyncSources?: Record<AutoSyncSource, AutoSyncSourceDef>
   /** A/B tests. Omitted without Postgres; /api/experiments then answers 503. */
   experiments?: ExperimentStore
+  /** GitHub `repository_dispatch` when an experiment is promoted or stopped. */
+  experimentsDispatch?: ConclusionDispatcher | null
 }
 
 export function createDashboardRoutes(deps: DashboardDeps) {
@@ -116,7 +119,11 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   if (deps.experiments) {
     app.route(
       '/api/experiments',
-      createExperimentDashboardRoutes({ experiments: deps.experiments, currentUser: (c) => currentUser(c, store) }),
+      createExperimentDashboardRoutes({
+        experiments: deps.experiments,
+        currentUser: (c) => currentUser(c, store),
+        dispatch: deps.experimentsDispatch,
+      }),
     )
   } else {
     const unavailable = async (c: Context) => {

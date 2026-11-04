@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Sunday-Rolls/website/blob/main/src/experiments/schema.json",
+  "title": "Sunday Rolls experiment registry entry",
+  "description": "One file per experiment at src/experiments/<key>.json (docs/EXPERIMENTS_CONTRACT.md, GitHub integration). Weights must also sum to 100 and keys must be unique, which registry.test.ts checks on top of this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key", "name", "hypothesis", "variants", "primaryMetric", "paths"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "key": {
+      "description": "Experiment key; must equal the filename without .json.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,47}$"
+    },
+    "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "hypothesis": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "variants": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "contains": {
+        "type": "object",
+        "properties": { "key": { "const": "control" } },
+        "required": ["key"]
+      },
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "weight"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,23}$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "weight": { "type": "integer", "minimum": 1, "maximum": 99 }
+        }
+      }
+    },
+    "primaryMetric": {
+      "type": "string",
+      "enum": ["add_to_cart", "begin_checkout", "contact_submit", "newsletter_subscribe", "purchase"]
+    },
+    "paths": {
+      "description": "Targeted paths such as [\"/\"]. Empty means site-wide (conflicts with every other running test). The first path is used for PR preview links.",
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 10,
+      "items": { "type": "string", "pattern": "^/[^?#\\s]*$", "maxLength": 300 }
+    },
+    "minVisitorsPerArm": { "type": "integer", "minimum": 1, "maximum": 10000000, "default": 1000 },
+    "minDays": { "type": "integer", "minimum": 1, "maximum": 365, "default": 14 },
+    "maxDays": { "type": "integer", "minimum": 1, "maximum": 365, "default": 42 }
+  }
+}
