@@ -32,7 +32,7 @@ Shopify orders upsert by Shopify id; cancelled, voided and `analytics-test` orde
 | Plan | **Free forever** — 3,000 emails/month, 100/day |
 | Why not SMTP | Railway **Hobby** (including paid Hobby) blocks outbound SMTP (465/587) |
 | Fallback | Every submission is also saved to Postgres `contact_messages` |
-| From address | `RESEND_FROM_EMAIL` (defaults to `onboarding@resend.dev` until a domain is verified) |
+| From address | `RESEND_FROM_EMAIL` (`Sunday Rolls Contact <hello@sundayrollsgolf.com>`; `sundayrollsgolf.com` is verified in Resend) |
 | Inbox | `CONTACT_TO_EMAIL` (e.g. `sundayrollsdevops@gmail.com`) |
 
 When you outgrow the free tier (unlikely for a contact form), upgrade Resend or switch providers — do **not** go back to Gmail SMTP unless the Railway project is on **Pro+**.
@@ -81,11 +81,8 @@ npm test
 4. Public domain → site `VITE_CONTACT_API_URL`; dashboard at `https://<api-host>/dashboard/`
 5. Production: `DASHBOARD_SECURE_COOKIES=true`, set passwords via `user:set-password` (Railway shell), do **not** leave `DASHBOARD_DEMO_PASSWORD` set
 
-### Verifying a custom from-domain (optional)
+### Sender domain
 
-`onboarding@resend.dev` works for the free plan with limits (often only to the Resend account owner). For production branding:
+`sundayrollsgolf.com` is verified in the Sunday Rolls Resend account (DKIM, SPF and the `send.` MX were added to Cloudflare by Resend's Cloudflare auto-setup). `contact-api` sends as `Sunday Rolls Contact <hello@sundayrollsgolf.com>`.
 
-1. In Resend → Domains, add `sundayrollsgolf.com` (or your mail domain)
-2. Add the DNS records Resend shows
-3. Set `RESEND_FROM_EMAIL=Sunday Rolls Contact <hello@sundayrollsgolf.com>` on `contact-api`
-4. Redeploy
+Don't go back to `onboarding@resend.dev`: Resend's shared test sender only delivers to the Resend account owner's address. If you move to another domain or Resend account, verify the domain there first, then change `RESEND_FROM_EMAIL` on `contact-api` (Railway redeploys).

@@ -20,7 +20,7 @@ Stay on Resend free until volume exceeds ~100 contact emails/day or 3,000/month.
 | Variable | Required | Notes |
 |----------|----------|--------|
 | `RESEND_API_KEY` | Yes (for inbox delivery) | Set in Railway only — never commit |
-| `RESEND_FROM_EMAIL` | Recommended | Default `Sunday Rolls Contact <onboarding@resend.dev>` |
+| `RESEND_FROM_EMAIL` | Recommended | `Sunday Rolls Contact <hello@sundayrollsgolf.com>` (also the code default) |
 | `CONTACT_TO_EMAIL` | Yes | Where the team reads messages |
 | `SMTP_*` | No on Hobby | Ignored when `RESEND_API_KEY` is set; only useful on Railway Pro+ |
 
@@ -33,15 +33,17 @@ The browser only needs `VITE_CONTACT_API_URL` (Railway API host). It does **not*
 1. Upgrade Resend (Pro starts ~$20/mo), **or**
 2. Move Railway to Pro+ and re-enable Gmail SMTP (not recommended — keep HTTPS email)
 
-## Optional: branded from-address
+## Sender domain
 
-Verify `sundayrollsgolf.com` (or similar) in the Resend dashboard, then set:
+`sundayrollsgolf.com` is verified in the Sunday Rolls Resend account; its DNS records (DKIM, SPF, `send.` MX) live in Cloudflare. Production sets:
 
 ```bash
 RESEND_FROM_EMAIL=Sunday Rolls Contact <hello@sundayrollsgolf.com>
 ```
 
-Until then, `onboarding@resend.dev` is fine for the free tier.
+Don't use `onboarding@resend.dev`: Resend's test sender only delivers to the account owner.
+
+The `sundayrollsdevops@gmail.com` inbox has a Gmail filter that skips the inbox and labels these emails **Contact** (matches the sender and `"Sunday Rolls Contact"` in the subject). Update it if the From address changes.
 
 ## Related
 

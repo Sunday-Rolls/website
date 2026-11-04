@@ -29,7 +29,7 @@ export function loadConfig() {
     resendApiKey: optional('RESEND_API_KEY'),
     resendFromEmail: optional(
       'RESEND_FROM_EMAIL',
-      'Sunday Rolls Contact <onboarding@resend.dev>',
+      'Sunday Rolls Contact <hello@sundayrollsgolf.com>',
     ),
     // Legacy Gmail SMTP — only works on Railway Pro+ (not Hobby).
     smtpUser: optional('SMTP_USER'),

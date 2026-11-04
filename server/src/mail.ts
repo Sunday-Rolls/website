@@ -25,8 +25,9 @@ export function createMailer(config: MailConfig) {
     if (!apiKey) throw new Error('RESEND_API_KEY is not configured')
 
     // Never use SMTP_USER (Gmail) as Resend's from-address — it must be a
-    // Resend-verified domain, or onboarding@resend.dev on the free plan.
-    const from = config.resendFromEmail || 'Sunday Rolls Contact <onboarding@resend.dev>'
+    // Resend-verified domain (sundayrollsgolf.com is verified in the Sunday Rolls
+    // Resend account).
+    const from = config.resendFromEmail || 'Sunday Rolls Contact <hello@sundayrollsgolf.com>'
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',

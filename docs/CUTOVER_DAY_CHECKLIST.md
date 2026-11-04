@@ -82,4 +82,4 @@ Run right after step 4, before announcing the new site.
 - [ ] Disconnect the domain in Squarespace; cancel only after exports are confirmed.
 - [ ] Raise TTLs back to Auto. Optional: proxy `@` / `www` (orange cloud) with SSL/TLS **Full (strict)**, never Flexible.
 - [ ] Update `SITE_URL` for review QR scripts if used, and team bookmarks to `https://dashboard.sundayrollsgolf.com/dashboard/`.
-- [ ] Later: verify the domain in Resend for a branded contact from-address.
+- [x] Verify the domain in Resend for a branded contact from-address (`hello@sundayrollsgolf.com`, done 2026-11-04).

@@ -55,7 +55,7 @@ Set these on the Railway **website** service, then redeploy/rebuild:
 | Variable | Action |
 |----------|--------|
 | `RESEND_API_KEY` | **Required on Hobby** — Resend free plan (3k/mo, 100/day). SMTP is blocked on Hobby even when paid. |
-| `RESEND_FROM_EMAIL` | `Sunday Rolls Contact <onboarding@resend.dev>` until a domain is verified in Resend |
+| `RESEND_FROM_EMAIL` | `Sunday Rolls Contact <hello@sundayrollsgolf.com>` (`sundayrollsgolf.com` is verified in Resend) |
 | `CONTACT_TO_EMAIL` | Inbox for form submissions (e.g. `sundayrollsdevops@gmail.com`) |
 | `CORS_ORIGINS` | Include `https://www.sundayrollsgolf.com,https://sundayrollsgolf.com` (keep localhost / Pages / Railway preview hosts during overlap if needed). Dashboard same-origin calls do not need the subdomain listed here. |
 | `DASHBOARD_SECURE_COOKIES` | `true` (required once the dashboard is on HTTPS / the custom subdomain) |
