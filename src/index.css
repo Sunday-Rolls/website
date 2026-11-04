@@ -208,8 +208,6 @@
   }
 }
 
-
-
 @keyframes featured-blink {
   0%,
   100% {
@@ -220,16 +218,7 @@
   }
 }
 
-/* Retro Roller banner: the cover hangs in the spotlight and sways a little. */
-@keyframes featured-sway {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-2.2deg);
-  }
-  50% {
-    transform: translateY(-2.5%) rotate(2.2deg);
-  }
-}
+/* Retro Roller banner: the new cover fades in when a fit or colour is picked. */
 
 @keyframes featured-in {
   from {
@@ -242,14 +231,3 @@
   }
 }
 
-@keyframes featured-shadow {
-  0%,
-  100% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scaleX(0.9);
-    opacity: 0.8;
-  }
-}

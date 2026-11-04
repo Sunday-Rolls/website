@@ -6,13 +6,16 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 
-/** Flagship-product banner: copy on one side, the cover swaying under a spotlight on the other. */
+/** Flagship-product banner: copy on one side, the cover under a spotlight on the other. */
 export function FeaturedProductBanner() {
   const { featured } = usePageContent('home')
-  const [active, setActive] = useState(0)
+  const [fitIndex, setFitIndex] = useState(0)
+  const [colorLabel, setColorLabel] = useState<string | null>(null)
 
-  if (!featured || featured.colorways.length === 0) return null
-  const colorway = featured.colorways[active] ?? featured.colorways[0]
+  const fit = featured?.fits[fitIndex] ?? featured?.fits[0]
+  if (!featured || !fit || fit.colorways.length === 0) return null
+  // Keep the chosen colour when switching fit if that fit comes in it, else its first colour.
+  const colorway = fit.colorways.find((option) => option.label === colorLabel) ?? fit.colorways[0]
   const ctaLabel = resolveLinkLabel(featured.cta)
 
   return (
@@ -29,13 +32,6 @@ export function FeaturedProductBanner() {
       <Container className="relative py-section-y">
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-14">
           <div className="order-2 space-y-6 lg:order-1 lg:max-w-xl">
-            {featured.eyebrow ? (
-              <p className="font-body text-label uppercase tracking-widest text-soft-gold-bright">
-                <span aria-hidden="true">▶ </span>
-                {featured.eyebrow}
-              </p>
-            ) : null}
-
             <h2
               id="home-featured-heading"
               className="font-display text-[clamp(2.5rem,6vw,4.25rem)] leading-[1.02] text-cream"
@@ -58,22 +54,51 @@ export function FeaturedProductBanner() {
               ))}
             </div>
 
-            {featured.colorways.length > 1 ? (
+            {featured.fits.length > 1 ? (
+              <div className="space-y-3">
+                <p className="font-body text-label uppercase tracking-widest text-cream/60">
+                  Fit
+                  {fit.note ? <span className="normal-case tracking-normal text-cream/55"> · {fit.note}</span> : null}
+                </p>
+                <div
+                  className="inline-flex rounded-full border border-cream/25 p-1"
+                  role="group"
+                  aria-label="Choose a putter fit"
+                >
+                  {featured.fits.map((option, index) => (
+                    <button
+                      key={option.label}
+                      type="button"
+                      aria-pressed={index === fitIndex}
+                      onClick={() => setFitIndex(index)}
+                      className={cn(
+                        'rounded-full px-4 py-1.5 font-body text-label uppercase tracking-widest transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-soft-gold-bright',
+                        index === fitIndex ? 'bg-cream text-matte-black' : 'text-cream/70 hover:text-cream',
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {fit.colorways.length > 1 ? (
               <div className="space-y-3">
                 <p className="font-body text-label uppercase tracking-widest text-cream/60">
                   Colorway · <span className="text-cream">{colorway.label}</span>
                 </p>
                 <div className="flex flex-wrap gap-3" role="group" aria-label="Choose a colorway">
-                  {featured.colorways.map((option, index) => (
+                  {fit.colorways.map((option) => (
                     <button
                       key={option.label}
                       type="button"
-                      aria-pressed={index === active}
+                      aria-pressed={option.label === colorway.label}
                       aria-label={option.label}
-                      onClick={() => setActive(index)}
+                      onClick={() => setColorLabel(option.label)}
                       className={cn(
                         'h-9 w-9 rounded-full border-2 transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-soft-gold-bright',
-                        index === active
+                        option.label === colorway.label
                           ? 'scale-110 border-soft-gold-bright'
                           : 'border-cream/25 hover:border-cream/60',
                       )}
@@ -109,14 +134,14 @@ export function FeaturedProductBanner() {
             />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-[27%] bottom-[11%] h-[5%] rounded-[50%] bg-black/55 blur-md motion-safe:animate-[featured-shadow_6s_ease-in-out_infinite]"
+              className="pointer-events-none absolute inset-x-[27%] bottom-[12%] h-[5%] rounded-[50%] bg-black/55 blur-md"
             />
 
-            <div className="absolute inset-[13%] bottom-[17%] origin-[50%_0%] motion-safe:animate-[featured-sway_6s_ease-in-out_infinite]">
+            <div className="absolute inset-x-[13%] top-[23%] bottom-[7%]">
               <img
                 key={colorway.label}
                 src={assetUrl(colorway.image)}
-                alt={`${featured.title} putter cover in ${colorway.label.toLowerCase()}`}
+                alt={`${featured.title} ${fit.label.toLowerCase()} putter cover in ${colorway.label.toLowerCase()}`}
                 width={1024}
                 height={1024}
                 fetchPriority="low"

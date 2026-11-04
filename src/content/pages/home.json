@@ -24,31 +24,54 @@
     ]
   },
   "featured": {
-    "eyebrow": "Player One Pick",
     "title": "The Retro Roller",
     "tagline": "Insert coin. Sink putt.",
     "lines": [
       "Our flagship cover, stitched like the handheld you wore out as a kid. Soft velvet lining, reinforced stitching and a magnetic closure that snaps shut like a cartridge.",
       "Cut for the L.A.B. DF3, with a mallet version for the Spider and putters like it."
     ],
-    "colorways": [
+    "fits": [
       {
-        "label": "Grey",
-        "swatch": "#cfc9bd",
-        "href": "/products/retro-roller-grey",
-        "image": "/assets/home/featured/retro-roller-grey.webp"
+        "label": "Center-shafted",
+        "note": "L.A.B. DF3 and putters like it",
+        "colorways": [
+          {
+            "label": "Grey",
+            "swatch": "#cfc9bd",
+            "href": "/products/retro-roller-grey",
+            "image": "/assets/home/featured/retro-roller-grey.webp"
+          },
+          {
+            "label": "Purple",
+            "swatch": "#5b2a86",
+            "href": "/products/retro-roller-purple",
+            "image": "/assets/home/featured/retro-roller-purple.webp"
+          },
+          {
+            "label": "Yellow",
+            "swatch": "#e8c547",
+            "href": "/products/retro-roller-yellow",
+            "image": "/assets/home/featured/retro-roller-yellow.webp"
+          }
+        ]
       },
       {
-        "label": "Purple",
-        "swatch": "#5b2a86",
-        "href": "/products/retro-roller-purple",
-        "image": "/assets/home/featured/retro-roller-purple.webp"
-      },
-      {
-        "label": "Yellow",
-        "swatch": "#e8c547",
-        "href": "/products/retro-roller-yellow",
-        "image": "/assets/home/featured/retro-roller-yellow.webp"
+        "label": "Mallet",
+        "note": "Spider and putters like it",
+        "colorways": [
+          {
+            "label": "White",
+            "swatch": "#f1eee6",
+            "href": "/products/mallet-retro-roller-white",
+            "image": "/assets/home/featured/mallet-retro-roller-white.webp"
+          },
+          {
+            "label": "Grey",
+            "swatch": "#cfc9bd",
+            "href": "/products/mallet-retro-roller-grey",
+            "image": "/assets/home/featured/mallet-retro-roller-grey.webp"
+          }
+        ]
       }
     ],
     "cta": {
