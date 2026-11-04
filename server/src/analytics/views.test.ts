@@ -234,6 +234,33 @@ describe('buildFunnelView', () => {
     expect(view.customers).toEqual({ new: 1, returning: 1 })
     expect(view.states).toEqual([{ state: 'TX', orders: 2, revenue: 120 }])
     expect(view.regions).toEqual([{ region: 'Texas', sessions: 60 }, { region: 'Ohio', sessions: 20 }])
+    expect(view.purchasesFrom).toBe('orders')
+    expect(Object.values(view.tracked).every(Boolean)).toBe(true)
+  })
+
+  it('marks steps GA4 is not receiving as untracked and counts only website orders as purchases', () => {
+    const view = buildFunnelView({
+      range,
+      orders: [
+        order('2026-10-02', 50, { channel: 'website' }),
+        order('2026-10-02', 40, { channel: 'etsy' }),
+        order('2026-10-03', 30, { channel: 'ebay' }),
+      ],
+      traffic: [traffic('2026-10-02', { addToCarts: 0, checkouts: 0, purchases: 0 })],
+      abandoned: null,
+    })
+    expect(view.funnel.purchases).toBe(1)
+    expect(view.tracked).toEqual({ visits: true, productViews: true, addToCarts: false, checkouts: false, purchases: true })
+  })
+
+  it('treats trailing zeros as real (nobody got that far)', () => {
+    const view = buildFunnelView({
+      range,
+      orders: [],
+      traffic: [traffic('2026-10-02', { addToCarts: 0, checkouts: 0, purchases: 0 })],
+      abandoned: null,
+    })
+    expect(view.tracked).toEqual({ visits: true, productViews: true, addToCarts: true, checkouts: true, purchases: true })
   })
 })
 

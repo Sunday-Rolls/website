@@ -360,13 +360,20 @@ export function buildMarketingView(input: {
 export type FunnelView = {
   range: DateRange
   funnel: { visits: number; productViews: number; addToCarts: number; checkouts: number; purchases: number }
+  /**
+   * Whether each step's count is real. A step reads 0 while a later step has activity only when
+   * GA4 isn't receiving that event (e.g. add_to_cart), so it is "not tracked", not a drop-off.
+   */
+  tracked: { visits: boolean; productViews: boolean; addToCarts: boolean; checkouts: boolean; purchases: boolean }
+  /** Where `purchases` came from: GA4 purchase events, or website orders when GA4 has none. */
+  purchasesFrom: 'ga4' | 'orders'
   abandoned: AbandonedCartStats | null
   customers: { new: number; returning: number }
   states: Array<{ state: string; orders: number; revenue: number }>
   regions: Array<{ region: string; sessions: number }>
 }
 
-/** `purchases` falls back to counted orders when GA4 has no purchases, like the overview funnel. */
+/** `purchases` falls back to website orders (not Etsy/eBay/in person) when GA4 has no purchase events. */
 export function buildFunnelView(input: {
   range: DateRange
   orders: Order[]
@@ -396,15 +403,24 @@ export function buildFunnelView(input: {
   }
   const returning = orders.filter((o) => o.isReturning).length
 
+  const ga4Purchases = total('purchases')
+  const funnel = {
+    visits: total('visits'),
+    productViews: total('productViews'),
+    addToCarts: total('addToCarts'),
+    checkouts: total('checkouts'),
+    purchases: ga4Purchases || orders.filter((o) => isWebsiteChannel(o.channel)).length,
+  }
+  const steps = ['visits', 'productViews', 'addToCarts', 'checkouts', 'purchases'] as const
+  const tracked = Object.fromEntries(
+    steps.map((key, i) => [key, funnel[key] > 0 || !steps.slice(i + 1).some((later) => funnel[later] > 0)]),
+  ) as FunnelView['tracked']
+
   return {
     range,
-    funnel: {
-      visits: total('visits'),
-      productViews: total('productViews'),
-      addToCarts: total('addToCarts'),
-      checkouts: total('checkouts'),
-      purchases: total('purchases') || orders.length,
-    },
+    funnel,
+    tracked,
+    purchasesFrom: ga4Purchases > 0 ? 'ga4' : 'orders',
     abandoned: input.abandoned,
     customers: { new: orders.length - returning, returning },
     states: [...stateMap.entries()]

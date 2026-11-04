@@ -21,6 +21,15 @@ const STYLE = `
 .fun-track { height: 12px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
 .fun-fill { height: 100%; min-width: 4px; border-radius: 99px; background: linear-gradient(90deg, var(--chart-1), var(--chart-1-light)); }
 .fun-step.is-drop .fun-fill { background: var(--warn); }
+.fun-step.is-untracked .fun-step-name { color: var(--muted); }
+.fun-step.is-untracked .fun-track { background: repeating-linear-gradient(135deg, var(--surface-2) 0 8px, transparent 8px 14px); border: 1px dashed var(--border); }
+.fun-step.is-untracked .fun-fill { display: none; }
+.fun-untracked { font-size: 13px; color: var(--faint); font-style: italic; }
+.fun-note { margin: 14px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; line-height: 1.5; }
+.fun-headline { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0 0 22px; }
+.fun-headline div { display: flex; flex-direction: column; }
+.fun-headline dt { font-size: 12px; color: var(--muted); }
+.fun-headline dd { margin: 0; font-size: 22px; font-weight: 600; color: var(--ink); }
 .fun-sentence { margin: 20px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; }
 .fun-stats { display: flex; flex-direction: column; gap: 16px; margin: 0; }
 .fun-stat { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border-soft); }
@@ -47,7 +56,7 @@ function stepConversion(count, prev, prevNoun) {
 
 // ---------- Funnel ----------
 
-function funnelCard(f) {
+function funnelCard(f, tracked = {}, purchasesFrom = 'ga4') {
   if (!f || !(f.visits > 0)) {
     return notConnected({
       title: 'Shopping funnel',
@@ -56,13 +65,18 @@ function funnelCard(f) {
     })
   }
   const counts = STEPS.map((s) => (isNum(f[s.key]) ? f[s.key] : 0))
+  // A step is untracked when GA4 isn't receiving that event: it reads 0 while a later step has activity.
+  const isTracked = STEPS.map((s) => tracked[s.key] !== false)
+  const measured = STEPS.map((_, i) => i).filter((i) => isTracked[i])
+  const prevMeasured = (i) => [...measured].reverse().find((j) => j < i)
 
-  // Biggest drop-off: the step that keeps the smallest share of the step before it.
+  // Biggest drop-off, only between steps that are actually measured.
   let drop = -1
   let worst = Infinity
-  for (let i = 1; i < counts.length; i++) {
-    if (!(counts[i - 1] > 0)) continue
-    const rate = counts[i] / counts[i - 1]
+  for (const i of measured) {
+    const p = prevMeasured(i)
+    if (p === undefined || !(counts[p] > 0)) continue
+    const rate = counts[i] / counts[p]
     if (rate < worst) {
       worst = rate
       drop = i
@@ -71,8 +85,18 @@ function funnelCard(f) {
 
   const items = STEPS.map((s, i) => {
     const count = counts[i]
+    if (!isTracked[i]) {
+      return `<li class="fun-step is-untracked">
+  <div class="fun-step-top">
+    <span class="fun-step-name">${escapeHtml(s.label)}</span>
+    <span class="fun-untracked">Not tracked yet</span>
+  </div>
+  <div class="fun-track"></div>
+</li>`
+    }
+    const p = prevMeasured(i)
     const width = Math.max(0, Math.min(100, (count / counts[0]) * 100))
-    const conv = i ? stepConversion(count, counts[i - 1], STEPS[i - 1].noun) : 'Everyone who reached the site'
+    const conv = p === undefined ? 'Everyone who reached the site' : stepConversion(count, counts[p], STEPS[p].noun)
     const isDrop = i === drop
     return `<li class="fun-step${isDrop ? ' is-drop' : ''}">
   <div class="fun-step-top">
@@ -83,19 +107,39 @@ function funnelCard(f) {
 </li>`
   }).join('')
 
+  const p = drop > 0 ? prevMeasured(drop) : undefined
   const sentence =
-    drop > 0
-      ? `<p class="fun-sentence">Most people leave between ${escapeHtml(STEPS[drop - 1].label)} and ${escapeHtml(STEPS[drop].label)}: ${escapeHtml(
-          stepConversion(counts[drop], counts[drop - 1], STEPS[drop - 1].noun),
-        )} move on.</p>`
+    drop > 0 && p !== undefined
+      ? `<p class="fun-sentence">The biggest loss is between ${escapeHtml(STEPS[p].label)} and ${escapeHtml(STEPS[drop].label)}: ${escapeHtml(
+          stepConversion(counts[drop], counts[p], STEPS[p].noun),
+        )} get there.</p>`
       : ''
 
-  const overall = counts[4] > 0 ? `${num(counts[4])} purchase${counts[4] === 1 ? '' : 's'} from ${num(counts[0])} visits` : `${num(counts[0])} visits, no purchases yet`
+  const missing = STEPS.filter((_, i) => !isTracked[i]).map((s) => s.label.toLowerCase())
+  const notes = []
+  if (missing.length) {
+    notes.push(
+      `Google Analytics isn’t receiving ${escapeHtml(missing.join(' or '))} events from the site yet, so ${missing.length === 1 ? 'that step is' : 'those steps are'} left out instead of showing a false drop to zero.`,
+    )
+  }
+  if (purchasesFrom === 'orders') notes.push('Purchases are website orders from Shopify (Etsy, eBay and in-person sales aren’t part of this funnel).')
+  const note = notes.length ? `<p class="fun-note">${notes.join(' ')}</p>` : ''
+
+  const visitToBuy = counts[0] > 0 ? (counts[4] / counts[0]) * 100 : null
+  const viewToBuy = isTracked[1] && counts[1] > 0 ? (counts[4] / counts[1]) * 100 : null
+  const fmt = (v) => (v == null ? '—' : `${v.toFixed(v < 1 ? 2 : 1)}%`)
+  const headline = `<dl class="fun-headline">
+  <div><dt>Visits</dt><dd>${num(counts[0])}</dd></div>
+  <div><dt>Purchases</dt><dd>${num(counts[4])}</dd></div>
+  <div><dt>Visit → purchase</dt><dd>${fmt(visitToBuy)}</dd></div>
+  <div><dt>Product view → purchase</dt><dd>${fmt(viewToBuy)}</dd></div>
+</dl>`
+
   return card({
     title: 'Shopping funnel',
-    subtitle: `How far shoppers get · ${overall}`,
+    subtitle: 'How far website shoppers get, from first visit to order',
     className: 'col-8',
-    body: `<ol class="fun-steps">${items}</ol>${sentence}`,
+    body: `${headline}<ol class="fun-steps">${items}</ol>${sentence}${note}`,
   })
 }
 
@@ -141,7 +185,7 @@ export async function render(root, ctx) {
   const regions = (data.regions ?? []).filter((r) => r.sessions > 0).slice(0, 8)
 
   root.innerHTML = [
-    funnelCard(data.funnel),
+    funnelCard(data.funnel, data.tracked, data.purchasesFrom),
     abandonedCard(data.abandoned),
     card({
       title: 'New vs returning',

@@ -24,10 +24,11 @@
         } catch (e) {}
       })()
     </script>
-    <link rel="stylesheet" href="/dashboard/styles.css?v=2" />
+    <link rel="stylesheet" href="/dashboard/styles.css?v=3" />
   </head>
   <body>
     <div id="progress" class="progress" aria-hidden="true"><span class="progress-fill"></span></div>
+    <aside id="sync-card" class="sync-card" role="status" aria-live="polite" hidden></aside>
 
     <section id="login-view" class="auth hidden">
       <div class="auth-card card">
@@ -127,6 +128,6 @@
     </div>
 
     <script src="/dashboard/vendor/apexcharts.js"></script>
-    <script type="module" src="/dashboard/app.js?v=2"></script>
+    <script type="module" src="/dashboard/app.js?v=3"></script>
   </body>
 </html>
