@@ -1,10 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import {
+  DEFAULT_MAX_DAYS,
+  DEFAULT_MIN_DAYS,
+  DEFAULT_MIN_VISITORS_PER_ARM,
   FUNNEL_EVENT_KINDS,
   type ArmExposureCounts,
   type ArmResults,
   type AuditAction,
   type AuditEntry,
+  type DailyCountRow,
   type Experiment,
   type ExperimentOrderRow,
   type ExperimentPatch,
@@ -14,6 +18,8 @@ import {
   type FunnelEventKind,
   type FunnelEventRow,
   type NewExperiment,
+  type RateMetric,
+  type VisitorRevenue,
 } from './types.js'
 
 /** What the Shopify order sync needs: optional, so the sync works without experiments. */
@@ -43,6 +49,13 @@ export interface ExperimentStore extends ExperimentOrderSink {
   /** Deduped by `dedupeKey`. Returns rows written. */
   recordEvents(rows: FunnelEventRow[]): Promise<number>
   results(exp: Experiment): Promise<ExperimentResults>
+  /** Per arm, the summed order revenue of each exposed (non-forced) visitor who bought in the window. */
+  visitorRevenue(exp: Experiment): Promise<VisitorRevenue>
+  /**
+   * Per arm and UTC day: new non-forced visitors (by first exposure) and new converters on `metric`
+   * (by their first qualifying event or order after exposure). Days with neither are omitted.
+   */
+  dailyCounts(exp: Experiment, metric: RateMetric): Promise<DailyCountRow[]>
 }
 
 export class ExperimentKeyTakenError extends Error {
@@ -139,18 +152,77 @@ CREATE TABLE IF NOT EXISTS experiment_audit (
   at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS experiment_audit_experiment_idx ON experiment_audit (experiment_id, at DESC);
+
+-- Phase 2 and 3 (docs/EXPERIMENTS_CONTRACT.md).
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS paths text[] NOT NULL DEFAULT '{}';
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS min_visitors_per_arm integer NOT NULL DEFAULT 1000;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS min_days smallint NOT NULL DEFAULT 14;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS max_days smallint NOT NULL DEFAULT 42;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS pr_number integer;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS pr_url text;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS branch text;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS merge_sha text;
+ALTER TABLE experiments ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'dashboard';
+CREATE INDEX IF NOT EXISTS experiments_pr_number_idx ON experiments (pr_number);
 `
 
 const EXPERIMENT_COLUMNS = `id, key, name, hypothesis, status, seed, traffic_pct, primary_metric, winner_variant,
-  started_at, paused_at, ended_at, created_by, created_at, updated_at`
+  started_at, paused_at, ended_at, created_by, created_at, updated_at,
+  paths, min_visitors_per_arm, min_days, max_days, pr_number, pr_url, branch, merge_sha, source`
 
-const PATCH_COLUMNS: Record<keyof ExperimentPatch, string> = {
+/** Columns on `experiments`; `variants` live in their own table. */
+const PATCH_COLUMNS: Record<Exclude<keyof ExperimentPatch, 'variants'>, string> = {
   status: 'status',
   trafficPct: 'traffic_pct',
   winnerVariant: 'winner_variant',
   startedAt: 'started_at',
   pausedAt: 'paused_at',
   endedAt: 'ended_at',
+  name: 'name',
+  hypothesis: 'hypothesis',
+  primaryMetric: 'primary_metric',
+  paths: 'paths',
+  minVisitorsPerArm: 'min_visitors_per_arm',
+  minDays: 'min_days',
+  maxDays: 'max_days',
+  prNumber: 'pr_number',
+  prUrl: 'pr_url',
+  branch: 'branch',
+  mergeSha: 'merge_sha',
+}
+
+/** Conversion sources for the daily series, by metric (whitelisted SQL, never user input). */
+function conversionSql(metric: RateMetric): string {
+  if (metric === 'purchase') {
+    return `SELECT x.variant_key, x.visitor_id, MIN(o.ordered_at) AS at
+       FROM x JOIN experiment_orders o ON o.visitor_id = x.visitor_id
+         AND o.ordered_at >= x.first_exposed_at
+         AND ($2::timestamptz IS NULL OR o.ordered_at <= $2::timestamptz)
+       GROUP BY 1, 2`
+  }
+  return `SELECT x.variant_key, x.visitor_id, MIN(e.occurred_at) AS at
+       FROM x JOIN experiment_events e ON e.visitor_id = x.visitor_id AND e.kind = $3
+         AND e.occurred_at >= x.first_exposed_at
+         AND ($2::timestamptz IS NULL OR e.occurred_at <= $2::timestamptz)
+       GROUP BY 1, 2`
+}
+
+function utcDate(at: string | Date): string {
+  return (at instanceof Date ? at : new Date(at)).toISOString().slice(0, 10)
+}
+
+function withDefaults(input: NewExperiment) {
+  return {
+    paths: input.paths ?? [],
+    minVisitorsPerArm: input.minVisitorsPerArm ?? DEFAULT_MIN_VISITORS_PER_ARM,
+    minDays: input.minDays ?? DEFAULT_MIN_DAYS,
+    maxDays: input.maxDays ?? DEFAULT_MAX_DAYS,
+    prNumber: input.prNumber ?? null,
+    prUrl: input.prUrl ?? null,
+    branch: input.branch ?? null,
+    mergeSha: input.mergeSha ?? null,
+    source: input.source ?? 'dashboard',
+  }
 }
 
 function iso(value: unknown): string | null {
@@ -217,6 +289,15 @@ export function createPgExperimentStore(db: Queryable): ExperimentStore {
       createdAt: iso(row.created_at)!,
       updatedAt: iso(row.updated_at)!,
       variants: variants.get(String(row.id)) ?? [],
+      paths: Array.isArray(row.paths) ? row.paths.map(String) : [],
+      minVisitorsPerArm: row.min_visitors_per_arm == null ? DEFAULT_MIN_VISITORS_PER_ARM : Number(row.min_visitors_per_arm),
+      minDays: row.min_days == null ? DEFAULT_MIN_DAYS : Number(row.min_days),
+      maxDays: row.max_days == null ? DEFAULT_MAX_DAYS : Number(row.max_days),
+      prNumber: row.pr_number == null ? null : Number(row.pr_number),
+      prUrl: row.pr_url == null ? null : String(row.pr_url),
+      branch: row.branch == null ? null : String(row.branch),
+      mergeSha: row.merge_sha == null ? null : String(row.merge_sha),
+      source: row.source === 'github' ? 'github' : 'dashboard',
     }))
   }
 
@@ -246,11 +327,13 @@ export function createPgExperimentStore(db: Queryable): ExperimentStore {
 
     async create(input) {
       const id = randomUUID()
+      const extra = withDefaults(input)
       // One statement (the pool hands each query its own client, so no BEGIN/COMMIT).
       const { rows } = await db.query(
         `WITH e AS (
-           INSERT INTO experiments (id, key, name, hypothesis, seed, traffic_pct, primary_metric, created_by)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           INSERT INTO experiments (id, key, name, hypothesis, seed, traffic_pct, primary_metric, created_by,
+             paths, min_visitors_per_arm, min_days, max_days, pr_number, pr_url, branch, merge_sha, source)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $13::text[], $14, $15, $16, $17, $18, $19, $20, $21)
            ON CONFLICT (key) DO NOTHING RETURNING id
          )
          INSERT INTO experiment_variants (experiment_id, key, name, weight, is_control, position)
@@ -271,6 +354,15 @@ export function createPgExperimentStore(db: Queryable): ExperimentStore {
           input.variants.map((v) => v.name),
           input.variants.map((v) => v.weight),
           input.variants.map((v) => v.isControl),
+          extra.paths,
+          extra.minVisitorsPerArm,
+          extra.minDays,
+          extra.maxDays,
+          extra.prNumber,
+          extra.prUrl,
+          extra.branch,
+          extra.mergeSha,
+          extra.source,
         ],
       )
       if (!rows.length) throw new ExperimentKeyTakenError(input.key)
@@ -278,9 +370,32 @@ export function createPgExperimentStore(db: Queryable): ExperimentStore {
     },
 
     async update(id, patch) {
+      if (patch.variants) {
+        // Upsert the new arms and drop the rest in one statement (disjoint rows, so no ordering issue).
+        await db.query(
+          `WITH up AS (
+             INSERT INTO experiment_variants (experiment_id, key, name, weight, is_control, position)
+             SELECT $1::uuid, v.key, v.name, v.weight, v.is_control, v.position - 1
+             FROM unnest($2::text[], $3::text[], $4::int[], $5::boolean[])
+               WITH ORDINALITY AS v(key, name, weight, is_control, position)
+             ON CONFLICT (experiment_id, key) DO UPDATE SET
+               name = EXCLUDED.name, weight = EXCLUDED.weight, is_control = EXCLUDED.is_control,
+               position = EXCLUDED.position
+             RETURNING key
+           )
+           DELETE FROM experiment_variants WHERE experiment_id = $1::uuid AND NOT (key = ANY($2::text[]))`,
+          [
+            id,
+            patch.variants.map((v) => v.key),
+            patch.variants.map((v) => v.name),
+            patch.variants.map((v) => v.weight),
+            patch.variants.map((v) => v.isControl),
+          ],
+        )
+      }
       const sets: string[] = []
       const params: unknown[] = [id]
-      for (const [field, column] of Object.entries(PATCH_COLUMNS) as [keyof ExperimentPatch, string][]) {
+      for (const [field, column] of Object.entries(PATCH_COLUMNS) as [Exclude<keyof ExperimentPatch, 'variants'>, string][]) {
         if (!(field in patch)) continue
         params.push(patch[field])
         sets.push(`${column} = $${params.length}`)
@@ -466,7 +581,63 @@ export function createPgExperimentStore(db: Queryable): ExperimentStore {
 
       return { key: exp.key, status: exp.status, startedAt: exp.startedAt, endedAt, arms: [...arms.values()] }
     },
+
+    async visitorRevenue(exp) {
+      const { rows } = await db.query(
+        `SELECT x.variant_key, SUM(o.revenue)::float8 AS revenue
+         FROM experiment_exposures x
+         JOIN experiment_orders o ON o.visitor_id = x.visitor_id
+           AND o.ordered_at >= x.first_exposed_at
+           AND ($2::timestamptz IS NULL OR o.ordered_at <= $2::timestamptz)
+         WHERE x.experiment_id = $1 AND NOT x.forced
+         GROUP BY x.variant_key, x.visitor_id`,
+        [exp.id, exp.endedAt],
+      )
+      const out: VisitorRevenue = Object.fromEntries(exp.variants.map((v) => [v.key, [] as number[]]))
+      for (const row of rows) (out[String(row.variant_key)] ??= []).push(round2(Number(row.revenue)))
+      return out
+    },
+
+    async dailyCounts(exp, metric) {
+      const params: unknown[] = [exp.id, exp.endedAt]
+      if (metric !== 'purchase') params.push(metric)
+      const { rows } = await db.query(
+        `WITH x AS (
+           SELECT visitor_id, variant_key, first_exposed_at FROM experiment_exposures
+           WHERE experiment_id = $1::uuid AND NOT forced
+         ), conv AS (${conversionSql(metric)})
+         SELECT variant_key, to_char((first_exposed_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS date,
+                COUNT(*)::int AS visitors, 0 AS conversions
+         FROM x GROUP BY 1, 2
+         UNION ALL
+         SELECT variant_key, to_char((at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD') AS date,
+                0 AS visitors, COUNT(*)::int AS conversions
+         FROM conv GROUP BY 1, 2`,
+        params,
+      )
+      return mergeDaily(
+        rows.map((row) => ({
+          date: String(row.date),
+          variant: String(row.variant_key),
+          visitors: Number(row.visitors),
+          conversions: Number(row.conversions),
+        })),
+      )
+    },
   }
+}
+
+function mergeDaily(rows: DailyCountRow[]): DailyCountRow[] {
+  const byKey = new Map<string, DailyCountRow>()
+  for (const r of rows) {
+    const k = `${r.date}|${r.variant}`
+    const existing = byKey.get(k)
+    if (existing) {
+      existing.visitors += r.visitors
+      existing.conversions += r.conversions
+    } else byKey.set(k, { ...r })
+  }
+  return [...byKey.values()].sort((a, b) => a.date.localeCompare(b.date) || a.variant.localeCompare(b.variant))
 }
 
 /** In-memory store for tests and local dev. Same semantics as the Postgres store. */
@@ -480,7 +651,7 @@ export function createMemoryExperimentStore(): ExperimentStore & {
   const events: FunnelEventRow[] = []
   const orders: ExperimentOrderRow[] = []
   let auditSeq = 0
-  const clone = (e: Experiment): Experiment => ({ ...e, variants: e.variants.map((v) => ({ ...v })) })
+  const clone = (e: Experiment): Experiment => ({ ...e, variants: e.variants.map((v) => ({ ...v })), paths: [...e.paths] })
 
   return {
     _rows: { exposures, events, orders },
@@ -523,7 +694,9 @@ export function createMemoryExperimentStore(): ExperimentStore & {
         createdAt: now,
         updatedAt: now,
         variants: input.variants.map((v) => ({ ...v })),
+        ...withDefaults(input),
       }
+      exp.paths = [...exp.paths]
       experiments.push(exp)
       return clone(exp)
     },
@@ -532,6 +705,8 @@ export function createMemoryExperimentStore(): ExperimentStore & {
       const exp = experiments.find((e) => e.id === id)
       if (!exp) throw new Error('Experiment not found')
       Object.assign(exp, patch, { updatedAt: new Date().toISOString() })
+      if (patch.variants) exp.variants = patch.variants.map((v) => ({ ...v }))
+      if (patch.paths) exp.paths = [...patch.paths]
       return clone(exp)
     },
 
@@ -644,6 +819,40 @@ export function createMemoryExperimentStore(): ExperimentStore & {
       }
 
       return { key: exp.key, status: exp.status, startedAt: exp.startedAt, endedAt: exp.endedAt, arms: [...arms.values()] }
+    },
+
+    async visitorRevenue(exp) {
+      const out: VisitorRevenue = Object.fromEntries(exp.variants.map((v) => [v.key, [] as number[]]))
+      const endMs = exp.endedAt ? Date.parse(exp.endedAt) : Infinity
+      for (const x of exposures) {
+        if (x.experimentId !== exp.id || x.forced) continue
+        const from = Date.parse(x.firstExposedAt)
+        const matched = orders.filter((o) => {
+          const t = Date.parse(o.orderedAt)
+          return o.visitorId === x.visitorId && t >= from && t <= endMs
+        })
+        if (matched.length) (out[x.variantKey] ??= []).push(round2(matched.reduce((s, o) => s + o.revenue, 0)))
+      }
+      return out
+    },
+
+    async dailyCounts(exp, metric) {
+      const endMs = exp.endedAt ? Date.parse(exp.endedAt) : Infinity
+      const rows: DailyCountRow[] = []
+      for (const x of exposures) {
+        if (x.experimentId !== exp.id || x.forced) continue
+        rows.push({ date: utcDate(x.firstExposedAt), variant: x.variantKey, visitors: 1, conversions: 0 })
+        const from = Date.parse(x.firstExposedAt)
+        const times =
+          metric === 'purchase'
+            ? orders.filter((o) => o.visitorId === x.visitorId).map((o) => Date.parse(o.orderedAt))
+            : events.filter((e) => e.visitorId === x.visitorId && e.kind === metric).map((e) => Date.parse(e.occurredAt))
+        const inWindow = times.filter((t) => t >= from && t <= endMs)
+        if (inWindow.length) {
+          rows.push({ date: utcDate(new Date(Math.min(...inWindow))), variant: x.variantKey, visitors: 0, conversions: 1 })
+        }
+      }
+      return mergeDaily(rows)
     },
   }
 }

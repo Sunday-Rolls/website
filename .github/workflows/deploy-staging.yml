@@ -205,7 +205,7 @@ jobs:
               issue_number: context.issue.number,
             })
             const existing = comments.find((comment) =>
-              comment.body?.includes('sunday-rolls.github.io/website/previews/'),
+              comment.body?.startsWith('## Preview'),
             )
             if (existing) {
               await github.rest.issues.updateComment({

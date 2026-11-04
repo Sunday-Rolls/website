@@ -15,9 +15,12 @@ import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
 import { SocialsBanner } from '@/components/home/SocialsBanner'
 import { StoryBanner } from '@/components/home/StoryBanner'
 import { ValueStrip } from '@/components/ui/ValueStrip'
+import { useVariant } from '@/components/experiments'
 
 export function HomePage() {
   const content = usePageContent('home')
+  // A/A check: both arms render the same page. Logs the home-page exposure that proves the pipeline.
+  useVariant('aa-check')
   const [products, setProducts] = useState<ShopifyProduct[]>(placeholderProducts)
 
   useEffect(() => {
