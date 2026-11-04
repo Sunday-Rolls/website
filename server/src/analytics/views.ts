@@ -54,6 +54,32 @@ function daysInMonth(year: number, month1: number): number {
   return new Date(Date.UTC(year, month1, 0)).getUTCDate()
 }
 
+/**
+ * Customers who ordered in the range, by email: new when their first-ever order is in the range,
+ * returning when they ordered before it. Orders without an email (Etsy, eBay, Sales Tracker rows)
+ * can't be matched to a person, so they are counted as `unknownOrders` instead of guessed.
+ */
+export function customerSplit(allOrders: Order[], range: Range): { new: number; returning: number; unknownOrders: number } {
+  const first = new Map<string, string>()
+  for (const o of preferLiveOrders(allOrders)) {
+    const email = o.customerEmail?.trim().toLowerCase()
+    if (!email) continue
+    const day = storeDay(o.orderedAt)
+    if (!first.has(email) || day < first.get(email)!) first.set(email, day)
+  }
+  const inRangeOrders = liveOrdersIn(allOrders, range)
+  const emails = new Set<string>()
+  let unknownOrders = 0
+  for (const o of inRangeOrders) {
+    const email = o.customerEmail?.trim().toLowerCase()
+    if (email) emails.add(email)
+    else unknownOrders += 1
+  }
+  let fresh = 0
+  for (const email of emails) if (first.get(email)! >= range.start) fresh += 1
+  return { new: fresh, returning: emails.size - fresh, unknownOrders }
+}
+
 // ---------------------------------------------------------------- overview extras
 
 export type MerView = { revenue: number; adSpend: number; mer: number | null }
@@ -304,12 +330,19 @@ export type MarketingView = {
   revenue: number
   adSpend: number
   mer: number | null
+  /** First-time customers by email (see customerSplit). */
   newCustomers: number
+  /** Orders in range with no customer email, so not counted as new or returning. */
+  unknownCustomerOrders: number
+  /** Website orders in range with no email; CAC is null while this is above 0. */
+  websiteOrdersWithoutEmail: number
   newCustomerCac: number | null
   platforms: RoasPlatform[]
   spendTrend: Array<{ date: string; spend: number; revenue: number }>
   sources: Array<{ source: string; visits: number; share: number }>
   keywords: Array<{ query: string; visits: number }>
+  /** Search Console reports one fixed window, which may not match the selected range. */
+  keywordsPeriod: { start: string; end: string } | null
   connected: { googleAds: boolean; meta: boolean; etsyAds: boolean }
 }
 
@@ -323,7 +356,9 @@ export function buildMarketingView(input: {
   const { range } = input
   const { revenue, adSpend, mer } = buildMer(input)
   const orders = liveOrdersIn(input.orders, range)
-  const newCustomers = orders.filter((o) => o.isReturning === false).length
+  const customers = customerSplit(input.orders, range)
+  const newCustomers = customers.new
+  const websiteOrdersWithoutEmail = orders.filter((o) => isWebsiteChannel(o.channel) && !o.customerEmail?.trim()).length
 
   const trend = new Map(daysOf(range).map((d) => [d, { spend: 0, revenue: 0 }]))
   for (const r of adSpendIn(input.adSpend, range)) {
@@ -342,11 +377,20 @@ export function buildMarketingView(input: {
     adSpend,
     mer,
     newCustomers,
-    newCustomerCac: newCustomers > 0 ? adSpend / newCustomers : null,
+    unknownCustomerOrders: customers.unknownOrders,
+    // Ads drive website orders; if some of those lack an email, new customers are undercounted and
+    // spend ÷ new customers would be inflated, so leave it blank rather than mislead.
+    newCustomerCac: newCustomers > 0 && websiteOrdersWithoutEmail === 0 ? adSpend / newCustomers : null,
+    websiteOrdersWithoutEmail,
     platforms: buildRoas({ range, orders: input.orders, adSpend: input.adSpend }),
     spendTrend: [...trend.entries()].map(([date, v]) => ({ date, ...v })),
     sources: trafficSourceBreakdown(input.traffic.filter((t) => t.date >= range.start && t.date <= range.end)),
     keywords: topSearchKeywords(input.keywords, range),
+    keywordsPeriod: (() => {
+      const k = input.keywords.filter((x) => x.periodEnd >= range.start && x.periodStart <= range.end)
+      if (!k.length) return null
+      return { start: k.map((x) => x.periodStart).sort()[0], end: k.map((x) => x.periodEnd).sort().at(-1)! }
+    })(),
     connected: {
       googleAds: platformsSeen.some((p) => /google/i.test(p)),
       meta: platformsSeen.some((p) => /meta|facebook|instagram/i.test(p)),
@@ -365,10 +409,13 @@ export type FunnelView = {
    * GA4 isn't receiving that event (e.g. add_to_cart), so it is "not tracked", not a drop-off.
    */
   tracked: { visits: boolean; productViews: boolean; addToCarts: boolean; checkouts: boolean; purchases: boolean }
+  /** Visits, product views and website orders per day (ranges up to 31 days) or per 7-day bucket. */
+  trend: Array<{ start: string; end: string; visits: number; productViews: number; orders: number }>
   /** Where `purchases` came from: GA4 purchase events, or website orders when GA4 has none. */
   purchasesFrom: 'ga4' | 'orders'
   abandoned: AbandonedCartStats | null
-  customers: { new: number; returning: number }
+  /** Unique customers by email; orders without an email are `unknownOrders`. */
+  customers: { new: number; returning: number; unknownOrders: number }
   states: Array<{ state: string; orders: number; revenue: number }>
   regions: Array<{ region: string; sessions: number }>
 }
@@ -401,8 +448,6 @@ export function buildFunnelView(input: {
       regionMap.set(region, (regionMap.get(region) ?? 0) + n)
     }
   }
-  const returning = orders.filter((o) => o.isReturning).length
-
   const ga4Purchases = total('purchases')
   const funnel = {
     visits: total('visits'),
@@ -411,18 +456,39 @@ export function buildFunnelView(input: {
     checkouts: total('checkouts'),
     purchases: ga4Purchases || orders.filter((o) => isWebsiteChannel(o.channel)).length,
   }
+  // A funnel only narrows, so a step counting fewer than a later step isn't being measured
+  // (GA4 sees a stray add_to_cart while orders come from Shopify). Zeros with nothing after are real.
   const steps = ['visits', 'productViews', 'addToCarts', 'checkouts', 'purchases'] as const
   const tracked = Object.fromEntries(
-    steps.map((key, i) => [key, funnel[key] > 0 || !steps.slice(i + 1).some((later) => funnel[later] > 0)]),
+    steps.map((key, i) => [key, steps.slice(i + 1).every((later) => funnel[key] >= funnel[later])]),
   ) as FunnelView['tracked']
+
+  const websiteOrders = orders.filter((o) => isWebsiteChannel(o.channel))
+  const allDays = daysOf(range)
+  const bucket = allDays.length <= 31 ? 1 : 7
+  const trend: FunnelView['trend'] = []
+  for (let i = 0; i < allDays.length; i += bucket) {
+    const span = allDays.slice(i, i + bucket)
+    const start = span[0]
+    const end = span[span.length - 1]
+    const rows = traffic.filter((t) => t.date >= start && t.date <= end)
+    trend.push({
+      start,
+      end,
+      visits: sum(rows.map((t) => t.visits)),
+      productViews: sum(rows.map((t) => t.productViews)),
+      orders: websiteOrders.filter((o) => inRange(o.orderedAt, start, end)).length,
+    })
+  }
 
   return {
     range,
     funnel,
     tracked,
+    trend,
     purchasesFrom: ga4Purchases > 0 ? 'ga4' : 'orders',
     abandoned: input.abandoned,
-    customers: { new: orders.length - returning, returning },
+    customers: customerSplit(input.orders, range),
     states: [...stateMap.entries()]
       .map(([state, s]) => ({ state, ...s }))
       .sort((a, b) => b.orders - a.orders || b.revenue - a.revenue),

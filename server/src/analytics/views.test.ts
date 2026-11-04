@@ -190,10 +190,21 @@ describe('buildProductsView', () => {
 describe('buildMarketingView', () => {
   it('computes new-customer CAC and connection flags', () => {
     const orders = [
-      order('2026-10-02', 100),
-      order('2026-10-03', 100),
-      order('2026-10-04', 100, { isReturning: true }),
+      order('2026-10-02', 100, { customerEmail: 'a@x.test' }),
+      order('2026-10-03', 100, { customerEmail: 'B@x.test' }),
+      order('2026-10-04', 100, { customerEmail: 'b@x.test' }),
+      order('2026-09-20', 100, { customerEmail: 'c@x.test' }),
+      order('2026-10-05', 100, { customerEmail: 'c@x.test' }),
+      order('2026-10-06', 100, { channel: 'etsy', source: 'sales-tracker' }),
     ]
+    const noEmail = buildMarketingView({
+      range,
+      orders: [...orders, order('2026-10-07', 100, { channel: 'squarespace', source: 'sales-tracker' })],
+      adSpend: [spend('2026-10-02', 'Google Ads', 60)],
+      traffic: [],
+      keywords: [],
+    })
+    expect(noEmail).toMatchObject({ websiteOrdersWithoutEmail: 1, newCustomerCac: null })
     const view = buildMarketingView({
       range,
       orders,
@@ -201,7 +212,9 @@ describe('buildMarketingView', () => {
       traffic: [traffic('2026-10-02')],
       keywords: [{ query: 'golf roller', visits: 9, periodStart: '2026-10-01', periodEnd: '2026-10-31' }],
     })
-    expect(view).toMatchObject({ revenue: 300, adSpend: 60, mer: 5, newCustomers: 2, newCustomerCac: 30 })
+    // a and b are first-time (b twice, counted once); c ordered before the range; the Etsy order has no email.
+    expect(view).toMatchObject({ revenue: 500, adSpend: 60, newCustomers: 2, unknownCustomerOrders: 1, newCustomerCac: 30 })
+    expect(view.keywordsPeriod).toEqual({ start: '2026-10-01', end: '2026-10-31' })
     expect(view.connected).toEqual({ googleAds: true, meta: false, etsyAds: true })
     expect(view.spendTrend.find((d) => d.date === '2026-10-02')).toEqual({ date: '2026-10-02', spend: 60, revenue: 100 })
     expect(view.sources[0]).toMatchObject({ source: 'google', visits: 60 })
@@ -212,7 +225,7 @@ describe('buildMarketingView', () => {
   it('has a null CAC without new customers', () => {
     const view = buildMarketingView({
       range,
-      orders: [order('2026-10-04', 100, { isReturning: true })],
+      orders: [order('2026-09-04', 100, { customerEmail: 'r@x.test' }), order('2026-10-04', 100, { customerEmail: 'r@x.test' })],
       adSpend: [spend('2026-10-02', 'Google Ads', 60)],
       traffic: [],
       keywords: [],
@@ -226,12 +239,16 @@ describe('buildFunnelView', () => {
   it('sums the funnel, falls back to order count for purchases, and groups states and regions', () => {
     const view = buildFunnelView({
       range,
-      orders: [order('2026-10-02', 50, { state: 'TX' }), order('2026-10-03', 70, { state: 'TX', isReturning: true })],
+      orders: [
+        order('2026-09-02', 20, { customerEmail: 'old@x.test' }),
+        order('2026-10-02', 50, { state: 'TX', customerEmail: 'new@x.test' }),
+        order('2026-10-03', 70, { state: 'TX', customerEmail: 'old@x.test' }),
+      ],
       traffic: [traffic('2026-10-02'), traffic('2026-10-03')],
       abandoned: null,
     })
     expect(view.funnel).toEqual({ visits: 200, productViews: 100, addToCarts: 20, checkouts: 10, purchases: 2 })
-    expect(view.customers).toEqual({ new: 1, returning: 1 })
+    expect(view.customers).toEqual({ new: 1, returning: 1, unknownOrders: 0 })
     expect(view.states).toEqual([{ state: 'TX', orders: 2, revenue: 120 }])
     expect(view.regions).toEqual([{ region: 'Texas', sessions: 60 }, { region: 'Ohio', sessions: 20 }])
     expect(view.purchasesFrom).toBe('orders')
@@ -251,6 +268,29 @@ describe('buildFunnelView', () => {
     })
     expect(view.funnel.purchases).toBe(1)
     expect(view.tracked).toEqual({ visits: true, productViews: true, addToCarts: false, checkouts: false, purchases: true })
+  })
+
+  it('ignores a stray GA4 event count below a later step (1 add-to-cart vs website orders)', () => {
+    const view = buildFunnelView({
+      range,
+      orders: [order('2026-10-02', 50, { channel: 'shopify' }), order('2026-10-03', 60, { channel: 'shopify' })],
+      traffic: [traffic('2026-10-02', { addToCarts: 1, checkouts: 0, purchases: 0 })],
+      abandoned: null,
+    })
+    expect(view.tracked).toEqual({ visits: true, productViews: true, addToCarts: false, checkouts: false, purchases: true })
+  })
+
+  it('builds a daily trend of visits and website orders', () => {
+    const view = buildFunnelView({
+      range,
+      orders: [order('2026-10-02', 50, { channel: 'shopify' }), order('2026-10-02', 40, { channel: 'etsy' })],
+      traffic: [traffic('2026-10-02')],
+      abandoned: null,
+    })
+    expect(view.trend).toHaveLength(31)
+    expect(view.trend.find((t) => t.start === '2026-10-02')).toEqual({
+      start: '2026-10-02', end: '2026-10-02', visits: 100, productViews: 50, orders: 1,
+    })
   })
 
   it('treats trailing zeros as real (nobody got that far)', () => {

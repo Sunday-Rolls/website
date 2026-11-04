@@ -125,7 +125,8 @@ function kpis(data, monthName) {
   const opex = statementRow(rows, 'Total operating expenses')
   const net = statementRow(rows, 'Net income')
   const lastYear = data.year - 1
-  const cashAsOf = (data.cashForecast ?? []).filter((r) => isNum(r.endingBalance)).at(-1)?.monthEnd
+  const cashAsOf = k.cashAsOf
+  const through = k.comparedThrough ? `${lastYear} through ${dayLabel(k.comparedThrough)}` : `${lastYear}`
   return [
     kpiCard({
       icon: 'coins',
@@ -135,7 +136,7 @@ function kpis(data, monthName) {
       className: 'col-3',
       hint: [
         revenue ? `${monthName}: ${money(revenue.monthAmount)}` : '',
-        isNum(k.revenueYtd?.previous) && k.revenueYtd.previous > 0 ? `${money(k.revenueYtd.previous)} in all of ${lastYear}` : '',
+        isNum(k.revenueYtd?.previous) && k.revenueYtd.previous > 0 ? `${money(k.revenueYtd.previous)} in ${through}` : '',
       ]
         .filter(Boolean)
         .join(' · '),
@@ -147,7 +148,9 @@ function kpis(data, monthName) {
       delta: k.grossMarginYtd,
       deltaFormat: 'pts',
       className: 'col-3',
-      hint: gross ? `${money(gross.ytdAmount)} gross profit · ${monthName}: ${money(gross.monthAmount)}` : 'Revenue minus the cost of making the product',
+      hint: gross
+        ? `${money(gross.ytdAmount)} gross profit · ${monthName}: ${money(gross.monthAmount)}${k.cogsEstimated ? ' · product cost estimated at $15/unit' : ''}`
+        : 'Revenue minus the cost of making the product',
     }),
     kpiCard({
       icon: 'wallet',
@@ -158,6 +161,7 @@ function kpis(data, monthName) {
       hint: [
         opex ? `After ${money(Math.abs(opex.ytdAmount))} of operating expenses` : '',
         net ? `${monthName}: ${money(net.monthAmount)}` : '',
+        isNum(k.netIncomeYtd?.previous) ? `${money(k.netIncomeYtd.previous)} in ${through}` : '',
       ]
         .filter(Boolean)
         .join(' · '),
@@ -167,7 +171,7 @@ function kpis(data, monthName) {
       label: 'Cash on hand',
       value: money(k.cashOnHand),
       className: 'col-3',
-      hint: cashAsOf ? `From the cash forecast, month ending ${dayLabel(cashAsOf)}` : 'From the cash forecast',
+      hint: cashAsOf ? `Cash forecast balance at the end of ${dayLabel(cashAsOf)}` : 'No completed month in the cash forecast yet',
     }),
   ].join('')
 }

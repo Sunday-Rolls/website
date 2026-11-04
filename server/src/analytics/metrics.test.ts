@@ -67,12 +67,15 @@ describe('buildPnL', () => {
       orders: demo.orders,
       expenses: demo.expenses,
       cashForecast: demo.cashForecast,
+      today: '2026-11-03',
     })
 
     expect(pnl.incomeStatement.some((r) => r.label === 'Total revenue')).toBe(true)
     expect(pnl.incomeStatement.some((r) => r.label === 'Net income')).toBe(true)
     expect(pnl.cashForecast).toHaveLength(5)
-    expect(pnl.kpis.cashOnHand).toBe(30760)
+    // Latest month already ended (Oct 31), not the Jan 2027 forecast.
+    expect(pnl.kpis.cashOnHand).toBe(15280)
+    expect(pnl.kpis.cashAsOf).toBe('2026-10-31')
     expect(pnl.revenueByChannel.length).toBeGreaterThan(0)
     expect(pnl.monthlyRevenueByChannel.every((m) => m.month.startsWith('2026'))).toBe(true)
   })
@@ -100,5 +103,42 @@ describe('buildPnL', () => {
     expect(mismatched.year).toBe(2026)
     expect(total(mismatched)).toBe(total(matched))
     expect(total(mismatched)).toBeGreaterThan(0)
+  })
+})
+
+describe('buildPnL statement math', () => {
+  const o = (day: string, revenue: number, qty = 1) => ({
+    id: day + revenue, externalId: day + revenue, channel: 'etsy', source: 'sales-tracker', orderedAt: day, revenue,
+    fees: 2, shippingCost: 3, marketingCost: 0, state: null, customerEmail: null, isReturning: false, trafficSource: null,
+    lines: [{ productName: 'Roller', productSku: null, category: null, quantity: qty, unitPrice: revenue, lineRevenue: revenue }],
+  })
+  const e = (day: string, category: string, amount: number, bucket: 'cogs' | 'sga' = 'sga') => ({
+    id: day + category, spentAt: day, category, explanation: '', amount, bucket, productLine: null,
+  })
+  const orders = [o('2025-02-01', 100), o('2025-12-01', 900), o('2026-02-01', 200), o('2026-03-01', 300)]
+  const expenses = [
+    e('2026-02-10', 'Manufacturing', 50, 'cogs'),
+    e('2026-03-10', 'Legal Fees', 40),
+    e('2025-02-10', 'Manufacturing', 10, 'cogs'),
+  ]
+  const pnl = (month: string) => buildPnL({ year: 2026, month, orders, expenses, cashForecast: [], today: '2026-06-15' })
+  const row = (p: ReturnType<typeof pnl>, label: string) => p.incomeStatement.find((r) => r.label === label)!
+
+  it('compares YTD with the same window last year, not the whole year', () => {
+    const p = pnl('2026-03')
+    expect(p.kpis.revenueYtd).toMatchObject({ value: 500, previous: 100 })
+    expect(p.kpis.comparedThrough).toBe('2025-06-15')
+    // 2025 through Jun 15: 100 revenue - 10 manufacturing - 2 fees - 3 shipping.
+    expect(p.kpis.netIncomeYtd.previous).toBe(85)
+  })
+
+  it('counts every expense and makes the months add up to the year', () => {
+    const months = Array.from({ length: 12 }, (_, i) => pnl(`2026-${String(i + 1).padStart(2, '0')}`))
+    const ytdNet = row(months[0], 'Net income').ytdAmount
+    expect(months.reduce((t, p) => t + row(p, 'Net income').monthAmount, 0)).toBeCloseTo(ytdNet)
+    // 500 - 50 manufacturing - 4 fees - 6 shipping - 40 legal.
+    expect(ytdNet).toBe(400)
+    expect(row(months[2], 'Legal & other').monthAmount).toBe(-40)
+    expect(months[0].kpis.cogsEstimated).toBe(false)
   })
 })
