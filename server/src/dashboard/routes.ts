@@ -74,6 +74,11 @@ import {
 
 const UI_DIR = join(dirname(fileURLToPath(import.meta.url)), 'ui')
 const requireFromHere = createRequire(import.meta.url)
+/** Changes on every deploy (Railway sets the commit SHA); used in versioned UI asset URLs. */
+const ASSET_VERSION = (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.RAILWAY_DEPLOYMENT_ID || Date.now().toString(36))
+  .replace(/[^a-zA-Z0-9]/g, '')
+  .slice(0, 12)
+const IMMUTABLE = 'public, max-age=31536000, immutable'
 
 export type DashboardDeps = {
   store: AnalyticsStore
@@ -103,20 +108,37 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     return next()
   })
 
-  app.get('/', async (c) => file(c, 'index.html', 'text/html; charset=utf-8'))
+  // index.html points at /dashboard/v/<ASSET_VERSION>/..., so every deploy gets new script and style
+  // URLs. Cloudflare forces a 4-hour browser cache on .js/.css whatever the origin says, and a stale
+  // app.js against a new index.html crashes the page. Relative module imports inherit the prefix.
+  app.get('/', async (c) => {
+    try {
+      const html = (await readFile(join(UI_DIR, 'index.html'), 'utf8'))
+        .replace('href="/dashboard/styles.css"', `href="/dashboard/v/${ASSET_VERSION}/styles.css"`)
+        .replace('src="/dashboard/app.js"', `src="/dashboard/v/${ASSET_VERSION}/app.js"`)
+      return c.body(html, 200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' })
+    } catch {
+      return c.text('Not found', 404)
+    }
+  })
   app.get('/styles.css', async (c) => file(c, 'styles.css', 'text/css; charset=utf-8'))
   app.get('/app.js', async (c) => file(c, 'app.js', 'text/javascript; charset=utf-8'))
+  // Versioned copies: the version segment only busts caches, so any value serves the current file.
+  app.get('/v/:version/styles.css', async (c) => file(c, 'styles.css', 'text/css; charset=utf-8', IMMUTABLE))
+  app.get('/v/:version/app.js', async (c) => file(c, 'app.js', 'text/javascript; charset=utf-8', IMMUTABLE))
   app.get('/logo.svg', async (c) => file(c, 'logo.svg', 'image/svg+xml'))
   app.get('/mark.svg', async (c) => file(c, 'mark.svg', 'image/svg+xml'))
   app.get('/favicon.svg', async (c) => file(c, 'favicon.svg', 'image/svg+xml'))
   app.get('/favicon.png', async (c) => file(c, 'favicon.png', 'image/png'))
   // ES modules for the shell (lib/) and one module per page (pages/). Names are restricted to kebab-case .js.
   for (const dir of ['lib', 'pages'] as const) {
-    app.get(`/${dir}/:name`, async (c) => {
-      const name = c.req.param('name')
-      if (!/^[a-z0-9-]+\.js$/.test(name)) return c.text('Not found', 404)
-      return file(c, `${dir}/${name}`, 'text/javascript; charset=utf-8')
-    })
+    for (const [prefix, cache] of [['', 'no-cache'], ['/v/:version', IMMUTABLE]] as const) {
+      app.get(`${prefix}/${dir}/:name`, async (c) => {
+        const name = c.req.param('name')
+        if (!/^[a-z0-9-]+\.js$/.test(name)) return c.text('Not found', 404)
+        return file(c, `${dir}/${name}`, 'text/javascript; charset=utf-8', cache)
+      })
+    }
   }
   app.get('/vendor/apexcharts.js', async (c) => {
     try {
@@ -917,12 +939,12 @@ function resolveRange(
   return rangeForPeriod(parsePeriod(period), asOf ?? undefined)
 }
 
-async function file(c: Context, name: string, contentType: string) {
+async function file(c: Context, name: string, contentType: string, cacheControl = 'no-cache') {
   try {
     const body = await readFile(join(UI_DIR, name))
     // no-cache: browsers and Cloudflare must revalidate, so a deploy never mixes a new index.html
     // with a stale app.js or page module (Cloudflare otherwise keeps them for hours).
-    return c.body(body, 200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' })
+    return c.body(body, 200, { 'Content-Type': contentType, 'Cache-Control': cacheControl })
   } catch {
     return c.text('Not found', 404)
   }

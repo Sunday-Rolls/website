@@ -29,6 +29,22 @@ async function setup() {
 }
 
 describe('dashboard auth + overview', () => {
+  it('points index.html at versioned assets that resolve and cache for good', async () => {
+    const { app } = await setup()
+    const html = await (await app.request('/dashboard')).text()
+    const appJs = html.match(/src="(\/dashboard\/v\/[a-zA-Z0-9]+\/app\.js)"/)?.[1]
+    const css = html.match(/href="(\/dashboard\/v\/[a-zA-Z0-9]+\/styles\.css)"/)?.[1]
+    expect(appJs).toBeTruthy()
+    expect(css).toBeTruthy()
+    const base = appJs!.replace(/app\.js$/, '')
+    for (const path of [appJs!, css!, `${base}lib/ui.js`, `${base}pages/overview.js`]) {
+      const res = await app.request(path)
+      expect(res.status, path).toBe(200)
+      expect(res.headers.get('cache-control'), path).toContain('immutable')
+    }
+    expect((await app.request(`${base}pages/..%2Fapp.js`)).status).toBe(404)
+  })
+
   it('serves the UI shell and page modules with no-cache so deploys are never mixed', async () => {
     const { app } = await setup()
     for (const path of ['/dashboard', '/dashboard/app.js', '/dashboard/styles.css', '/dashboard/lib/ui.js', '/dashboard/pages/overview.js']) {
