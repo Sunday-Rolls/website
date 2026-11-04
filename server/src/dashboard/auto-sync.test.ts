@@ -16,6 +16,7 @@ function fakeSources(overrides: Partial<Record<AutoSyncSource, Partial<AutoSyncS
   })
   return {
     shopify: base('shopify'),
+    etsy: base('etsy'),
     'sales-tracker': base('sales-tracker'),
     ga4: base('ga4'),
     'search-console': base('search-console'),
@@ -113,6 +114,7 @@ describe('defaultAutoSyncSources', () => {
   it('names what each source is missing', () => {
     const sources = defaultAutoSyncSources({})
     expect(sources.shopify.missing()).toBe('SHOPIFY_CLIENT_ID/SECRET')
+    expect(sources.etsy.missing()).toBe('ETSY_KEYSTRING, ETSY_SHARED_SECRET, ETSY_REFRESH_TOKEN')
     expect(sources['sales-tracker'].missing()).toBe('GOOGLE_SERVICE_ACCOUNT_JSON')
     expect(defaultAutoSyncSources({ GOOGLE_SERVICE_ACCOUNT_JSON: '{}' })['sales-tracker'].missing()).toBe(
       'SALES_TRACKER_DRIVE_FILE_ID',

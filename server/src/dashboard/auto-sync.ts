@@ -7,6 +7,8 @@
  * credentials answers `unconfigured` instead of failing.
  */
 import { extractDriveFileId } from '../analytics/drive.js'
+import { etsyMissingEnv, loadEtsyCredentialsFromEnv } from '../analytics/etsy.js'
+import { syncEtsyToStore } from '../analytics/etsy-sync.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { loadGscCredentialsFromEnv } from '../analytics/gsc.js'
 import { syncGscToStore } from '../analytics/gsc-sync.js'
@@ -14,7 +16,7 @@ import { syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 
-export const AUTO_SYNC_SOURCES = ['shopify', 'sales-tracker', 'ga4', 'search-console'] as const
+export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'sales-tracker', 'ga4', 'search-console'] as const
 export type AutoSyncSource = (typeof AUTO_SYNC_SOURCES)[number]
 
 export type AutoSyncOutcome =
@@ -40,6 +42,15 @@ export function defaultAutoSyncSources(env: NodeJS.ProcessEnv = process.env): Re
       run: async (store) => {
         const r = await syncShopifyToStore(store, loadShopifyCredentialsFromEnv(env)!)
         return `${r.orders} orders`
+      },
+    },
+    etsy: {
+      freshMs: 15 * MIN,
+      missing: () => etsyMissingEnv(env),
+      run: async (store) => {
+        const days = Math.max(1, Math.min(Number(env.ETSY_SYNC_DAYS ?? 365) || 365, 3650))
+        const r = await syncEtsyToStore(store, loadEtsyCredentialsFromEnv(env)!, { days })
+        return `${r.orders} new orders · ${r.inTracker} already in Sales Tracker`
       },
     },
     'sales-tracker': {
