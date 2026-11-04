@@ -787,3 +787,28 @@ tr.section td {
 @media (prefers-reduced-motion: reduce) {
   .sync-toast-bar > span { animation: none; width: 100%; opacity: 0.5; }
 }
+.sync-toast-text { font-weight: 600; }
+.sync-toast-steps {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+}
+.sync-toast-steps li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+}
+.sync-toast-steps li .label { color: var(--ink); }
+.sync-toast-steps li.ok .detail { color: var(--up); }
+.sync-toast-steps li.fail .detail { color: var(--down); }
+.sync-toast-steps li .detail {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}

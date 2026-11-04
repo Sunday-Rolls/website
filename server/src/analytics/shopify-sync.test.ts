@@ -97,7 +97,7 @@ describe('store-timezone days', () => {
   })
 })
 
-describe('POST /dashboard/api/sync/shopify { auto: true }', () => {
+describe('POST /dashboard/api/sync/auto/shopify', () => {
   async function setup() {
     vi.stubEnv('SHOPIFY_SHOP', 'chrgrk-ff')
     vi.stubEnv('SHOPIFY_CLIENT_ID', 'id')
@@ -122,11 +122,7 @@ describe('POST /dashboard/api/sync/shopify { auto: true }', () => {
     })
     const cookie = login.headers.get('set-cookie')!.split(';')[0]!
     const autoSync = () =>
-      app.request('/dashboard/api/sync/shopify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Cookie: cookie },
-        body: JSON.stringify({ auto: true }),
-      })
+      app.request('/dashboard/api/sync/auto/shopify', { method: 'POST', headers: { Cookie: cookie } })
     return { store, autoSync }
   }
 
@@ -134,10 +130,10 @@ describe('POST /dashboard/api/sync/shopify { auto: true }', () => {
     const { store, autoSync } = await setup()
     const urls = stubShopify(() => [rawOrder(1005)])
     const first = await (await autoSync()).json()
-    expect(first.data.orders).toBe(1)
+    expect(first.data).toEqual({ status: 'synced', summary: '1 orders' })
     expect((await store.listOrders()).map((o) => o.externalId)).toEqual(['shopify:1005'])
     const second = await (await autoSync()).json()
-    expect(second.data.skipped).toBe(true)
+    expect(second.data.status).toBe('fresh')
     expect(urls).toHaveLength(1)
   })
 
@@ -145,8 +141,8 @@ describe('POST /dashboard/api/sync/shopify { auto: true }', () => {
     const { autoSync } = await setup()
     const urls = stubShopify(() => [rawOrder(1005)])
     const [a, b] = await Promise.all([autoSync(), autoSync()])
-    expect((await a.json()).data.orders).toBe(1)
-    expect((await b.json()).data.orders).toBe(1)
+    expect((await a.json()).data.status).toBe('synced')
+    expect((await b.json()).data.status).toBe('synced')
     expect(urls).toHaveLength(1)
   })
 })

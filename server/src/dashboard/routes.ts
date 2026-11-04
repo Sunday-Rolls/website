@@ -34,11 +34,8 @@ import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { rangeForCustom, rangeForPeriod, storeDay } from '../analytics/period.js'
 import { seedDemoStore } from '../analytics/seed.js'
 import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
-import {
-  loadShopifyCredentialsFromEnv,
-  syncShopifyToStore,
-  type ShopifySyncResult,
-} from '../analytics/shopify-sync.js'
+import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
+import { createAutoSync, isAutoSyncSource, type AutoSyncSource, type AutoSyncSourceDef } from './auto-sync.js'
 import { pingShopifyShop } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey, PublicUser } from '../analytics/types.js'
@@ -68,15 +65,14 @@ export type DashboardDeps = {
   sendContactEmail?: (payload: ContactPayload) => Promise<void>
   resendApiKey?: string
   contactToEmail?: string
+  /** Override the on-open sync sources (tests). Defaults read credentials from env. */
+  autoSyncSources?: Record<AutoSyncSource, AutoSyncSourceDef>
 }
-
-/** A dashboard open/login within this long of the last good Shopify sync doesn't sync again. */
-const AUTO_SYNC_FRESH_MS = 5 * 60_000
 
 export function createDashboardRoutes(deps: DashboardDeps) {
   const app = new Hono()
   const { store, checkRateLimit, secureCookies } = deps
-  let autoShopifySync: Promise<ShopifySyncResult | { skipped: true; lastSyncedAt: string | null }> | null = null
+  const autoSync = createAutoSync(store, deps.autoSyncSources)
 
   app.use('*', async (c, next) => {
     const path = c.req.path
@@ -378,22 +374,6 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       return c.json({ ok: false, error: 'End date must be on or after start date' }, 400)
     }
     try {
-      // `auto` is the sync the dashboard fires when someone opens it or logs in: full range,
-      // shared with any run already in flight, and skipped if one finished in the last few minutes.
-      if (body.auto === true) {
-        // Claim the slot before any await so simultaneous tabs share one check + run.
-        autoShopifySync ??= (async () => {
-          const last = (await store.latestSyncs()).find((s) => s.source === 'shopify')
-          const lastAt = last?.finishedAt ? Date.parse(last.finishedAt) : 0
-          if (last?.status === 'ok' && Date.now() - lastAt < AUTO_SYNC_FRESH_MS) {
-            return { skipped: true as const, lastSyncedAt: last.finishedAt }
-          }
-          return syncShopifyToStore(store, creds)
-        })().finally(() => {
-          autoShopifySync = null
-        })
-        return c.json({ ok: true, data: await autoShopifySync })
-      }
       const result = await syncShopifyToStore(store, creds, { start, end })
       return c.json({ ok: true, data: result })
     } catch (error) {
@@ -401,6 +381,19 @@ export function createDashboardRoutes(deps: DashboardDeps) {
         { ok: false, error: error instanceof Error ? error.message : 'Shopify sync failed' },
         502,
       )
+    }
+  })
+
+  /** One source of the sync the dashboard runs on open/login (see auto-sync.ts). */
+  app.post('/api/sync/auto/:source', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const source = c.req.param('source')
+    if (!isAutoSyncSource(source)) return c.json({ ok: false, error: `Unknown source: ${source}` }, 404)
+    try {
+      return c.json({ ok: true, data: await autoSync(source) })
+    } catch (error) {
+      return c.json({ ok: false, error: error instanceof Error ? error.message : `${source} sync failed` }, 502)
     }
   })
 

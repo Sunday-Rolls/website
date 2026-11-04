@@ -719,30 +719,75 @@ function setSyncToast(message, status = 'busy') {
   syncToastTimer = setTimeout(() => {
     el.classList.add('leaving')
     syncToastTimer = setTimeout(() => (el.hidden = true), 300)
-  }, status === 'error' ? 6000 : 2500)
+  }, status === 'error' ? 10000 : 2500)
 }
 
-/** Pull the latest Shopify orders whenever someone opens the dashboard or logs in. */
-async function autoSyncShopify() {
-  setSyncToast('Syncing Shopify orders…')
-  try {
-    const { data } = await api('/sync/shopify', { method: 'POST', body: JSON.stringify({ auto: true }) })
-    if (data?.skipped) {
-      setSyncToast('Shopify orders up to date', 'done')
-      return
-    }
-    setSyncToast(`Shopify synced · ${data.orders} orders`, 'done')
-    // Redraw whatever page is open with the new orders.
-    if (state.user && state.page) setPage(state.page)
-  } catch (err) {
-    if (err.status === 503) {
-      // Shopify isn't configured here (local dev): nothing to sync, say nothing.
-      $('#sync-toast').hidden = true
-      return
-    }
-    setSyncToast(`Shopify sync failed: ${err.message}`, 'error')
-    if (err.status === 401 || err.status === 403) showError(err)
+const AUTO_SYNC_SOURCES = [
+  { key: 'shopify', label: 'Shopify orders' },
+  { key: 'sales-tracker', label: 'Sales Tracker' },
+  { key: 'ga4', label: 'GA4 traffic' },
+  { key: 'search-console', label: 'Search Console' },
+]
+
+function renderSyncSteps(steps) {
+  const list = $('#sync-toast .sync-toast-steps')
+  if (!list) return
+  list.replaceChildren(
+    ...steps.map((s) => {
+      const li = document.createElement('li')
+      li.className = s.cls
+      const label = document.createElement('span')
+      label.className = 'label'
+      label.textContent = s.label
+      const detail = document.createElement('span')
+      detail.className = 'detail'
+      detail.textContent = s.detail
+      detail.title = s.detail
+      li.append(label, detail)
+      return li
+    }),
+  )
+}
+
+/** Sync every data source whenever someone opens the dashboard or logs in, showing each one's progress. */
+async function autoSyncAll() {
+  const steps = AUTO_SYNC_SOURCES.map((s) => ({ ...s, cls: 'busy', detail: 'syncing…' }))
+  const total = steps.length
+  let done = 0
+  let changed = false
+  let failed = 0
+  const update = () => {
+    renderSyncSteps(steps)
+    if (done < total) setSyncToast(`Syncing data · ${done}/${total}`)
   }
+  update()
+
+  await Promise.all(
+    steps.map(async (step) => {
+      try {
+        const { data } = await api(`/sync/auto/${step.key}`, { method: 'POST' })
+        if (data.status === 'synced') {
+          Object.assign(step, { cls: 'ok', detail: `✓ ${data.summary}` })
+          changed = true
+        } else if (data.status === 'fresh') {
+          Object.assign(step, { cls: 'ok', detail: '✓ up to date' })
+        } else {
+          Object.assign(step, { cls: 'off', detail: 'not set up' })
+        }
+      } catch (err) {
+        failed += 1
+        Object.assign(step, { cls: 'fail', detail: `✗ ${err.message}` })
+        if (err.status === 401 || err.status === 403) showError(err)
+      }
+      done += 1
+      update()
+    }),
+  )
+
+  if (failed) setSyncToast(`Synced with ${failed} error${failed > 1 ? 's' : ''}`, 'error')
+  else setSyncToast(changed ? 'All data synced' : 'All data up to date', 'done')
+  // Redraw whatever page is open with the new data.
+  if (changed && state.user && state.page) setPage(state.page)
 }
 
 function setPage(page) {
@@ -838,7 +883,7 @@ function bind() {
       $('#user-name').textContent = data.user.name
       show('dash')
       setPage('overview')
-      autoSyncShopify()
+      autoSyncAll()
     } catch (err) {
       error.textContent = err.message
       error.hidden = false
@@ -1058,7 +1103,7 @@ async function boot() {
     $('#user-name').textContent = me.user.name
     show('dash')
     setPage('overview')
-    autoSyncShopify()
+    autoSyncAll()
   } catch {
     show('login')
   }
