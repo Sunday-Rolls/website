@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Hono, type Context } from 'hono'
@@ -31,11 +32,30 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
-import { rangeForCustom, rangeForPeriod, storeDay } from '../analytics/period.js'
+import { rangeForCustom, rangeForPeriod, storeDateOf, storeDay } from '../analytics/period.js'
+import {
+  buildAttention,
+  buildFunnelView,
+  buildHealth,
+  buildMarketingView,
+  buildMer,
+  buildOrdersView,
+  buildPace,
+  buildProductsView,
+} from '../analytics/views.js'
+import { loadMerchantScheduleFromEnv } from '../merchant/merchant-scheduler.js'
+import { loadMerchantConfigFromEnv } from '../merchant/merchant-sync.js'
 import { seedDemoStore } from '../analytics/seed.js'
 import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
-import { createAutoSync, isAutoSyncSource, type AutoSyncSource, type AutoSyncSourceDef } from './auto-sync.js'
+import {
+  AUTO_SYNC_SOURCES,
+  createAutoSync,
+  defaultAutoSyncSources,
+  isAutoSyncSource,
+  type AutoSyncSource,
+  type AutoSyncSourceDef,
+} from './auto-sync.js'
 import { pingShopifyShop } from '../analytics/shopify.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { PeriodKey, PublicUser } from '../analytics/types.js'
@@ -53,6 +73,7 @@ import {
 } from '../review-qr-pdf.js'
 
 const UI_DIR = join(dirname(fileURLToPath(import.meta.url)), 'ui')
+const requireFromHere = createRequire(import.meta.url)
 
 export type DashboardDeps = {
   store: AnalyticsStore
@@ -89,6 +110,25 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   app.get('/mark.svg', async (c) => file(c, 'mark.svg', 'image/svg+xml'))
   app.get('/favicon.svg', async (c) => file(c, 'favicon.svg', 'image/svg+xml'))
   app.get('/favicon.png', async (c) => file(c, 'favicon.png', 'image/png'))
+  // ES modules for the shell (lib/) and one module per page (pages/). Names are restricted to kebab-case .js.
+  for (const dir of ['lib', 'pages'] as const) {
+    app.get(`/${dir}/:name`, async (c) => {
+      const name = c.req.param('name')
+      if (!/^[a-z0-9-]+\.js$/.test(name)) return c.text('Not found', 404)
+      return file(c, `${dir}/${name}`, 'text/javascript; charset=utf-8')
+    })
+  }
+  app.get('/vendor/apexcharts.js', async (c) => {
+    try {
+      const body = await readFile(requireFromHere.resolve('apexcharts/dist/apexcharts.min.js'))
+      return c.body(body, 200, {
+        'Content-Type': 'text/javascript; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400',
+      })
+    } catch {
+      return c.text('Not found', 404)
+    }
+  })
 
   app.get('/api/me', async (c) => {
     const user = await currentUser(c, store)
@@ -157,17 +197,96 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     } catch (error) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
     }
-    const [orders, traffic, keywords, productViews, abandoned] = await Promise.all([
+    const [orders, traffic, keywords, productViews, abandoned, adSpend, syncs, cashForecast] = await Promise.all([
       store.listOrders(),
       store.listTraffic(),
       store.listKeywords(),
       store.listProductViews(),
       store.getAbandoned(range.start, range.end),
+      store.listAdSpend(),
+      store.latestSyncs(),
+      store.listCashForecast(),
     ])
+    const today = storeDateOf(new Date())
     return c.json({
       ok: true,
-      data: buildOverview({ range, orders, traffic, keywords, abandoned, productViews }),
+      data: {
+        ...buildOverview({ range, orders, traffic, keywords, abandoned, productViews }),
+        mer: buildMer({ range, orders, adSpend }),
+        // Pace is about the month containing the range end, never a future day.
+        pace: buildPace({ orders, asOf: range.end < today ? range.end : today }),
+        attention: buildAttention({ abandoned, syncs, cashForecast, today }),
+      },
     })
+  })
+
+  app.get('/api/orders', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const range = rangeOrError(c)
+    if (range instanceof Response) return range
+    const orders = await store.listOrders()
+    return c.json({ ok: true, data: buildOrdersView({ range, orders, channel: c.req.query('channel') }) })
+  })
+
+  app.get('/api/products', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const range = rangeOrError(c)
+    if (range instanceof Response) return range
+    const [orders, productViews] = await Promise.all([store.listOrders(), store.listProductViews()])
+    return c.json({ ok: true, data: buildProductsView({ range, orders, productViews }) })
+  })
+
+  app.get('/api/marketing', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const range = rangeOrError(c)
+    if (range instanceof Response) return range
+    const [orders, adSpend, traffic, keywords] = await Promise.all([
+      store.listOrders(),
+      store.listAdSpend(),
+      store.listTraffic(),
+      store.listKeywords(),
+    ])
+    return c.json({ ok: true, data: buildMarketingView({ range, orders, adSpend, traffic, keywords }) })
+  })
+
+  app.get('/api/funnel', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const range = rangeOrError(c)
+    if (range instanceof Response) return range
+    const [orders, traffic, abandoned] = await Promise.all([
+      store.listOrders(),
+      store.listTraffic(),
+      store.getAbandoned(range.start, range.end),
+    ])
+    return c.json({ ok: true, data: buildFunnelView({ range, orders, traffic, abandoned }) })
+  })
+
+  app.get('/api/health', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const defs = deps.autoSyncSources ?? defaultAutoSyncSources()
+    const merchantInterval = loadMerchantScheduleFromEnv().intervalMs
+    const sources = [
+      ...AUTO_SYNC_SOURCES.map((source) => ({
+        source,
+        label: AUTO_SYNC_LABELS[source],
+        missing: defs[source].missing(),
+        freshMs: defs[source].freshMs,
+      })),
+      {
+        source: 'merchant',
+        label: 'Google Merchant Center',
+        missing: merchantMissing(),
+        freshMs: merchantInterval > 0 ? merchantInterval : null,
+        // merchant-scheduler.ts records its runs as 'merchant-center'.
+        syncSource: 'merchant-center',
+      },
+    ]
+    return c.json({ ok: true, data: buildHealth(sources, await store.latestSyncs()) })
   })
 
   app.get('/api/pnl', async (c) => {
@@ -391,7 +510,8 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const source = c.req.param('source')
     if (!isAutoSyncSource(source)) return c.json({ ok: false, error: `Unknown source: ${source}` }, 404)
     try {
-      return c.json({ ok: true, data: await autoSync(source) })
+      const force = ['1', 'true'].includes(c.req.query('force') ?? '')
+      return c.json({ ok: true, data: await autoSync(source, { force }) })
     } catch (error) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : `${source} sync failed` }, 502)
     }
@@ -750,6 +870,36 @@ async function requireAdmin(c: Context, store: AnalyticsStore): Promise<Response
   if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
   if (!user.isAdmin) return c.json({ ok: false, error: 'Admin access required' }, 403)
   return user
+}
+
+const AUTO_SYNC_LABELS: Record<AutoSyncSource, string> = {
+  shopify: 'Shopify',
+  'sales-tracker': 'Sales Tracker',
+  ga4: 'Google Analytics 4',
+  'search-console': 'Google Search Console',
+}
+
+/** Same checks as createMerchantSyncRunnerFromEnv; null when the merchant sync can run. */
+function merchantMissing(env: NodeJS.ProcessEnv = process.env): string | null {
+  if ((env.MERCHANT_SYNC_ENABLED ?? 'true').trim() === 'false') return 'MERCHANT_SYNC_ENABLED=false'
+  const config = loadMerchantConfigFromEnv(env)
+  const missing = [
+    !config.merchantId && 'MERCHANT_CENTER_ID',
+    !config.dataSourceId && 'MERCHANT_DATA_SOURCE_ID',
+    !(env.MERCHANT_SERVICE_ACCOUNT_JSON?.trim() || env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim()) &&
+      'MERCHANT_SERVICE_ACCOUNT_JSON',
+    !loadShopifyCredentialsFromEnv(env) && 'SHOPIFY_CLIENT_ID/SECRET',
+  ].filter(Boolean)
+  return missing.length ? missing.join(', ') : null
+}
+
+/** The query's range (period/start/end/asOf, default 30d), or a 400 response. */
+function rangeOrError(c: Context) {
+  try {
+    return resolveRange(c.req.query('period'), c.req.query('start'), c.req.query('end'), c.req.query('asOf'))
+  } catch (error) {
+    return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
+  }
 }
 
 function parsePeriod(value: string | undefined): PeriodKey {

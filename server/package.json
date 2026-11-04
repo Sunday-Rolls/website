@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "apexcharts": "^3.54.1",
     "bcryptjs": "^3.0.3",
     "exceljs": "^4.4.0",
     "google-auth-library": "^11.3.0",

@@ -9,335 +9,124 @@
     <link rel="apple-touch-icon" href="/dashboard/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      // Apply the saved (or system) theme before first paint.
+      ;(function () {
+        var saved = null
+        try {
+          saved = localStorage.getItem('sr-dashboard-theme')
+        } catch (e) {}
+        var dark = saved ? saved === 'dark' : window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches
+        if (dark) document.documentElement.classList.add('dark')
+        try {
+          if (localStorage.getItem('sr-dashboard-sidebar') === 'collapsed') document.documentElement.classList.add('sidebar-collapsed')
+        } catch (e) {}
+      })()
+    </script>
     <link rel="stylesheet" href="/dashboard/styles.css" />
   </head>
   <body>
-    <div id="app">
-      <section id="login-view" class="login-view hidden">
-        <div class="login-card">
-          <img class="login-logo" src="/dashboard/logo.svg" alt="Sunday Rolls" />
-          <p class="login-sub">Store analytics</p>
-          <form id="login-form">
-            <label>Email <input id="login-email" type="email" autocomplete="username" required /></label>
-            <label>Password <input id="login-password" type="password" autocomplete="current-password" required /></label>
-            <p id="login-error" class="error" hidden></p>
-            <button type="submit">Sign in</button>
-          </form>
-          <p class="hint">Forgot password? Ask Ethan to reset it on the server.</p>
-        </div>
-      </section>
+    <div id="progress" class="progress" aria-hidden="true"><span class="progress-fill"></span></div>
 
-      <section id="dash-view" class="dash-view hidden">
-        <header class="top">
-          <a class="brand" href="/dashboard" aria-label="Sunday Rolls analytics home">
-            <img class="brand-logo" src="/dashboard/logo.svg" alt="Sunday Rolls" />
-          </a>
-          <nav id="nav" class="nav" aria-label="Dashboard sections">
-            <button type="button" data-page="overview" class="active">Overview</button>
-            <button type="button" data-page="pnl">P&amp;L</button>
-            <button type="button" data-page="roas">ROAS</button>
-            <button type="button" data-page="data">Data</button>
-            <button type="button" data-page="tests">Tests</button>
-          </nav>
-          <div class="top-actions">
-            <span id="user-name"></span>
-            <button type="button" id="logout-btn" class="ghost">Sign out</button>
-          </div>
-        </header>
+    <section id="login-view" class="auth hidden">
+      <div class="auth-card card">
+        <img class="auth-logo" src="/dashboard/logo.svg" alt="Sunday Rolls" />
+        <h1 class="auth-title">Sign in</h1>
+        <p class="auth-sub">Store analytics for the Sunday Rolls team.</p>
+        <form id="login-form" class="auth-form">
+          <label class="field">
+            <span>Email</span>
+            <input id="login-email" type="email" autocomplete="username" placeholder="you@sundayrollsgolf.com" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter your password" required />
+          </label>
+          <p id="login-error" class="form-error" hidden></p>
+          <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+        </form>
+        <p class="auth-hint">Forgot password? Ask Ethan to reset it on the server.</p>
+      </div>
+    </section>
 
-        <div id="overview-page" class="page">
-          <div class="toolbar">
-            <div class="range-controls">
-              <div id="period-pills" class="pills">
-                <button type="button" data-period="7d">7 days</button>
-                <button type="button" data-period="30d" class="active">30 days</button>
-                <button type="button" data-period="90d">90 days</button>
-                <button type="button" data-period="year">Year</button>
-              </div>
-              <div class="date-range">
-                <label>From <input id="range-start" type="date" /></label>
-                <label>To <input id="range-end" type="date" /></label>
-                <button type="button" id="range-apply">Apply</button>
-              </div>
-            </div>
-            <p id="range-label" class="muted"></p>
-          </div>
-          <div id="kpi-row" class="kpi-row"></div>
-          <div class="overview-shell">
-            <div class="overview-main">
-              <article class="panel">
-                <div class="panel-head">
-                  <h2 id="trend-title">Revenue trend</h2>
-                  <p id="trend-grain" class="muted"></p>
-                </div>
-                <div id="chart-series" class="pills small">
-                  <button type="button" data-series="revenue" class="active">Revenue</button>
-                  <button type="button" data-series="orders">Orders</button>
-                  <button type="button" data-series="visits">Visits</button>
-                </div>
-                <div id="trend-summary" class="trend-summary"></div>
-                <div id="revenue-chart" class="line-chart" role="img" aria-label="Trend chart"></div>
-              </article>
-            <article class="panel">
-              <h2>Sales by product</h2>
-              <p id="products-note" class="muted">Sales Tracker history is category-level (e.g. Headcover). Shopify orders use listing / variant names.</p>
-              <table id="products-table"><thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Share</th></tr></thead><tbody></tbody></table>
-            </article>
-              <article class="panel">
-                <h2>Views by product</h2>
-                <p class="muted">GA4 product page views for this range.</p>
-                <div id="product-views"></div>
-              </article>
-            </div>
-            <aside class="overview-rail">
-              <article class="panel">
-                <h2>Purchase funnel</h2>
-                <p id="funnel-note" class="muted">Cart/checkout steps need Shopify ecommerce tagging in GA4.</p>
-                <div id="funnel"></div>
-              </article>
-              <article class="panel">
-                <h2>Traffic sources</h2>
-                <div id="sources"></div>
-              </article>
-              <article class="panel">
-                <h2>Top search keywords</h2>
-                <div id="keywords"></div>
-              </article>
-              <article class="panel">
-                <h2 id="states-title">Visitors by state</h2>
-                <p id="states-note" class="muted"></p>
-                <div id="states"></div>
-              </article>
-              <article class="panel">
-                <h2>Abandoned carts</h2>
-                <p id="abandoned-note" class="muted"></p>
-                <div id="abandoned" class="abandoned"></div>
-              </article>
-            </aside>
-          </div>
-        </div>
+    <div id="shell" class="shell hidden">
+      <aside id="sidebar" class="sidebar" aria-label="Main navigation">
+        <a class="sidebar-logo" href="#/overview" aria-label="Sunday Rolls analytics home">
+          <img class="sidebar-mark" src="/dashboard/mark.svg" alt="" />
+          <span class="sidebar-word">Sunday Rolls<small>Analytics</small></span>
+        </a>
+        <nav id="sidebar-nav" class="sidebar-nav"></nav>
+      </aside>
+      <div id="backdrop" class="backdrop" aria-hidden="true"></div>
 
-        <div id="pnl-page" class="page hidden">
-          <div class="toolbar">
-            <div class="pills">
-              <button type="button" id="pnl-refresh" class="icon-btn" title="Refresh P&amp;L" aria-label="Refresh P&amp;L">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.2M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button type="button" id="sidebar-toggle" class="btn-square" aria-label="Toggle sidebar" aria-controls="sidebar">
+              <span data-icon="menu"></span>
+            </button>
+            <h1 id="page-title" class="page-title">Overview</h1>
+          </div>
+          <div class="topbar-right">
+            <button type="button" id="theme-toggle" class="btn-round" aria-label="Switch colour theme" title="Switch colour theme">
+              <span class="theme-icon-light" data-icon="moon"></span>
+              <span class="theme-icon-dark" data-icon="sun"></span>
+            </button>
+            <button type="button" id="refresh-btn" class="btn-round btn-refresh" title="Refresh data" aria-label="Refresh data">
+              <span class="refresh-icon" data-icon="refresh"></span>
+              <span class="refresh-label">Refresh</span>
+              <span class="refresh-dot" aria-hidden="true"></span>
+            </button>
+            <div class="user-menu">
+              <button type="button" id="user-btn" class="user-btn" aria-haspopup="menu" aria-expanded="false">
+                <span id="user-avatar" class="avatar">S</span>
+                <span id="user-name" class="user-name"></span>
+                <span class="user-chevron" data-icon="chevron-down"></span>
               </button>
-            </div>
-            <p id="pnl-feedback" class="muted" aria-live="polite"></p>
-          </div>
-
-          <article class="panel workbook-panel">
-            <div class="panel-head">
-              <h2>Dashboard data workbook</h2>
-              <div class="panel-actions">
-                <button type="button" id="workbook-download" class="btn btn-primary">Download workbook</button>
-                <button type="button" id="workbook-upload-btn" class="btn btn-secondary">Upload workbook</button>
-                <input id="workbook-upload" class="file-hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-              </div>
-            </div>
-            <p class="muted">
-              One Excel file with everything you can edit: <strong>Revenue</strong>, <strong>Expenses</strong>, and <strong>Cash</strong>.
-              Download → change or delete rows → upload. Upload replaces the editable data from the file
-              (deleted rows are removed). Shopify website sales stay on live sync and are not in this file.
-            </p>
-          </article>
-
-          <div id="pnl-kpis" class="kpi-row"></div>
-          <article class="panel">
-            <div class="panel-head">
-              <h2>Income statement</h2>
-              <div class="panel-actions">
-                <button type="button" id="export-pnl" class="ghost">Export statement CSV</button>
-              </div>
-            </div>
-            <p class="muted">COGS / SG&amp;A come from the Expenses sheet in the workbook above.</p>
-            <table id="pnl-table"><thead><tr><th>Line item</th><th>Month</th><th>% rev</th><th>YTD</th><th>% rev</th></tr></thead><tbody></tbody></table>
-          </article>
-          <div class="grid-2">
-            <article class="panel">
-              <div class="panel-head">
-                <h2>Revenue by channel, YTD</h2>
-              </div>
-              <p class="muted">Shopify syncs live. Etsy / eBay / other history is edited in the workbook Revenue sheet (or quick-add below).</p>
-              <div id="channel-rev"></div>
-              <details class="manual-details">
-                <summary>Add one revenue row</summary>
-                <form id="manual-revenue-form" class="manual-form">
-                  <label>Date <input name="date" type="date" required /></label>
-                  <label>Channel
-                    <select name="channel" required>
-                      <option value="etsy">Etsy</option>
-                      <option value="ebay">eBay</option>
-                      <option value="squarespace">Squarespace</option>
-                      <option value="other">Other / in person</option>
-                      <option value="shopify">Shopify (manual only if needed)</option>
-                    </select>
-                  </label>
-                  <label>Revenue <input name="revenue" type="number" min="0.01" step="0.01" required /></label>
-                  <label>Fees <input name="fees" type="number" min="0" step="0.01" value="0" /></label>
-                  <label>Shipping <input name="shipping" type="number" min="0" step="0.01" value="0" /></label>
-                  <label>Marketing <input name="marketing" type="number" min="0" step="0.01" value="0" /></label>
-                  <label>Product <input name="product" type="text" placeholder="Headcover" /></label>
-                  <label>External id <input name="externalId" type="text" placeholder="etsy order # (for upserts)" /></label>
-                  <div class="sync-actions">
-                    <button type="submit" class="btn btn-primary">Save to database</button>
-                  </div>
-                </form>
-              </details>
-              <details class="manual-details">
-                <summary>Recent manual revenue <span id="manual-order-count" class="muted"></span></summary>
-                <table id="manual-orders-table">
-                  <thead>
-                    <tr><th>Date</th><th>Channel</th><th>Product</th><th>Revenue</th><th>External id</th></tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </details>
-            </article>
-            <article class="panel">
-              <h2>Where a headcover sale goes</h2>
-              <div id="unit-profit"></div>
-            </article>
-          </div>
-          <article class="panel">
-            <h2>Monthly revenue by channel</h2>
-            <div id="monthly-channel-legend" class="channel-legend"></div>
-            <div id="monthly-channels" class="bars stacked"></div>
-          </article>
-          <article class="panel">
-            <div class="panel-head">
-              <h2>Cash forecast</h2>
-              <div class="panel-actions">
-                <button type="button" id="pnl-refresh-cash" class="icon-btn" title="Refresh P&amp;L" aria-label="Refresh P&amp;L">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.2M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div id="user-dropdown" class="dropdown" role="menu">
+                <div class="dropdown-head">
+                  <span id="dropdown-name" class="dropdown-name"></span>
+                  <span id="dropdown-email" class="dropdown-email"></span>
+                </div>
+                <button type="button" id="logout-btn" class="dropdown-item" role="menuitem">
+                  <span data-icon="logout"></span> Sign out
                 </button>
               </div>
             </div>
-            <p class="muted">Edit month-end cash in the workbook Cash sheet, then re-upload.</p>
-            <table id="cash-table"><thead><tr><th>Month ending</th><th>Beginning</th><th>Collections</th><th>Freight &amp; fees</th><th>Marketing</th><th>Website</th><th>Manufacturing</th><th>Ending</th></tr></thead><tbody></tbody></table>
-          </article>
-        </div>
-
-        <div id="roas-page" class="page hidden">
-          <article class="panel">
-            <h2>Return on ad spend</h2>
-            <p class="muted">Break-even ≈ 1.25x. Em dashes mean sales aren’t available yet (not a true 0x).</p>
-            <p id="roas-note" class="muted"></p>
-            <table id="roas-table"><thead><tr><th>Platform</th><th>Spend</th><th>Platform sales</th><th>Platform ROAS</th><th>Site sales</th><th>Site ROAS</th></tr></thead><tbody></tbody></table>
-          </article>
-          <article class="panel">
-            <h2>Campaigns</h2>
-            <p class="muted">Spend mix and reported return by campaign within each platform.</p>
-            <div id="roas-campaigns"></div>
-          </article>
-          <article class="panel">
-            <h2>Last sync runs</h2>
-            <div id="sync-status"></div>
-          </article>
-        </div>
-
-        <div id="data-page" class="page hidden">
-          <article class="panel">
-            <h2>Sync range</h2>
-            <p class="muted">Choose dates for historic pulls, or leave blank for full available history / last 90 days (GA4).</p>
-            <div class="date-range sync-range">
-              <label>From <input id="sync-start" type="date" /></label>
-              <label>To <input id="sync-end" type="date" /></label>
-            </div>
-            <p id="sync-feedback" class="muted" aria-live="polite"></p>
-          </article>
-
-          <div class="grid-2">
-            <article class="panel">
-              <h2>Google Analytics</h2>
-              <p class="muted">Sessions, sources, product page views, Google Ads cost.</p>
-              <div class="sync-actions">
-                <button type="button" id="sync-ga4-btn" class="btn btn-primary">Sync GA4</button>
-              </div>
-            </article>
-            <article class="panel">
-              <h2>Shopify (live orders)</h2>
-              <p id="shopify-status" class="muted">Checking connection…</p>
-              <p class="muted">Source of truth for website sales. Etsy / eBay / other history and expenses live on P&amp;L → Download / Upload workbook.</p>
-              <div class="sync-actions">
-                <button type="button" id="sync-shopify-btn" class="btn btn-primary">Sync Shopify</button>
-              </div>
-            </article>
           </div>
+        </header>
 
-          <article class="panel">
-            <h2>Review QR codes</h2>
-            <p class="muted">
-              Download a printable PDF for <strong>every active product</strong> on the site (headcovers, towels, etc.).
-              <strong>One product per page</strong> — each cutout shows the Sunday Rolls logo, “Leave a Review!”, and a QR
-              (cut along the dashed lines and drop in the box). Codes open that product’s review form
-              (<code>?review=1</code>). Prefer live Shopify products; falls back to the catalog if Shopify is unavailable.
-            </p>
-            <label class="stack-label">Landing site
-              <select id="review-qr-target">
-                <option value="pages" selected>GitHub Pages (sunday-rolls.github.io/website)</option>
-                <option value="live">Live site (www.sundayrollsgolf.com)</option>
-              </select>
-            </label>
-            <p id="review-qr-meta" class="muted" aria-live="polite"></p>
-            <div class="sync-actions">
-              <button type="button" id="export-review-qr-pdf" class="btn btn-primary">Export PDF</button>
+        <main class="content">
+          <div class="content-bar">
+            <p id="range-label" class="range-label"></p>
+            <div class="range-controls">
+              <div id="range-pills" class="segmented" role="group" aria-label="Date range">
+                <button type="button" data-period="7d">7d</button>
+                <button type="button" data-period="30d">30d</button>
+                <button type="button" data-period="90d">90d</button>
+                <button type="button" data-period="year">YTD</button>
+                <button type="button" id="range-custom-btn" data-period="custom" aria-haspopup="dialog" aria-expanded="false">Custom</button>
+              </div>
+              <div id="range-popover" class="dropdown range-popover" role="dialog" aria-label="Custom date range">
+                <form id="range-form" class="range-form">
+                  <label class="field"><span>From</span><input id="range-start" type="date" required /></label>
+                  <label class="field"><span>To</span><input id="range-end" type="date" required /></label>
+                  <p id="range-error" class="form-error" hidden></p>
+                  <div class="range-actions">
+                    <button type="button" id="range-cancel" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </article>
-
-          <article class="panel">
-            <h2>Sync history</h2>
-            <p class="muted">Manual revenue, expenses, and cash: use <strong>P&amp;L → Download / Upload workbook</strong> (one Excel file, replace-on-upload).</p>
-            <div id="data-sync-status"></div>
-          </article>
-        </div>
-
-        <div id="tests-page" class="page hidden">
-          <article class="panel">
-            <h2>Reviews</h2>
-            <p class="muted">Posts a review, checks the product list the site reads, then deletes it.</p>
-            <div class="sync-actions">
-              <button type="button" class="btn btn-primary" data-workflow="reviews">Run review test</button>
-            </div>
-            <ol id="workflow-reviews" class="workflow-steps"></ol>
-          </article>
-          <article class="panel">
-            <h2>Contact us</h2>
-            <p class="muted">Sends a contact email through Resend, then deletes the saved message. The email stays in the inbox.</p>
-            <div class="sync-actions">
-              <button type="button" class="btn btn-primary" data-workflow="contact">Run contact test</button>
-            </div>
-            <ol id="workflow-contact" class="workflow-steps"></ol>
-          </article>
-          <article class="panel">
-            <h2>Mailing list</h2>
-            <p class="muted">Subscribes a unique test address, confirms it is on the Shopify list, then deletes that customer.</p>
-            <div class="sync-actions">
-              <button type="button" class="btn btn-primary" data-workflow="mailing-list">Run mailing list test</button>
-            </div>
-            <ol id="workflow-mailing-list" class="workflow-steps"></ol>
-          </article>
-          <article class="panel">
-            <h2>Orders</h2>
-            <p class="muted">Creates a $0 Shopify test order, reads it back, then deletes it. Inventory is left alone.</p>
-            <div class="sync-actions">
-              <button type="button" class="btn btn-primary" data-workflow="orders">Run order test</button>
-            </div>
-            <ol id="workflow-orders" class="workflow-steps"></ol>
-          </article>
-        </div>
-      </section>
+          </div>
+          <div id="page-root" class="page-root"></div>
+        </main>
+      </div>
     </div>
-    <div id="sync-toast" class="sync-toast" role="status" aria-live="polite" hidden>
-      <span class="sync-toast-text"></span>
-      <ul class="sync-toast-steps"></ul>
-      <span class="sync-toast-bar"><span></span></span>
-    </div>
+
+    <script src="/dashboard/vendor/apexcharts.js"></script>
     <script type="module" src="/dashboard/app.js"></script>
   </body>
 </html>

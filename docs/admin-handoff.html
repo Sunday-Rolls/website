@@ -121,7 +121,7 @@ tr:last-child td { border-bottom: 0; }
         </div>
       </div>
       <div class="hub"><span class="eyebrow">Ops tools</span><h3>Railway dashboard</h3>
-        <p>Sync GA4 and Shopify, P&amp;L and ROAS, export review QR PDFs, smoke-test contact and reviews.</p>
+        <p>Syncs every source when you open it (Refresh forces it). Sales, products, marketing, funnel, money (P&amp;L), and Tools for review QR PDFs, manual entries and smoke tests.</p>
         <div class="links"><a href="https://contact-api-production-9af6.up.railway.app/dashboard/">Open /dashboard/</a></div>
       </div>
     </div>
@@ -161,8 +161,8 @@ tr:last-child td { border-bottom: 0; }
       <p>Shopify is the source of truth for website sales. The dashboard pulls those orders into Postgres for P&amp;L and ROAS. Legacy and multi-channel history still uses the Sales Tracker workbook.</p>
       <div class="table-wrap"><table>
         <tr><th>Source</th><th>Where</th><th>When</th></tr>
-        <tr><td>Website sales</td><td>Shopify → dashboard Sync Shopify</td><td>After orders land, or when numbers look stale</td></tr>
-        <tr><td>Traffic &amp; ads</td><td>Dashboard Sync GA4</td><td>After campaigns or at the weekly check-in</td></tr>
+        <tr><td>Website sales</td><td>Shopify → dashboard (automatic on open)</td><td>After orders land, or when numbers look stale</td></tr>
+        <tr><td>Traffic &amp; ads</td><td>GA4 → dashboard (automatic on open)</td><td>After campaigns or at the weekly check-in</td></tr>
         <tr><td>Legacy / other channels</td><td><a href="https://docs.google.com/spreadsheets/d/1v18ftrLt5jcyGJsKFq37CwIYYY04aKIDeeEp0F5_XMU/edit">Sales Tracker sheet</a></td><td>Owned by Derick; optional import into Postgres</td></tr>
       </table></div>
       <p class="muted">Access checklist: <a href="https://github.com/Sunday-Rolls/website/blob/main/docs/DASHBOARD_ACCESS.md">docs/DASHBOARD_ACCESS.md</a></p>
@@ -298,7 +298,7 @@ const LISTS = {
   ops: [
     ["ops-orders", "Check Shopify Orders (and Shippo Orders) for new purchases"],
     ["ops-fulfill", "Buy Shippo label → tracking syncs; refunds stay in Shopify"],
-    ["ops-sync", "If numbers look stale, Sync Shopify + Sync GA4 in the dashboard"],
+    ["ops-sync", "If numbers look stale, press Refresh in the dashboard header"],
     ["ops-qr", "When packaging, print review QR sheets from Dashboard → Data"],
     ["ops-contact", "Skim contact inbox (CONTACT_TO_EMAIL) and dashboard reviews"],
   ],

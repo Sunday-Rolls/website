@@ -92,4 +92,4 @@ VITE_GA4_SEND_DIRECT=true
 
 2. DevTools → Network: `gtag/js?id=G-ET6SXZWE8E` and `collect`/`g/collect` on add-to-cart  
 3. GA4 Admin for that property → **Realtime** while you shop on the demo site  
-4. Dashboard **Data → Sync GA4** after events age into the API (often near-realtime for today)
+4. Open the dashboard (it syncs GA4) or press **Refresh** in the header after events age into the API (often near-realtime for today)

@@ -66,6 +66,32 @@ describe('createAutoSync', () => {
     expect(sources.shopify.run).toHaveBeenCalledTimes(1)
   })
 
+  it('force runs a source even when its last sync is fresh', async () => {
+    const sources = fakeSources()
+    const run = createAutoSync(createMemoryAnalyticsStore(), sources)
+    await run('ga4')
+    expect((await run('ga4')).status).toBe('fresh')
+    expect(await run('ga4', { force: true })).toEqual({ status: 'synced', summary: 'ga4 ok' })
+    expect(sources.ga4.run).toHaveBeenCalledTimes(2)
+  })
+
+  it('shares one run between simultaneous forced callers', async () => {
+    const sources = fakeSources()
+    const run = createAutoSync(createMemoryAnalyticsStore(), sources)
+    await run('shopify')
+    const [a, b] = await Promise.all([run('shopify', { force: true }), run('shopify', { force: true })])
+    expect(a).toBe(b)
+    expect(a.status).toBe('synced')
+    expect(sources.shopify.run).toHaveBeenCalledTimes(2)
+  })
+
+  it('still reports an unconfigured source when forced', async () => {
+    const sources = fakeSources({ ga4: { missing: () => 'GA4_PROPERTY_RESOURCE' } })
+    const outcome = await createAutoSync(createMemoryAnalyticsStore(), sources)('ga4', { force: true })
+    expect(outcome.status).toBe('unconfigured')
+    expect(sources.ga4.run).not.toHaveBeenCalled()
+  })
+
   it('surfaces a sync error to the caller and lets the next call retry', async () => {
     let fail = true
     const sources = fakeSources({

@@ -145,6 +145,54 @@ function trafficIn(rows: DailyTraffic[], start: string, end: string): DailyTraff
   return rows.filter((r) => r.date >= start && r.date <= end)
 }
 
+/** Product page views in the range, keyed by product name (GA4 item name). */
+export function productViewsByName(
+  rows: DailyProductView[],
+  range: { start: string; end: string },
+): Map<string, { name: string; category: string | null; views: number }> {
+  const viewMap = new Map<string, { name: string; category: string | null; views: number }>()
+  for (const row of rows) {
+    if (row.date < range.start || row.date > range.end) continue
+    const existing = viewMap.get(row.productName) ?? {
+      name: row.productName,
+      category: row.category,
+      views: 0,
+    }
+    existing.views += row.views
+    if (!existing.category && row.category) existing.category = row.category
+    viewMap.set(row.productName, existing)
+  }
+  return viewMap
+}
+
+/** Visits by traffic source, summed over already range-filtered traffic rows. */
+export function trafficSourceBreakdown(
+  traffic: DailyTraffic[],
+): Array<{ source: string; visits: number; share: number }> {
+  const sourceMap = new Map<string, number>()
+  for (const t of traffic) {
+    for (const [source, count] of Object.entries(t.sourceBreakdown)) {
+      sourceMap.set(source, (sourceMap.get(source) ?? 0) + count)
+    }
+  }
+  const sourceVisits = sum([...sourceMap.values()]) || sum(traffic.map((t) => t.visits))
+  return [...sourceMap.entries()]
+    .map(([source, v]) => ({ source, visits: v, share: sourceVisits ? (v / sourceVisits) * 100 : 0 }))
+    .sort((a, b) => b.visits - a.visits)
+}
+
+/** Top 10 Search Console queries whose period overlaps the range. */
+export function topSearchKeywords(
+  keywords: SearchKeyword[],
+  range: { start: string; end: string },
+): Array<{ query: string; visits: number }> {
+  return keywords
+    .filter((k) => k.periodEnd >= range.start && k.periodStart <= range.end)
+    .sort((a, b) => b.visits - a.visits)
+    .slice(0, 10)
+    .map((k) => ({ query: k.query, visits: k.visits }))
+}
+
 export function buildOverview(input: {
   range: DateRange
   orders: Order[]
@@ -240,18 +288,7 @@ export function buildOverview(input: {
     .sort((a, b) => b.revenue - a.revenue)
     .map((p) => ({ ...p, share: revenue ? (p.revenue / revenue) * 100 : 0 }))
 
-  const viewMap = new Map<string, { name: string; category: string | null; views: number }>()
-  for (const row of productViewRows) {
-    if (row.date < range.start || row.date > range.end) continue
-    const existing = viewMap.get(row.productName) ?? {
-      name: row.productName,
-      category: row.category,
-      views: 0,
-    }
-    existing.views += row.views
-    if (!existing.category && row.category) existing.category = row.category
-    viewMap.set(row.productName, existing)
-  }
+  const viewMap = productViewsByName(productViewRows, range)
   const viewsTotal = sum([...viewMap.values()].map((p) => p.views)) || productViews
   const productViewsByProduct = [...viewMap.values()]
     .sort((a, b) => b.views - a.views)
@@ -260,16 +297,7 @@ export function buildOverview(input: {
       share: viewsTotal ? (p.views / viewsTotal) * 100 : 0,
     }))
 
-  const sourceMap = new Map<string, number>()
-  for (const t of curTraffic) {
-    for (const [source, count] of Object.entries(t.sourceBreakdown)) {
-      sourceMap.set(source, (sourceMap.get(source) ?? 0) + count)
-    }
-  }
-  const sourceVisits = sum([...sourceMap.values()]) || visits
-  const trafficSources = [...sourceMap.entries()]
-    .map(([source, v]) => ({ source, visits: v, share: sourceVisits ? (v / sourceVisits) * 100 : 0 }))
-    .sort((a, b) => b.visits - a.visits)
+  const trafficSources = trafficSourceBreakdown(curTraffic)
 
   const ordersWithState = curOrders.filter((o) => o.state?.trim())
   // Prefer real ship-to states whenever we have any (Shopify). Sales Tracker rows stay out of this chart.
@@ -324,11 +352,7 @@ export function buildOverview(input: {
     trafficSources,
     ordersByState,
     stateBreakdownMode,
-    searchKeywords: keywords
-      .filter((k) => k.periodEnd >= range.start && k.periodStart <= range.end)
-      .sort((a, b) => b.visits - a.visits)
-      .slice(0, 10)
-      .map((k) => ({ query: k.query, visits: k.visits })),
+    searchKeywords: topSearchKeywords(keywords, range),
     abandonedCarts: {
       abandoned: abandoned?.abandoned ?? 0,
       recovered: abandoned?.recovered ?? 0,
