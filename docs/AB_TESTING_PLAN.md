@@ -355,7 +355,11 @@ Replace the baselines with real numbers from the dashboard funnel in Phase 0. Th
 - `experiments.yml`, registry schema and vitest consistency check, PR preview-link comment, CI upsert, cleanup dispatch and weekly stale-flag job.
 - Update `website-change` / `start-feature` skills and `admin-handoff` (skill and `docs/admin-handoff.html`) with an "Run it as an A/B test" path.
 
-**First real test:** PR #89's Retro Roller splat banner vs the current home hero (`home-banner`, primary metric home → add-to-cart rate, guardrail LCP via a `web-vitals` beacon field). It's a bold visual change on the highest-traffic page, which suits the traffic level.
+**First real test: PR #89, the Retro Roller banner** (part of this effort; it stays open until Phase 1 lands)
+- **Arms:** `control` = the home page without the banner; `b` = with the banner under the value strip. Primary metric: home → add-to-cart rate. Guardrails: purchase rate, revenue per visitor, and LCP via a `web-vitals` field on the beacon.
+- **Changes to PR #89:** rebase on `main` once Phase 1 is merged, wrap the banner section in `<Variant experiment="home-banner" is="b">` (the 3D viewer is already lazy-loaded, so control visitors don't download it), add `src/experiments/home-banner.json`, and label the PR `ab-test`.
+- **Order of work:** Phase 1 → A/A check → PR #89 merges dark → Start from the dashboard. Phase 2 (the dashboard page) can be built during the A/A run, so it's ready by the time the banner starts.
+- **Why it suits this traffic level:** it's a bold visual change on the highest-traffic page.
 
 **Phase 4: later, only if needed**
 - Mutually exclusive layers, multi-arm tests, per-segment targeting UI.
@@ -377,4 +381,6 @@ Replace the baselines with real numbers from the dashboard funnel in Phase 0. Th
 | 6 | One test at a time, or overlap? | **Let tests on different pages overlap** from day one. Same-page tests stay mutually blocked (§9). |
 | 7 | First real test? | **Yes: the Retro Roller banner** (PR #89, `home-banner`), after the A/A check. |
 
-Remaining unknowns to settle in Phase 0: real 90-day baselines per page (they set `min_visitors_per_arm`), and whether PR #89 merges dark under this system or waits until Phase 1 lands.
+PR #89 is part of this effort (owner, 2026-11-03): it does **not** merge on its own. It waits for Phase 1 and then merges dark as the `home-banner` experiment (see "First real test" in §11).
+
+Remaining unknown to settle in Phase 0: real 90-day baselines per page (they set `min_visitors_per_arm`).
