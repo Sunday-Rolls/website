@@ -13,6 +13,10 @@ For each variant of every active product published to the **Headless** sales cha
 - Title, description, all images, price (and sale price when there's a compare-at price), availability (from `availableForSale`), brand (vendor), product type, and condition new.
 - `identifier_exists = false` when there's no GTIN or SKU, because these are own-brand goods.
 - Offer ID `shopify_{productId}_{variantId}`. Multi-variant products get an item group ID and a `?variant=` link.
+- Exception: single-variant products listed in `server/src/data/merchant-legacy-offers.json` (keyed by Shopify handle) keep the item ID and title of their old Squarespace listing, so they keep their listing history and ad performance. New products don't need an entry.
+- Shipping weight from the variant's Shopify weight. Merchant Center's shipping rates are weight-based, so items without it are disapproved.
+
+`MERCHANT_SHOPIFY_CHANNEL` matches the sales channel by name (default `Headless`). In this store the channel is named `Sunday Rolls`.
 
 After every product is accepted, it deletes items from its own data source that are no longer active in Shopify. It never deletes products from other sources, such as Squarespace.
 
@@ -46,9 +50,12 @@ Exit code 1 means at least one product failed. In that case nothing is pruned.
 
 Schedule it as a Railway cron service on the `server/` image. Use the command `npm run merchant:sync` and a schedule of `0 9 * * *` (daily). Run it right after bulk product edits too.
 
-## Cutting over from Squarespace
+## Cutting over from Squarespace (done Nov 2026)
 
-1. Run the sync. In **Merchant Center → Data sources**, wait until **Shopify (website sync)** shows all products approved. That usually takes a few hours and can take up to 3 business days.
-2. Then delete or pause the **Squarespace** primary source, along with the **SUPPLEMENTAL SOURCE 1** Google Sheet attached to it. Don't do this sooner, because the Squarespace source keeps the current approved listings live until then.
+The **Squarespace** primary source was deleted and the sync immediately re-sent the same item IDs (see `merchant-legacy-offers.json`), so the listings carried over instead of starting fresh. While two primary sources send the same item ID, Merchant Center keeps serving the original source's copy, and a source can't be paused, only deleted. That's why the old source had to go first.
+
+Leftovers to tidy:
+
+1. Disconnect Squarespace's Google integration in Squarespace, so it doesn't recreate its data source.
+2. Remove or retarget the **SUPPLEMENTAL SOURCE 1** Google Sheet that was attached to the Squarespace source.
 3. Remove the empty legacy **Content API** source.
-4. Check that Google Ads Shopping or Performance Max campaigns aren't filtered on the old Squarespace item IDs.

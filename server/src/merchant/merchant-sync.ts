@@ -10,8 +10,22 @@
  *
  * Runbook: docs/GOOGLE_MERCHANT_SYNC.md
  */
+import { createRequire } from 'node:module'
 import { GoogleAuth } from 'google-auth-library'
 import { createShopifyAccessToken, type ShopifyCredentials } from '../analytics/shopify.js'
+
+const require = createRequire(import.meta.url)
+
+/**
+ * Shopify handle → item ID and title of the listing that already existed in Merchant Center
+ * (from the old Squarespace feed). Reusing them keeps each listing's history and ad performance.
+ */
+export type LegacyOffer = { offerId: string; title: string }
+const legacyOffers = (() => {
+  const { _comment, ...rest } = require('../data/merchant-legacy-offers.json') as Record<string, unknown>
+  return rest as Record<string, LegacyOffer>
+})()
+const legacyOfferIds = new Set(Object.values(legacyOffers).map((o) => o.offerId))
 
 const MERCHANT_API = 'https://merchantapi.googleapis.com'
 const CONTENT_SCOPE = 'https://www.googleapis.com/auth/content'
@@ -212,10 +226,13 @@ function cleanText(text: string, max: number): string {
 export function shopifyProductToMerchantInputs(
   product: ShopifyProductNode,
   config: Pick<MerchantSyncConfig, 'siteOrigin' | 'feedLabel' | 'contentLanguage' | 'currency' | 'offerIdPrefix'>,
+  legacy: Record<string, LegacyOffer> = legacyOffers,
 ): MerchantProductInput[] {
   const productNum = gidNumber(product.id)
   const variants = product.variants.nodes
   const multi = variants.length > 1
+  // Legacy listings were one item per product, so only single-variant products can take one over.
+  const legacyOffer = multi ? undefined : legacy[product.handle]
   const productImages = product.media.nodes.flatMap((m) => (m.image?.url ? [m.image.url] : []))
   const baseLink = `${config.siteOrigin}/products/${product.handle}/`
 
@@ -232,7 +249,7 @@ export function shopifyProductToMerchantInputs(
     const regular = compareAt ?? v.price
 
     const attrs: MerchantProductInput['productAttributes'] = {
-      title: cleanText(title, 150),
+      title: cleanText(legacyOffer?.title ?? title, 150),
       description: cleanText(product.description || product.title, 5000),
       link: multi ? `${baseLink}?variant=${variantNum}` : baseLink,
       availability: v.availableForSale ? 'IN_STOCK' : 'OUT_OF_STOCK',
@@ -261,7 +278,7 @@ export function shopifyProductToMerchantInputs(
     }
 
     return {
-      offerId: `${config.offerIdPrefix}${productNum}_${variantNum}`,
+      offerId: legacyOffer?.offerId ?? `${config.offerIdPrefix}${productNum}_${variantNum}`,
       contentLanguage: config.contentLanguage,
       feedLabel: config.feedLabel,
       productAttributes: attrs,
@@ -348,7 +365,9 @@ async function listOwnedProducts(token: string, config: MerchantSyncConfig): Pro
       `/products/v1/accounts/${config.merchantId}/products?${qs}`,
     )
     for (const p of page.products ?? []) {
-      if (p.dataSource === ds && p.offerId.startsWith(config.offerIdPrefix)) out.push(p)
+      if (p.dataSource === ds && (p.offerId.startsWith(config.offerIdPrefix) || legacyOfferIds.has(p.offerId))) {
+        out.push(p)
+      }
     }
     if (!page.nextPageToken) break
     pageToken = page.nextPageToken
