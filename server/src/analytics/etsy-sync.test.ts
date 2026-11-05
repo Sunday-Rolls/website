@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { etsyMissingEnv, getEtsyAccessToken, loadEtsyCredentialsFromEnv, type EtsyReceiptRaw } from './etsy.js'
+import {
+  etsyMissingEnv,
+  getEtsyAccessToken,
+  loadEtsyCredentialsFromEnv,
+  type EtsyLedgerEntryRaw,
+  type EtsyReceiptRaw,
+} from './etsy.js'
 import { etsyCostModel, isCountedReceipt, mapEtsyReceipt, syncEtsyToStore } from './etsy-sync.js'
 import { createMemoryAnalyticsStore } from './store.js'
 import type { Order } from './types.js'
@@ -45,7 +51,7 @@ function trackerOrder(receiptId: number, revenue: number, fees: number, shipping
 type Call = { url: string; headers: Record<string, string>; body?: string }
 
 /** Fake Etsy: token refresh (rotating refresh tokens), /users/me and paged receipts. */
-function stubEtsy(receipts: () => EtsyReceiptRaw[], pageSize = 100) {
+function stubEtsy(receipts: () => EtsyReceiptRaw[], pageSize = 100, ledger: () => EtsyLedgerEntryRaw[] = () => []) {
   const calls: Call[] = []
   let issued = 0
   vi.stubGlobal(
@@ -58,6 +64,11 @@ function stubEtsy(receipts: () => EtsyReceiptRaw[], pageSize = 100) {
         return json({ access_token: `123.access-${issued}`, refresh_token: `rotated-${issued}`, expires_in: 3600 })
       }
       if (url.endsWith('/users/me')) return json({ user_id: 123, shop_id: 555 })
+      if (url.includes('/shops/555/payment-account/ledger-entries')) {
+        const offset = Number(new URL(url).searchParams.get('offset') ?? 0)
+        const all = ledger()
+        return json({ count: all.length, results: all.slice(offset, offset + pageSize) })
+      }
       if (url.includes('/shops/555/receipts')) {
         const offset = Number(new URL(url).searchParams.get('offset') ?? 0)
         const all = receipts()
@@ -115,7 +126,7 @@ describe('syncEtsyToStore', () => {
     const calls = stubEtsy(() => [receipt(1), receipt(2), receipt(3, { status: 'Canceled' })])
 
     const r = await syncEtsyToStore(store, creds, { days: 30 })
-    expect(r).toEqual({ receipts: 3, orders: 1, inTracker: 1, removed: 0 })
+    expect(r).toMatchObject({ receipts: 3, orders: 1, inTracker: 1, removed: 0, adSpendRows: 0, adSpend: 0 })
 
     const orders = await store.listOrders()
     expect(orders.find((o) => o.externalId === 'etsy:1')).toMatchObject({ source: 'sales-tracker', fees: 17.21 })
@@ -200,5 +211,68 @@ describe('Etsy env', () => {
       refreshToken: 'r',
       shopId: null,
     })
+  })
+})
+
+describe('Etsy ad spend in the sync', () => {
+  const NOW = Date.parse('2026-11-04T18:00:00Z')
+  const at = (iso: string) => Math.floor(Date.parse(iso) / 1000)
+
+  it('writes daily Etsy Ads spend and gives live orders their Offsite Ads fee', async () => {
+    const store = createMemoryAnalyticsStore()
+    stubEtsy(
+      () => [receipt(2, { created_timestamp: at('2026-11-03T15:00:00Z') })],
+      100,
+      () => [
+        { entry_id: 1, amount: -500, ledger_type: 'prolist', created_timestamp: at('2026-11-03T15:00:00Z') },
+        { entry_id: 2, amount: -500, ledger_type: 'PROLIST', created_timestamp: at('2026-11-03T20:00:00Z') },
+        { entry_id: 3, amount: -1402, ledger_type: 'offsite_ads_fee', reference_type: 'receipt', reference_id: 2, created_timestamp: at('2026-11-03T16:00:00Z') },
+        { entry_id: 4, amount: -1600, ledger_type: 'TRANSACTION', created_timestamp: at('2026-11-03T16:00:00Z') },
+      ],
+    )
+    const r = await syncEtsyToStore(store, creds, { now: () => NOW })
+    expect(r).toMatchObject({ orders: 1, adSpendRows: 2, adSpend: 24.02 })
+    expect(await store.listAdSpend()).toEqual([
+      { date: '2026-11-03', platform: 'Etsy Ads', campaign: 'Etsy Ads', spend: 10, platformReportedSales: 0, platformReportedOrders: 0 },
+      { date: '2026-11-03', platform: 'Etsy Ads', campaign: 'Offsite Ads', spend: 14.02, platformReportedSales: 93.45, platformReportedOrders: 1 },
+    ])
+    expect((await store.listOrders())[0]).toMatchObject({ externalId: 'etsy:2', marketingCost: 14.02 })
+    expect((await store.latestSyncs())[0].message).toMatch(/Ad spend since .*\$24\.02/)
+  })
+
+  it('still syncs orders when the ledger is off limits', async () => {
+    const store = createMemoryAnalyticsStore()
+    const calls = stubEtsy(() => [receipt(2)])
+    const fetchMock = vi.mocked(fetch)
+    const original = fetchMock.getMockImplementation()!
+    fetchMock.mockImplementation(async (url, init) =>
+      String(url).includes('ledger-entries') ? new Response(JSON.stringify({ error: 'insufficient scope' }), { status: 403 }) : original(url, init),
+    )
+    const r = await syncEtsyToStore(store, creds, { now: () => NOW })
+    expect(r).toMatchObject({ orders: 1, adSpendRows: 0, adSpend: null })
+    expect((await store.latestSyncs())[0]).toMatchObject({ status: 'ok' })
+    expect((await store.latestSyncs())[0].message).toMatch(/Ad spend skipped: .*insufficient scope/)
+    expect(calls.length).toBeGreaterThan(0)
+  })
+
+  it('backfills the full window once, then looks back 45 days', async () => {
+    const store = createMemoryAnalyticsStore()
+    const calls = stubEtsy(() => [], 100, () => [
+      { entry_id: 1, amount: -300, ledger_type: 'prolist', created_timestamp: at('2026-11-02T15:00:00Z') },
+    ])
+    // Earliest min_created among the ledger calls of the latest run, in days before now.
+    const ledgerFrom = (since: number) => {
+      const mins = calls.slice(since).filter((c) => c.url.includes('ledger-entries')).map((c) => Number(new URL(c.url).searchParams.get('min_created')))
+      return Math.round((NOW / 1000 - Math.min(...mins)) / 86_400)
+    }
+    await syncEtsyToStore(store, creds, { days: 365, now: () => NOW })
+    expect(ledgerFrom(0)).toBe(367)
+    // 367 days in 30-day slices.
+    expect(calls.filter((c) => c.url.includes('ledger-entries'))).toHaveLength(13)
+    const before = calls.length
+    await syncEtsyToStore(store, creds, { days: 365, now: () => NOW })
+    expect(ledgerFrom(before)).toBe(47)
+    // The ledger entry falls in one slice only, so it's counted once.
+    expect((await store.listAdSpend()).map((r) => r.spend)).toEqual([3])
   })
 })
