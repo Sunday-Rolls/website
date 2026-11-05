@@ -1,4 +1,5 @@
 import { scheduleAfterLoad } from '@/lib/schedule'
+import type { ShopifyAnalyticsProduct } from '@/lib/shopifyAnalytics'
 
 type Fbq = ((...args: unknown[]) => void) & {
   callMethod?: (...args: unknown[]) => void
@@ -64,11 +65,33 @@ function parseMoney(value: string | number | undefined): number {
 
 let analyticsBooted = false
 
+type ShopifyAnalyticsModule = typeof import('@/lib/shopifyAnalytics')
+/** Shopify events wait here until analytics boots, so its module stays off the critical path. */
+const pendingShopify: Array<(module: ShopifyAnalyticsModule) => void> = []
+let shopifyModule: ShopifyAnalyticsModule | null = null
+
+function withShopify(send: (module: ShopifyAnalyticsModule) => void): void {
+  if (typeof window === 'undefined') return
+  if (shopifyModule) send(shopifyModule)
+  else pendingShopify.push(send)
+}
+
+function bootShopifyAnalytics(): void {
+  import('@/lib/shopifyAnalytics')
+    .then((module) => {
+      shopifyModule = module
+      void module.initShopifyAnalytics()
+      for (const send of pendingShopify.splice(0)) send(module)
+    })
+    .catch((error) => console.warn('[shopify-analytics] failed to load', error))
+}
+
 function loadAnalyticsScripts(): void {
   if (analyticsBooted || typeof window === 'undefined') return
   analyticsBooted = true
 
   window.dataLayer = window.dataLayer ?? []
+  bootShopifyAnalytics()
 
   if (gtmId) {
     window.dataLayer.push({
@@ -236,6 +259,7 @@ export function trackPageView(path: string, title?: string): void {
     page_title: title ?? (typeof document !== 'undefined' ? document.title : path),
   })
   sendMetaEvent('PageView')
+  withShopify((shopify) => shopify.shopifyPageView())
   if (sendDirect && window.gtag && ga4MeasurementId) {
     window.gtag('event', 'page_view', {
       send_to: ga4MeasurementId,
@@ -273,7 +297,18 @@ export function trackSelectItem(
   })
 }
 
-export function trackViewItem(product: TrackableProduct): void {
+/** Product fields Shopify's own analytics also needs. */
+type ShopifyProductFields = Pick<ShopifyAnalyticsProduct, 'variantId' | 'variantTitle' | 'vendor'>
+
+export function trackViewItem(product: TrackableProduct & ShopifyProductFields): void {
+  withShopify((shopify) =>
+    shopify.shopifyProductView({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      variantId: product.variantId,
+    }),
+  )
   const price = parseMoney(product.price)
   pushEcommerce('view_item', {
     currency: 'USD',
@@ -282,7 +317,22 @@ export function trackViewItem(product: TrackableProduct): void {
   })
 }
 
-export function trackAddToCart(product: TrackableProduct, quantity = 1): void {
+export function trackAddToCart(
+  product: TrackableProduct & ShopifyProductFields,
+  quantity = 1,
+  cartId?: string,
+): void {
+  if (cartId) {
+    withShopify((shopify) =>
+      shopify.shopifyAddToCart(cartId, {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        variantId: product.variantId,
+        quantity,
+      }),
+    )
+  }
   const item = toItem(product, quantity)
   pushEcommerce('add_to_cart', {
     currency: 'USD',

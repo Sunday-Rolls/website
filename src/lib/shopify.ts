@@ -4,6 +4,7 @@ import {
   getCatalogProductByHandle,
   placeholderProducts as catalogPlaceholders,
 } from '@/lib/product-catalog'
+import { shopifyTrackingHeaders } from '@/lib/shopifyAnalytics'
 
 const storeDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN
 const publicAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN
@@ -224,8 +225,12 @@ const CART_SELECTION = `
 `
 
 const CART_CREATE = `#graphql
-  mutation CartCreate($lines: [CartLineInput!], $attributes: [AttributeInput!]) {
-    cartCreate(input: { lines: $lines, attributes: $attributes }) {
+  mutation CartCreate(
+    $lines: [CartLineInput!]
+    $attributes: [AttributeInput!]
+    $buyerIdentity: CartBuyerIdentityInput
+  ) {
+    cartCreate(input: { lines: $lines, attributes: $attributes, buyerIdentity: $buyerIdentity }) {
       cart {
         ${CART_SELECTION}
       }
@@ -537,6 +542,28 @@ const NEWSLETTER_SUBSCRIBE_MUTATION = `#graphql
   }
 `
 
+/**
+ * Email from the newsletter form, kept so the next cart is created for that buyer.
+ * Shopify's abandoned-cart email can only reach a cart that has a known customer.
+ */
+const SUBSCRIBER_EMAIL_KEY = 'sr_subscriber_email'
+
+function readSubscriberEmail(): string | null {
+  try {
+    return window.localStorage.getItem(SUBSCRIBER_EMAIL_KEY)
+  } catch {
+    return null
+  }
+}
+
+function rememberSubscriberEmail(email: string): void {
+  try {
+    window.localStorage.setItem(SUBSCRIBER_EMAIL_KEY, email)
+  } catch {
+    // Private mode etc.: the cart just stays anonymous.
+  }
+}
+
 export async function subscribeToNewsletter(email: string): Promise<void> {
   const trimmed = email.trim()
   if (!trimmed) {
@@ -559,6 +586,7 @@ export async function subscribeToNewsletter(email: string): Promise<void> {
       userErrorMessage(payload.customerUserErrors, 'Unable to subscribe right now. Please try again.'),
     )
   }
+  rememberSubscriberEmail(trimmed)
 }
 
 export async function fetchProducts(limit = 12): Promise<ShopifyProduct[]> {
@@ -626,8 +654,10 @@ export async function createCart(
 ): Promise<ShopifyCart> {
   if (!shopifyClient) throw new Error('Shopify is not configured')
 
+  const email = readSubscriberEmail()
   const { data, errors } = await shopifyClient.request(CART_CREATE, {
-    variables: { lines, attributes },
+    variables: { lines, attributes, buyerIdentity: email ? { email } : undefined },
+    headers: shopifyTrackingHeaders(),
   })
 
   const payload = data?.cartCreate
@@ -646,6 +676,7 @@ export async function fetchCart(cartId: string): Promise<ShopifyCart | null> {
 
   const { data, errors } = await shopifyClient.request(CART_QUERY, {
     variables: { id: cartId },
+    headers: shopifyTrackingHeaders(),
   })
 
   if (errors) {
@@ -665,6 +696,7 @@ export async function updateCartAttributes(
 
   const { data, errors } = await shopifyClient.request(CART_ATTRIBUTES_UPDATE, {
     variables: { cartId, attributes },
+    headers: shopifyTrackingHeaders(),
   })
 
   const payload = data?.cartAttributesUpdate
@@ -683,6 +715,7 @@ export async function addCartLines(
 
   const { data, errors } = await shopifyClient.request(CART_LINES_ADD, {
     variables: { cartId, lines },
+    headers: shopifyTrackingHeaders(),
   })
 
   const payload = data?.cartLinesAdd
@@ -704,6 +737,7 @@ export async function updateCartLines(
 
   const { data, errors } = await shopifyClient.request(CART_LINES_UPDATE, {
     variables: { cartId, lines },
+    headers: shopifyTrackingHeaders(),
   })
 
   const payload = data?.cartLinesUpdate
@@ -725,6 +759,7 @@ export async function removeCartLines(
 
   const { data, errors } = await shopifyClient.request(CART_LINES_REMOVE, {
     variables: { cartId, lineIds },
+    headers: shopifyTrackingHeaders(),
   })
 
   const payload = data?.cartLinesRemove
