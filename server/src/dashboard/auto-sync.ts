@@ -50,7 +50,8 @@ export function defaultAutoSyncSources(env: NodeJS.ProcessEnv = process.env): Re
       run: async (store) => {
         const days = Math.max(1, Math.min(Number(env.ETSY_SYNC_DAYS ?? 365) || 365, 3650))
         const r = await syncEtsyToStore(store, loadEtsyCredentialsFromEnv(env)!, { days })
-        return `${r.orders} new orders · ${r.inTracker} already in Sales Tracker`
+        const ads = r.adSpend === null ? 'ad spend unavailable' : `$${r.adSpend.toFixed(0)} ad spend`
+        return `${r.orders} new orders · ${r.inTracker} already in Sales Tracker · ${ads}`
       },
     },
     'sales-tracker': {

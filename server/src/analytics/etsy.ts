@@ -181,3 +181,45 @@ export async function fetchEtsyReceipts(
   }
   return out
 }
+
+export type EtsyLedgerEntryRaw = {
+  entry_id: number
+  /** Minor units (cents); debits are negative. */
+  amount: number
+  currency?: string | null
+  created_timestamp?: number | null
+  create_date?: number | null
+  ledger_type?: string | null
+  description?: string | null
+  reference_type?: string | null
+  reference_id?: number | string | null
+}
+
+/** Payment-account ledger entries created in [minCreated, maxCreated] (unix seconds). */
+export async function fetchEtsyLedgerEntries(
+  creds: EtsyCredentials,
+  token: string,
+  shopId: string,
+  options: { minCreated: number; maxCreated: number },
+): Promise<EtsyLedgerEntryRaw[]> {
+  const out: EtsyLedgerEntryRaw[] = []
+  // 30-day slices keep each request inside any window limit Etsy applies to the ledger.
+  const SLICE = 30 * 86_400
+  for (let start = options.minCreated; start < options.maxCreated; start += SLICE) {
+    const end = Math.min(options.maxCreated, start + SLICE - 1)
+    const slice: EtsyLedgerEntryRaw[] = []
+    for (;;) {
+      const page = await etsyGet<{ count: number; results: EtsyLedgerEntryRaw[] }>(
+        creds,
+        token,
+        `/shops/${shopId}/payment-account/ledger-entries`,
+        { min_created: start, max_created: end, limit: PAGE_LIMIT, offset: slice.length },
+      )
+      slice.push(...(page.results ?? []))
+      if (!page.results?.length || slice.length >= (page.count ?? 0)) break
+    }
+    out.push(...slice)
+  }
+  // Slices don't overlap, but dedupe by entry id in case Etsy's boundaries are inclusive.
+  return [...new Map(out.map((e) => [e.entry_id, e])).values()]
+}

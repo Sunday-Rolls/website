@@ -10,6 +10,7 @@ Outputs (in the same folder as this script):
   etsy_order_items.csv      one row per item sold (transaction)
   etsy_listings.csv         your active listings
   etsy_monthly_summary.csv  orders / items / revenue by month
+  etsy_ledger.csv           payment-account ledger: every fee, ad charge and payout
 
 Usage:
   python3 etsy_pull.py                    # pull everything
@@ -365,6 +366,38 @@ def main():
         "url": l.get("url"),
     } for l in listings_raw]
 
+    # ---- Ledger (fees, Etsy Ads, Offsite Ads, payouts) ----
+    print("Fetching payment ledger (last 365 days)...")
+    ledger = []
+    try:
+        end = int(time.time())
+        start = end - 365 * 86400
+        while start < end:
+            stop = min(end, start + 30 * 86400 - 1)
+            ledger.extend(etsy.paginate(
+                f"/shops/{shop_id}/payment-account/ledger-entries",
+                {"min_created": start, "max_created": stop}, "ledger entries"))
+            start = stop + 1
+    except RuntimeError as e:
+        print(f"  Couldn't read the ledger: {str(e).splitlines()[0]}")
+    seen = set()
+    ledger_rows = []
+    for e in sorted(ledger, key=lambda x: x.get("created_timestamp") or 0):
+        if e.get("entry_id") in seen:
+            continue
+        seen.add(e.get("entry_id"))
+        ledger_rows.append({
+            "entry_id": e.get("entry_id"),
+            "created": ts(e.get("created_timestamp") or e.get("create_date")),
+            "ledger_type": e.get("ledger_type"),
+            "description": e.get("description"),
+            "amount": round((e.get("amount") or 0) / 100, 2),
+            "currency": e.get("currency"),
+            "reference_type": e.get("reference_type"),
+            "reference_id": e.get("reference_id"),
+            "balance": round((e.get("balance") or 0) / 100, 2),
+        })
+
     # ---- Write ----
     print("\nSaving CSVs...")
     write_csv("etsy_orders.csv", orders, list(orders[0].keys()) if orders else
@@ -379,6 +412,8 @@ def main():
                                for f, v in monthly[k].items()}}
                for k in sorted(monthly)]
     write_csv("etsy_monthly_summary.csv", summary, summary_fields)
+    write_csv("etsy_ledger.csv", ledger_rows, list(ledger_rows[0].keys()) if ledger_rows else
+              ["entry_id", "created", "ledger_type", "amount"])
     print("\nDone.")
 
 

@@ -12,6 +12,17 @@ The dashboard pulls Etsy orders straight from the Etsy Open API v3, so new Etsy 
 
 It runs with the other sources when the dashboard opens (`POST /dashboard/api/sync/auto/etsy`, skipped while the last good run is under 15 minutes old) and on **Refresh**. Tools → Connections shows its status.
 
+## Ad spend
+
+Each run also reads Etsy's payment-account ledger and writes daily Etsy ad spend to `analytics_daily_ad_spend` under platform **Etsy Ads**:
+
+- campaign **Etsy Ads**: on-site promoted listings (ledger type `prolist`), the daily ad budget.
+- campaign **Offsite Ads**: the per-order fee Etsy charges when one of its offsite ads made the sale (`offsite_ads_fee`). These rows also report the sales those ads made, so the Marketing page shows a ROAS for them.
+
+That gives the Marketing page, MER and ROAS the Etsy spend next to Google and Meta, and clears the "Etsy Ads isn't connected" card. The P&L is unchanged: it takes marketing from each order (the Sales Tracker's Marketing column), so nothing is counted twice. Live Etsy orders not yet in the sheet carry their own Offsite Ads fee as marketing cost.
+
+The first run backfills the same window as orders (`ETSY_SYNC_DAYS`). After that each run re-reads the last 45 days, so late refunds of ad fees get picked up. If the ledger can't be read, orders still sync and Tools → Connections says "Ad spend skipped" with the reason. Ad-looking ledger types the sync doesn't recognise are listed in the sync message, so a new Etsy fee type gets noticed.
+
 ## Setup
 
 1. **Etsy app.** Use the seller app **shop-data-export** at <https://www.etsy.com/developers/your-apps> (owner: the Sunday Rolls Etsy account). It has the callback URL `https://localhost:3003/callback` registered.
@@ -38,4 +49,4 @@ The local script and the server each keep their own token chain. If the script l
 
 ## Scopes
 
-The app asks for `transactions_r listings_r shops_r`, which is read-only. Buyer emails need `email_r`, so live Etsy rows have no customer email, the same as sheet rows.
+The app asks for `transactions_r listings_r shops_r`, which is read-only. The ledger is covered by `transactions_r`. Buyer emails need `email_r`, so live Etsy rows have no customer email, the same as sheet rows.
