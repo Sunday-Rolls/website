@@ -54,7 +54,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       // until Shopify has added it. A failed add shows in the cart's error banner.
       const added = addItem(variantId, 1)
       navigate('/cart')
-      added.then(() => trackAddToCart(product)).catch(() => undefined)
+      added
+        .then((cart) => trackAddToCart({ ...product, variantId }, 1, cart.id))
+        .catch(() => undefined)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to add to cart')
     } finally {

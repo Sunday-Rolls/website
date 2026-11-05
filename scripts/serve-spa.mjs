@@ -7,9 +7,13 @@ import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { extname, join, normalize } from 'node:path'
 import { legacyRedirect } from './lib/legacy-redirects.mjs'
+import { proxyStorefrontApi, storefrontApiVersion } from './lib/storefront-proxy.mjs'
 
 const dist = join(process.cwd(), 'dist')
 const port = Number(process.env.PORT || 8080)
+/** Shop's primary domain; Shopify analytics cookies are issued for its parent domain. */
+const storefrontProxyHost =
+  process.env.VITE_SHOPIFY_CHECKOUT_DOMAIN?.trim() || 'shop.sundayrollsgolf.com'
 
 // Product handles for the Squarespace URL redirects (empty set → product URLs fall back to /shop/).
 const productHandles = await readFile(join(process.cwd(), 'src/data/product-catalog.json'), 'utf8')
@@ -64,6 +68,11 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && (req.url === '/health' || req.url?.startsWith('/health?'))) {
       res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' })
       res.end('ok')
+      return
+    }
+
+    if (storefrontApiVersion(req.url)) {
+      await proxyStorefrontApi(req, res, { upstreamHost: storefrontProxyHost })
       return
     }
 

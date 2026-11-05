@@ -91,8 +91,19 @@ function inlineCss(): Plugin {
   }
 }
 
+/** Same-origin Storefront API proxy in dev, matching scripts/serve-spa.mjs in production. */
+const checkoutDomain = process.env.VITE_SHOPIFY_CHECKOUT_DOMAIN?.trim() || 'shop.sundayrollsgolf.com'
+
 export default defineConfig({
   base: basePath,
+  server: {
+    proxy: {
+      '^/api/(unstable|\\d{4}-\\d{2})/graphql\\.json$': {
+        target: `https://${checkoutDomain}`,
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     manifest: true,
   },

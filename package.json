@@ -29,6 +29,7 @@
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
+    "@shopify/hydrogen-react": "^2026.4.5",
     "@shopify/storefront-api-client": "^2.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "clsx": "^2.1.1",
