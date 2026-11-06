@@ -177,4 +177,73 @@ CREATE TABLE IF NOT EXISTS analytics_integration_state (
   value jsonb NOT NULL DEFAULT '{}'::jsonb,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+-- Etsy detail data from the Open API (see docs/ETSY_SYNC.md). Money in dollars.
+CREATE TABLE IF NOT EXISTS analytics_etsy_receipts (
+  receipt_id text PRIMARY KEY,
+  ordered_at timestamptz NOT NULL,
+  status text NOT NULL DEFAULT '',
+  buyer_user_id text,
+  grandtotal numeric(12,2) NOT NULL DEFAULT 0,
+  subtotal numeric(12,2) NOT NULL DEFAULT 0,
+  shipping_charged numeric(12,2) NOT NULL DEFAULT 0,
+  tax numeric(12,2) NOT NULL DEFAULT 0,
+  discount numeric(12,2) NOT NULL DEFAULT 0,
+  refunded numeric(12,2) NOT NULL DEFAULT 0,
+  shop_coupon numeric(12,2) NOT NULL DEFAULT 0,
+  buyer_coupon numeric(12,2) NOT NULL DEFAULT 0,
+  units integer NOT NULL DEFAULT 0,
+  is_shipped boolean NOT NULL DEFAULT false,
+  shipped_at timestamptz,
+  processing_fees numeric(12,2),
+  actual_fees numeric(12,2),
+  label_cost numeric(12,2),
+  offsite_ads_fee numeric(12,2),
+  net numeric(12,2),
+  payment_synced boolean NOT NULL DEFAULT false,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS analytics_etsy_receipts_ordered_at_idx ON analytics_etsy_receipts (ordered_at);
+
+CREATE TABLE IF NOT EXISTS analytics_etsy_fees_daily (
+  date date NOT NULL,
+  ledger_type text NOT NULL,
+  category text NOT NULL DEFAULT 'other',
+  amount numeric(12,2) NOT NULL DEFAULT 0,
+  entries integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (date, ledger_type)
+);
+
+CREATE TABLE IF NOT EXISTS analytics_etsy_listings (
+  listing_id text PRIMARY KEY,
+  title text NOT NULL DEFAULT '',
+  url text,
+  state text NOT NULL,
+  price numeric(12,2) NOT NULL DEFAULT 0,
+  quantity integer NOT NULL DEFAULT 0,
+  favorites integer NOT NULL DEFAULT 0,
+  views integer NOT NULL DEFAULT 0,
+  tags jsonb NOT NULL DEFAULT '[]'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS analytics_etsy_reviews (
+  review_key text PRIMARY KEY,
+  listing_id text,
+  transaction_id text,
+  rating integer NOT NULL,
+  review text,
+  created_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS analytics_etsy_reviews_created_idx ON analytics_etsy_reviews (created_at);
+
+CREATE TABLE IF NOT EXISTS analytics_etsy_shop_daily (
+  date date PRIMARY KEY,
+  shop_name text NOT NULL DEFAULT '',
+  url text,
+  favorites integer NOT NULL DEFAULT 0,
+  review_count integer NOT NULL DEFAULT 0,
+  review_average numeric(4,2),
+  total_sold integer NOT NULL DEFAULT 0,
+  active_listings integer NOT NULL DEFAULT 0
+);
 `

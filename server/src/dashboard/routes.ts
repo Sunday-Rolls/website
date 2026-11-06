@@ -16,6 +16,7 @@ import {
 } from '../analytics/auth.js'
 import { buildDataAudit } from '../analytics/data-audit.js'
 import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
+import { buildEtsyView } from '../analytics/etsy-view.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { loadGscCredentialsFromEnv, syncGscToStore } from '../analytics/gsc-sync.js'
 import {
@@ -237,6 +238,29 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (range instanceof Response) return range
     const [orders, productViews] = await Promise.all([store.listOrders(), store.listProductViews()])
     return c.json({ ok: true, data: buildProductsView({ range, orders, productViews }) })
+  })
+
+  app.get('/api/etsy', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const range = rangeOrError(c)
+    if (range instanceof Response) return range
+    const [orders, customerOrders, receipts, fees, listings, reviews, shopDaily, syncs] = await Promise.all([
+      store.listOrders(),
+      store.listCustomerOrders(),
+      store.listEtsyReceipts(),
+      store.listEtsyFeesDaily(),
+      store.listEtsyListings(),
+      store.listEtsyReviews(),
+      store.listEtsyShopDaily(),
+      store.latestSyncs(),
+    ])
+    // Same credential check as the Etsy auto-sync and /api/health.
+    const connected = (deps.autoSyncSources ?? defaultAutoSyncSources()).etsy.missing() === null
+    return c.json({
+      ok: true,
+      data: buildEtsyView({ range, orders, customerOrders, receipts, fees, listings, reviews, shopDaily, syncs, connected }),
+    })
   })
 
   app.get('/api/marketing', async (c) => {
