@@ -21,6 +21,8 @@ Each run also reads Etsy's payment-account ledger and writes daily Etsy ad spend
 
 That gives the Marketing page, MER and ROAS the Etsy spend next to Google and Meta, and clears the "Etsy Ads isn't connected" card. The P&L is unchanged: it takes marketing from each order (the Sales Tracker's Marketing column), so nothing is counted twice. Live Etsy orders not yet in the sheet carry their own Offsite Ads fee as marketing cost.
 
+**ROAS.** Etsy's ads only show on Etsy, so the Marketing page credits them with Etsy sales: the platform ROAS is all Etsy sales in the range ÷ all Etsy ad spend. Per campaign, Offsite Ads gets the sales of the orders Etsy charged an Offsite Ads fee on, and Etsy Ads gets the rest of Etsy's sales, so the two add up to the platform total. This is generous to the ads (Etsy's own search and repeat buyers would sell some of that anyway), so treat it as an upper bound.
+
 The first run backfills the same window as orders (`ETSY_SYNC_DAYS`). After that each run re-reads the last 45 days, so late refunds of ad fees get picked up. If the ledger can't be read, orders still sync and Tools → Connections says "Ad spend skipped" with the reason. Ad-looking ledger types the sync doesn't recognise are listed in the sync message, so a new Etsy fee type gets noticed.
 
 ## Fees and receipt detail

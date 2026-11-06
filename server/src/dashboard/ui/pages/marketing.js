@@ -169,7 +169,11 @@ function platformTable(p) {
           if (!(v > 0)) return `—<span class="cell-sub">None linked</span>`
           const n = r.siteTaggedOrders ?? 0
           const parts = []
-          if (n) parts.push(`${num(n)} tagged order${n === 1 ? '' : 's'}`)
+          if (/etsy/i.test(r.platform)) {
+            // Offsite Ads: sales Etsy credits to them. Other Etsy campaigns: their share of Etsy's sales.
+            if (r.campaign !== 'Offsite Ads') parts.push('Share of Etsy sales')
+            else parts.push(n ? `${num(n)} order${n === 1 ? '' : 's'} credited by Etsy` : 'Credited by Etsy')
+          } else if (n) parts.push(`${num(n)} tagged order${n === 1 ? '' : 's'}`)
           if (r.siteSalesEstimated > 0) parts.push(`${money(r.siteSalesEstimated)} est.`)
           return `${money(v)}<span class="cell-sub">${escapeHtml(parts.join(' · '))}</span>`
         },
