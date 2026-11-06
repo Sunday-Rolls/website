@@ -8,6 +8,7 @@ import {
 } from './etsy.js'
 import { etsyCostModel, isCountedReceipt, mapEtsyReceipt, syncEtsyToStore } from './etsy-sync.js'
 import { createMemoryAnalyticsStore } from './store.js'
+import { customerSplit } from './views.js'
 import type { Order } from './types.js'
 
 const creds = { keystring: 'key', sharedSecret: 'secret', refreshToken: 'seed-refresh' }
@@ -51,7 +52,13 @@ function trackerOrder(receiptId: number, revenue: number, fees: number, shipping
 type Call = { url: string; headers: Record<string, string>; body?: string }
 
 /** Fake Etsy: token refresh (rotating refresh tokens), /users/me and paged receipts. */
-function stubEtsy(receipts: () => EtsyReceiptRaw[], pageSize = 100, ledger: () => EtsyLedgerEntryRaw[] = () => []) {
+function stubEtsy(
+  receipts: () => EtsyReceiptRaw[],
+  pageSize = 100,
+  ledger: () => EtsyLedgerEntryRaw[] = () => [],
+  /** Extra routes (payments, listings, reviews, shop); return undefined to fall through. */
+  routes?: (url: URL) => Response | undefined,
+) {
   const calls: Call[] = []
   let issued = 0
   vi.stubGlobal(
@@ -64,6 +71,8 @@ function stubEtsy(receipts: () => EtsyReceiptRaw[], pageSize = 100, ledger: () =
         return json({ access_token: `123.access-${issued}`, refresh_token: `rotated-${issued}`, expires_in: 3600 })
       }
       if (url.endsWith('/users/me')) return json({ user_id: 123, shop_id: 555 })
+      const routed = routes?.(new URL(url))
+      if (routed) return routed
       if (url.includes('/shops/555/payment-account/ledger-entries')) {
         const offset = Number(new URL(url).searchParams.get('offset') ?? 0)
         const all = ledger()
@@ -274,5 +283,253 @@ describe('Etsy ad spend in the sync', () => {
     expect(ledgerFrom(before)).toBe(47)
     // The ledger entry falls in one slice only, so it's counted once.
     expect((await store.listAdSpend()).map((r) => r.spend)).toEqual([3])
+  })
+})
+
+describe('Etsy detail data in the sync', () => {
+  const NOW = Date.parse('2026-11-04T18:00:00Z')
+  const at = (iso: string) => Math.floor(Date.parse(iso) / 1000)
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status })
+  const page = (results: unknown[]) => json({ count: results.length, results })
+  const opts = { now: () => NOW, paymentIntervalMs: 0 }
+
+  /** Payments by receipt id, listings by state, reviews, shop. */
+  function routes(data: {
+    payments?: Record<string, unknown[]>
+    listings?: Record<string, unknown[]>
+    reviews?: () => unknown[]
+    shop?: unknown
+    fail?: RegExp
+  }) {
+    return (url: URL) => {
+      if (data.fail?.test(url.pathname)) return json({ error: 'insufficient scope' }, 403)
+      const pay = url.pathname.match(/\/receipts\/(\d+)\/payments$/)
+      if (pay) return page(data.payments?.[pay[1]] ?? [])
+      if (url.pathname.endsWith('/shops/555/listings')) return page(data.listings?.[url.searchParams.get('state') ?? 'active'] ?? [])
+      if (url.pathname.endsWith('/shops/555/reviews')) return page(data.reviews?.() ?? [])
+      if (url.pathname.endsWith('/shops/555')) return json(data.shop ?? { shop_id: 555, shop_name: 'SundayRolls' })
+      return undefined
+    }
+  }
+
+  it('uses real fees and label cost where Etsy has them, else the estimate, and stores every receipt', async () => {
+    const store = createMemoryAnalyticsStore()
+    await store.upsertOrders([trackerOrder(1, 93.45, 17.21, 5.83)])
+    const created = at('2026-11-01T15:00:00Z')
+    stubEtsy(
+      () => [receipt(1, { created_timestamp: created }), receipt(2, { created_timestamp: created }), receipt(3, { created_timestamp: created })],
+      100,
+      () => [
+        { entry_id: 1, amount: -520, ledger_type: 'transaction', reference_type: 'transaction', reference_id: '20', created_timestamp: at('2026-11-01T15:00:00Z') },
+        { entry_id: 2, amount: -651, ledger_type: 'shipping_labels', reference_type: 'receipt', reference_id: '2', created_timestamp: at('2026-11-02T15:00:00Z') },
+        { entry_id: 3, amount: 9345, ledger_type: 'Payment', reference_type: 'receipt', reference_id: '2', created_timestamp: at('2026-11-01T15:00:00Z') },
+      ],
+      routes({
+        payments: {
+          '1': [{ payment_id: 10, receipt_id: 1, amount_fees: usd(290), amount_net: usd(9055) }],
+          '2': [{ payment_id: 20, receipt_id: 2, amount_fees: usd(295), amount_net: usd(9050) }],
+          '3': [{ payment_id: 30, receipt_id: 3, amount_fees: usd(300), amount_net: usd(9045) }],
+        },
+      }),
+    )
+    const r = await syncEtsyToStore(store, creds, opts)
+    expect(r).toMatchObject({ orders: 2, inTracker: 1, receiptDetails: 3, payments: 3, actualFeeOrders: 1, actualLabelOrders: 1, skipped: [] })
+
+    const orders = await store.listOrders()
+    expect(orders.find((o) => o.externalId === 'etsy:1')).toMatchObject({ source: 'sales-tracker', fees: 17.21, shippingCost: 5.83 })
+    expect(orders.find((o) => o.externalId === 'etsy:2')).toMatchObject({ source: 'etsy', fees: 8.15, shippingCost: 6.51 })
+    // No transaction-fee entry for #3 yet, so the sheet-learned estimate stays.
+    const three = orders.find((o) => o.externalId === 'etsy:3')!
+    expect(three.fees).toBeCloseTo(17.21)
+    expect(three.shippingCost).toBeCloseTo(5.83)
+
+    const details = await store.listEtsyReceipts()
+    expect(details.map((d) => [d.receiptId, d.processingFees, d.actualFees, d.labelCost, d.paymentSynced])).toEqual([
+      ['1', 2.9, null, null, true],
+      ['2', 2.95, 8.15, 6.51, true],
+      ['3', 3, null, null, true],
+    ])
+    expect(await store.listEtsyFeesDaily()).toEqual([
+      { date: '2026-11-01', ledgerType: 'transaction', category: 'transaction_fee', amount: 5.2, entries: 1 },
+      { date: '2026-11-02', ledgerType: 'shipping_labels', category: 'shipping_label', amount: 6.51, entries: 1 },
+    ])
+    expect((await store.latestSyncs())[0].message).toMatch(/real fees on 1\/2 live orders/)
+  })
+
+  it('writes customer history keyed by Etsy buyer, so repeat buyers count as returning', async () => {
+    const store = createMemoryAnalyticsStore()
+    let cancelFour = false
+    stubEtsy(
+      () => [
+        receipt(2, { buyer_user_id: 111, created_timestamp: at('2026-09-10T15:00:00Z') }),
+        receipt(3, { created_timestamp: at('2026-11-02T15:00:00Z') }),
+        receipt(4, { buyer_user_id: 111, created_timestamp: at('2026-11-02T15:00:00Z'), status: cancelFour ? 'Canceled' : 'Paid' }),
+        receipt(5, { buyer_user_id: 222, status: 'Canceled' }),
+      ],
+      100,
+      () => [],
+      routes({}),
+    )
+    const r = await syncEtsyToStore(store, creds, opts)
+    expect(r.customerOrders).toBe(2)
+    const rows = await store.listCustomerOrders()
+    expect(rows.map((c) => [c.externalId, c.email, c.channel, c.units])).toEqual([
+      ['etsy:2', 'etsy-buyer:111', 'etsy', 1],
+      ['etsy:4', 'etsy-buyer:111', 'etsy', 1],
+    ])
+    const split = customerSplit(await store.listOrders(), { start: '2026-11-01', end: '2026-11-04' }, rows)
+    // #4 is a returning buyer; #3 has no buyer id but Etsy is covered, so it isn't "unknown".
+    expect(split).toEqual({ new: 0, returning: 1, unknownOrders: 0 })
+
+    cancelFour = true
+    await syncEtsyToStore(store, creds, opts)
+    expect((await store.listCustomerOrders()).map((c) => c.externalId)).toEqual(['etsy:2'])
+  })
+
+  it('keeps syncing orders when payments and reviews are off limits', async () => {
+    const store = createMemoryAnalyticsStore()
+    stubEtsy(
+      () => [receipt(2)],
+      100,
+      () => [],
+      routes({
+        fail: /\/payments$|\/reviews$/,
+        listings: { active: [{ listing_id: 9, title: 'Retro Roller', state: 'active', price: usd(8000) }] },
+        shop: { shop_id: 555, shop_name: 'SundayRolls', num_favorers: 10, review_count: 3, review_average: 5, transaction_sold_count: 40, listing_active_count: 1 },
+      }),
+    )
+    const r = await syncEtsyToStore(store, creds, opts)
+    expect(r).toMatchObject({ orders: 1, listings: 1, reviews: null, shopSnapshot: true, payments: 0, skipped: ['payments', 'reviews'] })
+    expect((await store.listOrders()).map((o) => o.externalId)).toEqual(['etsy:2'])
+    const sync = (await store.latestSyncs())[0]
+    expect(sync.status).toBe('ok')
+    expect(sync.message).toMatch(/Skipped payments \(1 of 1 failed: .*insufficient scope\); reviews \(.*insufficient scope\)\./)
+    expect(await store.listEtsyShopDaily()).toEqual([
+      { date: '2026-11-04', shopName: 'SundayRolls', url: null, favorites: 10, reviewCount: 3, reviewAverage: 5, totalSold: 40, activeListings: 1 },
+    ])
+    // Payment never read, so the next run asks again.
+    expect((await store.listEtsyReceipts())[0].paymentSynced).toBe(false)
+  })
+
+  it('replaces listings, and re-reads reviews from 30 days before the newest one', async () => {
+    const store = createMemoryAnalyticsStore()
+    let listings: Record<string, unknown[]> = {
+      active: [{ listing_id: 1, title: 'B cover', state: 'active' }],
+      sold_out: [{ listing_id: 2, title: 'A cover', state: 'sold_out' }],
+    }
+    const reviewCreated = at('2026-10-20T15:00:00Z')
+    const calls = stubEtsy(
+      () => [],
+      100,
+      () => [],
+      (url) => routes({ listings, reviews: () => [{ listing_id: 1, transaction_id: 77, rating: 5, review: 'Great', created_timestamp: reviewCreated }] })(url),
+    )
+    await syncEtsyToStore(store, creds, opts)
+    expect((await store.listEtsyListings()).map((l) => [l.listingId, l.state])).toEqual([
+      ['2', 'sold_out'],
+      ['1', 'active'],
+    ])
+    expect(calls.filter((c) => c.url.includes('/listings')).map((c) => new URL(c.url).searchParams.get('state'))).toEqual([
+      'active',
+      'sold_out',
+      'inactive',
+      'expired',
+    ])
+    const firstReviews = calls.filter((c) => c.url.includes('/reviews'))
+    expect(new URL(firstReviews[0].url).searchParams.get('min_created')).toBeNull()
+
+    listings = { active: [{ listing_id: 1, title: 'B cover', state: 'active' }] }
+    const before = calls.length
+    const r = await syncEtsyToStore(store, creds, opts)
+    expect(r).toMatchObject({ listings: 1, reviews: 1 })
+    expect((await store.listEtsyListings()).map((l) => l.listingId)).toEqual(['1'])
+    const second = calls.slice(before).find((c) => c.url.includes('/reviews'))!
+    expect(Number(new URL(second.url).searchParams.get('min_created'))).toBe(reviewCreated - 30 * 86_400)
+    expect(await store.listEtsyReviews()).toHaveLength(1)
+  })
+
+  it('reads each payment once, then only recent receipts again', async () => {
+    const store = createMemoryAnalyticsStore()
+    const calls = stubEtsy(
+      () => [receipt(2, { created_timestamp: at('2026-07-01T15:00:00Z') }), receipt(3, { created_timestamp: at('2026-11-01T15:00:00Z') })],
+      100,
+      () => [],
+      routes({ payments: { '2': [{ payment_id: 1, amount_fees: usd(100) }], '3': [{ payment_id: 2, amount_fees: usd(100) }] } }),
+    )
+    const paid = (since: number) => calls.slice(since).filter((c) => c.url.includes('/payments')).map((c) => c.url.match(/receipts\/(\d+)/)![1])
+    await syncEtsyToStore(store, creds, opts)
+    expect(paid(0).sort()).toEqual(['2', '3'])
+    const before = calls.length
+    await syncEtsyToStore(store, creds, opts)
+    expect(paid(before)).toEqual(['3'])
+    // The older receipt keeps its processing fee.
+    expect((await store.listEtsyReceipts()).map((d) => d.processingFees)).toEqual([1, 1])
+  })
+})
+
+describe('Etsy detail store (memory)', () => {
+  it('round-trips each table and clears with the rest of the analytics data', async () => {
+    const store = createMemoryAnalyticsStore()
+    const detail = {
+      receiptId: '1',
+      orderedAt: '2026-11-01T15:00:00.000Z',
+      status: 'paid',
+      buyerUserId: '9',
+      grandtotal: 10,
+      subtotal: 8,
+      shippingCharged: 1,
+      tax: 1,
+      discount: 0,
+      refunded: 0,
+      shopCoupon: 0,
+      buyerCoupon: 0,
+      units: 1,
+      isShipped: false,
+      shippedAt: null,
+      processingFees: null,
+      actualFees: null,
+      labelCost: null,
+      offsiteAdsFee: null,
+      net: null,
+      paymentSynced: false,
+    }
+    await store.upsertEtsyReceipts([detail])
+    await store.upsertEtsyReceipts([{ ...detail, status: 'completed' }])
+    expect(await store.listEtsyReceipts()).toEqual([{ ...detail, status: 'completed' }])
+
+    await store.upsertEtsyFeesDaily([
+      { date: '2026-10-01', ledgerType: 'transaction', category: 'transaction_fee', amount: 1, entries: 1 },
+      { date: '2026-11-01', ledgerType: 'listing', category: 'listing_fee', amount: 0.2, entries: 1 },
+    ])
+    await store.upsertEtsyFeesDaily([{ date: '2026-11-02', ledgerType: 'transaction', category: 'transaction_fee', amount: 2, entries: 1 }], {
+      replaceFromDay: '2026-11-01',
+    })
+    expect((await store.listEtsyFeesDaily()).map((r) => r.date)).toEqual(['2026-10-01', '2026-11-02'])
+
+    const listing = { listingId: '5', title: 'Cover', url: null, state: 'active', price: 80, quantity: 1, favorites: 0, views: 0, tags: ['golf'], updatedAt: '2026-11-01T00:00:00.000Z' }
+    await store.replaceEtsyListings([listing, { ...listing, listingId: '6' }])
+    await store.replaceEtsyListings([listing])
+    expect(await store.listEtsyListings()).toEqual([listing])
+
+    const review = { reviewKey: 't:1', listingId: '5', transactionId: '1', rating: 5, review: null, createdAt: '2026-11-01T00:00:00.000Z' }
+    await store.upsertEtsyReviews([review, { ...review, rating: 4 }])
+    expect(await store.listEtsyReviews()).toEqual([{ ...review, rating: 4 }])
+
+    const shop = { date: '2026-11-01', shopName: 'S', url: null, favorites: 1, reviewCount: 1, reviewAverage: 5, totalSold: 1, activeListings: 1 }
+    await store.upsertEtsyShopDaily([shop])
+    await store.upsertEtsyShopDaily([{ ...shop, favorites: 2 }])
+    expect(await store.listEtsyShopDaily()).toEqual([{ ...shop, favorites: 2 }])
+
+    await store.upsertCustomerOrders([{ channel: 'etsy', externalId: 'etsy:1', orderedAt: detail.orderedAt, email: 'etsy-buyer:9', revenue: 10, units: 1 }])
+    expect(await store.deleteCustomerOrders({ channel: 'etsy', externalIds: ['etsy:1', 'etsy:2'] })).toBe(1)
+
+    await store.clearAnalyticsData()
+    expect([
+      ...(await store.listEtsyReceipts()),
+      ...(await store.listEtsyFeesDaily()),
+      ...(await store.listEtsyListings()),
+      ...(await store.listEtsyReviews()),
+      ...(await store.listEtsyShopDaily()),
+    ]).toEqual([])
   })
 })

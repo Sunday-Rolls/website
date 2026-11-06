@@ -8,6 +8,7 @@ const ROUTES = [
   { name: 'sales', label: 'Sales', icon: 'cart', group: 'MENU' },
   { name: 'products', label: 'Products', icon: 'package', group: 'MENU' },
   { name: 'marketing', label: 'Marketing', icon: 'megaphone', group: 'MENU' },
+  { name: 'etsy', label: 'Etsy', icon: 'package', group: 'MENU' },
   { name: 'funnel', label: 'Funnel', icon: 'filter', group: 'MENU' },
   { name: 'money', label: 'Money', icon: 'coins', group: 'MENU', ownRange: true },
   { name: 'tools', label: 'Tools', icon: 'tool', group: 'OTHERS', ownRange: true },

@@ -40,7 +40,7 @@ afterEach(() => {
 const RANGE = 'period=30d&asOf=2026-10-11'
 
 describe('redesign dashboard endpoints', () => {
-  it.each(['/api/orders', '/api/products', '/api/marketing', '/api/funnel', '/api/health'])(
+  it.each(['/api/orders', '/api/products', '/api/marketing', '/api/funnel', '/api/health', '/api/etsy'])(
     '%s requires a session',
     async (path) => {
       const { app } = await setup()
@@ -48,7 +48,7 @@ describe('redesign dashboard endpoints', () => {
     },
   )
 
-  it.each(['/api/orders', '/api/products', '/api/marketing', '/api/funnel'])('%s rejects an invalid range', async (path) => {
+  it.each(['/api/orders', '/api/products', '/api/marketing', '/api/funnel', '/api/etsy'])('%s rejects an invalid range', async (path) => {
     const { app, cookie } = await setup()
     const res = await app.request(`/dashboard${path}?start=2026-10-10&end=2026-10-01`, { headers: { Cookie: cookie } })
     expect(res.status).toBe(400)
@@ -94,6 +94,34 @@ describe('redesign dashboard endpoints', () => {
     const funnel = await get('/api/funnel')
     expect(funnel.funnel).toHaveProperty('visits')
     expect(funnel.customers).toHaveProperty('new')
+  })
+
+  it('etsy returns the Etsy page view for the seeded demo shop', async () => {
+    for (const key of ['ETSY_KEYSTRING', 'ETSY_SHARED_SECRET', 'ETSY_REFRESH_TOKEN']) vi.stubEnv(key, '')
+    const { app, cookie } = await setup()
+    const get = async () => {
+      const res = await app.request(`/dashboard/api/etsy?${RANGE}`, { headers: { Cookie: cookie } })
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body.ok).toBe(true)
+      return body.data
+    }
+    const data = await get()
+    expect(data.connected).toBe(false)
+    expect(data.range.end).toBe('2026-10-11')
+    expect(data.orders.count).toBeGreaterThan(0)
+    expect(data.orders.newBuyers + data.orders.returningBuyers).toBeGreaterThan(0)
+    expect(data.fees.total).toBeGreaterThan(0)
+    expect(data.fees.byType[0]).toHaveProperty('group')
+    expect(data.reviews.count).toBeGreaterThan(0)
+    expect(data.listings.length).toBeGreaterThanOrEqual(6)
+    expect(data.shop).toMatchObject({ name: 'SundayRollsGolf' })
+    expect(data.shopTrend).toHaveLength(30)
+
+    vi.stubEnv('ETSY_KEYSTRING', 'k')
+    vi.stubEnv('ETSY_SHARED_SECRET', 's')
+    vi.stubEnv('ETSY_REFRESH_TOKEN', 'r')
+    expect((await get()).connected).toBe(true)
   })
 
   it('health lists every source with its configuration', async () => {
@@ -155,7 +183,7 @@ describe('POST /api/import/customer-orders', () => {
     const res = await app.request('/dashboard/api/import/customer-orders', { method: 'POST', body, headers: { Cookie: cookie } })
     expect(res.status).toBe(200)
     expect((await res.json()).data).toMatchObject({ rows: 2, customers: 2 })
-    expect((await store.listCustomerOrders()).map((o) => o.email).sort()).toEqual(['a@x.test', 'b@x.test'])
+    expect((await store.listCustomerOrders()).filter((o) => o.channel !== 'etsy').map((o) => o.email).sort()).toEqual(['a@x.test', 'b@x.test'])
     expect((await store.listOrders()).length).toBe(ordersBefore)
   })
 

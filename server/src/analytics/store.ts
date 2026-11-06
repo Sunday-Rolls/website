@@ -10,6 +10,11 @@ import type {
   DailyTraffic,
   DashboardSession,
   DashboardUser,
+  EtsyFeesDaily,
+  EtsyListing,
+  EtsyReceiptDetail,
+  EtsyReview,
+  EtsyShopDaily,
   Expense,
   Order,
   OrderSource,
@@ -74,6 +79,32 @@ export type AnalyticsStore = {
   /** Insert or update by (channel, externalId). */
   upsertCustomerOrders(rows: CustomerOrder[]): Promise<number>
   listCustomerOrders(): Promise<CustomerOrder[]>
+  /** Delete customer orders for one channel by external id. Returns how many were removed. */
+  deleteCustomerOrders(filter: { channel: string; externalIds: string[] }): Promise<number>
+  // Etsy detail data (see etsy-sync.ts)
+  /** Insert or update by receiptId. */
+  upsertEtsyReceipts(rows: EtsyReceiptDetail[]): Promise<number>
+  /** Oldest first. */
+  listEtsyReceipts(): Promise<EtsyReceiptDetail[]>
+  /**
+   * Insert or update by (date, ledgerType). `replaceFromDay`: first delete every row on or after
+   * that day, so a re-read ledger window fully replaces its days.
+   */
+  upsertEtsyFeesDaily(rows: EtsyFeesDaily[], options?: { replaceFromDay?: string }): Promise<number>
+  /** By date, then ledger type. */
+  listEtsyFeesDaily(): Promise<EtsyFeesDaily[]>
+  /** Replace all listings (listings gone from Etsy disappear). */
+  replaceEtsyListings(rows: EtsyListing[]): Promise<number>
+  /** By title. */
+  listEtsyListings(): Promise<EtsyListing[]>
+  /** Insert or update by reviewKey. */
+  upsertEtsyReviews(rows: EtsyReview[]): Promise<number>
+  /** Oldest first. */
+  listEtsyReviews(): Promise<EtsyReview[]>
+  /** Insert or update by date (last write wins). */
+  upsertEtsyShopDaily(rows: EtsyShopDaily[]): Promise<number>
+  /** Oldest first. */
+  listEtsyShopDaily(): Promise<EtsyShopDaily[]>
   replaceAbandoned(stats: AbandonedCartStats): Promise<void>
   getAbandoned(periodStart: string, periodEnd: string): Promise<AbandonedCartStats | null>
   startSync(source: string): Promise<SyncRun>
@@ -96,6 +127,15 @@ function optionalStr(value: unknown): string | null {
   return value == null || value === '' ? null : String(value)
 }
 
+function optionalNum(value: unknown): number | null {
+  return value == null || value === '' ? null : Number(value)
+}
+
+function jsonArray(value: unknown): string[] {
+  const parsed = typeof value === 'string' ? (JSON.parse(value) as unknown) : value
+  return Array.isArray(parsed) ? parsed.map(String) : []
+}
+
 export function createMemoryAnalyticsStore(): AnalyticsStore {
   const users = new Map<string, DashboardUser>()
   const sessions = new Map<string, DashboardSession>()
@@ -108,6 +148,11 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let cash: CashForecastRow[] = []
   let abandoned: AbandonedCartStats[] = []
   let customerOrders: CustomerOrder[] = []
+  let etsyReceipts = new Map<string, EtsyReceiptDetail>()
+  let etsyFees = new Map<string, EtsyFeesDaily>()
+  let etsyListings: EtsyListing[] = []
+  let etsyReviews = new Map<string, EtsyReview>()
+  let etsyShop = new Map<string, EtsyShopDaily>()
   let syncs: SyncRun[] = []
   const integrationState = new Map<string, Record<string, unknown>>()
 
@@ -123,6 +168,11 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       expenses = []
       cash = []
       abandoned = []
+      etsyReceipts = new Map()
+      etsyFees = new Map()
+      etsyListings = []
+      etsyReviews = new Map()
+      etsyShop = new Map()
       syncs = []
     },
 
@@ -309,6 +359,65 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       return customerOrders
     },
 
+    async deleteCustomerOrders(filter) {
+      const ids = new Set(filter.externalIds)
+      const before = customerOrders.length
+      customerOrders = customerOrders.filter((r) => !(r.channel === filter.channel && ids.has(r.externalId)))
+      return before - customerOrders.length
+    },
+
+    async upsertEtsyReceipts(rows) {
+      for (const row of rows) etsyReceipts.set(row.receiptId, structuredClone(row))
+      return rows.length
+    },
+
+    async listEtsyReceipts() {
+      return [...etsyReceipts.values()]
+        .map((r) => structuredClone(r))
+        .sort((a, b) => a.orderedAt.localeCompare(b.orderedAt) || a.receiptId.localeCompare(b.receiptId))
+    },
+
+    async upsertEtsyFeesDaily(rows, options) {
+      if (options?.replaceFromDay) {
+        for (const [key, row] of etsyFees) if (row.date >= options.replaceFromDay) etsyFees.delete(key)
+      }
+      for (const row of rows) etsyFees.set(`${row.date}|${row.ledgerType}`, { ...row })
+      return rows.length
+    },
+
+    async listEtsyFeesDaily() {
+      return [...etsyFees.values()]
+        .map((r) => ({ ...r }))
+        .sort((a, b) => a.date.localeCompare(b.date) || a.ledgerType.localeCompare(b.ledgerType))
+    },
+
+    async replaceEtsyListings(rows) {
+      etsyListings = rows.map((r) => structuredClone(r))
+      return rows.length
+    },
+
+    async listEtsyListings() {
+      return etsyListings.map((r) => structuredClone(r)).sort((a, b) => a.title.localeCompare(b.title) || a.listingId.localeCompare(b.listingId))
+    },
+
+    async upsertEtsyReviews(rows) {
+      for (const row of rows) etsyReviews.set(row.reviewKey, { ...row })
+      return rows.length
+    },
+
+    async listEtsyReviews() {
+      return [...etsyReviews.values()].map((r) => ({ ...r })).sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.reviewKey.localeCompare(b.reviewKey))
+    },
+
+    async upsertEtsyShopDaily(rows) {
+      for (const row of rows) etsyShop.set(row.date, { ...row })
+      return rows.length
+    },
+
+    async listEtsyShopDaily() {
+      return [...etsyShop.values()].map((r) => ({ ...r })).sort((a, b) => a.date.localeCompare(b.date))
+    },
+
     async replaceAbandoned(stats) {
       abandoned = [stats]
     },
@@ -382,6 +491,11 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           analytics_cash_forecast,
           analytics_customer_orders,
           analytics_abandoned_carts,
+          analytics_etsy_receipts,
+          analytics_etsy_fees_daily,
+          analytics_etsy_listings,
+          analytics_etsy_reviews,
+          analytics_etsy_shop_daily,
           analytics_sync_runs
         RESTART IDENTITY CASCADE
       `)
@@ -905,6 +1019,202 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         email: str(row.email),
         revenue: num(row.revenue),
         units: num(row.units),
+      }))
+    },
+
+    async deleteCustomerOrders(filter) {
+      if (!filter.externalIds.length) return 0
+      const { rows } = await db.query(
+        `DELETE FROM analytics_customer_orders WHERE channel = $1 AND external_id = ANY($2::text[]) RETURNING external_id`,
+        [filter.channel, filter.externalIds],
+      )
+      return rows.length
+    },
+
+    async upsertEtsyReceipts(rows) {
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_etsy_receipts
+            (receipt_id, ordered_at, status, buyer_user_id, grandtotal, subtotal, shipping_charged, tax, discount,
+             refunded, shop_coupon, buyer_coupon, units, is_shipped, shipped_at, processing_fees, actual_fees,
+             label_cost, offsite_ads_fee, net, payment_synced, updated_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21, now())
+           ON CONFLICT (receipt_id) DO UPDATE SET
+             ordered_at = EXCLUDED.ordered_at, status = EXCLUDED.status, buyer_user_id = EXCLUDED.buyer_user_id,
+             grandtotal = EXCLUDED.grandtotal, subtotal = EXCLUDED.subtotal, shipping_charged = EXCLUDED.shipping_charged,
+             tax = EXCLUDED.tax, discount = EXCLUDED.discount, refunded = EXCLUDED.refunded,
+             shop_coupon = EXCLUDED.shop_coupon, buyer_coupon = EXCLUDED.buyer_coupon, units = EXCLUDED.units,
+             is_shipped = EXCLUDED.is_shipped, shipped_at = EXCLUDED.shipped_at,
+             processing_fees = EXCLUDED.processing_fees, actual_fees = EXCLUDED.actual_fees,
+             label_cost = EXCLUDED.label_cost, offsite_ads_fee = EXCLUDED.offsite_ads_fee, net = EXCLUDED.net,
+             payment_synced = EXCLUDED.payment_synced, updated_at = now()`,
+          [
+            r.receiptId,
+            r.orderedAt,
+            r.status,
+            r.buyerUserId,
+            r.grandtotal,
+            r.subtotal,
+            r.shippingCharged,
+            r.tax,
+            r.discount,
+            r.refunded,
+            r.shopCoupon,
+            r.buyerCoupon,
+            r.units,
+            r.isShipped,
+            r.shippedAt,
+            r.processingFees,
+            r.actualFees,
+            r.labelCost,
+            r.offsiteAdsFee,
+            r.net,
+            r.paymentSynced,
+          ],
+        )
+      }
+      return rows.length
+    },
+
+    async listEtsyReceipts() {
+      const { rows } = await db.query(`SELECT * FROM analytics_etsy_receipts ORDER BY ordered_at, receipt_id`)
+      return rows.map((row) => ({
+        receiptId: str(row.receipt_id),
+        orderedAt: toIso(row.ordered_at),
+        status: str(row.status),
+        buyerUserId: optionalStr(row.buyer_user_id),
+        grandtotal: num(row.grandtotal),
+        subtotal: num(row.subtotal),
+        shippingCharged: num(row.shipping_charged),
+        tax: num(row.tax),
+        discount: num(row.discount),
+        refunded: num(row.refunded),
+        shopCoupon: num(row.shop_coupon),
+        buyerCoupon: num(row.buyer_coupon),
+        units: num(row.units),
+        isShipped: row.is_shipped === true,
+        shippedAt: row.shipped_at == null ? null : toIso(row.shipped_at),
+        processingFees: optionalNum(row.processing_fees),
+        actualFees: optionalNum(row.actual_fees),
+        labelCost: optionalNum(row.label_cost),
+        offsiteAdsFee: optionalNum(row.offsite_ads_fee),
+        net: optionalNum(row.net),
+        paymentSynced: row.payment_synced === true,
+      }))
+    },
+
+    async upsertEtsyFeesDaily(rows, options) {
+      if (options?.replaceFromDay) {
+        await db.query(`DELETE FROM analytics_etsy_fees_daily WHERE date >= $1`, [options.replaceFromDay])
+      }
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_etsy_fees_daily (date, ledger_type, category, amount, entries)
+           VALUES ($1,$2,$3,$4,$5)
+           ON CONFLICT (date, ledger_type) DO UPDATE SET
+             category = EXCLUDED.category, amount = EXCLUDED.amount, entries = EXCLUDED.entries`,
+          [r.date, r.ledgerType, r.category, r.amount, r.entries],
+        )
+      }
+      return rows.length
+    },
+
+    async listEtsyFeesDaily() {
+      const { rows } = await db.query(`SELECT * FROM analytics_etsy_fees_daily ORDER BY date, ledger_type`)
+      return rows.map((row) => ({
+        date: toDateOnly(row.date),
+        ledgerType: str(row.ledger_type),
+        category: str(row.category),
+        amount: num(row.amount),
+        entries: num(row.entries),
+      }))
+    },
+
+    async replaceEtsyListings(rows) {
+      await db.query(`DELETE FROM analytics_etsy_listings`)
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_etsy_listings (listing_id, title, url, state, price, quantity, favorites, views, tags, updated_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)
+           ON CONFLICT (listing_id) DO UPDATE SET
+             title = EXCLUDED.title, url = EXCLUDED.url, state = EXCLUDED.state, price = EXCLUDED.price,
+             quantity = EXCLUDED.quantity, favorites = EXCLUDED.favorites, views = EXCLUDED.views,
+             tags = EXCLUDED.tags, updated_at = EXCLUDED.updated_at`,
+          [r.listingId, r.title, r.url, r.state, r.price, r.quantity, r.favorites, r.views, JSON.stringify(r.tags), r.updatedAt],
+        )
+      }
+      return rows.length
+    },
+
+    async listEtsyListings() {
+      const { rows } = await db.query(`SELECT * FROM analytics_etsy_listings ORDER BY title, listing_id`)
+      return rows.map((row) => ({
+        listingId: str(row.listing_id),
+        title: str(row.title),
+        url: optionalStr(row.url),
+        state: str(row.state),
+        price: num(row.price),
+        quantity: num(row.quantity),
+        favorites: num(row.favorites),
+        views: num(row.views),
+        tags: jsonArray(row.tags),
+        updatedAt: toIso(row.updated_at),
+      }))
+    },
+
+    async upsertEtsyReviews(rows) {
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_etsy_reviews (review_key, listing_id, transaction_id, rating, review, created_at)
+           VALUES ($1,$2,$3,$4,$5,$6)
+           ON CONFLICT (review_key) DO UPDATE SET
+             listing_id = EXCLUDED.listing_id, transaction_id = EXCLUDED.transaction_id,
+             rating = EXCLUDED.rating, review = EXCLUDED.review, created_at = EXCLUDED.created_at`,
+          [r.reviewKey, r.listingId, r.transactionId, r.rating, r.review, r.createdAt],
+        )
+      }
+      return rows.length
+    },
+
+    async listEtsyReviews() {
+      const { rows } = await db.query(`SELECT * FROM analytics_etsy_reviews ORDER BY created_at, review_key`)
+      return rows.map((row) => ({
+        reviewKey: str(row.review_key),
+        listingId: optionalStr(row.listing_id),
+        transactionId: optionalStr(row.transaction_id),
+        rating: num(row.rating),
+        review: optionalStr(row.review),
+        createdAt: toIso(row.created_at),
+      }))
+    },
+
+    async upsertEtsyShopDaily(rows) {
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_etsy_shop_daily
+            (date, shop_name, url, favorites, review_count, review_average, total_sold, active_listings)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (date) DO UPDATE SET
+             shop_name = EXCLUDED.shop_name, url = EXCLUDED.url, favorites = EXCLUDED.favorites,
+             review_count = EXCLUDED.review_count, review_average = EXCLUDED.review_average,
+             total_sold = EXCLUDED.total_sold, active_listings = EXCLUDED.active_listings`,
+          [r.date, r.shopName, r.url, r.favorites, r.reviewCount, r.reviewAverage, r.totalSold, r.activeListings],
+        )
+      }
+      return rows.length
+    },
+
+    async listEtsyShopDaily() {
+      const { rows } = await db.query(`SELECT * FROM analytics_etsy_shop_daily ORDER BY date`)
+      return rows.map((row) => ({
+        date: toDateOnly(row.date),
+        shopName: str(row.shop_name),
+        url: optionalStr(row.url),
+        favorites: num(row.favorites),
+        reviewCount: num(row.review_count),
+        reviewAverage: optionalNum(row.review_average),
+        totalSold: num(row.total_sold),
+        activeListings: num(row.active_listings),
       }))
     },
 

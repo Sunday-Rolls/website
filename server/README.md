@@ -18,7 +18,7 @@ Opening the dashboard (or logging in) syncs every data source in parallel, drivi
 
 ## Dashboard pages
 
-The UI is plain HTML/CSS/JS with no build step: the shell is `src/dashboard/ui/app.js`, shared helpers are in `ui/lib/` (`ui.js` documents the page-module contract, `charts.js` wraps ApexCharts, served from `/dashboard/vendor/apexcharts.js`), and each page is one module in `ui/pages/`: Overview, Sales (`/api/orders`), Products (`/api/products`), Marketing (`/api/marketing`), Funnel (`/api/funnel`), Money (`/api/pnl`) and Tools (review QR PDFs, manual entries, workbook import/export, connections, checks). The page data builders are in `src/analytics/views.ts`.
+The UI is plain HTML/CSS/JS with no build step: the shell is `src/dashboard/ui/app.js`, shared helpers are in `ui/lib/` (`ui.js` documents the page-module contract, `charts.js` wraps ApexCharts, served from `/dashboard/vendor/apexcharts.js`), and each page is one module in `ui/pages/`: Overview, Sales (`/api/orders`), Products (`/api/products`), Marketing (`/api/marketing`), Etsy (`/api/etsy`), Funnel (`/api/funnel`), Money (`/api/pnl`) and Tools (review QR PDFs, manual entries, workbook import/export, connections, checks). The page data builders are in `src/analytics/views.ts` (Etsy: `src/analytics/etsy-view.ts`).
 
 Shopify orders upsert by Shopify id; cancelled, voided and `analytics-test` orders are removed. Etsy receipts only fill in orders the Sales Tracker doesn't have yet; a sheet row always replaces the live one. Dashboard days and months are **America/Chicago** calendar days (`STORE_TIME_ZONE` in `src/analytics/period.ts`).
 
