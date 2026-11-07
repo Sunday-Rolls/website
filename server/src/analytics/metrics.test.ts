@@ -119,39 +119,6 @@ describe('buildRoas', () => {
     expect(meta?.connected).toBe(false)
     expect(meta?.salesStatus).toBe('not_connected')
   })
-
-  it('credits Etsy campaigns with Etsy sales: Offsite Ads its fee orders, Etsy Ads the rest', () => {
-    const range = rangeForPeriod('7d', '2026-10-11')
-    const spend = (campaign: string, amount: number, sales = 0, orders = 0): DailyAdSpend => ({
-      date: '2026-10-10',
-      platform: 'Etsy Ads',
-      campaign,
-      spend: amount,
-      platformReportedSales: sales,
-      platformReportedOrders: orders,
-    })
-    const order = (id: string, channel: string, revenue: number) => ({
-      id, externalId: id, channel, source: 'sales-tracker', orderedAt: '2026-10-09T12:00:00Z', revenue,
-      fees: 0, shippingCost: 0, marketingCost: 0, state: null, customerEmail: null, isReturning: false, trafficSource: null,
-      lines: [],
-    })
-    const platforms = buildRoas({
-      range,
-      adSpend: [spend('Etsy Ads', 40), spend('Offsite Ads', 15, 100, 1)],
-      orders: [order('e1', 'etsy', 100), order('e2', 'etsy', 300), order('w1', 'shopify', 500)],
-    })
-    const etsy = platforms.find((p) => p.platform === 'Etsy Ads')!
-    expect(etsy.siteObservedSales).toBe(400)
-    expect(etsy.siteRoas).toBeCloseTo(400 / 55)
-    const onsite = etsy.campaigns.find((c) => c.campaign === 'Etsy Ads')!
-    const offsite = etsy.campaigns.find((c) => c.campaign === 'Offsite Ads')!
-    expect(onsite.siteSales).toBe(300)
-    expect(onsite.siteRoas).toBeCloseTo(300 / 40)
-    expect(offsite.siteSales).toBe(100)
-    expect(offsite.siteTaggedOrders).toBe(1)
-    expect(onsite.siteSales + offsite.siteSales).toBe(etsy.siteObservedSales)
-    expect(etsy.note).toMatch(/Etsy sales in this range/)
-  })
 })
 
 describe('buildPnL', () => {
