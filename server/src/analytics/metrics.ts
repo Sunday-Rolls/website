@@ -1,5 +1,4 @@
 import { orderSourceCounts, preferLiveOrders } from './orders.js'
-import { OFFSITE_CAMPAIGN } from './etsy-ads.js'
 import { inRange, isWebsiteChannel, monthKey, storeDay, type DateRange } from './period.js'
 import type {
   AbandonedCartStats,
@@ -757,7 +756,6 @@ export function buildRoas(input: {
       const p = platform.toLowerCase()
       const isGoogle = p.includes('google')
       const isMeta = p.includes('meta') || p.includes('facebook')
-      const isEtsy = p.includes('etsy')
       let linked: ReturnType<typeof linkSiteSales> | null = null
       let marketplaceSales = 0
       if (isGoogle || isMeta) {
@@ -769,7 +767,7 @@ export function buildRoas(input: {
           campaignSpend: v.spendByDay,
           visitsByDay,
         })
-      } else if (isEtsy) marketplaceSales = channelSales('etsy')
+      } else if (p.includes('etsy')) marketplaceSales = channelSales('etsy')
       else if (p.includes('ebay')) marketplaceSales = channelSales('ebay')
       else marketplaceSales = sum(websiteOrders.map((o) => o.revenue))
 
@@ -781,19 +779,7 @@ export function buildRoas(input: {
         salesStatus = 'unattributed'
         note = isGoogle
           ? 'No website sales linked to these ads in this range yet.'
-          : isEtsy
-            ? 'No Etsy sales in this range yet.'
-            : 'No website orders tagged with this platform’s ads in this range yet.'
-      } else if (isEtsy) {
-        const hasOffsite = v.campaigns.has(OFFSITE_CAMPAIGN)
-        const hasOther = [...v.campaigns.keys()].some((name) => name !== OFFSITE_CAMPAIGN)
-        note =
-          'Etsy’s ads only show on Etsy, so ROAS here is Etsy sales in this range ÷ Etsy ad spend.' +
-          (hasOffsite && hasOther
-            ? ' Offsite Ads gets the orders Etsy charged an Offsite Ads fee on; the other campaigns get the rest.'
-            : hasOffsite
-              ? ' The Offsite Ads row shows only the orders Etsy charged an Offsite Ads fee on.'
-              : '')
+          : 'No website orders tagged with this platform’s ads in this range yet.'
       } else if (linked && estimated > 0) {
         salesStatus = 'estimated'
         const share = (() => {
@@ -810,22 +796,10 @@ export function buildRoas(input: {
           `${money(estimated)} estimated: website orders without an ad tag are credited by these campaigns’ share of each day’s visits (${share.toFixed(0)}% over this range).`
       }
 
-      // Etsy: Offsite Ads keep the sales Etsy credits them; the other campaigns split the rest by spend.
-      const etsyOffsite = isEtsy ? v.campaigns.get(OFFSITE_CAMPAIGN) : undefined
-      const etsyOffsiteSales = Math.min(etsyOffsite?.reported ?? 0, marketplaceSales)
-      const etsyOtherSpend = isEtsy
-        ? sum([...v.campaigns.entries()].filter(([name]) => name !== OFFSITE_CAMPAIGN).map(([, c]) => c.spend))
-        : 0
-      const etsyCampaignSales = (campaign: string, spend: number) => {
-        if (campaign === OFFSITE_CAMPAIGN) return etsyOffsiteSales
-        const rest = Math.max(0, marketplaceSales - etsyOffsiteSales)
-        return etsyOtherSpend > 0 ? (rest * spend) / etsyOtherSpend : 0
-      }
-
       const campaigns = [...v.campaigns.entries()]
         .map(([campaign, c]) => {
           const l = linked?.byCampaign.get(campaign)
-          const siteSalesC = isEtsy ? etsyCampaignSales(campaign, c.spend) : l ? l.exact + l.estimated : 0
+          const siteSalesC = l ? l.exact + l.estimated : 0
           return {
             campaign,
             spend: c.spend,
@@ -835,7 +809,7 @@ export function buildRoas(input: {
             shareOfPlatformSpend: v.spend ? (c.spend / v.spend) * 100 : 0,
             siteSales: siteSalesC,
             siteSalesEstimated: l?.estimated ?? 0,
-            siteTaggedOrders: isEtsy && campaign === OFFSITE_CAMPAIGN ? c.orders : (l?.tagged ?? 0),
+            siteTaggedOrders: l?.tagged ?? 0,
             siteRoas: c.spend > 0 && siteSalesC > 0 ? siteSalesC / c.spend : null,
           }
         })
