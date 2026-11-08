@@ -201,6 +201,7 @@ Check status any time with `/mcp`. Servers you don't need can stay disabled. The
 | [`docs/CUTOVER_DAY_CHECKLIST.md`](docs/CUTOVER_DAY_CHECKLIST.md) | Day-of cutover order, rollback records, E2E purchase test |
 | [`docs/DASHBOARD_ACCESS.md`](docs/DASHBOARD_ACCESS.md) | Access checklist, IDs, punch list |
 | [`docs/ANALYTICS.md`](docs/ANALYTICS.md) | GTM / GA4 demo vs live |
+| [`docs/INVENTORY.md`](docs/INVENTORY.md) | Dashboard Inventory page: where counts come from, adding shipments, SKUs, troubleshooting |
 | [`docs/ADS_AND_SEO_CONFIG.md`](docs/ADS_AND_SEO_CONFIG.md) | GTM, Google Ads, Merchant Center, Search Console: IDs, change log, how to revert; old-URL redirects and sitemap |
 | [`docs/SHIPPO.md`](docs/SHIPPO.md) | Shippo ↔ Shopify labels |
 | [`docs/REVIEW_QR_CODES.md`](docs/REVIEW_QR_CODES.md) | QR generation and print |

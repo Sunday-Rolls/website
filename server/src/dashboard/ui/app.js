@@ -7,6 +7,7 @@ const ROUTES = [
   { name: 'overview', label: 'Overview', icon: 'dashboard', group: 'MENU' },
   { name: 'sales', label: 'Sales', icon: 'cart', group: 'MENU' },
   { name: 'products', label: 'Products', icon: 'package', group: 'MENU' },
+  { name: 'inventory', label: 'Inventory', icon: 'inbox', group: 'MENU', ownRange: true },
   { name: 'marketing', label: 'Marketing', icon: 'megaphone', group: 'MENU' },
   { name: 'etsy', label: 'Etsy', icon: 'package', group: 'MENU' },
   { name: 'funnel', label: 'Funnel', icon: 'filter', group: 'MENU' },

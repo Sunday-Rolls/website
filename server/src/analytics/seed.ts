@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { addUtcDays, formatUtcDate, parseUtcDate } from './period.js'
 import type { AnalyticsStore } from './store.js'
+import { INVENTORY_ETSY_KEY, INVENTORY_SHEET_KEY, INVENTORY_SHOPIFY_KEY } from './inventory.js'
+import { demoInventory } from './inventory-demo.js'
 import type {
   AbandonedCartStats,
   CashForecastRow,
@@ -454,6 +456,10 @@ export async function seedDemoStore(store: AnalyticsStore, asOf = '2026-10-11'):
     await store.replaceEtsyListings(data.etsy.listings)
     await store.upsertEtsyReviews(data.etsy.reviews)
     await store.upsertEtsyShopDaily(data.etsy.shopDaily)
+    const inventory = demoInventory(asOf)
+    await store.setIntegrationState(INVENTORY_SHEET_KEY, inventory.sheet as unknown as Record<string, unknown>)
+    await store.setIntegrationState(INVENTORY_ETSY_KEY, inventory.etsy as unknown as Record<string, unknown>)
+    await store.setIntegrationState(INVENTORY_SHOPIFY_KEY, inventory.shopify as unknown as Record<string, unknown>)
     await store.finishSync(sync.id, 'ok', 'Loaded mockup-shaped demo data', data.orders.length)
   } catch (error) {
     await store.finishSync(sync.id, 'error', error instanceof Error ? error.message : 'seed failed', 0)

@@ -48,6 +48,15 @@ import {
 import { loadMerchantScheduleFromEnv } from '../merchant/merchant-scheduler.js'
 import { loadMerchantConfigFromEnv } from '../merchant/merchant-sync.js'
 import { seedDemoStore } from '../analytics/seed.js'
+import {
+  INVENTORY_ETSY_KEY,
+  INVENTORY_SHEET_KEY,
+  INVENTORY_SHOPIFY_KEY,
+  buildInventoryView,
+  type EtsyInventory,
+  type SheetInventory,
+  type ShopifyInventory,
+} from '../analytics/inventory.js'
 import { syncSalesTrackerFromBuffer, syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
 import {
@@ -260,6 +269,31 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     return c.json({
       ok: true,
       data: buildEtsyView({ range, orders, customerOrders, receipts, fees, listings, reviews, shopDaily, syncs, connected }),
+    })
+  })
+
+  // Inventory isn't range-based: it's on hand right now.
+  app.get('/api/inventory', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const [orders, sheet, etsy, shopify] = await Promise.all([
+      store.listOrders(),
+      store.getIntegrationState(INVENTORY_SHEET_KEY),
+      store.getIntegrationState(INVENTORY_ETSY_KEY),
+      store.getIntegrationState(INVENTORY_SHOPIFY_KEY),
+    ])
+    const fileId = extractDriveFileId(process.env.SALES_TRACKER_DRIVE_FILE_ID?.trim() || '')
+    return c.json({
+      ok: true,
+      data: {
+        ...buildInventoryView({
+          orders,
+          sheet: sheet as SheetInventory | null,
+          etsy: etsy as EtsyInventory | null,
+          shopify: shopify as ShopifyInventory | null,
+        }),
+        sheetUrl: fileId ? `https://docs.google.com/spreadsheets/d/${fileId}/edit` : null,
+      },
     })
   })
 

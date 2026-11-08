@@ -40,7 +40,7 @@ afterEach(() => {
 const RANGE = 'period=30d&asOf=2026-10-11'
 
 describe('redesign dashboard endpoints', () => {
-  it.each(['/api/orders', '/api/products', '/api/marketing', '/api/funnel', '/api/health', '/api/etsy'])(
+  it.each(['/api/orders', '/api/products', '/api/marketing', '/api/funnel', '/api/health', '/api/etsy', '/api/inventory'])(
     '%s requires a session',
     async (path) => {
       const { app } = await setup()
@@ -52,6 +52,34 @@ describe('redesign dashboard endpoints', () => {
     const { app, cookie } = await setup()
     const res = await app.request(`/dashboard${path}?start=2026-10-10&end=2026-10-01`, { headers: { Cookie: cookie } })
     expect(res.status).toBe(400)
+  })
+
+  it('inventory reads the saved sheet tabs and links the Sales Tracker', async () => {
+    vi.stubEnv('SALES_TRACKER_DRIVE_FILE_ID', '1v18ftrLt5jcyGJsKFq37CwIYYY04aKIDeeEp0F5_XMU')
+    const { app, store, cookie } = await setup()
+    const get = async () => {
+      const res = await app.request('/dashboard/api/inventory', { headers: { Cookie: cookie } })
+      expect(res.status).toBe(200)
+      return (await res.json()).data
+    }
+    // The demo seed includes example inventory.
+    const demo = await get()
+    expect(demo.ready).toBe(true)
+    expect(demo.rows).toHaveLength(23)
+    expect(demo.sheetUrl).toBe('https://docs.google.com/spreadsheets/d/1v18ftrLt5jcyGJsKFq37CwIYYY04aKIDeeEp0F5_XMU/edit')
+
+    await store.setIntegrationState('inventory-etsy', { sales: {}, listed: null, syncedAt: '2026-10-06T00:00:00Z' })
+    await store.setIntegrationState('inventory-sheet', {
+      skus: [{ sku: 'SR-DOODLE-DF3', product: 'The Doodle', style: 'DF3', category: 'Headcover' }],
+      received: [{ date: '2026-10-01', sku: 'SR-DOODLE-DF3', qty: 12, type: 'Starting count', notes: '' }],
+      sales: [{ key: 'ebay:E1', channel: 'ebay', sku: 'SR-DOODLE-DF3', product: 'Headcover', quantity: 1, soldAt: '2026-10-05', ref: 'E1' }],
+      warnings: [],
+      syncedAt: '2026-10-06T00:00:00Z',
+    })
+    const data = await get()
+    expect(data.ready).toBe(true)
+    expect(data.rows[0]).toMatchObject({ sku: 'SR-DOODLE-DF3', received: 12, onHand: 11, status: 'ok' })
+    expect(data.kpis.headcovers).toBe(11)
   })
 
   it('overview adds mer, pace and attention', async () => {
