@@ -299,12 +299,15 @@ describe('Etsy detail data in the sync', () => {
     listings?: Record<string, unknown[]>
     reviews?: () => unknown[]
     shop?: unknown
+    inventory?: Record<string, unknown>
     fail?: RegExp
   }) {
     return (url: URL) => {
       if (data.fail?.test(url.pathname)) return json({ error: 'insufficient scope' }, 403)
       const pay = url.pathname.match(/\/receipts\/(\d+)\/payments$/)
       if (pay) return page(data.payments?.[pay[1]] ?? [])
+      const inv = url.pathname.match(/\/listings\/(\d+)\/inventory$/)
+      if (inv) return json(data.inventory?.[inv[1]] ?? { products: [] })
       if (url.pathname.endsWith('/shops/555/listings')) return page(data.listings?.[url.searchParams.get('state') ?? 'active'] ?? [])
       if (url.pathname.endsWith('/shops/555/reviews')) return page(data.reviews?.() ?? [])
       if (url.pathname.endsWith('/shops/555')) return json(data.shop ?? { shop_id: 555, shop_name: 'SundayRolls' })
@@ -411,6 +414,28 @@ describe('Etsy detail data in the sync', () => {
     expect((await store.listEtsyReceipts())[0].paymentSynced).toBe(false)
   })
 
+  it('saves Etsy sales by receipt and listed stock per SKU for the Inventory page', async () => {
+    const store = createMemoryAnalyticsStore()
+    stubEtsy(
+      () => [
+        receipt(2, { transactions: [{ transaction_id: 20, title: 'Retro Roller', listing_id: 9, quantity: 1, price: usd(8000) }] }),
+        receipt(3, { status: 'Canceled' }),
+      ],
+      100,
+      () => [],
+      routes({
+        listings: { active: [{ listing_id: 9, title: 'Retro Roller', state: 'active', price: usd(8000) }] },
+        inventory: { '9': { products: [{ sku: 'SR-RETRO-DF3-GRY', offerings: [{ quantity: 12, is_enabled: true }] }] } },
+      }),
+    )
+    await syncEtsyToStore(store, creds, opts)
+    const state = (await store.getIntegrationState('inventory-etsy')) as { sales: Record<string, Array<{ sku: string | null }>>; listed: Record<string, number> }
+    expect(state.listed).toEqual({ 'SR-RETRO-DF3-GRY': 12 })
+    expect(Object.keys(state.sales)).toEqual(['2'])
+    // The line had no SKU of its own, so it took its single-SKU listing's.
+    expect(state.sales['2'][0].sku).toBe('SR-RETRO-DF3-GRY')
+  })
+
   it('replaces listings, and re-reads reviews from 30 days before the newest one', async () => {
     const store = createMemoryAnalyticsStore()
     let listings: Record<string, unknown[]> = {
@@ -429,7 +454,7 @@ describe('Etsy detail data in the sync', () => {
       ['2', 'sold_out'],
       ['1', 'active'],
     ])
-    expect(calls.filter((c) => c.url.includes('/listings')).map((c) => new URL(c.url).searchParams.get('state'))).toEqual([
+    expect(calls.filter((c) => c.url.includes('/shops/555/listings')).map((c) => new URL(c.url).searchParams.get('state'))).toEqual([
       'active',
       'sold_out',
       'inactive',

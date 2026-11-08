@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs'
 import { parseCashRows, parseExpenseRows, parseSalesRows, type SheetImportResult } from './sheet-import.js'
 import { storeDay } from './period.js'
+import { parseInventorySheets, type SheetInventory } from './inventory.js'
 import type { CashForecastRow, Expense, Order } from './types.js'
 
 export type ParseWorkbookOptions = {
@@ -11,7 +12,7 @@ export type ParseWorkbookOptions = {
 export async function parseWorkbookBuffer(
   buffer: Buffer,
   options: ParseWorkbookOptions = {},
-): Promise<SheetImportResult> {
+): Promise<SheetImportResult & { inventory: SheetInventory }> {
   const workbook = new ExcelJS.Workbook()
   await workbook.xlsx.load(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer)
 
@@ -37,7 +38,9 @@ export async function parseWorkbookBuffer(
   if (!workbook.getWorksheet('Sales')) warnings.push('Missing "Sales" tab')
   if (!workbook.getWorksheet('Expense Tracker.')) warnings.push('Missing "Expense Tracker." tab')
   const cashForecast = parseCashRows(sheetRows('Cash') as never)
-  return { orders, expenses, cashForecast, warnings }
+  // Inventory tabs (SKUs, Inventory In, and the SKU column on eBay / Other) for the Inventory page.
+  const inventory = parseInventorySheets(sheetRows)
+  return { orders, expenses, cashForecast, warnings, inventory }
 }
 
 export function filterOrdersByDate(orders: Order[], start?: string | null, end?: string | null): Order[] {

@@ -16,6 +16,7 @@ import { etsyDailyFees, etsyLedgerByReceipt } from './etsy-fees.js'
 import {
   etsyMoney,
   fetchEtsyLedgerEntries,
+  fetchEtsyListingInventory,
   fetchEtsyListings,
   fetchEtsyPaymentsForReceipts,
   fetchEtsyReceipts,
@@ -29,6 +30,7 @@ import {
   type EtsyReceiptRaw,
 } from './etsy.js'
 import { storeDay } from './period.js'
+import { INVENTORY_ETSY_KEY, etsyListedBySku, mergeEtsySales, type EtsyInventory } from './inventory.js'
 import type { AnalyticsStore } from './store.js'
 import type { CustomerOrder, EtsyReceiptDetail, Order } from './types.js'
 
@@ -315,11 +317,38 @@ export async function syncEtsyToStore(
 
     const nowIso = new Date(now()).toISOString()
     let listings: number | null = null
+    let rawListings: Awaited<ReturnType<typeof fetchEtsyListings>> | null = null
     try {
-      const raw = await fetchEtsyListings(creds, accessToken, shopId)
-      listings = await store.replaceEtsyListings(raw.map((l) => mapEtsyListing(l, nowIso)))
+      rawListings = await fetchEtsyListings(creds, accessToken, shopId)
+      listings = await store.replaceEtsyListings(rawListings.map((l) => mapEtsyListing(l, nowIso)))
     } catch (error) {
       skip('listings', error)
+    }
+
+    // Inventory page: Etsy sales by receipt (kept after the sheet replaces the live order) and stock per SKU.
+    try {
+      const listingSkus = new Map<string, string[]>()
+      let listed: Record<string, number> | null = null
+      if (rawListings) {
+        const active = rawListings.filter((l) => (l.state ?? 'active') === 'active')
+        const inventories = []
+        for (const l of active) {
+          const inv = await fetchEtsyListingInventory(creds, accessToken, l.listing_id)
+          inventories.push(inv)
+          const skus = [...new Set((inv.products ?? []).filter((p) => !p.is_deleted).map((p) => (p.sku || '').trim()).filter(Boolean))]
+          listingSkus.set(String(l.listing_id), skus)
+        }
+        listed = etsyListedBySku(inventories)
+      }
+      const previous = (await store.getIntegrationState(INVENTORY_ETSY_KEY)) as EtsyInventory | null
+      const next: EtsyInventory = {
+        sales: mergeEtsySales(previous?.sales ?? {}, receipts, isCountedReceipt, listingSkus),
+        listed: listed ?? previous?.listed ?? null,
+        syncedAt: nowIso,
+      }
+      await store.setIntegrationState(INVENTORY_ETSY_KEY, next as unknown as Record<string, unknown>)
+    } catch (error) {
+      skip('inventory', error)
     }
 
     let reviews: number | null = null

@@ -294,6 +294,23 @@ export type EtsyListingRaw = {
   last_modified_timestamp?: number | null
 }
 
+export type EtsyListingInventoryRaw = {
+  products?: Array<{
+    sku?: string | null
+    is_deleted?: boolean
+    offerings?: Array<{ quantity?: number; is_enabled?: boolean; is_deleted?: boolean }>
+  }>
+}
+
+/** A listing's inventory: one product per variation, each with its SKU and offered quantity. */
+export async function fetchEtsyListingInventory(
+  creds: EtsyCredentials,
+  token: string,
+  listingId: number | string,
+): Promise<EtsyListingInventoryRaw> {
+  return etsyGet<EtsyListingInventoryRaw>(creds, token, `/listings/${listingId}/inventory`)
+}
+
 /** Listing states worth tracking. The API takes one state per call (default active); drafts and removed are skipped. */
 export const ETSY_LISTING_STATES = ['active', 'sold_out', 'inactive', 'expired'] as const
 

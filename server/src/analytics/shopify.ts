@@ -236,6 +236,62 @@ export async function fetchShopifyActiveProducts(
   return products
 }
 
+export type ShopifyVariantStockRaw = {
+  sku: string | null
+  productTitle: string
+  variantTitle: string
+  quantity: number | null
+  active: boolean
+}
+
+/** Every variant's SKU and available quantity (Admin GraphQL), for the Inventory page. */
+export async function fetchShopifyVariantStock(creds: ShopifyCredentials): Promise<ShopifyVariantStockRaw[]> {
+  const { accessToken } = await createShopifyAccessToken(creds)
+  const host = shopHost(creds.shop)
+  const version = creds.apiVersion || '2025-01'
+  const out: ShopifyVariantStockRaw[] = []
+  let cursor: string | null = null
+  for (;;) {
+    const query = `#graphql
+      query VariantStock($cursor: String) {
+        productVariants(first: 100, after: $cursor) {
+          pageInfo { hasNextPage endCursor }
+          nodes { sku title inventoryQuantity product { title status } }
+        }
+      }`
+    const res = await fetch(`https://${host}/admin/api/${version}/graphql.json`, {
+      method: 'POST',
+      headers: { 'X-Shopify-Access-Token': accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { cursor } }),
+    })
+    const json = (await res.json()) as {
+      errors?: Array<{ message?: string }>
+      data?: {
+        productVariants?: {
+          pageInfo?: { hasNextPage?: boolean; endCursor?: string | null }
+          nodes?: Array<{ sku?: string | null; title?: string; inventoryQuantity?: number | null; product?: { title?: string; status?: string } }>
+        }
+      }
+    }
+    if (!res.ok || json.errors?.length) {
+      throw new Error(json.errors?.[0]?.message || `Shopify variants failed (${res.status})`)
+    }
+    for (const n of json.data?.productVariants?.nodes ?? []) {
+      out.push({
+        sku: n.sku?.trim() || null,
+        productTitle: n.product?.title ?? '',
+        variantTitle: n.title ?? '',
+        quantity: typeof n.inventoryQuantity === 'number' ? n.inventoryQuantity : null,
+        active: (n.product?.status ?? 'ACTIVE') === 'ACTIVE',
+      })
+    }
+    if (!json.data?.productVariants?.pageInfo?.hasNextPage) break
+    cursor = json.data.productVariants.pageInfo.endCursor ?? null
+    if (!cursor) break
+  }
+  return out
+}
+
 export type ShopifyAbandonedCheckout = {
   id: string
   createdAt: string

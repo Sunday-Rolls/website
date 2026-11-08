@@ -3,12 +3,14 @@ import type { AbandonedCartStats, Order } from './types.js'
 import {
   fetchShopifyAbandonedCheckouts,
   fetchShopifyOrders,
+  fetchShopifyVariantStock,
   loadShopifyCredentialsFromEnv,
   type ShopifyCredentials,
   type ShopifyOrderRaw,
 } from './shopify.js'
 import { addUtcDays, formatUtcDate, parseUtcDate, storeMidnightUtc } from './period.js'
 import type { AnalyticsStore } from './store.js'
+import { INVENTORY_SHOPIFY_KEY, shopifyInventory } from './inventory.js'
 
 export type ShopifySyncResult = {
   start: string | null
@@ -184,9 +186,18 @@ export async function syncShopifyToStore(
     }
     await store.replaceAbandoned(abandonedStats)
 
+    // Inventory page: listed quantity per SKU. A failure here doesn't fail the order sync.
+    let stockNote = ''
+    try {
+      const stock = await fetchShopifyVariantStock(creds)
+      await store.setIntegrationState(INVENTORY_SHOPIFY_KEY, shopifyInventory(stock) as unknown as Record<string, unknown>)
+    } catch (error) {
+      stockNote = `, stock skipped (${error instanceof Error ? error.message.slice(0, 80) : 'error'})`
+    }
+
     const message = `Shopify ${start ?? '…'}→${end ?? '…'}: ${count} orders, ${abandonedOnly.length} abandoned, ${recovered.length} recovered${
       removedTracker ? `, removed ${removedTracker} tracker Shopify rows` : ''
-    }${removedExcluded ? `, removed ${removedExcluded} cancelled/test orders` : ''}`
+    }${removedExcluded ? `, removed ${removedExcluded} cancelled/test orders` : ''}${stockNote}`
     await store.finishSync(sync.id, 'ok', message, count + checkouts.length + removedTracker + removedExcluded)
     return {
       start,

@@ -1,5 +1,6 @@
 import { downloadDriveWorkbook } from './drive.js'
 import type { AnalyticsStore } from './store.js'
+import { INVENTORY_SHEET_KEY } from './inventory.js'
 import {
   filterCashByDate,
   filterExpensesByDate,
@@ -63,6 +64,9 @@ export async function syncSalesTrackerFromBuffer(
       nExpenses = await store.upsertExpenses(expenses)
       if (includeCash && cashForecast.length) nCash = await store.upsertCashForecast(cashForecast)
     }
+
+    // The inventory tabs aren't date-filtered: the Inventory page needs every receipt and sale.
+    await store.setIntegrationState(INVENTORY_SHEET_KEY, parsed.inventory as unknown as Record<string, unknown>)
 
     const message = `${sourceLabel}: ${nOrders} orders, ${nExpenses} expenses, ${nCash} cash rows${
       start || end ? ` (${start ?? '…'}→${end ?? '…'})` : ''
