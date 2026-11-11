@@ -16,8 +16,9 @@ function absoluteImage(url: string, origin: string): string {
  * schema.org Product data for a product page, so Google can show price,
  * availability and review stars in search results.
  *
- * Only reviews written about this exact product count toward the rating
- * (Google's review-snippet rules); reviews of sibling products are left out.
+ * Only reviews left on this site about this exact product count toward the
+ * rating. Google's review-snippet rules forbid ratings aggregated from other
+ * sites, so imported Etsy reviews (and reviews of sibling products) are left out.
  */
 export function buildProductJsonLd(
   product: ShopifyProduct,
@@ -58,7 +59,9 @@ export function buildProductJsonLd(
     data.offers = offer
   }
 
-  const rated = reviews.filter((review) => review.rating >= 1 && review.rating <= 5)
+  const rated = reviews.filter(
+    (review) => review.source === 'site' && review.rating >= 1 && review.rating <= 5,
+  )
   if (rated.length > 0) {
     const average = rated.reduce((sum, review) => sum + review.rating, 0) / rated.length
     data.aggregateRating = {
