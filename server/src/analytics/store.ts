@@ -16,6 +16,8 @@ import type {
   EtsyReview,
   EtsyShopDaily,
   Expense,
+  GoogleAdsDaily,
+  GoogleAdsSearchTerm,
   Order,
   OrderSource,
   PublicUser,
@@ -67,6 +69,16 @@ export type AnalyticsStore = {
   listAdSpend(): Promise<DailyAdSpend[]>
   replaceKeywords(rows: SearchKeyword[]): Promise<number>
   listKeywords(): Promise<SearchKeyword[]>
+  /**
+   * Insert or update by (date, campaignId). `replaceFromDay`: first delete every row on or after
+   * that day, so a re-read window drops campaigns that no longer have data.
+   */
+  upsertGoogleAdsDaily(rows: GoogleAdsDaily[], options?: { replaceFromDay?: string }): Promise<number>
+  /** By date, then campaign. */
+  listGoogleAdsDaily(): Promise<GoogleAdsDaily[]>
+  replaceGoogleAdsSearchTerms(rows: GoogleAdsSearchTerm[]): Promise<number>
+  /** Highest cost first. */
+  listGoogleAdsSearchTerms(): Promise<GoogleAdsSearchTerm[]>
   replaceProductViews(rows: DailyProductView[]): Promise<number>
   upsertProductViews(rows: DailyProductView[]): Promise<number>
   listProductViews(): Promise<DailyProductView[]>
@@ -143,6 +155,8 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let traffic: DailyTraffic[] = []
   let adSpend: DailyAdSpend[] = []
   let keywords: SearchKeyword[] = []
+  let googleAdsDaily: GoogleAdsDaily[] = []
+  let googleAdsTerms: GoogleAdsSearchTerm[] = []
   let productViews: DailyProductView[] = []
   let expenses: Expense[] = []
   let cash: CashForecastRow[] = []
@@ -164,6 +178,8 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       traffic = []
       adSpend = []
       keywords = []
+      googleAdsDaily = []
+      googleAdsTerms = []
       productViews = []
       expenses = []
       cash = []
@@ -284,6 +300,27 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
 
     async listKeywords() {
       return keywords
+    },
+
+    async upsertGoogleAdsDaily(rows, options) {
+      const kept = options?.replaceFromDay ? googleAdsDaily.filter((r) => r.date < options.replaceFromDay!) : googleAdsDaily
+      const map = new Map(kept.map((r) => [`${r.date}|${r.campaignId}`, r]))
+      for (const row of rows) map.set(`${row.date}|${row.campaignId}`, row)
+      googleAdsDaily = [...map.values()].sort((a, b) => a.date.localeCompare(b.date) || a.campaign.localeCompare(b.campaign))
+      return rows.length
+    },
+
+    async listGoogleAdsDaily() {
+      return googleAdsDaily
+    },
+
+    async replaceGoogleAdsSearchTerms(rows) {
+      googleAdsTerms = [...rows].sort((a, b) => b.cost - a.cost)
+      return rows.length
+    },
+
+    async listGoogleAdsSearchTerms() {
+      return googleAdsTerms
     },
 
     async replaceProductViews(rows) {
@@ -486,6 +523,8 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           analytics_daily_traffic,
           analytics_daily_ad_spend,
           analytics_search_keywords,
+          analytics_google_ads_daily,
+          analytics_google_ads_search_terms,
           analytics_daily_product_views,
           analytics_expenses,
           analytics_cash_forecast,
@@ -853,6 +892,70 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         visits: num(row.visits),
         periodStart: toDateOnly(row.period_start),
         periodEnd: toDateOnly(row.period_end),
+      }))
+    },
+
+    async upsertGoogleAdsDaily(rows, options) {
+      if (options?.replaceFromDay) {
+        await db.query(`DELETE FROM analytics_google_ads_daily WHERE date >= $1`, [options.replaceFromDay])
+      }
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_google_ads_daily
+            (date, campaign_id, campaign, impressions, clicks, cost, conversions, conversion_value)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (date, campaign_id) DO UPDATE SET
+             campaign = EXCLUDED.campaign,
+             impressions = EXCLUDED.impressions,
+             clicks = EXCLUDED.clicks,
+             cost = EXCLUDED.cost,
+             conversions = EXCLUDED.conversions,
+             conversion_value = EXCLUDED.conversion_value`,
+          [row.date, row.campaignId, row.campaign, row.impressions, row.clicks, row.cost, row.conversions, row.conversionValue],
+        )
+      }
+      return rows.length
+    },
+
+    async listGoogleAdsDaily() {
+      const { rows } = await db.query(`SELECT * FROM analytics_google_ads_daily ORDER BY date, campaign`)
+      return rows.map((row) => ({
+        date: toDateOnly(row.date),
+        campaignId: str(row.campaign_id),
+        campaign: str(row.campaign),
+        impressions: num(row.impressions),
+        clicks: num(row.clicks),
+        cost: num(row.cost),
+        conversions: num(row.conversions),
+        conversionValue: num(row.conversion_value),
+      }))
+    },
+
+    async replaceGoogleAdsSearchTerms(rows) {
+      await db.query(`DELETE FROM analytics_google_ads_search_terms`)
+      for (const row of rows) {
+        await db.query(
+          `INSERT INTO analytics_google_ads_search_terms
+            (term, campaign, period_start, period_end, impressions, clicks, cost, conversions)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (term, campaign) DO NOTHING`,
+          [row.term, row.campaign, row.periodStart, row.periodEnd, row.impressions, row.clicks, row.cost, row.conversions],
+        )
+      }
+      return rows.length
+    },
+
+    async listGoogleAdsSearchTerms() {
+      const { rows } = await db.query(`SELECT * FROM analytics_google_ads_search_terms ORDER BY cost DESC, clicks DESC`)
+      return rows.map((row) => ({
+        term: str(row.term),
+        campaign: str(row.campaign),
+        periodStart: toDateOnly(row.period_start),
+        periodEnd: toDateOnly(row.period_end),
+        impressions: num(row.impressions),
+        clicks: num(row.clicks),
+        cost: num(row.cost),
+        conversions: num(row.conversions),
       }))
     },
 

@@ -18,6 +18,8 @@ import { buildDataAudit } from '../analytics/data-audit.js'
 import { extractDriveFileId, listDriveWorkbooks } from '../analytics/drive.js'
 import { buildEtsyView } from '../analytics/etsy-view.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
+import { googleAdsMissingEnv } from '../analytics/google-ads.js'
+import { buildGoogleAdsView } from '../analytics/google-ads-view.js'
 import { loadGscCredentialsFromEnv, syncGscToStore } from '../analytics/gsc-sync.js'
 import {
   CSV_TEMPLATES,
@@ -310,6 +312,18 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       store.listCustomerOrders(),
     ])
     return c.json({ ok: true, data: buildMarketingView({ range, orders, adSpend, traffic, keywords, customerOrders }) })
+  })
+
+  app.get('/api/google-ads', async (c) => {
+    const user = await currentUser(c, store)
+    if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
+    const range = rangeOrError(c)
+    if (range instanceof Response) return range
+    const [daily, searchTerms] = await Promise.all([store.listGoogleAdsDaily(), store.listGoogleAdsSearchTerms()])
+    return c.json({
+      ok: true,
+      data: buildGoogleAdsView({ range, daily, searchTerms, connected: !googleAdsMissingEnv() }),
+    })
   })
 
   app.get('/api/funnel', async (c) => {
@@ -963,6 +977,7 @@ const AUTO_SYNC_LABELS: Record<AutoSyncSource, string> = {
   etsy: 'Etsy',
   'sales-tracker': 'Sales Tracker',
   ga4: 'Google Analytics 4',
+  'google-ads': 'Google Ads',
   'search-console': 'Google Search Console',
 }
 

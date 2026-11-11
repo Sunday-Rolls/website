@@ -100,6 +100,30 @@ BEGIN
   END IF;
 END $$;
 
+CREATE TABLE IF NOT EXISTS analytics_google_ads_daily (
+  date date NOT NULL,
+  campaign_id text NOT NULL,
+  campaign text NOT NULL DEFAULT '',
+  impressions integer NOT NULL DEFAULT 0,
+  clicks integer NOT NULL DEFAULT 0,
+  cost numeric(12,2) NOT NULL DEFAULT 0,
+  conversions numeric(12,2) NOT NULL DEFAULT 0,
+  conversion_value numeric(12,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (date, campaign_id)
+);
+
+CREATE TABLE IF NOT EXISTS analytics_google_ads_search_terms (
+  term text NOT NULL,
+  campaign text NOT NULL DEFAULT '',
+  period_start date NOT NULL,
+  period_end date NOT NULL,
+  impressions integer NOT NULL DEFAULT 0,
+  clicks integer NOT NULL DEFAULT 0,
+  cost numeric(12,2) NOT NULL DEFAULT 0,
+  conversions numeric(12,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (term, campaign)
+);
+
 CREATE TABLE IF NOT EXISTS analytics_search_keywords (
   query text NOT NULL,
   period_start date NOT NULL,
