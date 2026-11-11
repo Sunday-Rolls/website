@@ -31,6 +31,7 @@ const SYNC_LABELS = {
   etsy: 'Etsy',
   'sales-tracker': 'Sales Tracker',
   ga4: 'Google Analytics',
+  'google-ads': 'Google Ads',
   'search-console': 'Search Console',
   'merchant-center': 'Merchant Center',
 }

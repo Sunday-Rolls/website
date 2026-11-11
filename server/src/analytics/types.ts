@@ -84,6 +84,31 @@ export type DailyAdSpend = {
   sessions?: number
 }
 
+/** One Google Ads campaign on one day, straight from the Google Ads API. */
+export type GoogleAdsDaily = {
+  date: string
+  campaignId: string
+  campaign: string
+  impressions: number
+  clicks: number
+  cost: number
+  /** Google Ads' own conversion count (Purchase v2 and any other primary actions). */
+  conversions: number
+  conversionValue: number
+}
+
+/** A search term summed over the last synced window. */
+export type GoogleAdsSearchTerm = {
+  term: string
+  campaign: string
+  periodStart: string
+  periodEnd: string
+  impressions: number
+  clicks: number
+  cost: number
+  conversions: number
+}
+
 export type SearchKeyword = {
   query: string
   visits: number

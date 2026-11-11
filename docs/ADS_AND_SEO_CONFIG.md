@@ -13,6 +13,14 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
 
+## Change log: 2026-11-11
+
+### Google Ads API
+
+- Cloud project **Sunday Rolls Ads** (`sunday-rolls-ads`, owner `stwolfe10@gmail.com`) with the Google Ads API enabled and **Explorer** access approved.
+- OAuth app (External, Testing) with Desktop client "Sunday Rolls Ads MCP"; test user `stwolfe10@gmail.com`.
+- Dashboard reads Google Ads directly (campaign clicks/impressions/cost/conversions and search terms). Setup and Railway variables: [`GOOGLE_ADS_API.md`](GOOGLE_ADS_API.md). Replaces the Windsor.ai connector.
+
 ## Change log: 2026-11-03
 
 Each entry lists what it was before, so it can be put back.

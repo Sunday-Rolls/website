@@ -1,4 +1,4 @@
-// Marketing: ad spend, MER, new-customer cost, spend vs revenue, campaigns, traffic sources, search keywords.
+// Marketing: ad spend, MER, new-customer cost, spend vs revenue, campaigns, Google Ads (API), traffic sources, search keywords.
 import { areaChart, barChart } from '../lib/charts.js'
 import { badge, card, emptyState, escapeHtml, icon, kpiCard, money, moneyExact, notConnected, num, pct, table } from '../lib/ui.js'
 
@@ -263,11 +263,83 @@ function keywordsCard(keywords, period) {
   })
 }
 
+// ---------- Google Ads (API) ----------
+
+function googleAdsCards(g) {
+  if (!g || !g.connected || !(g.campaigns ?? []).length && !(g.searchTerms ?? []).length) return ''
+  const t = g.totals ?? {}
+  const summary = [
+    `${money(t.cost)} cost`,
+    `${num(t.clicks)} clicks`,
+    isNum(t.cpc) ? `${moneyExact(t.cpc)} CPC` : null,
+    `${num(t.conversions)} conversions`,
+    isNum(t.roas) ? `${t.roas.toFixed(2)}x conv. value ÷ cost` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+  const campaigns = card({
+    title: 'Google Ads campaigns',
+    subtitle: `Straight from Google Ads: ${summary}. Conversions are Google Ads’ own count, so compare them with real orders.`,
+    className: 'col-12',
+    body: table({
+      columns: [
+        { key: 'campaign', label: 'Campaign' },
+        { key: 'impressions', label: 'Impr.', align: 'right', format: (v) => num(v) },
+        {
+          key: 'clicks',
+          label: 'Clicks',
+          align: 'right',
+          format: (v, r) => `${num(v)}<span class="cell-sub mkt-hide-sm">${isNum(r.ctr) ? `${pct(r.ctr * 100, 1)} CTR` : ''}</span>`,
+        },
+        {
+          key: 'cost',
+          label: 'Cost',
+          align: 'right',
+          format: (v, r) => `${money(v)}<span class="cell-sub mkt-hide-sm">${isNum(r.cpc) ? `${moneyExact(r.cpc)} CPC` : ''}</span>`,
+        },
+        {
+          key: 'conversions',
+          label: 'Conv.',
+          align: 'right',
+          format: (v, r) =>
+            `${num(v)}<span class="cell-sub mkt-hide-sm">${isNum(r.costPerConversion) ? `${moneyExact(r.costPerConversion)} each` : ''}</span>`,
+        },
+        { key: 'roas', label: 'Value ÷ cost', align: 'right', format: (v) => (isNum(v) ? `${v.toFixed(2)}x` : '—') },
+      ],
+      rows: g.campaigns ?? [],
+      empty: 'No Google Ads activity in this range.',
+    }),
+  })
+  const period = g.searchTermsPeriod
+  const terms = card({
+    title: 'Google Ads search terms',
+    subtitle: period
+      ? `What people searched before clicking an ad, ${shortDay(period.start)} – ${shortDay(period.end)}, highest cost first`
+      : 'What people searched before clicking an ad, highest cost first',
+    className: 'col-12',
+    body: table({
+      columns: [
+        { key: 'term', label: 'Search term', format: (v, r) => `${escapeHtml(v)}<span class="cell-sub mkt-hide-sm">${escapeHtml(r.campaign)}</span>` },
+        { key: 'clicks', label: 'Clicks', align: 'right', format: (v) => num(v) },
+        { key: 'cost', label: 'Cost', align: 'right', format: (v) => moneyExact(v) },
+        { key: 'conversions', label: 'Conv.', align: 'right', format: (v) => num(v) },
+      ],
+      rows: (g.searchTerms ?? []).slice(0, 20),
+      empty: 'No search terms yet.',
+    }),
+  })
+  return campaigns + terms
+}
+
 // ---------- Render ----------
 
 export async function render(root, ctx) {
   injectStyle()
-  const { data } = await ctx.api(`/marketing?${ctx.rangeQuery()}`)
+  const [{ data }, googleAds] = await Promise.all([
+    ctx.api(`/marketing?${ctx.rangeQuery()}`),
+    // Optional: an older server or a failed call just leaves the Google Ads cards out.
+    ctx.api(`/google-ads?${ctx.rangeQuery()}`).then((r) => r.data).catch(() => null),
+  ])
   ctx.setRangeLabel?.(data.range)
 
   const { weekly, points } = bucketSpend(data.spendTrend ?? [])
@@ -284,6 +356,7 @@ export async function render(root, ctx) {
       body: hasTrend ? '<div id="mkt-spend-chart" class="chart-box"></div>' : emptyState('No spend or sales in this range yet.'),
     }),
     campaignsCard(data.platforms ?? []),
+    googleAdsCards(googleAds),
     notConnectedCards(data.connected),
     card({
       title: 'Traffic sources',

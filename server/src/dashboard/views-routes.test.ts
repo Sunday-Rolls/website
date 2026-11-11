@@ -175,6 +175,7 @@ describe('redesign dashboard endpoints', () => {
       'etsy',
       'sales-tracker',
       'ga4',
+      'google-ads',
       'search-console',
       'merchant',
     ])
