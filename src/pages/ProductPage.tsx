@@ -4,6 +4,13 @@ import { usePageContent } from '@/lib/content'
 import { trackViewItem } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
 import { placeholderProducts } from '@/lib/product-catalog'
+import {
+  applyProductJsonLd,
+  buildProductJsonLd,
+  clearProductJsonLd,
+} from '@/lib/product-structured-data'
+import { getReviewItems } from '@/lib/review-items'
+import { reviewsForProduct } from '@/lib/reviews'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { ProductDetails } from '@/components/product/ProductDetails'
 import { ProductGallery } from '@/components/product/ProductGallery'
@@ -65,7 +72,13 @@ export function ProductPage() {
         image: product.imageUrl,
         type: 'product',
       })
-      return
+      const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href
+      if (canonical) {
+        applyProductJsonLd(
+          buildProductJsonLd(product, reviewsForProduct(getReviewItems(), product.handle), canonical),
+        )
+      }
+      return clearProductJsonLd
     }
     applyPageMeta({
       title: content.meta.title,

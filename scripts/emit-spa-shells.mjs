@@ -109,6 +109,23 @@ function injectHead(html, { title, description, canonicalPath, preload = [], mod
       )
     }
   }
+  // Social previews read the raw HTML, so keep og:/twitter: tags in step with the page.
+  const setMeta = (attr, key, value) => {
+    const pattern = new RegExp(`<meta\\s+${attr}="${key}"\\s+content="[^"]*"\\s*\\/?>`, 'i')
+    const tag = `<meta ${attr}="${key}" content="${escapeHtml(value)}" />`
+    next = pattern.test(next) ? next.replace(pattern, tag) : next.replace('</head>', `    ${tag}\n  </head>`)
+  }
+  if (title) {
+    setMeta('property', 'og:title', title)
+    setMeta('name', 'twitter:title', title)
+  }
+  if (description) {
+    setMeta('property', 'og:description', description)
+    setMeta('name', 'twitter:description', description)
+  }
+  if (canonicalPath) {
+    setMeta('property', 'og:url', canonicalPath)
+  }
   if (canonicalPath) {
     if (/<link\s+rel="canonical"/i.test(next)) {
       next = next.replace(
