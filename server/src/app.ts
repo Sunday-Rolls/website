@@ -2,6 +2,7 @@ import { Hono, type Context } from 'hono'
 import { cors } from 'hono/cors'
 import type { AnalyticsStore } from './analytics/store.js'
 import { createDashboardRoutes } from './dashboard/routes.js'
+import { createMcpRoutes } from './mcp/routes.js'
 import type { Config } from './env.js'
 import type { ContactStore } from './contact-store.js'
 import type { ContactPayload } from './mail.js'
@@ -77,6 +78,8 @@ export function createApp({ config, sendContactEmail, contacts, reviews, analyti
       }),
     )
     app.get('/dashboard/', (c) => c.redirect('/dashboard', 302))
+    // Google Ads connector for Claude (/mcp + OAuth). See docs/GOOGLE_ADS_CONNECTOR.md.
+    app.route('/', createMcpRoutes({ store: analytics, checkRateLimit }))
   }
 
   // Server-to-server from Shopify: no browser origin, authenticated by HMAC instead.

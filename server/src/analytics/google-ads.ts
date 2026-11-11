@@ -49,7 +49,7 @@ export function loadGoogleAdsCredentialsFromEnv(env: NodeJS.ProcessEnv = process
   }
 }
 
-async function accessToken(creds: GoogleAdsCredentials): Promise<string> {
+export async function accessToken(creds: GoogleAdsCredentials): Promise<string> {
   const client = new OAuth2Client({ clientId: creds.clientId, clientSecret: creds.clientSecret })
   client.setCredentials({ refresh_token: creds.refreshToken })
   const { token } = await client.getAccessToken()
@@ -58,6 +58,61 @@ async function accessToken(creds: GoogleAdsCredentials): Promise<string> {
 }
 
 type Row = Record<string, Record<string, unknown> | undefined>
+
+type AdsErrorBody = {
+  error?: {
+    message?: string
+    details?: Array<{ errors?: Array<{ message?: string; trigger?: { stringValue?: string } }> }>
+  }
+}
+
+/** The most useful message in a Google Ads error body: the per-operation errors when present. */
+export function adsErrorMessage(data: unknown): string | null {
+  const body = (Array.isArray(data) ? data[0] : data) as AdsErrorBody | undefined
+  const detail = (body?.error?.details ?? [])
+    .flatMap((d) => d.errors ?? [])
+    .map((e) => [e.message, e.trigger?.stringValue && `("${e.trigger.stringValue}")`].filter(Boolean).join(' '))
+    .filter(Boolean)
+  if (detail.length) return detail.join('; ')
+  return body?.error?.message ?? null
+}
+
+export type MutateService = 'campaignCriteria' | 'adGroupCriteria' | 'sharedCriteria' | 'campaigns' | 'campaignBudgets'
+
+/**
+ * Run mutate operations on one service. `validateOnly` asks Google to check the change without
+ * applying it (used for previews). Returns the resource names Google reports.
+ */
+export async function googleAdsMutate(
+  creds: GoogleAdsCredentials,
+  service: MutateService,
+  operations: Array<Record<string, unknown>>,
+  options: { validateOnly?: boolean; fetchImpl?: typeof fetch; token?: string } = {},
+): Promise<string[]> {
+  const fetchImpl = options.fetchImpl ?? fetch
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${options.token ?? (await accessToken(creds))}`,
+    'Content-Type': 'application/json',
+  }
+  if (creds.loginCustomerId) headers['login-customer-id'] = creds.loginCustomerId
+  if (creds.developerToken) headers['developer-token'] = creds.developerToken
+  const url = `https://googleads.googleapis.com/${creds.apiVersion}/customers/${creds.customerId}/${service}:mutate`
+  const res = await fetchImpl(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ operations, validateOnly: Boolean(options.validateOnly) }),
+  })
+  const text = await res.text()
+  let data: unknown = {}
+  try {
+    data = text ? JSON.parse(text) : {}
+  } catch {
+    throw new Error(`Google Ads change failed (${res.status}): ${text.slice(0, 200)}`)
+  }
+  if (!res.ok) throw new Error(`Google Ads change failed (${res.status}): ${adsErrorMessage(data) ?? text.slice(0, 200)}`)
+  const results = (data as { results?: Array<{ resourceName?: string }> }).results ?? []
+  return results.map((r) => r.resourceName ?? '').filter(Boolean)
+}
 
 /** Run one GAQL query through searchStream and return every result row. */
 export async function googleAdsQuery(
@@ -81,10 +136,7 @@ export async function googleAdsQuery(
   } catch {
     throw new Error(`Google Ads query failed (${res.status}): ${text.slice(0, 200)}`)
   }
-  if (!res.ok) {
-    const err = (Array.isArray(data) ? data[0] : data) as { error?: { message?: string } } | undefined
-    throw new Error(`Google Ads query failed (${res.status}): ${err?.error?.message ?? text.slice(0, 200)}`)
-  }
+  if (!res.ok) throw new Error(`Google Ads query failed (${res.status}): ${adsErrorMessage(data) ?? text.slice(0, 200)}`)
   // searchStream answers with an array of batches, each holding `results`.
   const batches = (Array.isArray(data) ? data : [data]) as Array<{ results?: Row[] }>
   return batches.flatMap((b) => b.results ?? [])
