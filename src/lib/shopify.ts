@@ -53,6 +53,11 @@ export interface ShopifyProduct {
   title: string
   description: string
   price: string
+  /** Raw decimal amount for the lowest variant price (e.g. "80.0"); used for structured data. */
+  priceAmount?: string
+  currencyCode?: string
+  /** False when every variant is sold out. Undefined for placeholder/catalog-only products. */
+  availableForSale?: boolean
   compareAtPrice?: string
   imageUrl?: string
   imageAlt?: string
@@ -111,6 +116,7 @@ const PRODUCT_SELECTION = `
   handle
   title
   description
+  availableForSale
   featuredImage {
     url
     altText
@@ -313,6 +319,7 @@ type ProductNode = {
   handle: string
   title: string
   description: string
+  availableForSale?: boolean | null
   featuredImage?: { url: string; altText?: string | null } | null
   images?: {
     nodes: Array<{ url: string; altText?: string | null }>
@@ -471,6 +478,9 @@ function mapProduct(node: ProductNode): ShopifyProduct {
     title: node.title,
     description: node.description,
     price: formatPrice(amount, currencyCode),
+    priceAmount: amount,
+    currencyCode,
+    availableForSale: node.availableForSale ?? undefined,
     imageUrl: images[0]?.url ?? node.featuredImage?.url,
     imageAlt: images[0]?.alt ?? node.featuredImage?.altText ?? node.title,
     images: images.length > 0 ? images : undefined,
