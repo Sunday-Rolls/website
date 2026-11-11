@@ -1,6 +1,6 @@
 // Marketing: ad spend, MER, new-customer cost, spend vs revenue, campaigns, traffic sources, search keywords.
 import { areaChart, barChart } from '../lib/charts.js'
-import { badge, card, emptyState, escapeHtml, kpiCard, money, moneyExact, notConnected, num, pct, table } from '../lib/ui.js'
+import { badge, card, emptyState, escapeHtml, icon, kpiCard, money, moneyExact, notConnected, num, pct, table } from '../lib/ui.js'
 
 // Platform ROAS needed to cover product cost (same threshold the old ROAS page used).
 const BREAK_EVEN_ROAS = 1.25
@@ -169,11 +169,7 @@ function platformTable(p) {
           if (!(v > 0)) return `—<span class="cell-sub">None linked</span>`
           const n = r.siteTaggedOrders ?? 0
           const parts = []
-          if (/etsy/i.test(r.platform)) {
-            // Offsite Ads: sales Etsy credits to them. Other Etsy campaigns: their share of Etsy's sales.
-            if (r.campaign !== 'Offsite Ads') parts.push('Share of Etsy sales')
-            else parts.push(n ? `${num(n)} order${n === 1 ? '' : 's'} credited by Etsy` : 'Credited by Etsy')
-          } else if (n) parts.push(`${num(n)} tagged order${n === 1 ? '' : 's'}`)
+          if (n) parts.push(`${num(n)} tagged order${n === 1 ? '' : 's'}`)
           if (r.siteSalesEstimated > 0) parts.push(`${money(r.siteSalesEstimated)} est.`)
           return `${money(v)}<span class="cell-sub">${escapeHtml(parts.join(' · '))}</span>`
         },
@@ -194,6 +190,18 @@ function platformTable(p) {
 </div>`
 }
 
+const ETSY_ADS_URL = 'https://www.etsy.com/your/shops/me/advertising'
+
+/** Etsy doesn't say which sales its ads drove, so show spend and send people to Etsy's own ad stats. */
+function etsyAdsBlock(p) {
+  const campaigns = (p.campaigns ?? []).filter((c) => c.spend > 0)
+  const split = campaigns.length > 1 ? ` (${campaigns.map((c) => `${c.campaign} ${money(c.spend)}`).join(' · ')})` : ''
+  return `<div class="mkt-platform">
+  <div class="mkt-platform-head"><h4>${escapeHtml(p.platform)}</h4><span>${escapeHtml(`${money(p.spend)} spent${split}`)}</span></div>
+  <p class="mkt-platform-note">Etsy doesn’t report which sales its ads drove, so there’s no ROAS for it here. The spend still counts toward MER above. <a href="${ETSY_ADS_URL}" target="_blank" rel="noopener noreferrer">See ad performance in Etsy${icon('arrow-right', { size: 14 })}</a></p>
+</div>`
+}
+
 function campaignsCard(platforms) {
   const live = platforms.filter((p) => p.connected && (p.campaigns ?? []).length)
   const note = `<p class="mkt-note">Sales are website orders linked to each campaign: in full when the order carries the ad’s click or UTM tag, otherwise estimated from the campaign’s share of that day’s visits. ROAS = sales ÷ spend; break-even is about ${BREAK_EVEN_ROAS}x. MER above covers every channel.</p>`
@@ -201,7 +209,9 @@ function campaignsCard(platforms) {
     title: 'Campaigns',
     subtitle: 'Spend and the website sales linked to each campaign',
     className: 'col-12',
-    body: live.length ? note + live.map(platformTable).join('') : emptyState('No campaign spend in this range.'),
+    body: live.length
+      ? note + live.map((p) => (/etsy/i.test(p.platform) ? etsyAdsBlock(p) : platformTable(p))).join('')
+      : emptyState('No campaign spend in this range.'),
   })
 }
 
