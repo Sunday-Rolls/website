@@ -20,6 +20,7 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 - Cloud project **Sunday Rolls Ads** (`sunday-rolls-ads`, owner `stwolfe10@gmail.com`) with the Google Ads API enabled and **Explorer** access approved.
 - OAuth app (External, Testing) with Desktop client "Sunday Rolls Ads MCP"; test user `stwolfe10@gmail.com`.
 - Dashboard reads Google Ads directly (campaign clicks/impressions/cost/conversions and search terms). Setup and Railway variables: [`GOOGLE_ADS_API.md`](GOOGLE_ADS_API.md). Replaces the Windsor.ai connector.
+- Claude connector at `https://dashboard.sundayrollsgolf.com/mcp` reads Ads and makes approved changes (negatives, tROAS, budgets, status): [`GOOGLE_ADS_CONNECTOR.md`](GOOGLE_ADS_CONNECTOR.md).
 
 ## Change log: 2026-11-03
 
