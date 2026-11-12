@@ -978,6 +978,7 @@ const AUTO_SYNC_LABELS: Record<AutoSyncSource, string> = {
   'sales-tracker': 'Sales Tracker',
   ga4: 'Google Analytics 4',
   'google-ads': 'Google Ads',
+  'meta-ads': 'Meta Ads',
   'search-console': 'Google Search Console',
 }
 

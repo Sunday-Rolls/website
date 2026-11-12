@@ -32,6 +32,7 @@ const SYNC_LABELS = {
   'sales-tracker': 'Sales Tracker',
   ga4: 'Google Analytics',
   'google-ads': 'Google Ads',
+  'meta-ads': 'Meta Ads',
   'search-console': 'Search Console',
   'merchant-center': 'Merchant Center',
 }

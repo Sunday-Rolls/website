@@ -845,7 +845,7 @@ export function buildRoas(input: {
       campaigns: [],
       connected: false,
       salesStatus: 'not_connected',
-      note: 'Not connected — add META_ACCESS_TOKEN to sync Meta ad spend.',
+      note: 'Not connected — add META_ACCESS_TOKEN and META_AD_ACCOUNT_ID to sync Meta ad spend (docs/META_ADS_SYNC.md).',
     })
   }
 

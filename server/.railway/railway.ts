@@ -55,6 +55,7 @@ export default defineRailway(() => {
       GOOGLE_ADS_CUSTOMER_ID: preserve(),
       GOOGLE_ADS_REFRESH_TOKEN: preserve(),
       GOOGLE_SERVICE_ACCOUNT_JSON: preserve(),
+      META_ACCESS_TOKEN: preserve(),
       META_AD_ACCOUNT_ID: preserve(),
       REQUIRE_BROWSER_ORIGIN: preserve(),
       RESEND_API_KEY: preserve(),
