@@ -22,6 +22,7 @@ const SYNC_SOURCES = [
   { key: 'sales-tracker', label: 'Sales Tracker' },
   { key: 'ga4', label: 'GA4' },
   { key: 'google-ads', label: 'Google Ads' },
+  { key: 'meta-ads', label: 'Meta Ads' },
   { key: 'search-console', label: 'Search Console' },
 ]
 const STORE = { theme: 'sr-dashboard-theme', sidebar: 'sr-dashboard-sidebar', range: 'sr-dashboard-range' }

@@ -22,6 +22,10 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 - Dashboard reads Google Ads directly (campaign clicks/impressions/cost/conversions and search terms). Setup and Railway variables: [`GOOGLE_ADS_API.md`](GOOGLE_ADS_API.md). Replaces the Windsor.ai connector.
 - Claude connector at `https://dashboard.sundayrollsgolf.com/mcp` reads Ads and makes approved changes (negatives, tROAS, budgets, status): [`GOOGLE_ADS_CONNECTOR.md`](GOOGLE_ADS_CONNECTOR.md).
 
+### Meta Ads
+
+- Dashboard syncs Meta ad spend per campaign/day from ad account `2001554000739418` once `META_ACCESS_TOKEN` is set: [`META_ADS_SYNC.md`](META_ADS_SYNC.md).
+
 ## Change log: 2026-11-03
 
 Each entry lists what it was before, so it can be put back.
