@@ -14,24 +14,24 @@
       "_Container-xadncVVB.js"
     ]
   },
-  "_ProductCard-DV0xkNzb.js": {
-    "file": "assets/ProductCard-DV0xkNzb.js",
+  "_ProductCard-BtVByuOD.js": {
+    "file": "assets/ProductCard-BtVByuOD.js",
     "name": "ProductCard",
     "imports": [
       "_jsx-runtime-B-hcVAMW.js",
       "_gtm-DPGgcCrH.js",
       "_page-meta-CEDpf6Q_.js",
-      "_preload-route-DLplTGRq.js",
+      "_preload-route-DESKymXG.js",
       "_Container-xadncVVB.js"
     ]
   },
-  "_ProductGrid-BM_VXcYd.js": {
-    "file": "assets/ProductGrid-BM_VXcYd.js",
+  "_ProductGrid-Povh0ZYY.js": {
+    "file": "assets/ProductGrid-Povh0ZYY.js",
     "name": "ProductGrid",
     "imports": [
       "_jsx-runtime-B-hcVAMW.js",
       "_page-meta-CEDpf6Q_.js",
-      "_ProductCard-DV0xkNzb.js"
+      "_ProductCard-BtVByuOD.js"
     ]
   },
   "_PuttAnimation-d5t7XYof.js": {
@@ -75,8 +75,8 @@
     "file": "assets/page-meta-CEDpf6Q_.js",
     "name": "page-meta"
   },
-  "_preload-route-DLplTGRq.js": {
-    "file": "assets/preload-route-DLplTGRq.js",
+  "_preload-route-DESKymXG.js": {
+    "file": "assets/preload-route-DESKymXG.js",
     "name": "preload-route",
     "imports": [
       "_gtm-DPGgcCrH.js"
@@ -93,18 +93,18 @@
       "src/lib/shopify.ts"
     ]
   },
-  "_product-catalog-B6O6jjl_.js": {
-    "file": "assets/product-catalog-B6O6jjl_.js",
+  "_product-catalog-BgcdMhMW.js": {
+    "file": "assets/product-catalog-BgcdMhMW.js",
     "name": "product-catalog",
     "imports": [
       "index.html"
     ]
   },
-  "_reviews-api-BOz2XssJ.js": {
-    "file": "assets/reviews-api-BOz2XssJ.js",
+  "_reviews-api-1g8hrFEc.js": {
+    "file": "assets/reviews-api-1g8hrFEc.js",
     "name": "reviews-api",
     "imports": [
-      "_product-catalog-B6O6jjl_.js"
+      "_product-catalog-BgcdMhMW.js"
     ]
   },
   "_shopifyAnalytics-Sv7tPOAL.js": {
@@ -114,15 +114,15 @@
       "_jsx-runtime-B-hcVAMW.js"
     ]
   },
-  "_toast-CZmZ6D0K.js": {
-    "file": "assets/toast-CZmZ6D0K.js",
+  "_toast-B53Lu1Ap.js": {
+    "file": "assets/toast-B53Lu1Ap.js",
     "name": "toast",
     "imports": [
       "index.html"
     ]
   },
   "index.html": {
-    "file": "assets/index-BYikva9K.js",
+    "file": "assets/index-ie7pR7Y3.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -130,7 +130,7 @@
       "_jsx-runtime-B-hcVAMW.js",
       "_gtm-DPGgcCrH.js",
       "_page-meta-CEDpf6Q_.js",
-      "_preload-route-DLplTGRq.js",
+      "_preload-route-DESKymXG.js",
       "_Container-xadncVVB.js"
     ],
     "dynamicImports": [
@@ -194,7 +194,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2"
   },
   "src/components/layout/StrollingRig.tsx": {
-    "file": "assets/StrollingRig-BHiKRHcv.js",
+    "file": "assets/StrollingRig-Co-JtjGD.js",
     "name": "StrollingRig",
     "src": "src/components/layout/StrollingRig.tsx",
     "isDynamicEntry": true,
@@ -205,17 +205,17 @@
     ]
   },
   "src/lib/shopify.ts": {
-    "file": "assets/shopify-Dul6wUYU.js",
+    "file": "assets/shopify-D54l---m.js",
     "name": "shopify",
     "src": "src/lib/shopify.ts",
     "isDynamicEntry": true,
     "imports": [
-      "_product-catalog-B6O6jjl_.js",
+      "_product-catalog-BgcdMhMW.js",
       "_shopifyAnalytics-Sv7tPOAL.js"
     ]
   },
   "src/pages/AboutPage.tsx": {
-    "file": "assets/AboutPage-DL2nhHw-.js",
+    "file": "assets/AboutPage-0xYu_j08.js",
     "name": "AboutPage",
     "src": "src/pages/AboutPage.tsx",
     "isDynamicEntry": true,
@@ -227,7 +227,7 @@
     ]
   },
   "src/pages/CartPage.tsx": {
-    "file": "assets/CartPage-B7IsnGBc.js",
+    "file": "assets/CartPage-DgovKqP6.js",
     "name": "CartPage",
     "src": "src/pages/CartPage.tsx",
     "isDynamicEntry": true,
@@ -237,7 +237,7 @@
       "_page-meta-CEDpf6Q_.js",
       "_Container-xadncVVB.js",
       "index.html",
-      "_product-catalog-B6O6jjl_.js",
+      "_product-catalog-BgcdMhMW.js",
       "src/lib/shopify.ts",
       "_motion-CQaoCZfx.js",
       "_PuttAnimation-d5t7XYof.js",
@@ -245,7 +245,7 @@
     ]
   },
   "src/pages/CollectionPage.tsx": {
-    "file": "assets/CollectionPage-E9QWegTZ.js",
+    "file": "assets/CollectionPage-CwomUmL_.js",
     "name": "CollectionPage",
     "src": "src/pages/CollectionPage.tsx",
     "isDynamicEntry": true,
@@ -255,16 +255,16 @@
       "_page-meta-CEDpf6Q_.js",
       "_Container-xadncVVB.js",
       "index.html",
-      "_product-catalog-B6O6jjl_.js",
+      "_product-catalog-BgcdMhMW.js",
       "_PageHeader-twVBl8zk.js",
-      "_ProductGrid-BM_VXcYd.js"
+      "_ProductGrid-Povh0ZYY.js"
     ],
     "dynamicImports": [
       "src/lib/shopify.ts"
     ]
   },
   "src/pages/ContactPage.tsx": {
-    "file": "assets/ContactPage-AH0AT7yc.js",
+    "file": "assets/ContactPage-DomVwybD.js",
     "name": "ContactPage",
     "src": "src/pages/ContactPage.tsx",
     "isDynamicEntry": true,
@@ -275,11 +275,11 @@
       "_Container-xadncVVB.js",
       "index.html",
       "_PageHeader-twVBl8zk.js",
-      "_toast-CZmZ6D0K.js"
+      "_toast-B53Lu1Ap.js"
     ]
   },
   "src/pages/HomePage.tsx": {
-    "file": "assets/HomePage-CYqAOQI6.js",
+    "file": "assets/HomePage-DzBIKNTI.js",
     "name": "HomePage",
     "src": "src/pages/HomePage.tsx",
     "isDynamicEntry": true,
@@ -289,10 +289,10 @@
       "_page-meta-CEDpf6Q_.js",
       "_Container-xadncVVB.js",
       "index.html",
-      "_product-catalog-B6O6jjl_.js",
-      "_ProductCard-DV0xkNzb.js",
-      "_toast-CZmZ6D0K.js",
-      "_reviews-api-BOz2XssJ.js"
+      "_product-catalog-BgcdMhMW.js",
+      "_ProductCard-BtVByuOD.js",
+      "_toast-B53Lu1Ap.js",
+      "_reviews-api-1g8hrFEc.js"
     ],
     "dynamicImports": [
       "src/lib/shopify.ts"
@@ -313,7 +313,7 @@
     ]
   },
   "src/pages/ProductPage.tsx": {
-    "file": "assets/ProductPage-CXYM8JdZ.js",
+    "file": "assets/ProductPage-576pq1AY.js",
     "name": "ProductPage",
     "src": "src/pages/ProductPage.tsx",
     "isDynamicEntry": true,
@@ -321,19 +321,19 @@
       "_jsx-runtime-B-hcVAMW.js",
       "_gtm-DPGgcCrH.js",
       "_page-meta-CEDpf6Q_.js",
-      "_preload-route-DLplTGRq.js",
+      "_preload-route-DESKymXG.js",
       "_Container-xadncVVB.js",
       "index.html",
-      "_product-catalog-B6O6jjl_.js",
+      "_product-catalog-BgcdMhMW.js",
       "_PageHeader-twVBl8zk.js",
-      "_reviews-api-BOz2XssJ.js"
+      "_reviews-api-1g8hrFEc.js"
     ],
     "dynamicImports": [
       "src/lib/shopify.ts"
     ]
   },
   "src/pages/ShopPage.tsx": {
-    "file": "assets/ShopPage-Dp2GP6yu.js",
+    "file": "assets/ShopPage-BzDCv410.js",
     "name": "ShopPage",
     "src": "src/pages/ShopPage.tsx",
     "isDynamicEntry": true,
@@ -344,10 +344,10 @@
       "_Container-xadncVVB.js",
       "index.html",
       "_old-man-poses-C-y0U7Ct.js",
-      "_product-catalog-B6O6jjl_.js",
+      "_product-catalog-BgcdMhMW.js",
       "_motion-CQaoCZfx.js",
       "_PageHeader-twVBl8zk.js",
-      "_ProductGrid-BM_VXcYd.js"
+      "_ProductGrid-Povh0ZYY.js"
     ],
     "dynamicImports": [
       "src/lib/shopify.ts"
