@@ -20,3 +20,20 @@ describe('productSeoTitle', () => {
     )
   })
 })
+
+describe('productMetaDescription', () => {
+  it('differs for color versions that share copy', async () => {
+    const { productMetaDescription } = await import('@/lib/product-seo.mjs')
+    const description = 'The Retro Roller brings nostalgic gaming energy straight to the course.'
+    const grey = productMetaDescription({ title: 'Retro Roller - Grey', category: 'headcovers', subcategory: 'center-shafted', description })
+    const purple = productMetaDescription({ title: 'Retro Roller - Purple', category: 'headcovers', subcategory: 'center-shafted', description })
+    expect(grey).toBe('Retro Roller Grey L.A.B. DF3 Putter Cover by Sunday Rolls Golf. ' + description)
+    expect(purple).not.toBe(grey)
+  })
+
+  it('stays under 160 characters', async () => {
+    const { productMetaDescription } = await import('@/lib/product-seo.mjs')
+    const description = 'word '.repeat(80)
+    expect(productMetaDescription({ title: 'Morning Dew', category: 'headcovers', subcategory: 'center-shafted', description }).length).toBeLessThanOrEqual(158)
+  })
+})

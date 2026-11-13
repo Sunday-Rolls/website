@@ -11,7 +11,12 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { productDisplayName, productFitLabel, productSeoTitle } from '../src/lib/product-seo.mjs'
+import {
+  productDisplayName,
+  productFitLabel,
+  productMetaDescription,
+  productSeoTitle,
+} from '../src/lib/product-seo.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(root, 'dist')
@@ -182,8 +187,27 @@ function injectHead(
 const PRERENDER_STYLE =
   'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0'
 
-function prerenderBlock(inner) {
-  return `<div data-prerender style="${PRERENDER_STYLE}">${inner}</div>`
+const SITE_NAV_LINKS = [
+  ['', 'Home'],
+  ['shop/', 'Shop'],
+  ['putter-covers/lab-df3/', 'L.A.B. DF3 Putter Covers'],
+  ['putter-covers/spider-mallet/', 'Spider & Mallet Putter Covers'],
+  ['putter-covers/lab-oz-mezz/', 'L.A.B. Oz & Mezz Putter Covers'],
+  ['about/', 'About'],
+  ['contact/', 'Contact & Returns'],
+]
+
+/** The header and footer links, which the app draws in JavaScript, so crawlers can reach every page. */
+function siteNav(base) {
+  return `<nav aria-label="Site"><ul>${SITE_NAV_LINKS.map(
+    ([path, label]) => `<li><a href="${withBase(path, base)}">${escapeHtml(label)}</a></li>`,
+  ).join('')}</ul></nav>`
+}
+
+let prerenderBase = ''
+
+function prerenderBlock(inner = '') {
+  return `<div data-prerender style="${PRERENDER_STYLE}">${inner}${siteNav(prerenderBase)}</div>`
 }
 
 function absoluteFrom(siteOrigin, base, path) {
@@ -298,6 +322,36 @@ function collectionJsonLd(collection, products, pageUrl, siteOrigin, base) {
   )
 }
 
+/** /llms.txt: a plain summary of the shop for AI assistants (https://llmstxt.org). */
+function llmsTxt({ siteOrigin, base, collections, products }) {
+  const url = (path) => withTrailingSlash(`${siteOrigin}${base}/${path}`)
+  const lines = [
+    '# Sunday Rolls Golf',
+    '',
+    '> Premium, vintage-inspired embroidered putter covers for L.A.B. DF3, L.A.B. Oz.1 and Mezz.1, and TaylorMade Spider putters, plus waffle-knit golf towels. Designed in the USA; based in Minneapolis, MN.',
+    '',
+    'Putter covers are $80 and close with a magnet over a soft velvet lining. Each cover is made for a specific putter shape, so match the cover to your putter: center-shafted (L.A.B. DF3/DF3i), heel-shafted mallet (TaylorMade Spider), or L.A.B. Oz.1/Mezz.1 (center-shaft models only). Returns are accepted within 30 days of delivery.',
+    '',
+    '## Putter covers by fit',
+    ...collections.map(
+      (collection) => `- [${collection.header.title}](${url(`putter-covers/${collection.slug}`)}): ${collection.header.subtitle}`,
+    ),
+    '',
+    '## Products',
+    ...products.map((product) => {
+      const price = product.price ? ` ($${product.price})` : ''
+      return `- [${productSeoTitle(product).replace(/ \| Sunday Rolls Golf$/, '')}](${url(`products/${product.handle}`)})${price}`
+    }),
+    '',
+    '## About',
+    `- [Shop all products](${url('shop')})`,
+    `- [About Sunday Rolls Golf](${url('about')})`,
+    `- [Contact and return policy](${url('contact')})`,
+    '',
+  ]
+  return lines.join('\n')
+}
+
 function baseFromHtml(html) {
   const match = html.match(/<base\s+href="([^"]+)"/i)
   if (match) return match[1].replace(/\/$/, '')
@@ -332,6 +386,7 @@ async function main() {
   const html = stripHeroLcp(stripHeroPosterPreload(await readFile(join(distDir, 'index.html'), 'utf8')))
   const base = process.env.VITE_BASE_PATH?.replace(/\/$/, '') || baseFromHtml(html)
   const siteOrigin = (process.env.VITE_SITE_ORIGIN || '').replace(/\/$/, '')
+  prerenderBase = base
   let manifest = null
   try {
     manifest = JSON.parse(await readFile(join(distDir, '.vite/manifest.json'), 'utf8'))
@@ -403,7 +458,7 @@ function modulePreloadFor(sourceSuffix) {
           ? prerenderBlock(
               `<main><h1>Shop Sunday Rolls Golf</h1><p>${escapeHtml(meta.description)}</p><ul>${productLinks(products, base)}</ul></main>`,
             )
-          : undefined,
+          : prerenderBlock(),
       preload,
       modulePreload: modulePreloadFor(ROUTE_CHUNKS[route]),
     })
@@ -417,7 +472,7 @@ function modulePreloadFor(sourceSuffix) {
     const imageUrl = absoluteFrom(siteOrigin, base, product.images?.[0])
     const shell = injectHead(html, {
       title: productSeoTitle(product),
-      description: product.description,
+      description: productMetaDescription(product),
       canonicalPath,
       image: imageUrl,
       type: 'product',
@@ -489,6 +544,7 @@ function modulePreloadFor(sourceSuffix) {
       join(distDir, 'sitemap.xml'),
       `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
     )
+    await writeFile(join(distDir, 'llms.txt'), llmsTxt({ siteOrigin, base, collections, products }))
     await writeFile(
       join(distDir, 'robots.txt'),
       `User-agent: *\nAllow: /\n\nSitemap: ${siteOrigin}${base}/sitemap.xml\n`,

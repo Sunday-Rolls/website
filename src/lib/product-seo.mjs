@@ -37,3 +37,24 @@ export function productSeoTitle(product) {
   }
   return `${name} — ${fit} | Sunday Rolls Golf`
 }
+
+const META_DESCRIPTION_MAX = 158
+
+/**
+ * A meta description that is different for every product, even color versions that
+ * share copy: "Retro Roller Grey L.A.B. DF3 putter cover by Sunday Rolls Golf. <first sentence>"
+ */
+export function productMetaDescription(product) {
+  const name = productDisplayName(product?.title)
+  const fit = productFitLabel(product)
+  const lead =
+    product?.category === 'towels'
+      ? `${name.replace(/^golf towel\s*/i, '')} waffle golf towel by Sunday Rolls Golf.`
+      : `${name} ${fit} by Sunday Rolls Golf.`
+  const text = String(product?.description ?? '').replace(/\s+/g, ' ').trim()
+  const sentence = text.match(/^.*?[.!?](\s|$)/)?.[0]?.trim() ?? text
+  const full = sentence ? `${lead} ${sentence}` : lead
+  if (full.length <= META_DESCRIPTION_MAX) return full
+  const cut = full.slice(0, META_DESCRIPTION_MAX - 1)
+  return `${cut.slice(0, cut.lastIndexOf(' '))}…`
+}
