@@ -65,6 +65,8 @@ async function sendFile(res, filePath, status = 200) {
 
 const server = createServer(async (req, res) => {
   try {
+    // Browsers should only ever use HTTPS for this site (Semrush: "no HSTS support").
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000')
     if (req.method === 'GET' && (req.url === '/health' || req.url?.startsWith('/health?'))) {
       res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' })
       res.end('ok')

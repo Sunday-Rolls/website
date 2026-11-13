@@ -6,3 +6,4 @@ export interface ProductSeoInput {
 export function productDisplayName(title: string | undefined): string
 export function productFitLabel(product: ProductSeoInput | undefined): string
 export function productSeoTitle(product: ProductSeoInput | undefined): string
+export function productMetaDescription(product: (ProductSeoInput & { description?: string }) | undefined): string
