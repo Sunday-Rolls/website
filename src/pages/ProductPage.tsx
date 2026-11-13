@@ -14,6 +14,7 @@ import { getReviewItems } from '@/lib/review-items'
 import { reviewsForProduct } from '@/lib/reviews'
 import type { ShopifyProduct } from '@/lib/shopify'
 import { ProductDetails } from '@/components/product/ProductDetails'
+import { ProductFitDetails } from '@/components/product/ProductFitDetails'
 import { ProductGallery } from '@/components/product/ProductGallery'
 import { ProductReviews } from '@/components/product/ProductReviews'
 import { ProductStory } from '@/components/product/ProductStory'
@@ -113,6 +114,7 @@ export function ProductPage() {
         <ProductGallery product={product} />
         <ProductDetails product={product} />
       </Container>
+      <ProductFitDetails product={product} />
       <ProductReviews product={product} />
       <ProductStory />
     </>
