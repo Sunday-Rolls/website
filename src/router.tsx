@@ -27,6 +27,11 @@ export const router = createBrowserRouter(
           lazy: async () => ({ Component: (await routeModules.shop()).ShopPage }),
         },
         {
+          path: 'putter-covers/:slug',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.collection()).CollectionPage }),
+        },
+        {
           path: 'products/:handle',
           hydrateFallbackElement: <PageLoader label="Loading product…" />,
           lazy: async () => ({ Component: (await routeModules.product()).ProductPage }),
