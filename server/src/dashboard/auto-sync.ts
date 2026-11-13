@@ -17,9 +17,10 @@ import { loadGscCredentialsFromEnv } from '../analytics/gsc.js'
 import { syncGscToStore } from '../analytics/gsc-sync.js'
 import { syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
 import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/shopify-sync.js'
+import { loadReportsSheetCredentialsFromEnv, reportsSheetMissingEnv, syncReportsSheet } from '../analytics/reports-sheet.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 
-export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'search-console'] as const
+export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'search-console', 'reports-sheet'] as const
 export type AutoSyncSource = (typeof AUTO_SYNC_SOURCES)[number]
 
 export type AutoSyncOutcome =
@@ -33,6 +34,8 @@ export type AutoSyncSourceDef = {
   /** Why it's off, when it is. */
   missing: () => string | null
   run: (store: AnalyticsStore) => Promise<string>
+  /** Wait for the other sources' in-flight runs first (the reports sheet exports what they stored). */
+  afterOthers?: boolean
 }
 
 const MIN = 60_000
@@ -109,6 +112,15 @@ export function defaultAutoSyncSources(env: NodeJS.ProcessEnv = process.env): Re
         return `${r.keywords} queries`
       },
     },
+    'reports-sheet': {
+      freshMs: 10 * MIN,
+      afterOthers: true,
+      missing: () => reportsSheetMissingEnv(env),
+      run: async (store) => {
+        const r = await syncReportsSheet(store, loadReportsSheetCredentialsFromEnv(env)!)
+        return `${r.tabs} tabs · ${r.rows} rows`
+      },
+    },
   }
 }
 
@@ -120,6 +132,8 @@ export function createAutoSync(
   store: AnalyticsStore,
   sources: Record<AutoSyncSource, AutoSyncSourceDef> = defaultAutoSyncSources(),
   now: () => number = Date.now,
+  /** How long an afterOthers source waits for sibling requests to arrive before checking what's in flight. */
+  settleMs = 1500,
 ) {
   const inFlight = new Map<AutoSyncSource, Promise<AutoSyncOutcome>>()
 
@@ -132,6 +146,11 @@ export function createAutoSync(
     const promise = (async (): Promise<AutoSyncOutcome> => {
       const missing = def.missing()
       if (missing) return { status: 'unconfigured', reason: `missing ${missing}` }
+      if (def.afterOthers) {
+        // The dashboard fires every source at once; give the others a moment to register, then wait.
+        if (settleMs > 0) await new Promise((r) => setTimeout(r, settleMs))
+        await Promise.allSettled([...inFlight].filter(([s]) => s !== source).map(([, p]) => p))
+      }
       const last = (await store.latestSyncs()).find((s) => s.source === source)
       const lastAt = last?.finishedAt ? Date.parse(last.finishedAt) : 0
       if (!options.force && last?.status === 'ok' && now() - lastAt < def.freshMs) {

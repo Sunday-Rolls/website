@@ -271,7 +271,7 @@ function productKey(name: string): string {
  * design, so on its own that row looks like a best-seller. Name it for what it is: a sale of unknown
  * design, by channel. Live Shopify and Squarespace CSV rows carry real product names and are left alone.
  */
-function productLabel(order: Order, line: { productName: string; category: string | null }): { name: string; category: string | null } {
+export function productLabel(order: Order, line: { productName: string; category: string | null }): { name: string; category: string | null } {
   const name = productKey(line.productName)
   if (/^headcovers?$/i.test(name) && (order.source ?? 'sales-tracker') === 'sales-tracker') {
     const where =

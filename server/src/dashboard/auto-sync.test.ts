@@ -110,6 +110,40 @@ describe('createAutoSync', () => {
   })
 })
 
+describe('afterOthers sources', () => {
+  it('waits for the other in-flight syncs before running', async () => {
+    const order: string[] = []
+    let release!: () => void
+    const gate = new Promise<void>((r) => (release = r))
+    const sources = fakeSources({
+      shopify: {
+        run: vi.fn(async () => {
+          await gate
+          order.push('shopify')
+          return 'ok'
+        }),
+      },
+    }) as Record<AutoSyncSource, AutoSyncSourceDef>
+    sources['reports-sheet'] = {
+      freshMs: 60_000,
+      afterOthers: true,
+      missing: () => null,
+      run: vi.fn(async () => {
+        order.push('reports')
+        return 'exported'
+      }),
+    }
+    const run = createAutoSync(createMemoryAnalyticsStore(), sources, Date.now, 0)
+    const shop = run('shopify')
+    const reports = run('reports-sheet')
+    await new Promise((r) => setTimeout(r, 10))
+    expect(order).toEqual([])
+    release()
+    await Promise.all([shop, reports])
+    expect(order).toEqual(['shopify', 'reports'])
+  })
+})
+
 describe('defaultAutoSyncSources', () => {
   it('names what each source is missing', () => {
     const sources = defaultAutoSyncSources({})
@@ -121,5 +155,6 @@ describe('defaultAutoSyncSources', () => {
     )
     expect(sources.ga4.missing()).toContain('GA4_PROPERTY_RESOURCE')
     expect(sources['search-console'].missing()).toContain('SEARCH_CONSOLE_SITE_URL')
+    expect(sources['reports-sheet'].missing()).toContain('REPORTS_SHEET_ID')
   })
 })

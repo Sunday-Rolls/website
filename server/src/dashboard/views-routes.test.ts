@@ -178,6 +178,7 @@ describe('redesign dashboard endpoints', () => {
       'google-ads',
       'meta-ads',
       'search-console',
+      'reports-sheet',
       'merchant',
     ])
     const merchant = data.sources.at(-1)
