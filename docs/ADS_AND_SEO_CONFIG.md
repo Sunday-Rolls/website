@@ -13,6 +13,12 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
 
+## Change log: 2026-11-13
+
+### Search Atlas OTTO
+
+- Added the Search Atlas OTTO script (`id="sa-dynamic-optimization"`, project uuid `9a5ab3ac-16eb-4a6f-b32d-b854fe99937d`) to the `<head>` of `index.html`, right after the charset meta. It goes in the site code, not the Shopify theme: the storefront is headless, so `theme.liquid` never loads for visitors.
+
 ## Change log: 2026-11-11
 
 ### Google Ads API
