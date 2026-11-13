@@ -226,7 +226,19 @@ function productLinks(products, base) {
     .join('')
 }
 
-function productPrerender(product, base) {
+function productFitPrerender(product, collections, base) {
+  const collection = collections.find((item) => item.sectionId === product.subcategory)
+  if (!collection) return ''
+  const items = collection.faq
+    .map((item) => `<dt>${escapeHtml(item.question)}</dt><dd>${escapeHtml(item.answer)}</dd>`)
+    .join('')
+  return (
+    `<section><h2>Fit &amp; details</h2><dl>${items}</dl>` +
+    `<p><a href="${withBase(`putter-covers/${collection.slug}/`, base)}">See all ${escapeHtml(collection.header.title)}</a></p></section>`
+  )
+}
+
+function productPrerender(product, base, collections = []) {
   const name = productDisplayName(product.title)
   const fit = productFitLabel(product)
   const features = (product.keyFeatures ?? [])
@@ -241,6 +253,7 @@ function productPrerender(product, base) {
       (product.description ? `<p>${escapeHtml(product.description)}</p>` : '') +
       (features ? `<ul>${features}</ul>` : '') +
       size +
+      productFitPrerender(product, collections, base) +
       `</main>`,
   )
 }
@@ -465,6 +478,13 @@ function modulePreloadFor(sourceSuffix) {
     await writeShell(route, shell)
   }
 
+  let collections = []
+  try {
+    collections = JSON.parse(await readFile(collectionsPath, 'utf8')).collections ?? []
+  } catch {
+    collections = []
+  }
+
   for (const product of products) {
     const route = `products/${product.handle}`
     const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
@@ -477,7 +497,7 @@ function modulePreloadFor(sourceSuffix) {
       image: imageUrl,
       type: 'product',
       headExtra: [productJsonLd(product, canonicalPath, imageUrl)],
-      body: productPrerender(product, base),
+      body: productPrerender(product, base, collections),
       preload: imageSrcSet
         ? [{ srcSet: imageSrcSet, sizes: '(min-width: 1024px) 50vw, 100vw', type: 'image/webp' }]
         : [],
@@ -486,12 +506,6 @@ function modulePreloadFor(sourceSuffix) {
     await writeShell(route, shell)
   }
 
-  let collections = []
-  try {
-    collections = JSON.parse(await readFile(collectionsPath, 'utf8')).collections ?? []
-  } catch {
-    collections = []
-  }
   for (const collection of collections) {
     const route = `putter-covers/${collection.slug}`
     const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
