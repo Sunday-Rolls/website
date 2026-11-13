@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { collectionPath, getCollectionForSection } from '@/lib/collections'
 import { usePageContent } from '@/lib/content'
 import { trackViewItemList } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
@@ -93,6 +94,17 @@ export function ShopPage() {
               {section.subtitle ? (
                 <p className="font-body text-lg text-matte-black/75">{section.subtitle}</p>
               ) : null}
+              {(() => {
+                const collection = getCollectionForSection(section.id)
+                return collection ? (
+                  <Link
+                    to={collectionPath(collection.slug)}
+                    className="inline-block font-body text-heritage-green underline underline-offset-4"
+                  >
+                    {`More about ${collection.navLabel} covers and fit`}
+                  </Link>
+                ) : null
+              })()}
             </div>
 
             <ProductGrid

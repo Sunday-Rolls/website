@@ -16,6 +16,7 @@ import { productDisplayName, productFitLabel, productSeoTitle } from '../src/lib
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(root, 'dist')
 const catalogPath = join(root, 'src/data/product-catalog.json')
+const collectionsPath = join(root, 'src/content/pages/collections.json')
 
 const STATIC_ROUTES = ['shop', 'about', 'contact', 'cart', 'order/thank-you']
 /** Routes worth indexing; cart and thank-you are per-visitor. */
@@ -247,6 +248,56 @@ function productJsonLd(product, pageUrl, imageUrl) {
   return `<script type="application/ld+json" id="product-jsonld">${json}</script>`
 }
 
+function collectionPrerender(collection, products, others, base) {
+  const faq = collection.faq
+    .map((item) => `<h3>${escapeHtml(item.question)}</h3><p>${escapeHtml(item.answer)}</p>`)
+    .join('')
+  const otherLinks = others
+    .map((item) => `<li><a href="${withBase(`putter-covers/${item.slug}/`, base)}">${escapeHtml(item.header.title)}</a></li>`)
+    .join('')
+  return prerenderBlock(
+    `<main><nav><a href="${withBase('', base)}">Sunday Rolls Golf</a> / <a href="${withBase('shop/', base)}">Shop</a></nav>` +
+      `<h1>${escapeHtml(collection.header.title)}</h1><p>${escapeHtml(collection.header.subtitle)}</p>` +
+      collection.intro.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('') +
+      `<ul>${productLinks(products, base)}</ul>` +
+      `<h2>Questions about fit</h2>${faq}` +
+      `<h2>Other fits</h2><ul>${otherLinks}</ul></main>`,
+  )
+}
+
+function collectionJsonLd(collection, products, pageUrl, siteOrigin, base) {
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: collection.faq.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  }
+  const list = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: collection.header.title,
+    description: collection.meta.description,
+    ...(pageUrl ? { url: pageUrl } : {}),
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: products.map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: product.title,
+        ...(siteOrigin
+          ? { url: `${siteOrigin}${withBase(`products/${product.handle}/`, base)}` }
+          : {}),
+      })),
+    },
+  }
+  return [faq, list].map(
+    (data) => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`,
+  )
+}
+
 function baseFromHtml(html) {
   const match = html.match(/<base\s+href="([^"]+)"/i)
   if (match) return match[1].replace(/\/$/, '')
@@ -380,6 +431,33 @@ function modulePreloadFor(sourceSuffix) {
     await writeShell(route, shell)
   }
 
+  let collections = []
+  try {
+    collections = JSON.parse(await readFile(collectionsPath, 'utf8')).collections ?? []
+  } catch {
+    collections = []
+  }
+  for (const collection of collections) {
+    const route = `putter-covers/${collection.slug}`
+    const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
+    const collectionProducts = products.filter((product) => product.subcategory === collection.sectionId)
+    const shell = injectHead(html, {
+      title: collection.meta.title,
+      description: collection.meta.description,
+      canonicalPath,
+      image: absoluteFrom(siteOrigin, base, collectionProducts[0]?.images?.[0]),
+      headExtra: collectionJsonLd(collection, collectionProducts, canonicalPath, siteOrigin, base),
+      body: collectionPrerender(
+        collection,
+        collectionProducts,
+        collections.filter((item) => item.slug !== collection.slug),
+        base,
+      ),
+      modulePreload: modulePreloadFor('src/pages/CollectionPage.tsx'),
+    })
+    await writeShell(route, shell)
+  }
+
   const homeChunk = modulePreloadFor('src/pages/HomePage.tsx')
   {
     const homeHtml = await readFile(join(distDir, 'index.html'), 'utf8')
@@ -390,7 +468,7 @@ function modulePreloadFor(sourceSuffix) {
         body: prerenderBlock(
           `<main><h1>Sunday Rolls Golf — Embroidered Putter Covers &amp; Golf Towels</h1>` +
             `<p>Premium, vintage-inspired embroidered putter covers for L.A.B. DF3, L.A.B. Oz and Mezz, and TaylorMade Spider putters, plus waffle golf towels.</p>` +
-            `<p><a href="${withBase('shop/', base)}">Shop all products</a></p><ul>${productLinks(products, base)}</ul></main>`,
+            `<p><a href="${withBase('shop/', base)}">Shop all products</a></p><ul>${collections.map((c) => `<li><a href="${withBase(`putter-covers/${c.slug}/`, base)}">${escapeHtml(c.header.title)}</a></li>`).join('')}</ul><ul>${productLinks(products, base)}</ul></main>`,
         ),
       }),
     )
@@ -398,7 +476,12 @@ function modulePreloadFor(sourceSuffix) {
 
   // The checked-in public/ copies only list the main pages; this one adds every product.
   if (siteOrigin) {
-    const sitemapRoutes = ['', ...SITEMAP_ROUTES, ...products.map((product) => `products/${product.handle}`)]
+    const sitemapRoutes = [
+      '',
+      ...SITEMAP_ROUTES,
+      ...collections.map((collection) => `putter-covers/${collection.slug}`),
+      ...products.map((product) => `products/${product.handle}`),
+    ]
     const urls = sitemapRoutes
       .map((route) => `  <url><loc>${withTrailingSlash(`${siteOrigin}${base}/${route}`)}</loc></url>`)
       .join('\n')
@@ -413,7 +496,7 @@ function modulePreloadFor(sourceSuffix) {
   }
 
   console.log(
-    `Emitted SPA shells for ${STATIC_ROUTES.length} routes and ${products.length} products`,
+    `Emitted SPA shells for ${STATIC_ROUTES.length} routes, ${collections.length} collections and ${products.length} products`,
   )
 }
 

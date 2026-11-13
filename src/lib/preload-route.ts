@@ -3,6 +3,7 @@ import { optimizedImageUrl } from '@/lib/responsive-image'
 const pageLoaders = {
   home: () => import('@/pages/HomePage'),
   shop: () => import('@/pages/ShopPage'),
+  collection: () => import('@/pages/CollectionPage'),
   product: () => import('@/pages/ProductPage'),
   about: () => import('@/pages/AboutPage'),
   contact: () => import('@/pages/ContactPage'),
@@ -41,6 +42,7 @@ function withStaleChunkReload<T>(load: () => Promise<T>): () => Promise<T> {
 export const routeModules = {
   home: withStaleChunkReload(pageLoaders.home),
   shop: withStaleChunkReload(pageLoaders.shop),
+  collection: withStaleChunkReload(pageLoaders.collection),
   product: withStaleChunkReload(pageLoaders.product),
   about: withStaleChunkReload(pageLoaders.about),
   contact: withStaleChunkReload(pageLoaders.contact),
@@ -65,6 +67,11 @@ export function prefetchDestination(to: string) {
 
   if (path === '/shop' || path.startsWith('/shop/')) {
     void pageLoaders.shop()
+    return
+  }
+
+  if (path.startsWith('/putter-covers/')) {
+    void pageLoaders.collection()
     return
   }
 
