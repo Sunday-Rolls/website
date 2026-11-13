@@ -36,7 +36,7 @@ describe('ProductPage', () => {
     })
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Retro Roller - Grey' })).toBeInTheDocument()
-    expect(screen.getByText('$55.00')).toBeInTheDocument()
+    expect(screen.getByText('$80.00')).toBeInTheDocument()
     expect(screen.getByText('Headcover')).toBeInTheDocument()
   })
 

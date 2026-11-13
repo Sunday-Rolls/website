@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { usePageContent } from '@/lib/content'
 import { trackViewItem } from '@/lib/gtm'
 import { applyPageMeta } from '@/lib/page-meta'
+import { productSeoTitle } from '@/lib/product-seo.mjs'
 import { placeholderProducts } from '@/lib/product-catalog'
 import {
   applyProductJsonLd,
@@ -66,7 +67,7 @@ export function ProductPage() {
   useEffect(() => {
     if (product) {
       applyPageMeta({
-        title: `${product.title} — Sunday Rolls`,
+        title: productSeoTitle(product),
         description: product.description || content.meta.description,
         path: `/products/${product.handle}`,
         image: product.imageUrl,
