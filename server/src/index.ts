@@ -11,6 +11,8 @@ import { createMailer } from './mail.js'
 import { createPgReviewStore } from './reviews.js'
 import { loadShopifyCredentialsFromEnv } from './analytics/shopify.js'
 import { createMerchantSyncRunnerFromEnv } from './merchant/merchant-scheduler.js'
+import { AUTO_SYNC_SOURCES, createAutoSync, defaultAutoSyncSources } from './dashboard/auto-sync.js'
+import { reportsSheetMissingEnv } from './analytics/reports-sheet.js'
 
 const config = loadConfig()
 const { sendContactEmail } = createMailer(config)
@@ -108,6 +110,29 @@ if (merchant.runner) {
   console.log(`Merchant Center sync: on (account ${merchant.config.merchantId})`)
 } else {
   console.log(`Merchant Center sync: off (${merchant.reason})`)
+}
+
+// Reports sheet: besides running after each dashboard sync, refresh every few hours on its own
+// (sync the stale sources, then export) so the sheet is current even when nobody opens the dashboard.
+const reportsMissing = reportsSheetMissingEnv()
+const reportsMinutes = Number(process.env.REPORTS_SHEET_INTERVAL_MINUTES ?? '360')
+if (analytics && !reportsMissing && Number.isFinite(reportsMinutes) && reportsMinutes > 0) {
+  const store = analytics
+  const autoSync = createAutoSync(store, defaultAutoSyncSources(), Date.now, 0)
+  const refresh = async () => {
+    for (const source of AUTO_SYNC_SOURCES) {
+      try {
+        await autoSync(source)
+      } catch (error) {
+        console.error(`Scheduled ${source} sync failed:`, error instanceof Error ? error.message : error)
+      }
+    }
+  }
+  const timer = setInterval(() => void refresh(), Math.max(30, reportsMinutes) * 60_000)
+  timer.unref?.()
+  console.log(`Reports sheet: on (every ${Math.max(30, reportsMinutes)} min and after dashboard syncs)`)
+} else {
+  console.log(`Reports sheet: off (${reportsMissing ? `missing ${reportsMissing}` : 'REPORTS_SHEET_INTERVAL_MINUTES=0'})`)
 }
 
 const app = createApp({
