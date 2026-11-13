@@ -153,6 +153,11 @@ To add one, edit `scripts/lib/legacy-redirects.mjs`, add a case to `scripts/lib/
 - `public/sitemap.xml` and `public/robots.txt` are fallbacks for builds without an origin.
 - Before #79, every page declared `https://sunday-rolls.github.io/website/` as canonical.
 
+**Crawlable pages (Nov 2026).** Most AI search crawlers and link previews don't run JavaScript, so `scripts/emit-spa-shells.mjs` writes into each shell what those bots need:
+- Product pages: the search title from `src/lib/product-seo.mjs` (shared with `ProductPage.tsx`, e.g. "Coin Collector — L.A.B. Oz & Mezz Putter Cover | Sunday Rolls Golf"), `og:image` = the product photo, `og:type=product`, Product JSON-LD with `id="product-jsonld"` (the app replaces it with live price and stock), and a visually hidden copy of the name, price, description and features inside `#root`. React's `createRoot` replaces that copy on first render.
+- Home and shop: a visually hidden heading, summary and link to every product.
+- The shell's fallback price is `price` in `src/data/product-catalog.json`. Keep it in step with Shopify when prices change.
+
 `serve-spa.mjs` sends `.html`, `.txt` and `.xml` with `Cache-Control: no-cache`, and hashed assets as immutable.
 
 ## Verify

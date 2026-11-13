@@ -11,6 +11,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { productDisplayName, productFitLabel, productSeoTitle } from '../src/lib/product-seo.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(root, 'dist')
@@ -22,8 +23,9 @@ const SITEMAP_ROUTES = ['shop', 'about', 'contact']
 
 const ROUTE_META = {
   shop: {
-    title: 'Our Collection — Sunday Rolls',
-    description: 'Timeless golf goods built for the walk.',
+    title: 'Shop Embroidered Putter Covers & Golf Towels | Sunday Rolls Golf',
+    description:
+      'Embroidered putter covers for L.A.B. DF3, Oz, Mezz and TaylorMade Spider putters, plus waffle golf towels. Designed in the USA.',
     preload: [
       {
         srcSet:
@@ -91,7 +93,10 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;')
 }
 
-function injectHead(html, { title, description, canonicalPath, preload = [], modulePreload = [] }) {
+function injectHead(
+  html,
+  { title, description, canonicalPath, image, type, headExtra = [], body, preload = [], modulePreload = [] },
+) {
   let next = html
   if (title) {
     next = next.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
@@ -126,6 +131,16 @@ function injectHead(html, { title, description, canonicalPath, preload = [], mod
   if (canonicalPath) {
     setMeta('property', 'og:url', canonicalPath)
   }
+  if (image) {
+    setMeta('property', 'og:image', image)
+    setMeta('name', 'twitter:image', image)
+  }
+  if (type) {
+    setMeta('property', 'og:type', type)
+  }
+  if (body) {
+    next = next.replace(/<div id="root"><\/div>/, `<div id="root">${body}</div>`)
+  }
   if (canonicalPath) {
     if (/<link\s+rel="canonical"/i.test(next)) {
       next = next.replace(
@@ -149,11 +164,87 @@ function injectHead(html, { title, description, canonicalPath, preload = [], mod
       return `<link rel="preload" as="image" href="${asset.href}"${typeAttr} fetchpriority="high" />`
     }),
     ...modulePreload.map((href) => `<link rel="modulepreload" href="${href}" />`),
+    ...headExtra,
   ]
   if (links.length) {
     next = next.replace('</head>', `    ${links.join('\n    ')}\n  </head>`)
   }
   return next
+}
+
+/**
+ * Crawlers that don't run JavaScript (most AI search bots, link previews) only
+ * see the HTML we ship. React's createRoot replaces everything inside #root on
+ * first render, so this copy is for them; it is visually hidden so people never
+ * see it flash before the app loads, and it says only what the page itself says.
+ */
+const PRERENDER_STYLE =
+  'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0'
+
+function prerenderBlock(inner) {
+  return `<div data-prerender style="${PRERENDER_STYLE}">${inner}</div>`
+}
+
+function absoluteFrom(siteOrigin, base, path) {
+  if (!path) return undefined
+  if (/^https?:\/\//i.test(path)) return path
+  if (!siteOrigin) return undefined
+  return `${siteOrigin}${withBase(path.replace(/^\//, ''), base)}`
+}
+
+function productLinks(products, base) {
+  return products
+    .map(
+      (product) =>
+        `<li><a href="${withBase(`products/${product.handle}/`, base)}">${escapeHtml(productSeoTitle(product).replace(/ \| Sunday Rolls Golf$/, ''))}</a></li>`,
+    )
+    .join('')
+}
+
+function productPrerender(product, base) {
+  const name = productDisplayName(product.title)
+  const fit = productFitLabel(product)
+  const features = (product.keyFeatures ?? [])
+    .map((feature) => `<li><strong>${escapeHtml(feature.label)}:</strong> ${escapeHtml(feature.text)}</li>`)
+    .join('')
+  const price = product.price ? `<p>Price: $${escapeHtml(product.price)} USD</p>` : ''
+  const size = product.dimensionsDisplay ? `<p>Size: ${escapeHtml(product.dimensionsDisplay)}</p>` : ''
+  return prerenderBlock(
+    `<main><nav><a href="${withBase('', base)}">Sunday Rolls Golf</a> / <a href="${withBase('shop/', base)}">Shop</a></nav>` +
+      `<h1>${escapeHtml(name)} — ${escapeHtml(fit)}</h1>` +
+      `<p>By Sunday Rolls Golf</p>${price}` +
+      (product.description ? `<p>${escapeHtml(product.description)}</p>` : '') +
+      (features ? `<ul>${features}</ul>` : '') +
+      size +
+      `</main>`,
+  )
+}
+
+/** Same shape as src/lib/product-structured-data.ts; the app replaces it (same id) with live price and stock. */
+function productJsonLd(product, pageUrl, imageUrl) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    brand: { '@type': 'Brand', name: 'Sunday Rolls' },
+    category: product.category === 'towels' ? 'Golf Towels' : 'Golf Putter Headcovers',
+  }
+  if (pageUrl) data.url = pageUrl
+  if (product.description) data.description = product.description
+  if (imageUrl) data.image = [imageUrl]
+  const price = Number(product.price)
+  if (Number.isFinite(price) && price > 0) {
+    data.offers = {
+      '@type': 'Offer',
+      ...(pageUrl ? { url: pageUrl } : {}),
+      price: price.toFixed(2),
+      priceCurrency: 'USD',
+      itemCondition: 'https://schema.org/NewCondition',
+    }
+  }
+  // Keep "</script>" in descriptions from closing the tag early.
+  const json = JSON.stringify(data).replace(/</g, '\\u003c')
+  return `<script type="application/ld+json" id="product-jsonld">${json}</script>`
 }
 
 function baseFromHtml(html) {
@@ -256,6 +347,12 @@ function modulePreloadFor(sourceSuffix) {
       title: meta.title,
       description: meta.description,
       canonicalPath,
+      body:
+        route === 'shop'
+          ? prerenderBlock(
+              `<main><h1>Shop Sunday Rolls Golf</h1><p>${escapeHtml(meta.description)}</p><ul>${productLinks(products, base)}</ul></main>`,
+            )
+          : undefined,
       preload,
       modulePreload: modulePreloadFor(ROUTE_CHUNKS[route]),
     })
@@ -266,10 +363,15 @@ function modulePreloadFor(sourceSuffix) {
     const route = `products/${product.handle}`
     const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
     const imageSrcSet = displayProductSrcSet(product.images?.[0], base)
+    const imageUrl = absoluteFrom(siteOrigin, base, product.images?.[0])
     const shell = injectHead(html, {
-      title: `${product.title ?? product.handle.replace(/-/g, ' ')} — Sunday Rolls`,
+      title: productSeoTitle(product),
       description: product.description,
       canonicalPath,
+      image: imageUrl,
+      type: 'product',
+      headExtra: [productJsonLd(product, canonicalPath, imageUrl)],
+      body: productPrerender(product, base),
       preload: imageSrcSet
         ? [{ srcSet: imageSrcSet, sizes: '(min-width: 1024px) 50vw, 100vw', type: 'image/webp' }]
         : [],
@@ -279,11 +381,18 @@ function modulePreloadFor(sourceSuffix) {
   }
 
   const homeChunk = modulePreloadFor('src/pages/HomePage.tsx')
-  if (homeChunk.length) {
+  {
     const homeHtml = await readFile(join(distDir, 'index.html'), 'utf8')
     await writeFile(
       join(distDir, 'index.html'),
-      injectHead(homeHtml, { modulePreload: homeChunk }),
+      injectHead(homeHtml, {
+        modulePreload: homeChunk,
+        body: prerenderBlock(
+          `<main><h1>Sunday Rolls Golf — Embroidered Putter Covers &amp; Golf Towels</h1>` +
+            `<p>Premium, vintage-inspired embroidered putter covers for L.A.B. DF3, L.A.B. Oz and Mezz, and TaylorMade Spider putters, plus waffle golf towels.</p>` +
+            `<p><a href="${withBase('shop/', base)}">Shop all products</a></p><ul>${productLinks(products, base)}</ul></main>`,
+        ),
+      }),
     )
   }
 
