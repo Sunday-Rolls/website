@@ -92,6 +92,17 @@ analytics.subscribe('checkout_completed', (event) => {
       country: address.countryCode,
     },
   })
+  // The site copies GA4's visitor and session IDs onto the cart at the checkout click
+  // (`_sr_ga_cid` / `_sr_ga_sid`, src/lib/ga-ids.ts). Sending the purchase under them ties
+  // it to the visit and its traffic source (Organic Search, Paid, Social...) instead of a
+  // new visitor with no source.
+  const attrs = {}
+  for (const a of checkout.attributes || []) attrs[a.key] = a.value
+  if (attrs._sr_ga_cid) {
+    const ids = { send_page_view: false, client_id: attrs._sr_ga_cid }
+    if (attrs._sr_ga_sid) ids.session_id = attrs._sr_ga_sid
+    gtag('config', GA4_MEASUREMENT_ID, ids)
+  }
   gtag('event', 'purchase', {
     send_to: GA4_MEASUREMENT_ID,
     transaction_id: orderId,
@@ -138,8 +149,11 @@ analytics.subscribe('checkout_completed', (event) => {
 1. **Meta Events Manager → Pixel `1274109674861464` → Test events** (or Overview): `Purchase` with value, plus `PageView` / `AddToCart` / `InitiateCheckout` from www.
 2. **Google Ads → Goals → Conversions → Summary**: the purchase action moves to **Recording conversions** within a few hours; **Diagnostics** shows enhanced-conversion coverage.
 3. **GA4 → Realtime**: `purchase` with the order value.
+4. **Purchase source (GA4 visitor IDs):** the order in Shopify Admin shows `_sr_ga_cid` / `_sr_ga_sid` under **Additional details** (hidden from the buyer). A day later, **GA4 → Reports → Acquisition → Traffic acquisition** shows the purchase under the visit's channel (e.g. Organic Search) instead of Direct / "(not set)".
 
 ## Limits
+
+- Purchases only keep their GA4 traffic source when the visitor came through the site's cart (the checkout button stamps `_sr_ga_cid` / `_sr_ga_sid`). Buy-now links straight to Shopify, or visitors who block GA cookies, still show as Direct.
 
 - Checkout can't see the site's `_gcl_aw` / `_fbc` click cookies, so attribution leans on enhanced conversions / advanced matching (email, phone, address). Google's **Google & YouTube** and Meta's **Facebook & Instagram** Shopify apps add server-side matching (Conversions API) if match rates come back low.
 - GA4 funnel steps (`view_item`, `add_to_cart`, `begin_checkout`, …) are sent by GTM before checkout; see [ANALYTICS.md](./ANALYTICS.md#live-gtm-container-gtm-pptr6v3b).

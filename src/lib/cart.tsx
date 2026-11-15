@@ -9,6 +9,7 @@ import {
 } from 'react'
 import type { ShopifyCart } from '@/lib/shopify'
 import { cartAttributes, cartNeedsAttributes, markCartAttributed } from '@/lib/attribution'
+import { gaCartAttributes } from '@/lib/ga-ids'
 
 const shopifyConfigured = Boolean(
   import.meta.env.VITE_SHOPIFY_STORE_DOMAIN && import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
@@ -19,6 +20,8 @@ function loadShopify() {
 }
 
 const CART_STORAGE_KEY = 'sunday-rolls-cart-id'
+/** Longest the checkout button waits for the GA4 IDs to reach the cart. */
+const CHECKOUT_STAMP_TIMEOUT_MS = 1500
 
 interface CartContextValue {
   cart: ShopifyCart | null
@@ -31,6 +34,12 @@ interface CartContextValue {
   addItem: (variantId: string, quantity?: number) => Promise<ShopifyCart>
   updateItemQuantity: (lineId: string, quantity: number) => Promise<void>
   removeItem: (lineId: string) => Promise<void>
+  /**
+   * Stamp the cart with the visitor's GA4 IDs right before checkout, so the Shopify
+   * purchase pixel can credit the sale to the visit's traffic source. Never throws and
+   * gives up after a short wait so checkout is never held up.
+   */
+  prepareCheckout: () => Promise<void>
   clearError: () => void
 }
 
@@ -193,6 +202,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [cart, persistCart],
   )
 
+  const prepareCheckout = useCallback(async () => {
+    if (!cart) return
+    const ga = gaCartAttributes()
+    if (!ga.length) return
+    try {
+      const { updateCartAttributes } = await loadShopify()
+      await Promise.race([
+        updateCartAttributes(cart.id, [...cartAttributes(), ...ga]),
+        new Promise((resolve) => setTimeout(resolve, CHECKOUT_STAMP_TIMEOUT_MS)),
+      ])
+    } catch {
+      // Best-effort: checkout goes ahead without the IDs.
+    }
+  }, [cart])
+
   const value = useMemo<CartContextValue>(
     () => ({
       cart,
@@ -204,9 +228,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       addItem,
       updateItemQuantity,
       removeItem,
+      prepareCheckout,
       clearError: () => setError(null),
     }),
-    [addItem, cart, error, isLoading, isUpdating, pendingAdds, removeItem, updateItemQuantity],
+    [
+      addItem,
+      cart,
+      error,
+      isLoading,
+      isUpdating,
+      pendingAdds,
+      prepareCheckout,
+      removeItem,
+      updateItemQuantity,
+    ],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
