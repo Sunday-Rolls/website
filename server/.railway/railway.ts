@@ -57,6 +57,8 @@ export default defineRailway(() => {
       GOOGLE_SERVICE_ACCOUNT_JSON: preserve(),
       META_ACCESS_TOKEN: preserve(),
       META_AD_ACCOUNT_ID: preserve(),
+      REPORTS_SHEET_ID: preserve(),
+      REPORTS_SHEET_INTERVAL_MINUTES: preserve(),
       REQUIRE_BROWSER_ORIGIN: preserve(),
       RESEND_API_KEY: preserve(),
       RESEND_FROM_EMAIL: preserve(),

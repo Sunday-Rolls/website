@@ -980,6 +980,7 @@ const AUTO_SYNC_LABELS: Record<AutoSyncSource, string> = {
   'google-ads': 'Google Ads',
   'meta-ads': 'Meta Ads',
   'search-console': 'Google Search Console',
+  'reports-sheet': 'Reports sheet',
 }
 
 /** Same checks as createMerchantSyncRunnerFromEnv; null when the merchant sync can run. */

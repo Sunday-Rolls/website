@@ -25,6 +25,7 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 ### Meta Ads
 
 - Dashboard syncs Meta ad spend per campaign/day from ad account `2001554000739418` once `META_ACCESS_TOKEN` is set: [`META_ADS_SYNC.md`](META_ADS_SYNC.md).
+- Dashboard data (orders, order lines, products by month, ad spend, traffic) is exported to a Google Sheet for team reports once `REPORTS_SHEET_ID` is set: [`REPORTS_SHEET.md`](REPORTS_SHEET.md).
 
 ## Change log: 2026-11-03
 
