@@ -67,12 +67,23 @@ describe('buildReportTables', () => {
         sourceBreakdown: { 'google / cpc': 20, 'direct / (none)': 30, 'x / y': 0 },
       },
     ],
+    expenses: [
+      { id: 'x2', spentAt: '2026-10-15', category: 'Ads', explanation: 'Google Ads', amount: 50.005, bucket: 'sga', productLine: null },
+      { id: 'x1', spentAt: '2026-10-02', category: 'Manufacturing', explanation: 'Alibaba', amount: 400, bucket: 'cogs', productLine: 'Headcover' },
+    ],
     generatedAt: '2026-11-13T19:00:00.000Z',
   })
   const byTitle = Object.fromEntries(tables.map((t) => [t.title.replace(DATA_TAB_PREFIX, ''), t]))
 
   it('prefixes every tab so Railway only owns its own tabs', () => {
     expect(tables.every((t) => t.title.startsWith(DATA_TAB_PREFIX))).toBe(true)
+  })
+
+  it('exports expenses by month with their COGS / SG&A bucket', () => {
+    expect(byTitle.Expenses.rows).toEqual([
+      ['2026-10-02', '2026-10-01', 'COGS', 'Manufacturing', 'Alibaba', 400, 'Headcover'],
+      ['2026-10-15', '2026-10-01', 'SG&A', 'Ads', 'Google Ads', 50.01, ''],
+    ])
   })
 
   it('dedupes orders like the dashboard and computes net', () => {

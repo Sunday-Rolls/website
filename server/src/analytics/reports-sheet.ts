@@ -11,7 +11,7 @@ import { extractDriveFileId } from './drive.js'
 import { preferLiveOrders } from './orders.js'
 import { storeDay } from './period.js'
 import type { AnalyticsStore } from './store.js'
-import type { DailyAdSpend, DailyTraffic, Order } from './types.js'
+import type { DailyAdSpend, DailyTraffic, Expense, Order } from './types.js'
 import { productLabel } from './views.js'
 
 export const REPORTS_SHEET_SYNC_SOURCE = 'reports-sheet'
@@ -57,6 +57,7 @@ export function buildReportTables(input: {
   orders: Order[]
   adSpend: DailyAdSpend[]
   traffic: DailyTraffic[]
+  expenses?: Expense[]
   generatedAt: string
 }): ReportTable[] {
   // Same dedupe as the dashboard: live Shopify / Squarespace CSV beat Sales Tracker copies.
@@ -155,6 +156,13 @@ export function buildReportTables(input: {
     }
   }
 
+  const expenseRows: Cell[][] = [...(input.expenses ?? [])]
+    .sort((a, b) => a.spentAt.localeCompare(b.spentAt) || a.category.localeCompare(b.category))
+    .map((e) => {
+      const day = e.spentAt.slice(0, 10)
+      return [day, monthOf(day), e.bucket === 'sga' ? 'SG&A' : 'COGS', e.category, e.explanation, round2(e.amount), e.productLine ?? '']
+    })
+
   const tab = (name: string) => `${DATA_TAB_PREFIX}${name}`
   return [
     {
@@ -167,6 +175,7 @@ export function buildReportTables(input: {
         ['Orders', orderRows.length],
         ['Ad spend rows', adRows.length],
         ['Traffic days', trafficRows.length],
+        ['Expenses', expenseRows.length],
       ],
     },
     {
@@ -188,6 +197,11 @@ export function buildReportTables(input: {
       title: tab('Ad spend'),
       header: ['Date', 'Month', 'Platform', 'Campaign', 'Spend', 'Platform-reported sales', 'Platform-reported orders', 'Sessions'],
       rows: adRows,
+    },
+    {
+      title: tab('Expenses'),
+      header: ['Date', 'Month', 'Bucket', 'Category', 'Explanation', 'Amount', 'Product line'],
+      rows: expenseRows,
     },
     {
       title: tab('Traffic'),
@@ -309,9 +323,14 @@ export async function syncReportsSheet(
 ): Promise<ReportsSheetSyncResult> {
   const sync = await store.startSync(REPORTS_SHEET_SYNC_SOURCE)
   try {
-    const [orders, adSpend, traffic] = await Promise.all([store.listOrders(), store.listAdSpend(), store.listTraffic()])
+    const [orders, adSpend, traffic, expenses] = await Promise.all([
+      store.listOrders(),
+      store.listAdSpend(),
+      store.listTraffic(),
+      store.listExpenses(),
+    ])
     const generatedAt = (options?.now?.() ?? new Date()).toISOString()
-    const tables = buildReportTables({ orders, adSpend, traffic, generatedAt })
+    const tables = buildReportTables({ orders, adSpend, traffic, expenses, generatedAt })
     const rows = await writeReportTables(creds, tables, options?.fetchImpl)
     await store.finishSync(sync.id, 'ok', `${tables.length} tabs · ${rows} rows`, rows)
     return { tabs: tables.length, rows }

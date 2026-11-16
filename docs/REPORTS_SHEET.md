@@ -17,6 +17,7 @@ Data tabs by hand; changes are overwritten.
 | `Data · Order lines` | product line | Date, Month, Channel, Order, Product, Category, SKU, Quantity, Unit price, Line revenue |
 | `Data · Products by month` | month × product | Month, Product, Category, Units, Revenue, Orders |
 | `Data · Ad spend` | day × platform × campaign | Date, Month, Platform (Google Ads / Meta Ads / Etsy Ads), Campaign, Spend, Platform-reported sales/orders, Sessions |
+| `Data · Expenses` | expense | Date, Month, Bucket (COGS / SG&A), Category, Explanation (vendor), Amount, Product line. From the Sales Tracker `Expense Tracker.` tab for now |
 | `Data · Traffic` | day | GA4 visits, unique visitors, product views, add to carts, checkouts, purchases |
 | `Data · Traffic sources` | day × source | Date, Month, Source / medium, Sessions |
 
