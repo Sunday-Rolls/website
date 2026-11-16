@@ -1,0 +1,11413 @@
+{
+"source": "Squarespace accounting export, 2026-11-16",
+"orders": [
+{
+"orderId": "00001",
+"orderedAt": "2025-10-04T20:05:01.288000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.5,
+"tax": 0.0,
+"total": 87.5,
+"refunded": 0.0,
+"fees": 4.59,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00002",
+"orderedAt": "2025-10-12T16:03:29.098000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.5,
+"tax": 0.0,
+"total": 87.5,
+"refunded": 0.0,
+"fees": 4.59,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00003",
+"orderedAt": "2025-10-12T17:57:42.283000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.5,
+"tax": 0.0,
+"total": 87.5,
+"refunded": 0.0,
+"fees": 4.59,
+"state": "PA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00004",
+"orderedAt": "2025-10-12T23:31:38.627000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.5,
+"tax": 0.0,
+"total": 87.5,
+"refunded": 0.0,
+"fees": 4.85,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00005",
+"orderedAt": "2025-10-13T07:48:31.205000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 7.03,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00006",
+"orderedAt": "2025-10-14T17:04:06.229000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00007",
+"orderedAt": "2025-10-15T22:44:23.451000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "MD",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00008",
+"orderedAt": "2025-10-17T07:33:39.540000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00009",
+"orderedAt": "2025-10-17T21:23:16.707000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "WV",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00010",
+"orderedAt": "2025-10-17T21:23:18.535000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00011",
+"orderedAt": "2025-10-21T16:20:19.758000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NY",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00012",
+"orderedAt": "2025-10-21T16:23:25.722000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 160.0,
+"shipping": 17.44,
+"tax": 0.0,
+"total": 177.44,
+"refunded": 0.0,
+"fees": 5.45,
+"state": "NY",
+"lines": [
+{
+"name": "Pre-Order - The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00013",
+"orderedAt": "2025-10-21T19:03:32.015000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "VA",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00014",
+"orderedAt": "2025-10-22T11:50:42.681000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.01,
+"tax": 0.0,
+"total": 88.01,
+"refunded": 0.0,
+"fees": 5.14,
+"state": "NE",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00015",
+"orderedAt": "2025-10-23T00:05:37.663000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 5.18,
+"state": "NV",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00016",
+"orderedAt": "2025-10-23T02:24:42.451000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.01,
+"tax": 0.0,
+"total": 88.01,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "WI",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00017",
+"orderedAt": "2025-10-23T09:56:06.349000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 4.23,
+"state": "CA",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00018",
+"orderedAt": "2025-10-25T04:09:02.146000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "PA",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00019",
+"orderedAt": "2025-11-02T19:21:48.168000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00020",
+"orderedAt": "2025-11-03T18:38:41.697000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NJ",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00021",
+"orderedAt": "2025-11-04T17:50:39.398000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "VA",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00022",
+"orderedAt": "2025-11-05T03:42:00.424000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "CO",
+"lines": [
+{
+"name": "Pre-Order - Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00023",
+"orderedAt": "2025-11-05T20:29:30.790000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.16,
+"tax": 0.0,
+"total": 88.16,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "MI",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00024",
+"orderedAt": "2025-11-06T17:51:37.614000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 8.16,
+"tax": 0.0,
+"total": 40.16,
+"refunded": 0.0,
+"fees": 1.47,
+"state": "MI",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00025",
+"orderedAt": "2025-11-06T17:52:41.787000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.58,
+"total": 43.23,
+"refunded": 0.0,
+"fees": 1.56,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ5792810",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00026",
+"orderedAt": "2025-11-06T20:33:00.922000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.52,
+"total": 43.17,
+"refunded": 0.0,
+"fees": 1.69,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00027",
+"orderedAt": "2025-11-06T23:18:54.920000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "TN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00028",
+"orderedAt": "2025-11-07T11:51:04.592000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "VT",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00029",
+"orderedAt": "2025-11-07T19:34:25.681000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.38,
+"total": 43.03,
+"refunded": 0.0,
+"fees": 1.68,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00030",
+"orderedAt": "2025-11-08T13:08:08.210000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.22,
+"total": 42.87,
+"refunded": 0.0,
+"fees": 1.68,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00031",
+"orderedAt": "2025-11-08T21:08:45.381000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.01,
+"tax": 0.0,
+"total": 88.01,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "IA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00032",
+"orderedAt": "2025-11-09T05:24:12.309000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00033",
+"orderedAt": "2025-11-09T16:58:13.915000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "OR",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00034",
+"orderedAt": "2025-11-09T19:20:41.991000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "NJ",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00035",
+"orderedAt": "2025-11-13T23:00:23.979000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00036",
+"orderedAt": "2025-11-15T14:31:35.978000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 40.52,
+"refunded": 0.0,
+"fees": 1.6,
+"state": "TN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ5792810",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00037",
+"orderedAt": "2025-11-15T15:00:26.334000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.42,
+"total": 43.07,
+"refunded": 0.0,
+"fees": 1.68,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ7260698",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00038",
+"orderedAt": "2025-11-15T15:03:34.013000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 40.52,
+"refunded": 0.0,
+"fees": 1.48,
+"state": "TN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ5792810",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00039",
+"orderedAt": "2025-11-15T16:11:17.415000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.52,
+"total": 43.17,
+"refunded": 0.0,
+"fees": 1.69,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00040",
+"orderedAt": "2025-11-15T16:34:32.830000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.38,
+"total": 43.03,
+"refunded": 0.0,
+"fees": 1.55,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ5792810",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00041",
+"orderedAt": "2025-11-15T19:46:32.381000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 40.72,
+"refunded": 0.0,
+"fees": 1.61,
+"state": "AZ",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00042",
+"orderedAt": "2025-11-18T11:21:15.478000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00043",
+"orderedAt": "2025-11-18T15:59:26.021000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.16,
+"tax": 0.0,
+"total": 88.16,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "OH",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00044",
+"orderedAt": "2025-11-18T22:06:26.612000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00045",
+"orderedAt": "2025-11-19T00:27:18.257000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "SC",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00046",
+"orderedAt": "2025-11-19T00:39:17.204000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.16,
+"tax": 0.0,
+"total": 88.16,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "OH",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00047",
+"orderedAt": "2025-11-19T00:58:00.017000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 5.19,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00048",
+"orderedAt": "2025-11-19T01:08:46.677000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "OR",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00049",
+"orderedAt": "2025-11-19T01:21:29.594000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00050",
+"orderedAt": "2025-11-19T02:14:42.628000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 5.18,
+"state": "MA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00051",
+"orderedAt": "2025-11-19T04:12:10.974000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00052",
+"orderedAt": "2025-11-19T04:21:33.001000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 5.18,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00053",
+"orderedAt": "2025-11-19T16:23:01.070000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "NJ",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00054",
+"orderedAt": "2025-11-19T21:08:04.830000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.53,
+"tax": 0.0,
+"total": 91.53,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "IL",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00055",
+"orderedAt": "2025-11-20T05:27:48.534000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "PA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00056",
+"orderedAt": "2025-11-20T21:30:33.930000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 88.72,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00057",
+"orderedAt": "2025-11-21T02:34:22.867000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "GA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00058",
+"orderedAt": "2025-11-22T03:23:34.836000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "OK",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00059",
+"orderedAt": "2025-11-22T11:56:45.017000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00060",
+"orderedAt": "2025-11-22T19:01:19.375000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00061",
+"orderedAt": "2025-11-26T12:35:42.289000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.22,
+"total": 42.87,
+"refunded": 0.0,
+"fees": 1.55,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ7260698",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00062",
+"orderedAt": "2025-11-27T16:21:37.777000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 24.0,
+"shipping": 7.65,
+"tax": 2.81,
+"total": 34.46,
+"refunded": 0.0,
+"fees": 1.41,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 8.0,
+"netSales": 24.0
+}
+]
+},
+{
+"orderId": "00063",
+"orderedAt": "2025-11-27T18:01:42.995000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 68.98,
+"refunded": 0.0,
+"fees": 2.31,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00064",
+"orderedAt": "2025-11-28T14:06:58.344000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.85,
+"tax": 2.94,
+"total": 42.79,
+"refunded": 0.0,
+"fees": 1.55,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00065",
+"orderedAt": "2025-11-28T14:34:43.701000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 24.0,
+"shipping": 7.85,
+"tax": 2.35,
+"total": 34.2,
+"refunded": 0.0,
+"fees": 1.3,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ5792810",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 8.0,
+"netSales": 24.0
+}
+]
+},
+{
+"orderId": "00066",
+"orderedAt": "2025-11-28T20:30:23.828000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 85.0,
+"refunded": 0.0,
+"fees": 4.05,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00067",
+"orderedAt": "2025-11-29T01:52:37.859000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.72,
+"tax": 0.0,
+"total": 68.72,
+"refunded": 0.0,
+"fees": 2.3,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00068",
+"orderedAt": "2025-11-29T04:49:47.481000Z",
+"canceled": false,
+"grossSales": 112.0,
+"netSales": 84.0,
+"shipping": 17.95,
+"tax": 0.0,
+"total": 101.95,
+"refunded": 0.0,
+"fees": 3.26,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+},
+{
+"name": "The Tee",
+"sku": "SQ5792810",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 8.0,
+"netSales": 24.0
+}
+]
+},
+{
+"orderId": "00069",
+"orderedAt": "2025-11-29T04:49:58.718000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 68.98,
+"refunded": 0.0,
+"fees": 2.31,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00070",
+"orderedAt": "2025-11-29T07:32:38.711000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 120.0,
+"shipping": 18.87,
+"tax": 0.0,
+"total": 138.87,
+"refunded": 0.0,
+"fees": 4.33,
+"state": "HI",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+},
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00071",
+"orderedAt": "2025-11-29T21:08:23.739000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 68.52,
+"refunded": 0.0,
+"fees": 2.29,
+"state": "AL",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00072",
+"orderedAt": "2025-11-30T18:26:32.187000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 68.52,
+"refunded": 0.0,
+"fees": 2.29,
+"state": "OH",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00073",
+"orderedAt": "2025-12-01T23:14:01.782000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 68.98,
+"refunded": 0.0,
+"fees": 2.31,
+"state": "CA",
+"lines": [
+{
+"name": "Pre-Order: Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00074",
+"orderedAt": "2025-12-06T04:34:45.932000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 85.0,
+"refunded": 0.0,
+"fees": 4.05,
+"state": null,
+"lines": [
+{
+"name": "Pre-Order: Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00075",
+"orderedAt": "2025-12-12T11:17:07.255000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00076",
+"orderedAt": "2025-12-13T17:50:26.600000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 7.65,
+"tax": 3.88,
+"total": 43.53,
+"refunded": 0.0,
+"fees": 1.7,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00077",
+"orderedAt": "2025-12-15T22:31:27.459000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "TN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00078",
+"orderedAt": "2025-12-19T05:04:15.802000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00079",
+"orderedAt": "2025-12-19T19:11:24.276000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00080",
+"orderedAt": "2025-12-28T17:06:47.261000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00081",
+"orderedAt": "2025-12-31T19:01:29.483000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.52,
+"tax": 0.0,
+"total": 88.52,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00082",
+"orderedAt": "2026-01-06T21:23:18.703000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.65,
+"tax": 7.91,
+"total": 95.56,
+"refunded": 0.0,
+"fees": 3.08,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00083",
+"orderedAt": "2026-01-12T16:51:47.134000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.65,
+"tax": 7.91,
+"total": 95.56,
+"refunded": 95.56,
+"fees": 3.08,
+"state": "MN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00084",
+"orderedAt": "2026-01-12T17:26:37.252000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 0.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 0.0,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "MN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 80.0,
+"netSales": 0.0
+}
+]
+},
+{
+"orderId": "00085",
+"orderedAt": "2026-01-12T18:15:23.481000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 0.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 0.0,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "MN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 80.0,
+"netSales": 0.0
+}
+]
+},
+{
+"orderId": "00086",
+"orderedAt": "2026-01-12T18:20:01.663000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 0.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 0.0,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "MN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 80.0,
+"netSales": 0.0
+}
+]
+},
+{
+"orderId": "00094",
+"orderedAt": "2026-01-18T23:21:54.703000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.85,
+"tax": 0.0,
+"total": 87.85,
+"refunded": 0.0,
+"fees": 2.85,
+"state": "IN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00095",
+"orderedAt": "2026-01-20T15:43:07.778000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.27,
+"tax": 0.0,
+"total": 91.27,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00096",
+"orderedAt": "2026-01-21T16:27:11.893000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 160.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 185.0,
+"refunded": 0.0,
+"fees": 8.45,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00098",
+"orderedAt": "2026-01-25T20:07:06.116000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00099",
+"orderedAt": "2026-01-27T15:47:27.318000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 3.13,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00100",
+"orderedAt": "2026-01-28T04:39:40.287000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00101",
+"orderedAt": "2026-01-28T18:27:56.774000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00102",
+"orderedAt": "2026-01-29T17:29:46.806000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.45,
+"tax": 7.46,
+"total": 94.91,
+"refunded": 0.0,
+"fees": 3.34,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00103",
+"orderedAt": "2026-01-29T22:00:28.893000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00104",
+"orderedAt": "2026-01-30T16:49:42.532000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.38,
+"tax": 7.26,
+"total": 96.64,
+"refunded": 0.0,
+"fees": 3.11,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00105",
+"orderedAt": "2026-02-05T06:19:04.869000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.27,
+"tax": 0.0,
+"total": 91.27,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00106",
+"orderedAt": "2026-02-05T16:10:20.721000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 72.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 80.11,
+"refunded": 0.0,
+"fees": 2.63,
+"state": "GA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 8.0,
+"netSales": 72.0
+}
+]
+},
+{
+"orderId": "00107",
+"orderedAt": "2026-02-07T02:14:34.673000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 3.12,
+"state": "MD",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00108",
+"orderedAt": "2026-02-13T15:55:10.456000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.71,
+"tax": 0.0,
+"total": 90.71,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "FL",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00109",
+"orderedAt": "2026-02-17T19:24:11.412000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "CA",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00110",
+"orderedAt": "2026-02-21T04:50:05.842000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 3.12,
+"state": "UT",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00111",
+"orderedAt": "2026-02-21T17:44:03.534000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "AZ",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00112",
+"orderedAt": "2026-02-22T06:16:54.061000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.71,
+"tax": 0.0,
+"total": 90.71,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "TX",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00117",
+"orderedAt": "2026-02-26T03:40:52.021000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "HI",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00118",
+"orderedAt": "2026-02-26T16:55:03.913000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.64,
+"tax": 0.0,
+"total": 89.64,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "WI",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00120",
+"orderedAt": "2026-03-04T06:50:40.364000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00121",
+"orderedAt": "2026-03-13T03:19:57.285000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 76.26,
+"refunded": 0.0,
+"fees": 2.75,
+"state": "NY",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00122",
+"orderedAt": "2026-03-14T18:23:28.728000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00123",
+"orderedAt": "2026-03-15T15:45:53.299000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.35,
+"tax": 0.0,
+"total": 90.35,
+"refunded": 0.0,
+"fees": 2.93,
+"state": "PA",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00124",
+"orderedAt": "2026-03-15T23:00:37.490000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00125",
+"orderedAt": "2026-03-21T19:46:48.093000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00126",
+"orderedAt": "2026-03-23T00:47:43.838000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00127",
+"orderedAt": "2026-03-23T07:25:10.450000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "CT",
+"lines": [
+{
+"name": "PRE ORDER - Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00128",
+"orderedAt": "2026-03-23T16:14:29.281000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 10.35,
+"tax": 0.0,
+"total": 74.35,
+"refunded": 0.0,
+"fees": 2.46,
+"state": "KY",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00129",
+"orderedAt": "2026-03-26T01:01:22.883000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 68.26,
+"refunded": 0.0,
+"fees": 2.28,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00130",
+"orderedAt": "2026-03-27T21:08:34.668000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 65.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 73.11,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "GA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 15.0,
+"netSales": 65.0
+}
+]
+},
+{
+"orderId": "00131",
+"orderedAt": "2026-03-27T21:25:10.486000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.35,
+"tax": 0.0,
+"total": 90.35,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "OH",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00132",
+"orderedAt": "2026-03-28T17:55:18.313000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 14.74,
+"tax": 0.0,
+"total": 94.74,
+"refunded": 0.0,
+"fees": 3.34,
+"state": "FL",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00133",
+"orderedAt": "2026-03-31T17:32:10.342000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.35,
+"tax": 0.0,
+"total": 90.35,
+"refunded": 0.0,
+"fees": 3.2,
+"state": "GA",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00134",
+"orderedAt": "2026-04-01T10:19:15.141000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "MA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00135",
+"orderedAt": "2026-04-03T18:52:48.888000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "HI",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00136",
+"orderedAt": "2026-04-04T21:00:18.431000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "TN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00137",
+"orderedAt": "2026-04-06T02:33:48.036000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 2.99,
+"state": "DE",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00138",
+"orderedAt": "2026-04-06T16:08:05.726000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "WA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00139",
+"orderedAt": "2026-04-07T18:12:06.500000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.85,
+"tax": 0.0,
+"total": 87.85,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "IL",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00140",
+"orderedAt": "2026-04-08T11:23:26.447000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 0.0,
+"state": null,
+"lines": [
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00141",
+"orderedAt": "2026-04-09T18:48:56.383000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00142",
+"orderedAt": "2026-04-10T19:53:17.993000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00143",
+"orderedAt": "2026-04-11T19:15:02.344000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00144",
+"orderedAt": "2026-04-12T19:12:15.639000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "NV",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00145",
+"orderedAt": "2026-04-14T07:02:09.524000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00146",
+"orderedAt": "2026-04-14T22:46:13.368000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00147",
+"orderedAt": "2026-04-15T05:25:28.114000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 0.0,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00148",
+"orderedAt": "2026-04-16T23:39:06.340000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00149",
+"orderedAt": "2026-04-18T15:23:37.001000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00150",
+"orderedAt": "2026-04-18T20:24:52.819000Z",
+"canceled": true,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 88.26,
+"fees": 2.86,
+"state": "AZ",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00151",
+"orderedAt": "2026-04-18T21:14:02.253000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.26,
+"tax": 0.0,
+"total": 88.26,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "TX",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00152",
+"orderedAt": "2026-04-18T21:16:34.196000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.71,
+"tax": 0.0,
+"total": 90.71,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "AZ",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00153",
+"orderedAt": "2026-04-22T20:00:26.662000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.71,
+"tax": 0.0,
+"total": 90.71,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "FL",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00154",
+"orderedAt": "2026-04-23T10:16:23.111000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.45,
+"tax": 7.11,
+"total": 94.56,
+"refunded": 0.0,
+"fees": 3.19,
+"state": "MN",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00155",
+"orderedAt": "2026-04-24T15:17:53.355000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 7.85,
+"tax": 0.0,
+"total": 87.85,
+"refunded": 0.0,
+"fees": 2.85,
+"state": "IL",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00156",
+"orderedAt": "2026-04-25T14:27:44.026000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.71,
+"tax": 0.0,
+"total": 90.71,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "TX",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00157",
+"orderedAt": "2026-04-25T16:08:23.273000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.11,
+"tax": 0.0,
+"total": 88.11,
+"refunded": 0.0,
+"fees": 0.0,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00158",
+"orderedAt": "2026-04-26T20:14:51.694000Z",
+"canceled": true,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 91.17,
+"fees": 2.95,
+"state": "NJ",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00159",
+"orderedAt": "2026-04-27T03:43:10.111000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 77.13,
+"refunded": 0.0,
+"fees": 2.65,
+"state": "OR",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00160",
+"orderedAt": "2026-04-29T00:16:40.689000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00161",
+"orderedAt": "2026-04-29T16:45:16.406000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 77.13,
+"refunded": 0.0,
+"fees": 2.54,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00162",
+"orderedAt": "2026-05-04T17:08:25.392000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00163",
+"orderedAt": "2026-05-04T23:26:49.043000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 3.67,
+"state": "VA",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00164",
+"orderedAt": "2026-05-06T00:39:44.721000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00165",
+"orderedAt": "2026-05-06T18:42:36.591000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 3.67,
+"state": "VA",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00166",
+"orderedAt": "2026-05-07T02:50:27.397000Z",
+"canceled": true,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 91.58,
+"fees": 2.96,
+"state": "NJ",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00167",
+"orderedAt": "2026-05-07T03:30:58.365000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00169",
+"orderedAt": "2026-05-08T03:53:23.816000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.59,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00170",
+"orderedAt": "2026-05-09T01:58:49.005000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "GA",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00171",
+"orderedAt": "2026-05-09T14:42:34.026000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00172",
+"orderedAt": "2026-05-10T04:46:35.576000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00173",
+"orderedAt": "2026-05-11T22:02:17.964000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 3.5,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00174",
+"orderedAt": "2026-05-11T23:09:11.892000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 47.69,
+"tax": 0.0,
+"total": 127.69,
+"refunded": 0.0,
+"fees": 4.39,
+"state": "WA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00175",
+"orderedAt": "2026-05-12T02:37:41.904000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00176",
+"orderedAt": "2026-05-12T22:21:19.457000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 76.93,
+"refunded": 0.0,
+"fees": 2.54,
+"state": "NJ",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00177",
+"orderedAt": "2026-05-13T14:33:41.540000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00178",
+"orderedAt": "2026-05-13T22:32:37.804000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00179",
+"orderedAt": "2026-05-13T23:09:29.761000Z",
+"canceled": true,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.19,
+"tax": 0.0,
+"total": 92.19,
+"refunded": 92.19,
+"fees": 5.37,
+"state": "FL",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00180",
+"orderedAt": "2026-05-14T01:47:54.360000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CT",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00181",
+"orderedAt": "2026-05-15T00:39:20.718000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 71.58,
+"refunded": 0.0,
+"fees": 2.38,
+"state": "NJ",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00182",
+"orderedAt": "2026-05-15T03:15:54.210000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 68.31,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "ND",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00183",
+"orderedAt": "2026-05-15T14:38:48.598000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 68.47,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "IL",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00184",
+"orderedAt": "2026-05-15T17:46:35.404000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 13.31,
+"tax": 0.0,
+"total": 93.31,
+"refunded": 0.0,
+"fees": 3.01,
+"state": "OK",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00185",
+"orderedAt": "2026-05-15T20:03:54.277000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 68.47,
+"refunded": 0.0,
+"fees": 2.39,
+"state": "AE",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00186",
+"orderedAt": "2026-05-15T23:23:53.209000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 11.88,
+"tax": 0.0,
+"total": 71.88,
+"refunded": 0.0,
+"fees": 3.0,
+"state": "IA",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00187",
+"orderedAt": "2026-05-16T14:25:15.052000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "TN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00188",
+"orderedAt": "2026-05-16T20:36:27.311000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 68.93,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "AZ",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00189",
+"orderedAt": "2026-05-17T09:07:55.900000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 69.13,
+"refunded": 0.0,
+"fees": 4.1,
+"state": "CA",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00190",
+"orderedAt": "2026-05-20T13:25:11.039000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.4,
+"tax": 0.0,
+"total": 90.4,
+"refunded": 0.0,
+"fees": 2.93,
+"state": "NE",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00191",
+"orderedAt": "2026-05-20T17:25:08.744000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00192",
+"orderedAt": "2026-05-21T09:10:26.040000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 3.67,
+"state": "PA",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00193",
+"orderedAt": "2026-05-21T19:01:08.293000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "NY",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00194",
+"orderedAt": "2026-05-21T23:11:00.868000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "ID",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00195",
+"orderedAt": "2026-05-22T03:08:53.529000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.6,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00196",
+"orderedAt": "2026-05-22T16:51:56.191000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.72,
+"state": "OR",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00197",
+"orderedAt": "2026-05-22T20:21:27.268000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 4.94,
+"state": "FL",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00198",
+"orderedAt": "2026-05-23T00:41:13.891000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "VA",
+"lines": [
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00199",
+"orderedAt": "2026-05-23T14:17:43.667000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 32.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 40.47,
+"refunded": 0.0,
+"fees": 1.48,
+"state": "IN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00200",
+"orderedAt": "2026-05-24T16:40:37.073000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "AZ",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00201",
+"orderedAt": "2026-05-26T15:00:22.997000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.06,
+"tax": 7.15,
+"total": 95.21,
+"refunded": 0.0,
+"fees": 3.21,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00202",
+"orderedAt": "2026-05-27T04:08:47.812000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00203",
+"orderedAt": "2026-05-28T03:02:19.254000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "IN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00204",
+"orderedAt": "2026-05-29T00:09:13.104000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00205",
+"orderedAt": "2026-05-29T16:10:57.594000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.06,
+"tax": 5.8,
+"total": 73.86,
+"refunded": 0.0,
+"fees": 2.56,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00206",
+"orderedAt": "2026-05-29T22:55:44.508000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IL",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00207",
+"orderedAt": "2026-05-30T00:58:53.368000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00208",
+"orderedAt": "2026-05-31T00:36:01.295000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00209",
+"orderedAt": "2026-06-02T04:29:54.809000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "UT",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00210",
+"orderedAt": "2026-06-03T03:39:57.003000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.73,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00211",
+"orderedAt": "2026-06-03T12:19:35.370000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "TN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00212",
+"orderedAt": "2026-06-03T14:23:24.437000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 88.77,
+"fees": 3.15,
+"state": "AR",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00213",
+"orderedAt": "2026-06-04T08:30:54.259000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00214",
+"orderedAt": "2026-06-05T03:53:52.700000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00215",
+"orderedAt": "2026-06-06T03:36:38.878000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.73,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00216",
+"orderedAt": "2026-06-06T15:50:54.237000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "AZ",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00217",
+"orderedAt": "2026-06-06T20:56:58.808000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.6,
+"state": "CA",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00218",
+"orderedAt": "2026-06-07T00:59:28.115000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "WY",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00219",
+"orderedAt": "2026-06-07T21:39:04.299000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.19,
+"tax": 0.0,
+"total": 92.19,
+"refunded": 0.0,
+"fees": 3.71,
+"state": "CA",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ9545708",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00220",
+"orderedAt": "2026-06-08T13:38:49.678000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "MD",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00221",
+"orderedAt": "2026-06-08T13:45:29.966000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 5.15,
+"state": "NE",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00222",
+"orderedAt": "2026-06-08T17:11:50.762000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "MI",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00223",
+"orderedAt": "2026-06-08T18:18:15.932000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00224",
+"orderedAt": "2026-06-08T18:31:03.231000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 3.58,
+"state": "MO",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00225",
+"orderedAt": "2026-06-08T19:06:53.415000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.16,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00226",
+"orderedAt": "2026-06-10T06:17:22.826000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.02,
+"state": "OR",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00227",
+"orderedAt": "2026-06-11T11:16:59.982000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 3.69,
+"state": "RI",
+"lines": [
+{
+"name": "PRE ORDER - Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00228",
+"orderedAt": "2026-06-13T05:31:07.649000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "WA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00229",
+"orderedAt": "2026-06-14T02:52:33.865000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 3.13,
+"state": "WI",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00230",
+"orderedAt": "2026-06-14T13:12:13.911000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.59,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00231",
+"orderedAt": "2026-06-16T02:38:51.006000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00232",
+"orderedAt": "2026-06-16T05:36:37.667000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00233",
+"orderedAt": "2026-06-16T14:40:06.950000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00234",
+"orderedAt": "2026-06-17T16:01:52.727000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00235",
+"orderedAt": "2026-06-18T02:18:18.665000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.59,
+"state": "KY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00236",
+"orderedAt": "2026-06-18T21:51:52.139000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 4.2,
+"state": "MI",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00237",
+"orderedAt": "2026-06-19T11:53:54.757000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ1778915",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00238",
+"orderedAt": "2026-06-19T17:44:42.674000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00239",
+"orderedAt": "2026-06-19T18:27:16.194000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 72.93,
+"refunded": 0.0,
+"fees": 3.04,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ0261303",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00240",
+"orderedAt": "2026-06-20T18:46:12.588000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 89.0,
+"refunded": 0.0,
+"fees": 4.23,
+"state": null,
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00241",
+"orderedAt": "2026-06-20T20:57:00.737000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 75.17,
+"refunded": 0.0,
+"fees": 2.48,
+"state": "OK",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00242",
+"orderedAt": "2026-06-21T21:38:27.268000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 3.03,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00243",
+"orderedAt": "2026-06-22T01:16:06.216000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 13.16,
+"tax": 0.0,
+"total": 77.16,
+"refunded": 0.0,
+"fees": 3.18,
+"state": "HI",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00244",
+"orderedAt": "2026-06-22T14:49:08.869000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 10.81,
+"tax": 0.0,
+"total": 74.81,
+"refunded": 0.0,
+"fees": 2.47,
+"state": "IL",
+"lines": [
+{
+"name": "Mallet Retro Roller",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00245",
+"orderedAt": "2026-06-23T00:56:51.450000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 128.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 153.0,
+"refunded": 0.0,
+"fees": 7.04,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ6360452",
+"quantity": 2,
+"unitPrice": 80.0,
+"discount": 32.0,
+"netSales": 128.0
+}
+]
+},
+{
+"orderId": "00246",
+"orderedAt": "2026-06-24T17:10:12.197000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ0261303",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00248",
+"orderedAt": "2026-06-29T21:50:58.245000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.06,
+"tax": 7.95,
+"total": 96.01,
+"refunded": 0.0,
+"fees": 3.23,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller",
+"sku": "SQ0261303",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00249",
+"orderedAt": "2026-07-02T03:52:08.342000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "NC",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00250",
+"orderedAt": "2026-07-03T15:44:18.820000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 76.93,
+"refunded": 76.93,
+"fees": 3.7,
+"state": "AZ",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00251",
+"orderedAt": "2026-07-03T17:58:10.762000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 93.0,
+"refunded": 0.0,
+"fees": 5.26,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00252",
+"orderedAt": "2026-07-03T19:57:34.598000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 93.0,
+"refunded": 0.0,
+"fees": 4.4,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00253",
+"orderedAt": "2026-07-05T17:06:42.821000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 76.93,
+"refunded": 0.0,
+"fees": 2.77,
+"state": "TX",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00254",
+"orderedAt": "2026-07-05T18:10:57.814000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 76.93,
+"refunded": 0.0,
+"fees": 2.54,
+"state": "ID",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00255",
+"orderedAt": "2026-07-06T20:18:16.503000Z",
+"canceled": false,
+"grossSales": 32.0,
+"netSales": 27.2,
+"shipping": 8.06,
+"tax": 2.86,
+"total": 38.12,
+"refunded": 0.0,
+"fees": 1.46,
+"state": "MN",
+"lines": [
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 4.8,
+"netSales": 27.2
+}
+]
+},
+{
+"orderId": "00256",
+"orderedAt": "2026-07-06T23:36:54.047000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 76.77,
+"refunded": 0.0,
+"fees": 2.53,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00257",
+"orderedAt": "2026-07-07T01:24:18.945000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 93.0,
+"refunded": 0.0,
+"fees": 4.4,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00258",
+"orderedAt": "2026-07-09T15:42:27.196000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.88,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00259",
+"orderedAt": "2026-07-09T20:52:14.405000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00260",
+"orderedAt": "2026-07-12T21:40:00.001000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00262",
+"orderedAt": "2026-07-17T02:23:58.887000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.06,
+"tax": 5.8,
+"total": 73.86,
+"refunded": 0.0,
+"fees": 2.78,
+"state": "MN",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00263",
+"orderedAt": "2026-07-17T09:42:36.677000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 68.47,
+"refunded": 0.0,
+"fees": 2.29,
+"state": "MI",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00264",
+"orderedAt": "2026-07-17T17:48:06.732000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 85.0,
+"refunded": 0.0,
+"fees": 4.05,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00265",
+"orderedAt": "2026-07-18T12:27:01.299000Z",
+"canceled": true,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 9.74,
+"tax": 5.67,
+"total": 75.41,
+"refunded": 75.41,
+"fees": 2.61,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00266",
+"orderedAt": "2026-07-18T16:26:12.909000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 9.74,
+"tax": 6.29,
+"total": 76.03,
+"refunded": 0.0,
+"fees": 2.85,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00267",
+"orderedAt": "2026-07-19T22:40:45.756000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 85.0,
+"refunded": 0.0,
+"fees": 6.01,
+"state": null,
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00268",
+"orderedAt": "2026-07-20T01:36:12.431000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 68.93,
+"refunded": 0.0,
+"fees": 2.51,
+"state": "MA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00269",
+"orderedAt": "2026-07-20T14:02:30.365000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 68.93,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00270",
+"orderedAt": "2026-07-20T19:13:58.811000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 69.13,
+"refunded": 0.0,
+"fees": 2.31,
+"state": "FL",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00271",
+"orderedAt": "2026-07-20T19:39:37.421000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 12.14,
+"tax": 0.0,
+"total": 72.14,
+"refunded": 0.0,
+"fees": 2.4,
+"state": "IN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00272",
+"orderedAt": "2026-07-21T14:52:30.120000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 60.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 68.77,
+"refunded": 0.0,
+"fees": 2.3,
+"state": "PA",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 20.0,
+"netSales": 60.0
+}
+]
+},
+{
+"orderId": "00273",
+"orderedAt": "2026-07-21T15:49:09.119000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.19,
+"tax": 0.0,
+"total": 92.19,
+"refunded": 0.0,
+"fees": 2.98,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00274",
+"orderedAt": "2026-07-23T00:17:23.153000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.73,
+"state": null,
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00275",
+"orderedAt": "2026-07-23T01:58:40.486000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.59,
+"state": "MA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00276",
+"orderedAt": "2026-07-23T03:07:13.348000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 3.24,
+"state": "SC",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00277",
+"orderedAt": "2026-07-23T06:02:28.017000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00278",
+"orderedAt": "2026-07-23T21:50:08.722000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.59,
+"state": "TX",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00279",
+"orderedAt": "2026-07-23T22:13:08.771000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.19,
+"tax": 0.0,
+"total": 92.19,
+"refunded": 0.0,
+"fees": 3.26,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00280",
+"orderedAt": "2026-07-24T23:02:59.115000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.88,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00281",
+"orderedAt": "2026-07-25T20:28:06.972000Z",
+"canceled": false,
+"grossSales": 240.0,
+"netSales": 240.0,
+"shipping": 25.3,
+"tax": 0.0,
+"total": 265.3,
+"refunded": 0.0,
+"fees": 8.79,
+"state": "AZ",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00282",
+"orderedAt": "2026-07-26T05:25:55.608000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00283",
+"orderedAt": "2026-07-26T12:42:20.302000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00284",
+"orderedAt": "2026-07-27T05:03:50.082000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 15.91,
+"tax": 0.0,
+"total": 95.91,
+"refunded": 0.0,
+"fees": 5.28,
+"state": "CA",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00285",
+"orderedAt": "2026-07-27T15:39:19.644000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00286",
+"orderedAt": "2026-07-27T18:45:02.610000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.06,
+"tax": 7.38,
+"total": 95.44,
+"refunded": 0.0,
+"fees": 3.21,
+"state": "MN",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00287",
+"orderedAt": "2026-07-28T11:33:09.807000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NJ",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00288",
+"orderedAt": "2026-07-29T01:01:39.265000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "NJ",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00289",
+"orderedAt": "2026-07-29T16:26:12.282000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 93.0,
+"refunded": 0.0,
+"fees": 5.26,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00290",
+"orderedAt": "2026-07-30T12:31:06.723000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "PA",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00291",
+"orderedAt": "2026-07-31T04:13:22.446000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "MA",
+"lines": [
+{
+"name": "Coin Collector",
+"sku": "SQ4485642",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00292",
+"orderedAt": "2026-08-01T03:30:27.582000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 5.18,
+"state": "KY",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00293",
+"orderedAt": "2026-08-01T22:08:56.830000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00294",
+"orderedAt": "2026-08-01T22:41:43.198000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.59,
+"state": "KY",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00295",
+"orderedAt": "2026-08-01T23:39:58.802000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "UT",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00296",
+"orderedAt": "2026-08-02T14:19:16.293000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CO",
+"lines": [
+{
+"name": "Coin Collector",
+"sku": "SQ4485642",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00297",
+"orderedAt": "2026-08-02T15:08:55.953000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00298",
+"orderedAt": "2026-08-02T17:15:03.500000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NC",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00299",
+"orderedAt": "2026-08-02T19:40:16.515000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00300",
+"orderedAt": "2026-08-02T22:49:42.988000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "TN",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00301",
+"orderedAt": "2026-08-03T01:25:55.048000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00302",
+"orderedAt": "2026-08-03T21:00:35.005000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CT",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00303",
+"orderedAt": "2026-08-03T22:15:43.793000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.81,
+"tax": 0.0,
+"total": 90.81,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "KS",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00304",
+"orderedAt": "2026-08-04T04:20:02.767000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "WY",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00305",
+"orderedAt": "2026-08-04T08:17:50.547000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00306",
+"orderedAt": "2026-08-04T12:33:30.571000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "MO",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00307",
+"orderedAt": "2026-08-05T14:31:27.169000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 76.77,
+"refunded": 0.0,
+"fees": 3.17,
+"state": "OH",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00308",
+"orderedAt": "2026-08-05T22:07:25.530000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00309",
+"orderedAt": "2026-08-06T01:11:35.994000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 93.0,
+"refunded": 0.0,
+"fees": 4.4,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00310",
+"orderedAt": "2026-08-06T02:13:07.003000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.81,
+"tax": 0.0,
+"total": 90.81,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "IL",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00311",
+"orderedAt": "2026-08-06T03:26:47.095000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "ID",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00312",
+"orderedAt": "2026-08-06T05:29:24.513000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 76.93,
+"refunded": 0.0,
+"fees": 2.54,
+"state": "NJ",
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00313",
+"orderedAt": "2026-08-06T18:03:40.492000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NY",
+"lines": [
+{
+"name": "Coin Collector",
+"sku": "SQ4485642",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00314",
+"orderedAt": "2026-08-06T19:57:02.152000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00315",
+"orderedAt": "2026-08-06T22:03:53.785000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CT",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00316",
+"orderedAt": "2026-08-07T21:23:29.654000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CT",
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00317",
+"orderedAt": "2026-08-08T13:52:50.165000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00318",
+"orderedAt": "2026-08-08T20:39:05.712000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.06,
+"tax": 7.15,
+"total": 95.21,
+"refunded": 0.0,
+"fees": 3.49,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller - Yellow",
+"sku": "SQ5038428",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00319",
+"orderedAt": "2026-08-09T15:58:13.827000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "AZ",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00320",
+"orderedAt": "2026-08-09T20:50:10.521000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IA",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00321",
+"orderedAt": "2026-08-10T01:59:49.326000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "CO",
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00322",
+"orderedAt": "2026-08-10T15:37:50.239000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 76.77,
+"refunded": 0.0,
+"fees": 2.53,
+"state": "MD",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00323",
+"orderedAt": "2026-08-10T18:52:19.307000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "FL",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00324",
+"orderedAt": "2026-08-11T05:09:44.242000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00325",
+"orderedAt": "2026-08-11T18:33:40.415000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "ND",
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00326",
+"orderedAt": "2026-08-12T01:50:33.852000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NC",
+"lines": [
+{
+"name": "Mallet - The Corduroy",
+"sku": "SQ0776878",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00327",
+"orderedAt": "2026-08-12T07:08:21.947000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.01,
+"state": "OR",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00328",
+"orderedAt": "2026-08-12T15:01:16.978000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 160.0,
+"shipping": 17.85,
+"tax": 0.0,
+"total": 177.85,
+"refunded": 0.0,
+"fees": 5.46,
+"state": "ME",
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00329",
+"orderedAt": "2026-08-12T23:52:14.077000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NC",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00330",
+"orderedAt": "2026-08-15T00:23:13.353000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.15,
+"tax": 7.1,
+"total": 97.25,
+"refunded": 0.0,
+"fees": 3.27,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00331",
+"orderedAt": "2026-08-15T04:30:41.823000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00332",
+"orderedAt": "2026-08-15T12:52:30.736000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.39,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00333",
+"orderedAt": "2026-08-15T19:36:10.073000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "FL",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00334",
+"orderedAt": "2026-08-16T21:14:12.807000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 5.18,
+"state": "VA",
+"lines": [
+{
+"name": "Mallet - The Corduroy",
+"sku": "SQ0776878",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00335",
+"orderedAt": "2026-08-18T17:23:58.302000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.64,
+"tax": 0.0,
+"total": 89.64,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "HI",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00336",
+"orderedAt": "2026-08-18T23:20:12.927000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00337",
+"orderedAt": "2026-08-19T01:52:48.245000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "MI",
+"lines": [
+{
+"name": "Retro Roller - Yellow",
+"sku": "SQ5038428",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00338",
+"orderedAt": "2026-08-19T04:00:17.178000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.14,
+"tax": 0.0,
+"total": 92.14,
+"refunded": 0.0,
+"fees": 2.98,
+"state": "KS",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00339",
+"orderedAt": "2026-08-19T16:58:16.929000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IL",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00340",
+"orderedAt": "2026-08-20T00:54:29.806000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "MI",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00341",
+"orderedAt": "2026-08-20T13:54:57.468000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 88.31,
+"refunded": 0.0,
+"fees": 5.15,
+"state": "IA",
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00342",
+"orderedAt": "2026-08-20T22:36:59.523000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.24,
+"state": null,
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00343",
+"orderedAt": "2026-08-21T17:43:05.753000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "NY",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00344",
+"orderedAt": "2026-08-22T16:24:33.237000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.16,
+"state": "CA",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00345",
+"orderedAt": "2026-08-22T19:25:57.376000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 93.0,
+"refunded": 0.0,
+"fees": 4.4,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00346",
+"orderedAt": "2026-08-24T22:04:22.101000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 68.0,
+"shipping": 12.14,
+"tax": 0.0,
+"total": 80.14,
+"refunded": 0.0,
+"fees": 4.49,
+"state": "MI",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 12.0,
+"netSales": 68.0
+}
+]
+},
+{
+"orderId": "00347",
+"orderedAt": "2026-08-25T01:21:44.894000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00348",
+"orderedAt": "2026-08-25T12:34:48.525000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IL",
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00349",
+"orderedAt": "2026-08-25T18:52:38.959000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00350",
+"orderedAt": "2026-08-25T21:02:15.226000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NY",
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00351",
+"orderedAt": "2026-08-27T05:47:25.566000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00352",
+"orderedAt": "2026-08-27T06:02:05.757000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 15.91,
+"tax": 0.0,
+"total": 95.91,
+"refunded": 0.0,
+"fees": 3.09,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00353",
+"orderedAt": "2026-08-27T17:11:27.552000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00354",
+"orderedAt": "2026-08-27T23:09:28.127000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.06,
+"tax": 7.95,
+"total": 96.01,
+"refunded": 0.0,
+"fees": 3.52,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00355",
+"orderedAt": "2026-08-28T21:57:33.700000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.16,
+"state": "CA",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00356",
+"orderedAt": "2026-08-28T23:31:51.915000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.39,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00357",
+"orderedAt": "2026-08-29T15:52:08.168000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "ID",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00358",
+"orderedAt": "2026-08-29T15:53:12.229000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00359",
+"orderedAt": "2026-08-30T09:05:32.113000Z",
+"canceled": false,
+"grossSales": 240.0,
+"netSales": 240.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 265.0,
+"refunded": 80.0,
+"fees": 11.97,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00360",
+"orderedAt": "2026-08-30T18:52:36.399000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "SC",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00361",
+"orderedAt": "2026-08-31T00:54:26.537000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "MD",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00362",
+"orderedAt": "2026-08-31T02:02:50.978000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "NY",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00363",
+"orderedAt": "2026-08-31T19:59:37.822000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "TN",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00364",
+"orderedAt": "2026-09-01T17:08:07.154000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NJ",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00365",
+"orderedAt": "2026-09-02T00:06:53.205000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IL",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00367",
+"orderedAt": "2026-09-04T01:06:59.849000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 3.14,
+"state": "IL",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00368",
+"orderedAt": "2026-09-04T01:34:25.772000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IL",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00369",
+"orderedAt": "2026-09-04T13:16:14.200000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.31,
+"tax": 5.33,
+"total": 77.64,
+"refunded": 0.0,
+"fees": 2.67,
+"state": "MN",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00370",
+"orderedAt": "2026-09-04T17:31:31.253000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 73.13,
+"refunded": 0.0,
+"fees": 2.43,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00371",
+"orderedAt": "2026-09-04T18:05:38.669000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 73.13,
+"refunded": 0.0,
+"fees": 2.43,
+"state": "CA",
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00372",
+"orderedAt": "2026-09-04T18:10:01.812000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 12.14,
+"tax": 0.0,
+"total": 76.14,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "OH",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00373",
+"orderedAt": "2026-09-04T20:44:02.817000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 4.3,
+"state": "OK",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00374",
+"orderedAt": "2026-09-05T01:03:20.430000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 89.0,
+"refunded": 0.0,
+"fees": 4.23,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00375",
+"orderedAt": "2026-09-05T01:32:59.958000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 89.0,
+"refunded": 0.0,
+"fees": 4.23,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00376",
+"orderedAt": "2026-09-05T12:53:24.709000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 72.31,
+"refunded": 0.0,
+"fees": 2.4,
+"state": "WI",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00377",
+"orderedAt": "2026-09-05T23:57:43.565000Z",
+"canceled": false,
+"grossSales": 320.0,
+"netSales": 256.0,
+"shipping": 32.84,
+"tax": 23.97,
+"total": 312.81,
+"refunded": 0.0,
+"fees": 10.77,
+"state": "MN",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+},
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+},
+{
+"name": "Coin Collector",
+"sku": "SQ4485642",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+},
+{
+"name": "Mallet - The Corduroy",
+"sku": "SQ0776878",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00378",
+"orderedAt": "2026-09-06T12:27:27.912000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 10.4,
+"tax": 0.0,
+"total": 74.4,
+"refunded": 0.0,
+"fees": 2.69,
+"state": "ND",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00379",
+"orderedAt": "2026-09-06T22:44:29.097000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "OH",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00380",
+"orderedAt": "2026-09-07T01:28:35.556000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 89.0,
+"refunded": 0.0,
+"fees": 4.23,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00381",
+"orderedAt": "2026-09-07T02:22:16.816000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.31,
+"tax": 0.0,
+"total": 72.31,
+"refunded": 0.0,
+"fees": 2.4,
+"state": "SD",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00382",
+"orderedAt": "2026-09-07T12:55:39.976000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 3.03,
+"state": "GA",
+"lines": [
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00383",
+"orderedAt": "2026-09-07T16:49:25.443000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 73.13,
+"refunded": 0.0,
+"fees": 2.43,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00384",
+"orderedAt": "2026-09-08T05:25:36.915000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00385",
+"orderedAt": "2026-09-11T00:35:26.324000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00386",
+"orderedAt": "2026-09-12T15:38:31.156000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 14.79,
+"tax": 0.0,
+"total": 94.79,
+"refunded": 0.0,
+"fees": 3.05,
+"state": "CT",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00387",
+"orderedAt": "2026-09-12T17:04:28.056000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00388",
+"orderedAt": "2026-09-13T01:43:12.675000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.74,
+"tax": 7.52,
+"total": 97.26,
+"refunded": 0.0,
+"fees": 3.27,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00389",
+"orderedAt": "2026-09-15T19:40:06.808000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "NY",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00390",
+"orderedAt": "2026-09-16T02:00:07.492000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "WY",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00391",
+"orderedAt": "2026-09-16T21:24:44.139000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.01,
+"state": "MT",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00392",
+"orderedAt": "2026-09-18T01:51:26.736000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.06,
+"tax": 7.51,
+"total": 95.57,
+"refunded": 0.0,
+"fees": 3.22,
+"state": "MN",
+"lines": [
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00393",
+"orderedAt": "2026-09-18T03:31:50.097000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00394",
+"orderedAt": "2026-09-18T13:38:28.212000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 89.13,
+"refunded": 0.0,
+"fees": 3.16,
+"state": "FL",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00395",
+"orderedAt": "2026-09-19T14:12:55.568000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 3.22,
+"state": "MD",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00396",
+"orderedAt": "2026-09-19T23:36:13.866000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.74,
+"tax": 7.52,
+"total": 97.26,
+"refunded": 0.0,
+"fees": 3.27,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00397",
+"orderedAt": "2026-09-20T02:45:03.519000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 14.79,
+"tax": 0.0,
+"total": 94.79,
+"refunded": 0.0,
+"fees": 3.05,
+"state": "AZ",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00398",
+"orderedAt": "2026-09-20T03:34:43.623000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.19,
+"tax": 0.0,
+"total": 92.19,
+"refunded": 0.0,
+"fees": 2.98,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00399",
+"orderedAt": "2026-09-20T16:47:07.107000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 80.0,
+"refunded": 0.0,
+"fees": 2.62,
+"state": "MI",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00400",
+"orderedAt": "2026-09-21T14:00:03.507000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "MD",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00401",
+"orderedAt": "2026-09-21T17:47:28.883000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.19,
+"tax": 0.0,
+"total": 92.19,
+"refunded": 0.0,
+"fees": 2.98,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00402",
+"orderedAt": "2026-09-22T02:17:06.821000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "AZ",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00403",
+"orderedAt": "2026-09-22T02:46:56.654000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00404",
+"orderedAt": "2026-09-24T12:31:17.484000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 91.58,
+"refunded": 0.0,
+"fees": 2.96,
+"state": "ID",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00405",
+"orderedAt": "2026-09-24T13:14:23.547000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 128.0,
+"shipping": 17.54,
+"tax": 0.0,
+"total": 145.54,
+"refunded": 0.0,
+"fees": 7.96,
+"state": "DE",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+},
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00409",
+"orderedAt": "2026-09-24T18:01:23.206000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 89.0,
+"refunded": 0.0,
+"fees": 4.23,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00410",
+"orderedAt": "2026-09-24T22:39:14.404000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "TX",
+"lines": [
+{
+"name": "Sunny Side Up",
+"sku": "SQ4123541",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00411",
+"orderedAt": "2026-09-25T18:06:31.530000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 72.47,
+"refunded": 0.0,
+"fees": 2.41,
+"state": "MO",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00412",
+"orderedAt": "2026-09-25T23:10:49.998000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 9.13,
+"tax": 0.0,
+"total": 73.13,
+"refunded": 0.0,
+"fees": 2.43,
+"state": "CA",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00413",
+"orderedAt": "2026-09-26T15:26:44.680000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 75.17,
+"refunded": 0.0,
+"fees": 2.48,
+"state": "AR",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00414",
+"orderedAt": "2026-09-27T04:38:28.697000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 9.74,
+"tax": 6.18,
+"total": 79.92,
+"refunded": 0.0,
+"fees": 2.73,
+"state": "MN",
+"lines": [
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00415",
+"orderedAt": "2026-09-27T11:44:52.943000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 72.93,
+"refunded": 0.0,
+"fees": 2.64,
+"state": "NJ",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00416",
+"orderedAt": "2026-09-27T15:51:03.113000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00417",
+"orderedAt": "2026-09-27T17:27:51.985000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 72.77,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "GA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00418",
+"orderedAt": "2026-09-27T23:58:41.109000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 15.91,
+"tax": 0.0,
+"total": 79.91,
+"refunded": 0.0,
+"fees": 2.86,
+"state": "FL",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00419",
+"orderedAt": "2026-09-28T15:30:42.522000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 11.58,
+"tax": 0.0,
+"total": 75.58,
+"refunded": 0.0,
+"fees": 2.5,
+"state": "MA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00420",
+"orderedAt": "2026-09-28T16:37:36.503000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 10.81,
+"tax": 0.0,
+"total": 74.81,
+"refunded": 0.0,
+"fees": 2.47,
+"state": "MI",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00421",
+"orderedAt": "2026-09-28T19:23:27.590000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 72.93,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "NJ",
+"lines": [
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00422",
+"orderedAt": "2026-09-29T04:33:51.552000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 64.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 72.93,
+"refunded": 0.0,
+"fees": 2.42,
+"state": "NV",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 16.0,
+"netSales": 64.0
+}
+]
+},
+{
+"orderId": "00423",
+"orderedAt": "2026-10-01T19:30:12.142000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00424",
+"orderedAt": "2026-10-01T20:15:51.912000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "PA",
+"lines": [
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00425",
+"orderedAt": "2026-10-02T02:53:48.661000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "OH",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00426",
+"orderedAt": "2026-10-02T04:57:12.305000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 5.18,
+"state": "GA",
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00427",
+"orderedAt": "2026-10-02T14:35:34.555000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.17,
+"tax": 0.0,
+"total": 91.17,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "TN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00428",
+"orderedAt": "2026-10-02T17:56:37.789000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.47,
+"tax": 0.0,
+"total": 88.47,
+"refunded": 0.0,
+"fees": 2.87,
+"state": "IL",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00429",
+"orderedAt": "2026-10-02T23:46:38.310000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 5.64,
+"state": "ID",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00430",
+"orderedAt": "2026-10-03T09:32:29.106000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.93,
+"tax": 0.0,
+"total": 88.93,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "ME",
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00431",
+"orderedAt": "2026-10-03T10:54:29.009000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.88,
+"state": null,
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00432",
+"orderedAt": "2026-10-04T01:04:23.968000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.77,
+"tax": 0.0,
+"total": 88.77,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "VA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00433",
+"orderedAt": "2026-10-05T06:05:58.228000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 4.93,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00434",
+"orderedAt": "2026-10-05T20:44:35.099000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 3.04,
+"state": "MT",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00435",
+"orderedAt": "2026-10-06T03:14:03.598000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "AR",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00436",
+"orderedAt": "2026-10-06T16:22:44.109000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 3.17,
+"state": "GA",
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00437",
+"orderedAt": "2026-10-07T00:56:02.355000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.93,
+"tax": 0.0,
+"total": 91.93,
+"refunded": 0.0,
+"fees": 2.97,
+"state": "PA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00438",
+"orderedAt": "2026-10-07T02:58:43.094000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 50.08,
+"tax": 0.0,
+"total": 130.08,
+"refunded": 50.0,
+"fees": 4.08,
+"state": "NJ",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00439",
+"orderedAt": "2026-10-07T03:21:48.747000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "UT",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00440",
+"orderedAt": "2026-10-09T04:16:11.966000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Yellow",
+"sku": "SQ5038428",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00441",
+"orderedAt": "2026-10-09T11:05:43.149000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.08,
+"state": null,
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00442",
+"orderedAt": "2026-10-09T11:46:07.407000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "OH",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00443",
+"orderedAt": "2026-10-10T15:47:10.666000Z",
+"canceled": false,
+"grossSales": 30.0,
+"netSales": 30.0,
+"shipping": 10.25,
+"tax": 3.63,
+"total": 43.88,
+"refunded": 0.0,
+"fees": 1.64,
+"state": "MN",
+"lines": [
+{
+"name": "SR - Striped Golf Towel \u2013 Red & Blue Stripe",
+"sku": "SQ1603184",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+}
+]
+},
+{
+"orderId": "00444",
+"orderedAt": "2026-10-10T19:54:32.596000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "CO",
+"lines": [
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00445",
+"orderedAt": "2026-10-11T23:23:29.161000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 3.18,
+"state": "CT",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00446",
+"orderedAt": "2026-10-12T19:01:12.166000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.25,
+"tax": 6.66,
+"total": 96.91,
+"refunded": 0.0,
+"fees": 4.01,
+"state": "MN",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00447",
+"orderedAt": "2026-10-12T20:19:27.419000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "KY",
+"lines": [
+{
+"name": "The Corduroy",
+"sku": "SQ5337427",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00448",
+"orderedAt": "2026-10-13T00:01:45.721000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 3.18,
+"state": "FL",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00449",
+"orderedAt": "2026-10-13T00:23:37.420000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 3.18,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet - The Corduroy",
+"sku": "SQ0776878",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00450",
+"orderedAt": "2026-10-13T20:36:40.949000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.93,
+"tax": 0.0,
+"total": 91.93,
+"refunded": 0.0,
+"fees": 2.97,
+"state": "PA",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00451",
+"orderedAt": "2026-10-13T22:46:27.447000Z",
+"canceled": false,
+"grossSales": 510.0,
+"netSales": 510.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 535.0,
+"refunded": 0.0,
+"fees": 24.65,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Sunday Stripes",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "SR - Solid Golf Towel \u2013 Black",
+"sku": "SQ1116843",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+},
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00452",
+"orderedAt": "2026-10-14T18:03:31.089000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "NJ",
+"lines": [
+{
+"name": "Mallet - The Corduroy",
+"sku": "SQ0776878",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00453",
+"orderedAt": "2026-10-14T23:59:12.108000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "PA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00454",
+"orderedAt": "2026-10-15T03:14:13.967000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "TN",
+"lines": [
+{
+"name": "Retro Roller - Yellow",
+"sku": "SQ5038428",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00455",
+"orderedAt": "2026-10-15T05:42:25.772000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 5.24,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00456",
+"orderedAt": "2026-10-15T16:17:09.394000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "PA",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00457",
+"orderedAt": "2026-10-15T20:27:25.742000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.34,
+"tax": 0.0,
+"total": 92.34,
+"refunded": 0.0,
+"fees": 3.26,
+"state": "NY",
+"lines": [
+{
+"name": "Mallet - Retro Roller - White",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00458",
+"orderedAt": "2026-10-15T21:38:39.703000Z",
+"canceled": true,
+"grossSales": 60.0,
+"netSales": 60.0,
+"shipping": 20.5,
+"tax": 6.54,
+"total": 87.04,
+"refunded": 87.04,
+"fees": 2.7,
+"state": "MN",
+"lines": [
+{
+"name": "SR - Solid Golf Towel \u2013 Black",
+"sku": "SQ1116843",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+},
+{
+"name": "SR - Solid Golf Towel \u2013 Blue",
+"sku": "SQ5065580",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+}
+]
+},
+{
+"orderId": "00459",
+"orderedAt": "2026-10-15T23:07:26.374000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 10.91,
+"tax": 0.0,
+"total": 90.91,
+"refunded": 0.0,
+"fees": 2.94,
+"state": "WI",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00460",
+"orderedAt": "2026-10-16T00:26:02.598000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "MD",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00461",
+"orderedAt": "2026-10-16T00:58:33.877000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "AL",
+"lines": [
+{
+"name": "Morning Dew",
+"sku": "SQ3877374",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00462",
+"orderedAt": "2026-10-16T02:14:22.073000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "MD",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00463",
+"orderedAt": "2026-10-16T05:28:53.446000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 2.89,
+"state": "MO",
+"lines": [
+{
+"name": "Retro Roller - Yellow",
+"sku": "SQ5038428",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00464",
+"orderedAt": "2026-10-16T20:11:21.825000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.34,
+"tax": 0.0,
+"total": 92.34,
+"refunded": 0.0,
+"fees": 5.85,
+"state": "AZ",
+"lines": [
+{
+"name": "Mallet - Retro Roller - Grey",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00465",
+"orderedAt": "2026-10-17T02:35:11.429000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "CA",
+"lines": [
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00466",
+"orderedAt": "2026-10-18T19:52:35.150000Z",
+"canceled": false,
+"grossSales": 30.0,
+"netSales": 30.0,
+"shipping": 10.25,
+"tax": 3.53,
+"total": 43.78,
+"refunded": 0.0,
+"fees": 1.63,
+"state": "MN",
+"lines": [
+{
+"name": "SR - Striped Golf Towel \u2013 Black Stripe",
+"sku": "SQ7664670",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+}
+]
+},
+{
+"orderId": "00467",
+"orderedAt": "2026-10-18T22:35:09.508000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.39,
+"state": null,
+"lines": [
+{
+"name": "Morning Dew",
+"sku": "SQ3877374",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00468",
+"orderedAt": "2026-10-19T17:36:13.190000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00469",
+"orderedAt": "2026-10-20T02:30:22.594000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 14.33,
+"tax": 0.0,
+"total": 94.33,
+"refunded": 0.0,
+"fees": 3.04,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller - Purple",
+"sku": "SQ1522462",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00470",
+"orderedAt": "2026-10-20T12:05:33.807000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller - Grey",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00471",
+"orderedAt": "2026-10-20T14:41:59.210000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.82,
+"tax": 0.0,
+"total": 88.82,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "IA",
+"lines": [
+{
+"name": "Mallet Sunday Stripes",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00472",
+"orderedAt": "2026-10-21T19:46:00.283000Z",
+"canceled": false,
+"grossSales": 112.0,
+"netSales": 112.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 112.0,
+"refunded": 0.0,
+"fees": 3.55,
+"state": "TX",
+"lines": [
+{
+"name": "Mallet - The Corduroy",
+"sku": "SQ0776878",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00473",
+"orderedAt": "2026-10-22T20:21:04.919000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "MD",
+"lines": [
+{
+"name": "Morning Dew",
+"sku": "SQ3877374",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00474",
+"orderedAt": "2026-10-23T13:48:51.335000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.34,
+"tax": 0.0,
+"total": 92.34,
+"refunded": 0.0,
+"fees": 2.98,
+"state": "NY",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00475",
+"orderedAt": "2026-10-24T05:36:08.277000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00476",
+"orderedAt": "2026-10-24T21:38:17.343000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.95,
+"tax": 0.0,
+"total": 92.95,
+"refunded": 0.0,
+"fees": 3.0,
+"state": "CA",
+"lines": [
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00477",
+"orderedAt": "2026-10-24T21:43:49.699000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 80.0,
+"refunded": 0.0,
+"fees": 2.54,
+"state": "CA",
+"lines": [
+{
+"name": "Sunday Stripes (L.A.B. DF3)",
+"sku": "SQ6821090",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00478",
+"orderedAt": "2026-10-24T21:43:49.699000Z",
+"canceled": false,
+"grossSales": 30.0,
+"netSales": 30.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 30.0,
+"refunded": 0.0,
+"fees": 0.95,
+"state": "CA",
+"lines": [
+{
+"name": "SR - Striped Golf Towel \u2013 Red & Blue Stripe",
+"sku": "SQ1603184",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+}
+]
+},
+{
+"orderId": "00479",
+"orderedAt": "2026-10-25T04:46:31.273000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 3.17,
+"state": "UT",
+"lines": [
+{
+"name": "The Doodle",
+"sku": "SQ0140625",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00480",
+"orderedAt": "2026-10-25T23:17:45.959000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "CO",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00481",
+"orderedAt": "2026-10-26T00:33:56.483000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.32,
+"tax": 0.0,
+"total": 91.32,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "IL",
+"lines": [
+{
+"name": "The Breakfast Roller",
+"sku": "SQ8429405",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00482",
+"orderedAt": "2026-10-26T00:39:29.135000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "TX",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00483",
+"orderedAt": "2026-10-26T01:21:08.647000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "MA",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00484",
+"orderedAt": "2026-10-26T02:36:24.406000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 5.69,
+"state": "WA",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00485",
+"orderedAt": "2026-10-26T02:43:49.342000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 3.17,
+"state": "CO",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00486",
+"orderedAt": "2026-10-27T02:24:25.505000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 80.0,
+"refunded": 0.0,
+"fees": 2.54,
+"state": "CA",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00487",
+"orderedAt": "2026-10-27T02:24:25.505000Z",
+"canceled": false,
+"grossSales": 30.0,
+"netSales": 30.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 30.0,
+"refunded": 0.0,
+"fees": 0.95,
+"state": "CA",
+"lines": [
+{
+"name": "SR - Striped Golf Towel \u2013 Green Stripe",
+"sku": "SQ7554114",
+"quantity": 1,
+"unitPrice": 30.0,
+"discount": 0.0,
+"netSales": 30.0
+}
+]
+},
+{
+"orderId": "00488",
+"orderedAt": "2026-10-27T03:35:39.961000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.54,
+"tax": 0.0,
+"total": 89.54,
+"refunded": 0.0,
+"fees": 2.9,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00489",
+"orderedAt": "2026-10-27T05:51:00.316000Z",
+"canceled": false,
+"grossSales": 160.0,
+"netSales": 160.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 160.0,
+"refunded": 0.0,
+"fees": 5.42,
+"state": "CA",
+"lines": [
+{
+"name": "The Birdie Machine",
+"sku": "SQ3685888",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00490",
+"orderedAt": "2026-10-27T15:52:46.262000Z",
+"canceled": false,
+"grossSales": 112.0,
+"netSales": 112.0,
+"shipping": 0.0,
+"tax": 0.0,
+"total": 112.0,
+"refunded": 0.0,
+"fees": 3.89,
+"state": "MI",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+},
+{
+"name": "The Tee",
+"sku": "SQ8040771",
+"quantity": 1,
+"unitPrice": 32.0,
+"discount": 0.0,
+"netSales": 32.0
+}
+]
+},
+{
+"orderId": "00491",
+"orderedAt": "2026-10-28T11:20:01.668000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.93,
+"tax": 0.0,
+"total": 91.93,
+"refunded": 0.0,
+"fees": 3.25,
+"state": "PA",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00492",
+"orderedAt": "2026-10-28T14:00:36.691000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.32,
+"tax": 0.0,
+"total": 91.32,
+"refunded": 0.0,
+"fees": 2.95,
+"state": "IL",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00493",
+"orderedAt": "2026-10-29T07:01:56.889000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 3.18,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00494",
+"orderedAt": "2026-10-29T16:14:57.700000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.34,
+"tax": 0.0,
+"total": 92.34,
+"refunded": 0.0,
+"fees": 2.98,
+"state": "WA",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00495",
+"orderedAt": "2026-10-29T17:46:54.299000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.95,
+"tax": 0.0,
+"total": 92.95,
+"refunded": 0.0,
+"fees": 3.0,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet Retro Roller - White (TaylorMade Spider)",
+"sku": "SQ1582500",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00496",
+"orderedAt": "2026-10-29T19:02:46.626000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00497",
+"orderedAt": "2026-10-29T20:25:09.661000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "CA",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00498",
+"orderedAt": "2026-10-30T13:32:29.592000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.82,
+"tax": 0.0,
+"total": 88.82,
+"refunded": 0.0,
+"fees": 2.88,
+"state": "WI",
+"lines": [
+{
+"name": "Morning Dew",
+"sku": "SQ3877374",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00499",
+"orderedAt": "2026-10-31T02:49:01.245000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "RI",
+"lines": [
+{
+"name": "Coin Collector",
+"sku": "SQ4485642",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00501",
+"orderedAt": "2026-10-31T18:09:53.949000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.89,
+"tax": 0.0,
+"total": 89.89,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet Sunday Stripes (TaylorMade Spider)",
+"sku": "SQ2715803",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00502",
+"orderedAt": "2026-10-31T18:38:15.938000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 25.0,
+"tax": 0.0,
+"total": 105.0,
+"refunded": 0.0,
+"fees": 5.39,
+"state": null,
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00503",
+"orderedAt": "2026-11-01T01:19:43.776000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "NY",
+"lines": [
+{
+"name": "Retro Roller - Yellow (L.A.B. DF3)",
+"sku": "SQ5038428",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00504",
+"orderedAt": "2026-11-01T09:42:48.397000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 11.93,
+"tax": 0.0,
+"total": 91.93,
+"refunded": 0.0,
+"fees": 2.97,
+"state": "PA",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00505",
+"orderedAt": "2026-11-01T17:00:57.432000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "MI",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00506",
+"orderedAt": "2026-11-01T17:07:10.878000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.98,
+"tax": 0.0,
+"total": 88.98,
+"refunded": 0.0,
+"fees": 3.15,
+"state": "KS",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00507",
+"orderedAt": "2026-11-01T20:35:10.370000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 12.95,
+"tax": 0.0,
+"total": 92.95,
+"refunded": 0.0,
+"fees": 3.0,
+"state": "CA",
+"lines": [
+{
+"name": "Mallet Retro Roller - Grey (TaylorMade Spider)",
+"sku": "SQ6617356",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00508",
+"orderedAt": "2026-11-02T04:29:59.362000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 9.69,
+"tax": 0.0,
+"total": 89.69,
+"refunded": 0.0,
+"fees": 2.91,
+"state": "TX",
+"lines": [
+{
+"name": "Retro Roller - Grey (L.A.B. DF3)",
+"sku": "SQ6360452",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+},
+{
+"orderId": "00509",
+"orderedAt": "2026-11-02T14:36:19.532000Z",
+"canceled": false,
+"grossSales": 80.0,
+"netSales": 80.0,
+"shipping": 8.72,
+"tax": 7.43,
+"total": 96.15,
+"refunded": 0.0,
+"fees": 3.23,
+"state": "MN",
+"lines": [
+{
+"name": "Flagstick Fuel",
+"sku": "SQ2272216",
+"quantity": 1,
+"unitPrice": 80.0,
+"discount": 0.0,
+"netSales": 80.0
+}
+]
+}
+]
+}
