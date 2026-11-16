@@ -56,6 +56,7 @@ export function CartPage() {
     addItem,
     updateItemQuantity,
     removeItem,
+    prepareCheckout,
   } = useCart()
   const [addingUpsell, setAddingUpsell] = useState(false)
   const [selectedTowelHandle, setSelectedTowelHandle] = useState<string | null>(null)
@@ -201,7 +202,16 @@ export function CartPage() {
     )
   }
 
-  function handleCheckoutClick() {
+  function handleCheckoutClick(event: React.MouseEvent<HTMLElement>) {
+    const checkoutUrl = cart?.checkoutUrl
+    // Let new-tab / modified clicks behave normally.
+    const plainClick =
+      event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+    if (checkoutUrl && plainClick) {
+      event.preventDefault()
+      // Hand GA4's visitor/session IDs to Shopify so the purchase keeps its traffic source.
+      void prepareCheckout().finally(() => window.location.assign(checkoutUrl))
+    }
     trackBeginCheckout(
       lines.map((item) => ({
         id: item.productId || item.variantId || item.id,

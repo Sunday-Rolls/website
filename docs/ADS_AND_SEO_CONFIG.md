@@ -13,6 +13,14 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
 
+## Change log: 2026-11-14
+
+### GA4 purchase attribution
+
+- GA4 credited every purchase to Direct / "(not set)": the Shopify custom pixel runs in a sandbox that can't read the site's `_ga` cookies, so each purchase arrived as a new visitor with no source, and organic search never showed a conversion.
+- The checkout button now copies the GA4 client ID and session ID onto the cart as hidden attributes `_sr_ga_cid` / `_sr_ga_sid` (`src/lib/ga-ids.ts`, `prepareCheckout` in `src/lib/cart.tsx`; waits at most 1.5 s).
+- **Manual step in Shopify Admin:** update the `Sunday Rolls purchase` custom pixel (Settings → Customer events) with the new script in [`SHOPIFY_WEB_PIXEL.md`](SHOPIFY_WEB_PIXEL.md), which sends `purchase` under those IDs. Revert by pasting the previous script back.
+
 ## Change log: 2026-11-11
 
 ### Google Ads API

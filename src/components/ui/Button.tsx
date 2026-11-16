@@ -11,7 +11,7 @@ interface ButtonProps {
   href?: string
   type?: 'button' | 'submit'
   className?: string
-  onClick?: () => void
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void
   disabled?: boolean
 }
 
