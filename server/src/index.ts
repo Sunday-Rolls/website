@@ -3,6 +3,7 @@ import pg from 'pg'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from './analytics/ga4-sync.js'
 import { createMemoryAnalyticsStore, createPgAnalyticsStore, type AnalyticsStore } from './analytics/store.js'
 import { seedDemoStore } from './analytics/seed.js'
+import { applySquarespaceHistory } from './analytics/squarespace-history.js'
 import { createApp } from './app.js'
 import { ensureBootstrapUsers } from './dashboard/routes.js'
 import { loadConfig } from './env.js'
@@ -63,6 +64,15 @@ async function setupDashboard(store: AnalyticsStore, label: string) {
   if (config.analyticsSeedDemoOnBoot) {
     await seedDemoStore(store)
     console.log(`Seeded analytics demo data on ${label}`)
+  }
+  // One-time Squarespace history (fees, shipping, refunds) from the accounting export; a no-op once applied.
+  else if ((process.env.SQUARESPACE_HISTORY_ON_BOOT ?? 'true').trim() !== 'false') {
+    try {
+      const r = await applySquarespaceHistory(store)
+      if (r.status === 'applied') console.log(`Squarespace history on ${label}: ${r.upserted} orders updated, ${r.deleted} removed`)
+    } catch (error) {
+      console.error('Squarespace history failed:', error instanceof Error ? error.message : error)
+    }
   }
   const ga4Creds = loadGa4CredentialsFromEnv()
   if (config.ga4SyncOnBoot && ga4Creds) {
