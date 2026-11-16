@@ -12,6 +12,7 @@ import type {
   DashboardUser,
   EtsyFeesDaily,
   EtsyListing,
+  EbayOrderDetail,
   EtsyReceiptDetail,
   EtsyReview,
   EtsyShopDaily,
@@ -98,6 +99,11 @@ export type AnalyticsStore = {
   upsertEtsyReceipts(rows: EtsyReceiptDetail[]): Promise<number>
   /** Oldest first. */
   listEtsyReceipts(): Promise<EtsyReceiptDetail[]>
+  // eBay detail data (see ebay-sync.ts)
+  /** Insert or update by orderId. */
+  upsertEbayOrders(rows: EbayOrderDetail[]): Promise<number>
+  /** Oldest first. */
+  listEbayOrders(): Promise<EbayOrderDetail[]>
   /**
    * Insert or update by (date, ledgerType). `replaceFromDay`: first delete every row on or after
    * that day, so a re-read ledger window fully replaces its days.
@@ -163,6 +169,7 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
   let abandoned: AbandonedCartStats[] = []
   let customerOrders: CustomerOrder[] = []
   let etsyReceipts = new Map<string, EtsyReceiptDetail>()
+  let ebayOrders = new Map<string, EbayOrderDetail>()
   let etsyFees = new Map<string, EtsyFeesDaily>()
   let etsyListings: EtsyListing[] = []
   let etsyReviews = new Map<string, EtsyReview>()
@@ -185,6 +192,7 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
       cash = []
       abandoned = []
       etsyReceipts = new Map()
+      ebayOrders = new Map()
       etsyFees = new Map()
       etsyListings = []
       etsyReviews = new Map()
@@ -414,6 +422,17 @@ export function createMemoryAnalyticsStore(): AnalyticsStore {
         .sort((a, b) => a.orderedAt.localeCompare(b.orderedAt) || a.receiptId.localeCompare(b.receiptId))
     },
 
+    async upsertEbayOrders(rows) {
+      for (const row of rows) ebayOrders.set(row.orderId, structuredClone(row))
+      return rows.length
+    },
+
+    async listEbayOrders() {
+      return [...ebayOrders.values()]
+        .map((r) => structuredClone(r))
+        .sort((a, b) => a.orderedAt.localeCompare(b.orderedAt) || a.orderId.localeCompare(b.orderId))
+    },
+
     async upsertEtsyFeesDaily(rows, options) {
       if (options?.replaceFromDay) {
         for (const [key, row] of etsyFees) if (row.date >= options.replaceFromDay) etsyFees.delete(key)
@@ -531,6 +550,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           analytics_customer_orders,
           analytics_abandoned_carts,
           analytics_etsy_receipts,
+          analytics_ebay_orders,
           analytics_etsy_fees_daily,
           analytics_etsy_listings,
           analytics_etsy_reviews,
@@ -1140,8 +1160,8 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
           `INSERT INTO analytics_etsy_receipts
             (receipt_id, ordered_at, status, buyer_user_id, grandtotal, subtotal, shipping_charged, tax, discount,
              refunded, shop_coupon, buyer_coupon, units, is_shipped, shipped_at, processing_fees, actual_fees,
-             label_cost, offsite_ads_fee, net, payment_synced, updated_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21, now())
+             label_cost, offsite_ads_fee, net, payment_synced, lines, updated_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22::jsonb, now())
            ON CONFLICT (receipt_id) DO UPDATE SET
              ordered_at = EXCLUDED.ordered_at, status = EXCLUDED.status, buyer_user_id = EXCLUDED.buyer_user_id,
              grandtotal = EXCLUDED.grandtotal, subtotal = EXCLUDED.subtotal, shipping_charged = EXCLUDED.shipping_charged,
@@ -1150,7 +1170,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
              is_shipped = EXCLUDED.is_shipped, shipped_at = EXCLUDED.shipped_at,
              processing_fees = EXCLUDED.processing_fees, actual_fees = EXCLUDED.actual_fees,
              label_cost = EXCLUDED.label_cost, offsite_ads_fee = EXCLUDED.offsite_ads_fee, net = EXCLUDED.net,
-             payment_synced = EXCLUDED.payment_synced, updated_at = now()`,
+             payment_synced = EXCLUDED.payment_synced, lines = EXCLUDED.lines, updated_at = now()`,
           [
             r.receiptId,
             r.orderedAt,
@@ -1173,6 +1193,7 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
             r.offsiteAdsFee,
             r.net,
             r.paymentSynced,
+            JSON.stringify(r.lines ?? []),
           ],
         )
       }
@@ -1203,7 +1224,25 @@ export function createPgAnalyticsStore(db: Queryable): AnalyticsStore {
         offsiteAdsFee: optionalNum(row.offsite_ads_fee),
         net: optionalNum(row.net),
         paymentSynced: row.payment_synced === true,
+        lines: Array.isArray(row.lines) ? (row.lines as EtsyReceiptDetail['lines']) : [],
       }))
+    },
+
+    async upsertEbayOrders(rows) {
+      for (const r of rows) {
+        await db.query(
+          `INSERT INTO analytics_ebay_orders (order_id, ordered_at, data, updated_at)
+           VALUES ($1, $2, $3::jsonb, now())
+           ON CONFLICT (order_id) DO UPDATE SET ordered_at = EXCLUDED.ordered_at, data = EXCLUDED.data, updated_at = now()`,
+          [r.orderId, r.orderedAt, JSON.stringify(r)],
+        )
+      }
+      return rows.length
+    },
+
+    async listEbayOrders() {
+      const { rows } = await db.query(`SELECT data FROM analytics_ebay_orders ORDER BY ordered_at, order_id`)
+      return rows.map((row) => row.data as EbayOrderDetail)
     },
 
     async upsertEtsyFeesDaily(rows, options) {

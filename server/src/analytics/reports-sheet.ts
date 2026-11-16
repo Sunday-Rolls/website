@@ -8,10 +8,11 @@
  */
 import { GoogleAuth } from 'google-auth-library'
 import { extractDriveFileId } from './drive.js'
+import { ebayRevenue, isCountedEbayOrder } from './ebay.js'
 import { preferLiveOrders } from './orders.js'
 import { storeDay } from './period.js'
 import type { AnalyticsStore } from './store.js'
-import type { DailyAdSpend, DailyTraffic, Order } from './types.js'
+import type { DailyAdSpend, DailyTraffic, EbayOrderDetail, EtsyReceiptDetail, Order } from './types.js'
 import { productLabel } from './views.js'
 
 export const REPORTS_SHEET_SYNC_SOURCE = 'reports-sheet'
@@ -58,6 +59,10 @@ export function buildReportTables(input: {
   adSpend: DailyAdSpend[]
   traffic: DailyTraffic[]
   generatedAt: string
+  /** Etsy receipts straight from Etsy's API, with item lines (Sales Tracker receipts included). */
+  etsyReceipts?: EtsyReceiptDetail[]
+  /** eBay orders from eBay's API; the eBay tabs are written only once there are some. */
+  ebayOrders?: EbayOrderDetail[]
 }): ReportTable[] {
   // Same dedupe as the dashboard: live Shopify / Squarespace CSV beat Sales Tracker copies.
   const orders = preferLiveOrders(input.orders).sort((a, b) => a.orderedAt.localeCompare(b.orderedAt))
@@ -155,6 +160,9 @@ export function buildReportTables(input: {
     }
   }
 
+  const etsy = etsyTables(input.etsyReceipts ?? [])
+  const ebay = ebayTables(input.ebayOrders ?? [])
+
   const tab = (name: string) => `${DATA_TAB_PREFIX}${name}`
   return [
     {
@@ -167,6 +175,8 @@ export function buildReportTables(input: {
         ['Orders', orderRows.length],
         ['Ad spend rows', adRows.length],
         ['Traffic days', trafficRows.length],
+        ['Etsy receipts (from Etsy)', etsy.orders.length],
+        ['eBay orders (from eBay)', ebay.orders.length],
       ],
     },
     {
@@ -199,7 +209,117 @@ export function buildReportTables(input: {
       header: ['Date', 'Month', 'Source / medium', 'Sessions'],
       rows: sourceRows,
     },
+    {
+      title: tab('Etsy orders'),
+      header: [
+        'Date', 'Month', 'Receipt', 'Status', 'Counted', 'Items', 'Units', 'Item subtotal', 'Shipping charged', 'Tax',
+        'Discount', 'Refunded', 'Revenue', 'Fees', 'Label cost', 'Offsite ads fee', 'Net',
+      ],
+      rows: etsy.orders,
+    },
+    {
+      title: tab('Etsy items'),
+      header: ['Date', 'Month', 'Receipt', 'Counted', 'Product', 'SKU', 'Listing', 'Quantity', 'Unit price', 'Line revenue'],
+      rows: etsy.items,
+    },
+    ...(ebay.orders.length
+      ? [
+          {
+            title: tab('eBay orders'),
+            header: [
+              'Date', 'Month', 'Order', 'Status', 'Counted', 'Items', 'Units', 'Item subtotal', 'Shipping charged', 'Discount',
+              'Tax', 'Refunded', 'Revenue', 'Fees', 'Label cost', 'Ad fees', 'Net', 'State',
+            ],
+            rows: ebay.orders,
+          },
+          {
+            title: tab('eBay items'),
+            header: ['Date', 'Month', 'Order', 'Counted', 'Product', 'SKU', 'Item ID', 'Quantity', 'Unit price', 'Line revenue'],
+            rows: ebay.items,
+          },
+        ]
+      : []),
   ]
+}
+
+const blank = (n: number | null) => (n == null ? '' : round2(n))
+
+/** Etsy statuses that aren't sales (same rule as the Etsy sync). */
+function etsyCounted(status: string): boolean {
+  return !['canceled', 'cancelled', 'fully refunded'].includes(status)
+}
+
+/** Etsy receipts as Etsy reports them. Revenue matches the Sales Tracker's Price: what the buyer paid, less refunds. */
+export function etsyTables(receipts: EtsyReceiptDetail[]): { orders: Cell[][]; items: Cell[][] } {
+  const orders: Cell[][] = []
+  const items: Cell[][] = []
+  for (const r of [...receipts].sort((a, b) => a.orderedAt.localeCompare(b.orderedAt) || a.receiptId.localeCompare(b.receiptId))) {
+    const day = storeDay(r.orderedAt)
+    const counted = etsyCounted(r.status)
+    const lines = r.lines ?? []
+    const revenue = counted ? round2(Math.max(0, r.grandtotal - r.refunded)) : 0
+    const costs = (r.actualFees ?? 0) + (r.labelCost ?? 0) + (r.offsiteAdsFee ?? 0)
+    orders.push([
+      day,
+      monthOf(day),
+      r.receiptId,
+      r.status,
+      counted ? 'Yes' : 'No',
+      lines.map((l) => l.title).join(' | '),
+      r.units,
+      round2(r.subtotal),
+      round2(r.shippingCharged),
+      round2(r.tax),
+      round2(r.discount),
+      round2(r.refunded),
+      revenue,
+      blank(r.actualFees),
+      blank(r.labelCost),
+      blank(r.offsiteAdsFee),
+      counted && r.actualFees != null ? round2(revenue - costs) : '',
+    ])
+    for (const l of lines) {
+      items.push([day, monthOf(day), r.receiptId, counted ? 'Yes' : 'No', l.title, l.sku ?? '', l.listingId ?? '', l.quantity, round2(l.unitPrice), round2(l.lineRevenue)])
+    }
+  }
+  return { orders, items }
+}
+
+/** eBay orders as eBay reports them. Revenue: items − discounts + shipping charged − refunds (eBay remits the tax). */
+export function ebayTables(list: EbayOrderDetail[]): { orders: Cell[][]; items: Cell[][] } {
+  const orders: Cell[][] = []
+  const items: Cell[][] = []
+  for (const o of [...list].sort((a, b) => a.orderedAt.localeCompare(b.orderedAt) || a.orderId.localeCompare(b.orderId))) {
+    const day = storeDay(o.orderedAt)
+    const counted = isCountedEbayOrder(o)
+    const revenue = ebayRevenue(o)
+    const status = o.cancelState === 'canceled' ? 'canceled' : o.paymentStatus === 'fully_refunded' ? 'fully refunded' : o.fulfillmentStatus
+    const costs = (o.marketplaceFees ?? 0) + (o.labelCost ?? 0) + (o.adFees ?? 0)
+    orders.push([
+      day,
+      monthOf(day),
+      o.orderId,
+      status,
+      counted ? 'Yes' : 'No',
+      o.lines.map((l) => l.title).join(' | '),
+      o.lines.reduce((s, l) => s + l.quantity, 0),
+      round2(o.itemSubtotal),
+      round2(o.shippingCharged),
+      round2(o.discount),
+      round2(o.tax),
+      round2(o.refunded),
+      revenue,
+      blank(o.marketplaceFees),
+      blank(o.labelCost),
+      blank(o.adFees),
+      counted && o.marketplaceFees != null ? round2(revenue - costs) : '',
+      o.state ?? '',
+    ])
+    for (const l of o.lines) {
+      items.push([day, monthOf(day), o.orderId, counted ? 'Yes' : 'No', l.title, l.sku ?? '', l.itemId ?? '', l.quantity, round2(l.unitPrice), round2(l.lineRevenue)])
+    }
+  }
+  return { orders, items }
 }
 
 /** Text that Sheets would read as a formula is written as plain text. */
@@ -309,9 +429,16 @@ export async function syncReportsSheet(
 ): Promise<ReportsSheetSyncResult> {
   const sync = await store.startSync(REPORTS_SHEET_SYNC_SOURCE)
   try {
-    const [orders, adSpend, traffic] = await Promise.all([store.listOrders(), store.listAdSpend(), store.listTraffic()])
+    const [orders, adSpend, traffic, etsyReceipts, ebayOrders] = await Promise.all([
+      store.listOrders(),
+      store.listAdSpend(),
+      store.listTraffic(),
+      // Detail tables are extras: an error reading one shouldn't stop the export.
+      store.listEtsyReceipts().catch(() => []),
+      store.listEbayOrders().catch(() => []),
+    ])
     const generatedAt = (options?.now?.() ?? new Date()).toISOString()
-    const tables = buildReportTables({ orders, adSpend, traffic, generatedAt })
+    const tables = buildReportTables({ orders, adSpend, traffic, generatedAt, etsyReceipts, ebayOrders })
     const rows = await writeReportTables(creds, tables, options?.fetchImpl)
     await store.finishSync(sync.id, 'ok', `${tables.length} tabs · ${rows} rows`, rows)
     return { tabs: tables.length, rows }

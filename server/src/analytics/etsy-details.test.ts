@@ -48,6 +48,10 @@ describe('mapEtsyReceiptDetail', () => {
       offsiteAdsFee: null,
       net: null,
       paymentSynced: false,
+      lines: [
+        { transactionId: '1', listingId: null, title: 'Etsy item', sku: null, quantity: 2, unitPrice: 40, lineRevenue: 80 },
+        { transactionId: '2', listingId: null, title: 'Etsy item', sku: null, quantity: 1, unitPrice: 0, lineRevenue: 0 },
+      ],
     })
     const noTxShip = { ...raw, transactions: [{ transaction_id: 1, quantity: 1 }] }
     expect(mapEtsyReceiptDetail(noTxShip).shippedAt).toBe(new Date(1_793_200_000_000).toISOString())

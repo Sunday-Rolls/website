@@ -4,9 +4,17 @@
  */
 import { createHash } from 'node:crypto'
 import type { EtsyReceiptLedger } from './etsy-fees.js'
-import { etsyMoney, type EtsyListingRaw, type EtsyPaymentRaw, type EtsyReceiptRaw, type EtsyReviewRaw, type EtsyShopRaw } from './etsy.js'
+import {
+  etsyMoney,
+  type EtsyListingRaw,
+  type EtsyPaymentRaw,
+  type EtsyReceiptRaw,
+  type EtsyReviewRaw,
+  type EtsyShopRaw,
+  type EtsyTransactionRaw,
+} from './etsy.js'
 import { storeDay } from './period.js'
-import type { EtsyListing, EtsyReceiptDetail, EtsyReview, EtsyShopDaily } from './types.js'
+import type { EtsyListing, EtsyReceiptDetail, EtsyReceiptLine, EtsyReview, EtsyShopDaily } from './types.js'
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 const iso = (seconds: number) => new Date(seconds * 1000).toISOString()
@@ -93,6 +101,21 @@ export function mapEtsyReceiptDetail(
     offsiteAdsFee,
     net,
     paymentSynced,
+    lines: transactions.length ? transactions.map(mapEtsyReceiptLine) : (previous?.lines ?? []),
+  }
+}
+
+export function mapEtsyReceiptLine(t: EtsyTransactionRaw): EtsyReceiptLine {
+  const quantity = t.quantity ?? 1
+  const unitPrice = etsyMoney(t.price)
+  return {
+    transactionId: String(t.transaction_id),
+    listingId: t.listing_id ? String(t.listing_id) : null,
+    title: (t.title ?? '').trim() || 'Etsy item',
+    sku: t.sku?.trim() || null,
+    quantity,
+    unitPrice,
+    lineRevenue: round2(unitPrice * quantity),
   }
 }
 

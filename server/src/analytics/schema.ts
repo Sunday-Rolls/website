@@ -227,6 +227,18 @@ CREATE TABLE IF NOT EXISTS analytics_etsy_receipts (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS analytics_etsy_receipts_ordered_at_idx ON analytics_etsy_receipts (ordered_at);
+-- Item lines from Etsy (title, SKU, qty, price), so the reports sheet has designs for Sales Tracker receipts too.
+ALTER TABLE analytics_etsy_receipts ADD COLUMN IF NOT EXISTS lines jsonb NOT NULL DEFAULT '[]'::jsonb;
+
+-- eBay orders from the Sell Fulfillment + Finances APIs (see docs/EBAY_SYNC.md). Money in dollars.
+-- Detail only: the dashboard's eBay numbers still come from the Sales Tracker.
+CREATE TABLE IF NOT EXISTS analytics_ebay_orders (
+  order_id text PRIMARY KEY,
+  ordered_at timestamptz NOT NULL,
+  data jsonb NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS analytics_ebay_orders_ordered_at_idx ON analytics_ebay_orders (ordered_at);
 
 CREATE TABLE IF NOT EXISTS analytics_etsy_fees_daily (
   date date NOT NULL,

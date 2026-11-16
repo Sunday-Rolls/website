@@ -333,6 +333,15 @@ function buildDemoEtsy(orders: Order[], asOf: string) {
       offsiteAdsFee: null,
       net: i % 6 === 5 ? null : round2(o.revenue - processingFee),
       paymentSynced: i % 6 !== 5,
+      lines: o.lines.map((l, j) => ({
+        transactionId: String(4_100_000_000 + i * 10 + j),
+        listingId: null,
+        title: l.productName,
+        sku: l.productSku,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        lineRevenue: l.lineRevenue,
+      })),
     })
     // Every seventh order has no buyer id on file, so it shows as unmatched.
     if (i % 7 !== 6) {
