@@ -15,7 +15,7 @@ import {
   writeReportTables,
   DATA_TAB_PREFIX,
 } from './reports-sheet.js'
-import type { Order } from './types.js'
+import type { EbayOrderDetail, EtsyReceiptDetail, Order } from './types.js'
 
 const order = (over: Partial<Order>): Order => ({
   id: 'id',
@@ -102,6 +102,84 @@ describe('buildReportTables', () => {
 
   it('leaves customer emails out of the sheet', () => {
     expect(JSON.stringify(tables)).not.toContain('a@example.com')
+  })
+
+  it('writes empty Etsy tabs and no eBay tabs when there is no detail data', () => {
+    expect(byTitle['Etsy orders'].rows).toEqual([])
+    expect(byTitle['Etsy items'].rows).toEqual([])
+    expect(byTitle['eBay orders']).toBeUndefined()
+  })
+})
+
+describe('Etsy and eBay detail tabs', () => {
+  const receipt = (over: Partial<EtsyReceiptDetail>): EtsyReceiptDetail => ({
+    receiptId: '555',
+    orderedAt: '2026-10-20T15:00:00.000Z',
+    status: 'completed',
+    buyerUserId: '9',
+    grandtotal: 74.5,
+    subtotal: 68,
+    shippingCharged: 0,
+    tax: 6.5,
+    discount: 0,
+    refunded: 0,
+    shopCoupon: 0,
+    buyerCoupon: 0,
+    units: 1,
+    isShipped: true,
+    shippedAt: null,
+    processingFees: 2.5,
+    actualFees: 7,
+    labelCost: 5.83,
+    offsiteAdsFee: null,
+    net: null,
+    paymentSynced: true,
+    lines: [{ transactionId: 't1', listingId: '42', title: 'Gameboy Golf Headcover', sku: 'GB-01', quantity: 1, unitPrice: 68, lineRevenue: 68 }],
+    ...over,
+  })
+  const ebay: EbayOrderDetail = {
+    orderId: '12-1',
+    orderedAt: '2026-10-21T15:00:00.000Z',
+    fulfillmentStatus: 'fulfilled',
+    paymentStatus: 'paid',
+    cancelState: 'none_requested',
+    state: 'TX',
+    itemSubtotal: 40,
+    shippingCharged: 5,
+    discount: 0,
+    tax: 3,
+    total: 48,
+    refunded: 0,
+    marketplaceFees: 6,
+    labelCost: 4,
+    adFees: null,
+    lines: [{ lineItemId: 'L1', itemId: '99', title: 'Wheaties Headcover', sku: null, quantity: 1, unitPrice: 40, lineRevenue: 40 }],
+  }
+  const tables = buildReportTables({
+    orders: [],
+    adSpend: [],
+    traffic: [],
+    generatedAt: '2026-11-16T00:00:00.000Z',
+    etsyReceipts: [receipt({}), receipt({ receiptId: '556', status: 'canceled' })],
+    ebayOrders: [ebay],
+  })
+  const byTitle = Object.fromEntries(tables.map((t) => [t.title.replace(DATA_TAB_PREFIX, ''), t]))
+
+  it('writes Etsy receipts with real fees and item titles', () => {
+    expect(byTitle['Etsy orders'].rows[0]).toEqual([
+      '2026-10-20', '2026-10-01', '555', 'completed', 'Yes', 'Gameboy Golf Headcover', 1, 68, 0, 6.5, 0, 0, 74.5, 7, 5.83, '', 61.67,
+    ])
+    // Cancelled receipts stay visible but count for nothing.
+    expect(byTitle['Etsy orders'].rows[1].slice(3, 5)).toEqual(['canceled', 'No'])
+    expect(byTitle['Etsy orders'].rows[1][12]).toBe(0)
+    expect(byTitle['Etsy items'].rows[0]).toEqual(['2026-10-20', '2026-10-01', '555', 'Yes', 'Gameboy Golf Headcover', 'GB-01', '42', 1, 68, 68])
+  })
+
+  it('writes eBay orders and items once there are some', () => {
+    expect(byTitle['eBay orders'].rows[0]).toEqual([
+      '2026-10-21', '2026-10-01', '12-1', 'fulfilled', 'Yes', 'Wheaties Headcover', 1, 40, 5, 0, 3, 0, 45, 6, 4, '', 35, 'TX',
+    ])
+    expect(byTitle['eBay items'].rows[0]).toEqual(['2026-10-21', '2026-10-01', '12-1', 'Yes', 'Wheaties Headcover', '', '99', 1, 40, 40])
   })
 })
 

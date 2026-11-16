@@ -9,6 +9,8 @@
 import { extractDriveFileId } from '../analytics/drive.js'
 import { etsyMissingEnv, loadEtsyCredentialsFromEnv } from '../analytics/etsy.js'
 import { syncEtsyToStore } from '../analytics/etsy-sync.js'
+import { ebayMissingEnv, loadEbayCredentialsFromEnv } from '../analytics/ebay.js'
+import { syncEbayToStore } from '../analytics/ebay-sync.js'
 import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync.js'
 import { googleAdsMissingEnv, loadGoogleAdsCredentialsFromEnv } from '../analytics/google-ads.js'
 import { syncGoogleAdsToStore } from '../analytics/google-ads-sync.js'
@@ -20,7 +22,7 @@ import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/
 import { loadReportsSheetCredentialsFromEnv, reportsSheetMissingEnv, syncReportsSheet } from '../analytics/reports-sheet.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 
-export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'search-console', 'reports-sheet'] as const
+export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'ebay', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'search-console', 'reports-sheet'] as const
 export type AutoSyncSource = (typeof AUTO_SYNC_SOURCES)[number]
 
 export type AutoSyncOutcome =
@@ -58,6 +60,15 @@ export function defaultAutoSyncSources(env: NodeJS.ProcessEnv = process.env): Re
         const r = await syncEtsyToStore(store, loadEtsyCredentialsFromEnv(env)!, { days })
         const ads = r.adSpend === null ? 'ad spend unavailable' : `$${r.adSpend.toFixed(0)} ad spend`
         return `${r.orders} new orders · ${r.inTracker} already in Sales Tracker · ${ads}`
+      },
+    },
+    ebay: {
+      freshMs: 30 * MIN,
+      missing: () => ebayMissingEnv(env),
+      run: async (store) => {
+        const days = Math.max(1, Math.min(Number(env.EBAY_SYNC_DAYS ?? 365) || 365, 730))
+        const r = await syncEbayToStore(store, loadEbayCredentialsFromEnv(env)!, { days })
+        return `${r.orders} orders · Finances costs on ${r.withFinances}${r.skipped.length ? ` · skipped ${r.skipped.join(', ')}` : ''}`
       },
     },
     'sales-tracker': {

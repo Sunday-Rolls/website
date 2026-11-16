@@ -19,6 +19,10 @@ Data tabs by hand; changes are overwritten.
 | `Data · Ad spend` | day × platform × campaign | Date, Month, Platform (Google Ads / Meta Ads / Etsy Ads), Campaign, Spend, Platform-reported sales/orders, Sessions |
 | `Data · Traffic` | day | GA4 visits, unique visitors, product views, add to carts, checkouts, purchases |
 | `Data · Traffic sources` | day × source | Date, Month, Source / medium, Sessions |
+| `Data · Etsy orders` | Etsy receipt | Straight from Etsy's API (Sales Tracker receipts too): Date, Month, Receipt, Status, Counted, Items, Units, Item subtotal, Shipping charged, Tax, Discount, Refunded, Revenue (what the buyer paid less refunds, like the tracker's Price), Fees, Label cost, Offsite ads fee, Net |
+| `Data · Etsy items` | Etsy item line | Date, Month, Receipt, Counted, Product (listing title), SKU, Listing, Quantity, Unit price, Line revenue |
+| `Data · eBay orders` | eBay order | Only once the eBay sync is set up ([EBAY_SYNC.md](EBAY_SYNC.md)): Date, Month, Order, Status, Counted, Items, Units, Item subtotal, Shipping charged, Discount, Tax, Refunded, Revenue (items − discounts + shipping − refunds; eBay remits the tax), Fees, Label cost, Ad fees, Net, State |
+| `Data · eBay items` | eBay item line | Date, Month, Order, Counted, Product, SKU, Item ID, Quantity, Unit price, Line revenue |
 
 Orders are deduped exactly like the dashboard (live Shopify and Squarespace CSV rows beat Sales
 Tracker copies) and use the same product names, so "Website sale (design not recorded)" etc. appear

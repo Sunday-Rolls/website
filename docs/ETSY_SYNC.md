@@ -30,7 +30,7 @@ The first run backfills the same window as orders (`ETSY_SYNC_DAYS`). After that
 The same ledger read also feeds:
 
 - **Fees by type**, per store day, in `analytics_etsy_fees_daily`: transaction, payment processing, listing and renewal, shipping labels, Etsy Ads, Offsite Ads, regulatory, currency conversion, subscription, VAT and sales tax. The classifier is in `server/src/analytics/etsy-fees.ts`; unknown types land in `other`.
-- **Per-receipt costs.** Ledger entries are matched to their receipt, and each receipt's Etsy Payments record gives the card processing fee and net. These land in `analytics_etsy_receipts` with the receipt's buyer id, coupon discounts, units and ship time. A live order uses those real fees and label cost; a receipt whose fees aren't known yet keeps the estimate.
+- **Per-receipt costs.** Ledger entries are matched to their receipt, and each receipt's Etsy Payments record gives the card processing fee and net. These land in `analytics_etsy_receipts` with the receipt's buyer id, coupon discounts, units and ship time. Each receipt also keeps its item lines (listing title, SKU, quantity, price), even after the Sales Tracker copy replaces the live order. The reports sheet writes these as `Data · Etsy orders` and `Data · Etsy items`, so Etsy sales have designs there. A live order uses those real fees and label cost; a receipt whose fees aren't known yet keeps the estimate.
 
 Each run also pulls:
 

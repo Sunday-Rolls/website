@@ -224,6 +224,63 @@ export type EtsyReceiptDetail = {
   net: number | null
   /** True once the receipt's Etsy Payments record has been read. */
   paymentSynced: boolean
+  /** The receipt's items as Etsy reports them (kept even after the Sales Tracker copy replaces the live order). */
+  lines: EtsyReceiptLine[]
+}
+
+/**
+ * One eBay order as eBay's Sell APIs report it (see ebay-sync.ts). Stored apart from analytics_orders
+ * so the dashboard keeps using the Sales Tracker for eBay; the reports sheet reads these. Money in dollars.
+ */
+export type EbayOrderDetail = {
+  orderId: string
+  orderedAt: string
+  /** orderFulfillmentStatus, lowercased: not_started, in_progress, fulfilled. */
+  fulfillmentStatus: string
+  /** orderPaymentStatus, lowercased: paid, pending, failed, partially_refunded, fully_refunded. */
+  paymentStatus: string
+  /** cancelStatus.cancelState, lowercased (none_requested, cancel_requested, canceled). */
+  cancelState: string
+  /** US state of the ship-to address; null elsewhere. */
+  state: string | null
+  itemSubtotal: number
+  shippingCharged: number
+  /** Seller discounts (positive). */
+  discount: number
+  /** Sales tax eBay collected and remits itself. */
+  tax: number
+  /** What the buyer paid, as eBay reports it. */
+  total: number
+  /** Sum of completed refunds. */
+  refunded: number
+  /** eBay final value + other selling fees; null until known. */
+  marketplaceFees: number | null
+  /** eBay shipping labels bought for this order (net of label refunds); null when none found. */
+  labelCost: number | null
+  /** Promoted Listings fee charged on this order; null when none. */
+  adFees: number | null
+  lines: EbayOrderLine[]
+}
+
+export type EbayOrderLine = {
+  lineItemId: string
+  itemId: string | null
+  title: string
+  sku: string | null
+  quantity: number
+  unitPrice: number
+  lineRevenue: number
+}
+
+/** One Etsy transaction (item line) on a receipt. Money in dollars. */
+export type EtsyReceiptLine = {
+  transactionId: string
+  listingId: string | null
+  title: string
+  sku: string | null
+  quantity: number
+  unitPrice: number
+  lineRevenue: number
 }
 
 /** Etsy payment-account ledger totals per store day and ledger type (sales, deposits and refunds excluded). */

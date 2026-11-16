@@ -173,6 +173,7 @@ describe('redesign dashboard endpoints', () => {
     expect(data.sources.map((s: { source: string }) => s.source)).toEqual([
       'shopify',
       'etsy',
+      'ebay',
       'sales-tracker',
       'ga4',
       'google-ads',
