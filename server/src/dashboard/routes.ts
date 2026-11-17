@@ -35,6 +35,7 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
+import { exchangeRedditCode, listRedditAdAccounts, redditAuthorizeUrl } from '../analytics/reddit-ads.js'
 import { customerOrdersFromSquarespaceCsv } from '../analytics/squarespace-orders.js'
 import { rangeForCustom, rangeForPeriod, storeDateOf, storeDay } from '../analytics/period.js'
 import {
@@ -579,6 +580,58 @@ export function createDashboardRoutes(deps: DashboardDeps) {
   })
 
   /** One source of the sync the dashboard runs on open/login (see auto-sync.ts). */
+  // One-time Reddit Ads sign-in (docs/REDDIT_ADS_SYNC.md). Admin-only like every /api/ route.
+  // Shows the refresh token once so an admin can paste it into Railway; nothing is stored.
+  app.get('/api/reddit/connect', async (c) => {
+    const clientId = process.env.REDDIT_ADS_CLIENT_ID?.trim()
+    if (!clientId || !process.env.REDDIT_ADS_CLIENT_SECRET?.trim()) {
+      return c.html(redditPage('Reddit Ads: add the app first', '<p>Set <code>REDDIT_ADS_CLIENT_ID</code> and <code>REDDIT_ADS_CLIENT_SECRET</code> in Railway (contact-api → Variables), wait for the deploy, then open this page again.</p>'), 400)
+    }
+    const state = randomUUID()
+    setCookie(c, REDDIT_STATE_COOKIE, state, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      secure: secureCookies,
+      path: '/dashboard/api/reddit',
+      maxAge: 10 * 60,
+    })
+    return c.redirect(redditAuthorizeUrl(clientId, redditRedirectUri(c), state), 302)
+  })
+
+  app.get('/api/reddit/callback', async (c) => {
+    const expected = getCookie(c, REDDIT_STATE_COOKIE)
+    deleteCookie(c, REDDIT_STATE_COOKIE, { path: '/dashboard/api/reddit' })
+    const error = c.req.query('error')
+    if (error) return c.html(redditPage('Reddit sign-in was cancelled', `<p>Reddit said: <code>${escapeHtml(error)}</code>. <a href="connect">Try again</a>.</p>`), 400)
+    const code = c.req.query('code')
+    if (!code || !expected || c.req.query('state') !== expected) {
+      return c.html(redditPage('Reddit sign-in expired', '<p>The sign-in link is too old or was opened in another browser. <a href="connect">Start again</a>.</p>'), 400)
+    }
+    try {
+      const clientId = process.env.REDDIT_ADS_CLIENT_ID!.trim()
+      const clientSecret = process.env.REDDIT_ADS_CLIENT_SECRET!.trim()
+      const tokens = await exchangeRedditCode(clientId, clientSecret, code, redditRedirectUri(c))
+      const accounts = await listRedditAdAccounts(tokens.accessToken).catch(() => [])
+      const accountList = accounts.length
+        ? `<p>Ad accounts this Reddit login can see:</p><ul>${accounts
+            .map((a) => `<li><code>${escapeHtml(a.id)}</code> ${escapeHtml(a.name)}${a.business ? ` (${escapeHtml(a.business)})` : ''}</li>`)
+            .join('')}</ul>`
+        : '<p>Copy the ad account ID from Reddit Ads Manager (top-left account menu, starts with <code>a2_</code> or <code>t2_</code>).</p>'
+      return c.html(
+        redditPage(
+          'Reddit Ads connected',
+          `<p>Paste this into Railway → contact-api → Variables as <code>REDDIT_ADS_REFRESH_TOKEN</code>. It is shown only once and isn't saved anywhere; don't paste it into chat.</p>
+<pre>${escapeHtml(tokens.refreshToken)}</pre>
+${accountList}
+<p>Set <code>REDDIT_ADS_ACCOUNT_ID</code> to the account Sunday Rolls advertises from, let Railway redeploy, then reopen the dashboard. Reddit Ads appears in the sync bar.</p>`,
+        ),
+      )
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Reddit sign-in failed'
+      return c.html(redditPage('Reddit sign-in failed', `<p>${escapeHtml(message)}</p><p><a href="connect">Try again</a>.</p>`), 502)
+    }
+  })
+
   app.post('/api/sync/auto/:source', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
@@ -980,6 +1033,7 @@ const AUTO_SYNC_LABELS: Record<AutoSyncSource, string> = {
   ga4: 'Google Analytics 4',
   'google-ads': 'Google Ads',
   'meta-ads': 'Meta Ads',
+  'reddit-ads': 'Reddit Ads',
   'search-console': 'Google Search Console',
   'reports-sheet': 'Reports sheet',
 }
@@ -996,6 +1050,31 @@ function merchantMissing(env: NodeJS.ProcessEnv = process.env): string | null {
     !loadShopifyCredentialsFromEnv(env) && 'SHOPIFY_CLIENT_ID/SECRET',
   ].filter(Boolean)
   return missing.length ? missing.join(', ') : null
+}
+
+const REDDIT_STATE_COOKIE = 'sr_reddit_state'
+
+/**
+ * Where Reddit sends the admin back after sign-in. Must match the redirect URI saved on the Reddit
+ * app exactly; REDDIT_ADS_REDIRECT_URI overrides the address worked out from the request.
+ */
+function redditRedirectUri(c: Context): string {
+  const override = process.env.REDDIT_ADS_REDIRECT_URI?.trim()
+  if (override) return override
+  const url = new URL(c.req.url)
+  const proto = c.req.header('x-forwarded-proto')?.split(',')[0]?.trim() || url.protocol.replace(':', '')
+  const host = c.req.header('x-forwarded-host')?.split(',')[0]?.trim() || c.req.header('host') || url.host
+  return `${proto}://${host}/dashboard/api/reddit/callback`
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`)
+}
+
+function redditPage(title: string, body: string): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>${escapeHtml(title)}</title>
+<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:48px auto;padding:0 20px;line-height:1.5;color:#1d2a1f}pre{white-space:pre-wrap;word-break:break-all;background:#f3efe6;padding:12px;border-radius:8px;user-select:all}code{background:#f3efe6;padding:1px 4px;border-radius:4px}</style>
+</head><body><h1>${escapeHtml(title)}</h1>${body}<p><a href="/dashboard">Back to the dashboard</a></p></body></html>`
 }
 
 /** The query's range (period/start/end/asOf, default 30d), or a 400 response. */

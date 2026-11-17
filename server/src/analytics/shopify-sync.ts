@@ -34,6 +34,7 @@ const CLICK_IDS: Record<string, { source: string; medium: string }> = {
   gbraid: { source: 'google', medium: 'cpc' },
   wbraid: { source: 'google', medium: 'cpc' },
   fbclid: { source: 'facebook', medium: 'paid' },
+  rdt_cid: { source: 'reddit', medium: 'paid' },
 }
 
 /**
