@@ -1,6 +1,8 @@
-# Shopify web pixel → GA4, Google Ads, Meta purchase
+# Shopify web pixel → GA4 and Google Ads purchase
 
-Checkout finishes on **Shopify** (`shop.sundayrollsgolf.com`), where GTM doesn't run, so the SPA never sees `purchase`. This **Customer events** custom pixel sends each paid checkout to all three platforms.
+Checkout finishes on **Shopify** (`shop.sundayrollsgolf.com`), where GTM doesn't run, so the SPA never sees `purchase`. This **Customer events** custom pixel sends each paid checkout to GA4 and Google Ads.
+
+**Meta `Purchase` comes only from Shopify's Facebook & Instagram app** (browser + Conversions API). This pixel and the SPA thank-you page used to send it too, each with a different event ID than the app, so Meta couldn't match them and counted sales about twice (135 Purchase events for ~50 orders, Nov 2–17, 2026). Don't add Meta back here.
 
 The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google Ads remarketing / conversion linker) and the Meta Pixel (`PageView`, `ViewContent`, `AddToCart`, `InitiateCheckout`, `Lead`, `Contact`).
 
@@ -8,7 +10,7 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 |----------|----|
 | GA4 | `G-YK0BB0TPM4` (zeros, not the letter O; confirmed in GA4 Admin → Data streams, 2026-11-03) |
 | Google Ads | `AW-17744695066`, purchase label `PznHCIOf2-EbEJqeqo1C` |
-| Meta Pixel | `1274109674861464` |
+| Meta Pixel | `1274109674861464` (Purchase via the Facebook & Instagram app only) |
 
 ## Install (Shopify Admin)
 
@@ -24,7 +26,6 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 const GA4_MEASUREMENT_ID = 'G-YK0BB0TPM4'
 const ADS_ID = 'AW-17744695066'
 const ADS_PURCHASE_LABEL = 'PznHCIOf2-EbEJqeqo1C'
-const META_PIXEL_ID = '1274109674861464'
 
 // Google (GA4 + Ads)
 const gtagScript = document.createElement('script')
@@ -38,24 +39,6 @@ function gtag() {
 gtag('js', new Date())
 gtag('config', GA4_MEASUREMENT_ID, { send_page_view: false })
 gtag('config', ADS_ID, { allow_enhanced_conversions: true })
-
-// Meta base code
-!(function (f, b, e, v, n, t, s) {
-  if (f.fbq) return
-  n = f.fbq = function () {
-    n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-  }
-  if (!f._fbq) f._fbq = n
-  n.push = n
-  n.loaded = true
-  n.version = '2.0'
-  n.queue = []
-  t = b.createElement(e)
-  t.async = true
-  t.src = v
-  s = b.getElementsByTagName(e)[0]
-  s.parentNode.insertBefore(t, s)
-})(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
 
 analytics.subscribe('checkout_completed', (event) => {
   const checkout = event.data?.checkout
@@ -72,9 +55,8 @@ analytics.subscribe('checkout_completed', (event) => {
     quantity: Number(line.quantity || 1),
   }))
 
-  // Customer details power Google enhanced conversions and Meta advanced matching.
-  // Checkout runs in a sandbox that can't read the site's ad-click cookies,
-  // so this is what lets both platforms tie the sale back to the ad.
+  // Customer details power Google enhanced conversions. Checkout runs in a sandbox that
+  // can't read the site's ad-click cookies, so this is what ties the sale back to the ad.
   const address = checkout.billingAddress || checkout.shippingAddress || {}
   const email = (checkout.email || '').trim().toLowerCase() || undefined
   const phone = (checkout.phone || address.phone || '').replace(/[^\d+]/g, '') || undefined
@@ -117,36 +99,12 @@ analytics.subscribe('checkout_completed', (event) => {
     currency,
   })
 
-  fbq('init', META_PIXEL_ID, {
-    em: email,
-    ph: phone?.replace(/\D/g, ''),
-    fn: address.firstName?.toLowerCase(),
-    ln: address.lastName?.toLowerCase(),
-    ct: address.city?.toLowerCase().replace(/\s/g, ''),
-    st: address.provinceCode?.toLowerCase(),
-    zp: address.zip,
-    country: address.countryCode?.toLowerCase(),
-  })
-  // Same eventID as the SPA thank-you page, so Meta dedupes if both fire.
-  fbq(
-    'track',
-    'Purchase',
-    {
-      value,
-      currency,
-      content_type: 'product',
-      content_ids: items.map((item) => item.item_id),
-      contents: items.map((item) => ({ id: item.item_id, quantity: item.quantity })),
-      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
-    },
-    { eventID: orderId },
-  )
 })
 ```
 
 ## Verify after a real order
 
-1. **Meta Events Manager → Pixel `1274109674861464` → Test events** (or Overview): `Purchase` with value, plus `PageView` / `AddToCart` / `InitiateCheckout` from www.
+1. **Meta Events Manager → Pixel `1274109674861464` → Overview → Purchase**: one event per order, from the Facebook & Instagram app (Browser + Server), with no deduplication warning. `PageView` / `ViewContent` / `AddToCart` / `InitiateCheckout` still come from www.
 2. **Google Ads → Goals → Conversions → Summary**: the purchase action moves to **Recording conversions** within a few hours; **Diagnostics** shows enhanced-conversion coverage.
 3. **GA4 → Realtime**: `purchase` with the order value.
 4. **Purchase source (GA4 visitor IDs):** the order in Shopify Admin shows `_sr_ga_cid` / `_sr_ga_sid` under **Additional details** (hidden from the buyer). A day later, **GA4 → Reports → Acquisition → Traffic acquisition** shows the purchase under the visit's channel (e.g. Organic Search) instead of Direct / "(not set)".
@@ -155,11 +113,11 @@ analytics.subscribe('checkout_completed', (event) => {
 
 - Purchases only keep their GA4 traffic source when the visitor came through the site's cart (the checkout button stamps `_sr_ga_cid` / `_sr_ga_sid`). Buy-now links straight to Shopify, or visitors who block GA cookies, still show as Direct.
 
-- Checkout can't see the site's `_gcl_aw` / `_fbc` click cookies, so attribution leans on enhanced conversions / advanced matching (email, phone, address). Google's **Google & YouTube** and Meta's **Facebook & Instagram** Shopify apps add server-side matching (Conversions API) if match rates come back low.
+- Checkout can't see the site's `_gcl_aw` / `_fbc` click cookies, so Google attribution leans on enhanced conversions (email, phone, address). Meta's Facebook & Instagram app handles its own matching through the Conversions API.
 - GA4 funnel steps (`view_item`, `add_to_cart`, `begin_checkout`, …) are sent by GTM before checkout; see [ANALYTICS.md](./ANALYTICS.md#live-gtm-container-gtm-pptr6v3b).
 
 ## Manual SPA validation
 
 `https://www.sundayrollsgolf.com/order/thank-you?transaction_id=TEST-test-1&value=80`
 
-Fires `purchase` in GTM (GA4 + the Google Ads conversion tag) and Meta `Purchase`, using the cart stashed at `begin_checkout` when available. It's a real conversion, so only use it with Meta's Test events open and expect one extra Ads conversion.
+Fires `purchase` in GTM (GA4 + the Google Ads conversion tag), not Meta, using the cart stashed at `begin_checkout` when available. It's a real conversion, so expect one extra Ads conversion.

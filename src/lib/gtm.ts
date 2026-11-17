@@ -185,12 +185,15 @@ function installMetaPixelStub(): void {
   fbq('init', metaPixelId)
 }
 
-/** GA4 ecommerce event → Meta standard event. Unlisted events don't go to Meta. */
+/**
+ * GA4 ecommerce event → Meta standard event. Unlisted events don't go to Meta.
+ * No `purchase`: Shopify's Facebook & Instagram app is the only Purchase source (browser +
+ * Conversions API). A second sender uses a different event ID, so Meta counts the sale twice.
+ */
 const META_ECOMMERCE_EVENTS: Record<string, string> = {
   view_item: 'ViewContent',
   add_to_cart: 'AddToCart',
   begin_checkout: 'InitiateCheckout',
-  purchase: 'Purchase',
 }
 
 function sendMetaEcommerce(event: string, ecommerce: Record<string, unknown>): void {
@@ -205,10 +208,7 @@ function sendMetaEcommerce(event: string, ecommerce: Record<string, unknown>): v
     value: ecommerce.value,
     currency: ecommerce.currency ?? 'USD',
   }
-  // The Shopify checkout pixel sends the same eventID, so Meta counts a purchase once.
-  const transactionId = ecommerce.transaction_id
-  if (transactionId) window.fbq('track', metaEvent, params, { eventID: String(transactionId) })
-  else window.fbq('track', metaEvent, params)
+  window.fbq('track', metaEvent, params)
 }
 
 function sendMetaEvent(event: string): void {
