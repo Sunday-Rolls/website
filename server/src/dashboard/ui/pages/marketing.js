@@ -219,10 +219,11 @@ function notConnectedCards(connected = {}) {
   const missing = [
     ['googleAds', 'Google Ads'],
     ['meta', 'Meta Ads'],
+    ['reddit', 'Reddit Ads'],
     ['etsyAds', 'Etsy Ads'],
   ].filter(([key]) => connected[key] === false)
   if (!missing.length) return ''
-  const cls = missing.length === 1 ? 'col-12' : missing.length === 2 ? 'col-6' : 'col-4'
+  const cls = missing.length === 1 ? 'col-12' : missing.length === 2 ? 'col-6' : missing.length === 3 ? 'col-4' : 'col-3'
   return missing
     .map(([, name]) =>
       notConnected({

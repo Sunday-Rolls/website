@@ -240,7 +240,7 @@ describe('buildMarketingView', () => {
     // a and b are first-time (b twice, counted once); c ordered before the range; the Etsy order has no email.
     expect(view).toMatchObject({ revenue: 500, adSpend: 60, newCustomers: 2, unknownCustomerOrders: 1, newCustomerCac: 30 })
     expect(view.keywordsPeriod).toEqual({ start: '2026-10-01', end: '2026-10-31' })
-    expect(view.connected).toEqual({ googleAds: true, meta: false, etsyAds: true })
+    expect(view.connected).toEqual({ googleAds: true, meta: false, reddit: false, etsyAds: true })
     expect(view.spendTrend.find((d) => d.date === '2026-10-02')).toEqual({ date: '2026-10-02', spend: 60, revenue: 100 })
     expect(view.sources[0]).toMatchObject({ source: 'google', visits: 60 })
     expect(view.keywords).toEqual([{ query: 'golf roller', visits: 9 }])

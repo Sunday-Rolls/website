@@ -624,6 +624,7 @@ const money = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`
 
 const GOOGLE_PAID = /^google \/ (cpc|ppc|paid)/i
 const META_PAID = /^(facebook|fb|ig|instagram|meta)[^/]* \/ (paid|cpc|ppc)/i
+const REDDIT_PAID = /^reddit[^/]* \/ (paid|cpc|ppc)/i
 
 /** Campaign named in an attribution string ("source / medium / campaign"), if any. */
 function taggedCampaign(trafficSource: string): string {
@@ -756,12 +757,13 @@ export function buildRoas(input: {
       const p = platform.toLowerCase()
       const isGoogle = p.includes('google')
       const isMeta = p.includes('meta') || p.includes('facebook')
+      const isReddit = p.includes('reddit')
       let linked: ReturnType<typeof linkSiteSales> | null = null
       let marketplaceSales = 0
-      if (isGoogle || isMeta) {
+      if (isGoogle || isMeta || isReddit) {
         linked = linkSiteSales({
           orders: websiteOrders,
-          isPaid: isGoogle ? GOOGLE_PAID : META_PAID,
+          isPaid: isGoogle ? GOOGLE_PAID : isMeta ? META_PAID : REDDIT_PAID,
           // Visit-share estimates need per-campaign visits, which GA4 gives for Google Ads only.
           campaignSessions: isGoogle ? v.sessions : new Map(),
           campaignSpend: v.spendByDay,

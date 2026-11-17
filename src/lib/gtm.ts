@@ -125,8 +125,8 @@ function loadAnalyticsScripts(): void {
   }
 }
 
-/** Ad click IDs that Google Ads / Meta read from the landing URL. */
-const AD_CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid', 'fbclid']
+/** Ad click IDs that Google Ads / Meta / Reddit read from the landing URL. */
+const AD_CLICK_PARAMS = ['gclid', 'gbraid', 'wbraid', 'fbclid', 'rdt_cid']
 
 function hasAdClickId(search: string): boolean {
   const params = new URLSearchParams(search)

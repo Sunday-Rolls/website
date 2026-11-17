@@ -178,6 +178,7 @@ describe('redesign dashboard endpoints', () => {
       'ga4',
       'google-ads',
       'meta-ads',
+      'reddit-ads',
       'search-console',
       'reports-sheet',
       'merchant',

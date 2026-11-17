@@ -33,6 +33,7 @@ const SYNC_LABELS = {
   ga4: 'Google Analytics',
   'google-ads': 'Google Ads',
   'meta-ads': 'Meta Ads',
+  'reddit-ads': 'Reddit Ads',
   'search-console': 'Search Console',
   'merchant-center': 'Merchant Center',
 }

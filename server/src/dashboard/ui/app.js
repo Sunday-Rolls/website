@@ -24,6 +24,7 @@ const SYNC_SOURCES = [
   { key: 'ga4', label: 'GA4' },
   { key: 'google-ads', label: 'Google Ads' },
   { key: 'meta-ads', label: 'Meta Ads' },
+  { key: 'reddit-ads', label: 'Reddit Ads' },
   { key: 'search-console', label: 'Search Console' },
   { key: 'reports-sheet', label: 'Reports sheet' },
 ]

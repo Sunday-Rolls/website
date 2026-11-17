@@ -378,7 +378,7 @@ export type MarketingView = {
   keywords: Array<{ query: string; visits: number }>
   /** Search Console reports one fixed window, which may not match the selected range. */
   keywordsPeriod: { start: string; end: string } | null
-  connected: { googleAds: boolean; meta: boolean; etsyAds: boolean }
+  connected: { googleAds: boolean; meta: boolean; reddit: boolean; etsyAds: boolean }
 }
 
 export function buildMarketingView(input: {
@@ -433,6 +433,7 @@ export function buildMarketingView(input: {
     connected: {
       googleAds: platformsSeen.some((p) => /google/i.test(p)),
       meta: platformsSeen.some((p) => /meta|facebook|instagram/i.test(p)),
+      reddit: platformsSeen.some((p) => /reddit/i.test(p)),
       etsyAds: platformsSeen.some((p) => /etsy/i.test(p)),
     },
   }

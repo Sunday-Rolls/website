@@ -15,6 +15,7 @@ import { loadGa4CredentialsFromEnv, syncGa4ToStore } from '../analytics/ga4-sync
 import { googleAdsMissingEnv, loadGoogleAdsCredentialsFromEnv } from '../analytics/google-ads.js'
 import { syncGoogleAdsToStore } from '../analytics/google-ads-sync.js'
 import { loadMetaAdsCredentialsFromEnv, metaAdsMissingEnv, syncMetaAdsToStore } from '../analytics/meta-ads.js'
+import { loadRedditAdsCredentialsFromEnv, redditAdsMissingEnv, syncRedditAdsToStore } from '../analytics/reddit-ads.js'
 import { loadGscCredentialsFromEnv } from '../analytics/gsc.js'
 import { syncGscToStore } from '../analytics/gsc-sync.js'
 import { syncSalesTrackerFromDrive } from '../analytics/sales-tracker-sync.js'
@@ -22,7 +23,7 @@ import { loadShopifyCredentialsFromEnv, syncShopifyToStore } from '../analytics/
 import { loadReportsSheetCredentialsFromEnv, reportsSheetMissingEnv, syncReportsSheet } from '../analytics/reports-sheet.js'
 import type { AnalyticsStore } from '../analytics/store.js'
 
-export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'ebay', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'search-console', 'reports-sheet'] as const
+export const AUTO_SYNC_SOURCES = ['shopify', 'etsy', 'ebay', 'sales-tracker', 'ga4', 'google-ads', 'meta-ads', 'reddit-ads', 'search-console', 'reports-sheet'] as const
 export type AutoSyncSource = (typeof AUTO_SYNC_SOURCES)[number]
 
 export type AutoSyncOutcome =
@@ -112,6 +113,15 @@ export function defaultAutoSyncSources(env: NodeJS.ProcessEnv = process.env): Re
       run: async (store) => {
         const days = Math.max(1, Math.min(Number(env.META_SYNC_DAYS ?? 90) || 90, 365))
         const r = await syncMetaAdsToStore(store, loadMetaAdsCredentialsFromEnv(env)!, { days })
+        return `${r.rows} campaign-days · $${r.spend.toFixed(0)} spend`
+      },
+    },
+    'reddit-ads': {
+      freshMs: 30 * MIN,
+      missing: () => redditAdsMissingEnv(env),
+      run: async (store) => {
+        const days = Math.max(1, Math.min(Number(env.REDDIT_SYNC_DAYS ?? 90) || 90, 365))
+        const r = await syncRedditAdsToStore(store, loadRedditAdsCredentialsFromEnv(env)!, { days })
         return `${r.rows} campaign-days · $${r.spend.toFixed(0)} spend`
       },
     },
