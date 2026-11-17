@@ -13,6 +13,15 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
 
+## Change log: 2026-11-17
+
+### Meta purchases counted once
+
+- Meta was counting sales about twice: 135 Purchase events and 41 ad-credited sales for ~50 real orders (~18 from Meta ads), Nov 2–17. Three senders each reported every purchase: the Facebook & Instagram app, the `Sunday Rolls purchase` custom pixel, and the SPA thank-you page. The app's event ID differs from the order ID the other two used, so Meta could only dedupe about half (51.6%).
+- Purchase now comes only from the **Facebook & Instagram app**. The SPA no longer sends Meta `Purchase` (`src/lib/gtm.ts`); `ViewContent`, `AddToCart`, `InitiateCheckout`, `Lead` and `Contact` are unchanged, since the app can't see the headless site's pages.
+- **Manual step in Shopify Admin:** replace the custom pixel's script (Settings → Customer events) with the updated one in [`SHOPIFY_WEB_PIXEL.md`](SHOPIFY_WEB_PIXEL.md), which drops the Meta base code and `fbq` calls. GA4 and Google Ads are unchanged. Revert by pasting the previous script back.
+- Expect Ads Manager purchases and ROAS to fall to the real level; compare only against data from after the change.
+
 ## Change log: 2026-11-14
 
 ### GA4 purchase attribution

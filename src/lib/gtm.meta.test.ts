@@ -44,11 +44,12 @@ describe('Meta Pixel', () => {
     })
   })
 
-  it('sends the transaction id as eventID so checkout and site purchases dedupe', async () => {
+  it('leaves Purchase to the Facebook & Instagram app so Meta counts each sale once', async () => {
     const gtm = await loadGtm('123')
     gtm.trackPurchase({ transactionId: '5001', value: 85.5, items: [] })
     const purchase = (window.fbq!.queue as unknown[][]).find((call) => call[1] === 'Purchase')
-    expect(purchase?.[3]).toEqual({ eventID: '5001' })
+    expect(purchase).toBeUndefined()
+    expect(window.dataLayer).toContainEqual(expect.objectContaining({ event: 'purchase' }))
   })
 
   it('loads fbevents.js only when analytics boot', async () => {
