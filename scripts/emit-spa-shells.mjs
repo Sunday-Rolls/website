@@ -23,8 +23,8 @@ const distDir = join(root, 'dist')
 const catalogPath = join(root, 'src/data/product-catalog.json')
 const collectionsPath = join(root, 'src/content/pages/collections.json')
 
-const STATIC_ROUTES = ['shop', 'about', 'contact', 'cart', 'order/thank-you']
-/** Routes worth indexing; cart and thank-you are per-visitor. */
+const STATIC_ROUTES = ['shop', 'about', 'contact', 'cart', 'order/thank-you', 'privacy']
+/** Routes worth indexing; cart and thank-you are per-visitor, privacy is unlinked and noindex. */
 const SITEMAP_ROUTES = ['shop', 'about', 'contact']
 
 const ROUTE_META = {
@@ -53,6 +53,11 @@ const ROUTE_META = {
   cart: {
     title: 'Your Cart — Sunday Rolls',
     description: 'Review your Sunday Rolls cart.',
+  },
+  privacy: {
+    title: 'Privacy Policy — Sunday Rolls',
+    description: 'How Sunday Rolls collects, uses and protects your personal information.',
+    headExtra: ['<meta name="robots" content="noindex, follow" />'],
   },
 }
 
@@ -393,6 +398,7 @@ const ROUTE_CHUNKS = {
   contact: 'src/pages/ContactPage.tsx',
   cart: 'src/pages/CartPage.tsx',
   'order/thank-you': 'src/pages/OrderThankYouPage.tsx',
+  privacy: 'src/pages/PrivacyPage.tsx',
 }
 
 async function main() {
@@ -443,6 +449,13 @@ function modulePreloadFor(sourceSuffix) {
     ? displayProductSrcSet(firstShopProduct.images?.[0], base)
     : null
 
+  let privacyContent = null
+  try {
+    privacyContent = JSON.parse(await readFile(join(root, 'src/content/pages/privacy.json'), 'utf8'))
+  } catch {
+    privacyContent = null
+  }
+
   for (const route of STATIC_ROUTES) {
     const meta = ROUTE_META[route] ?? {}
     const canonicalPath = siteOrigin ? withTrailingSlash(`${siteOrigin}${base}/${route}`) : undefined
@@ -466,8 +479,13 @@ function modulePreloadFor(sourceSuffix) {
       title: meta.title,
       description: meta.description,
       canonicalPath,
+      headExtra: meta.headExtra ?? [],
       body:
-        route === 'shop'
+        route === 'privacy' && privacyContent
+          ? prerenderBlock(
+              `<main><h1>${escapeHtml(privacyContent.title)}</h1><p>Last updated: ${escapeHtml(privacyContent.lastUpdated)}</p>${privacyContent.html}</main>`,
+            )
+          : route === 'shop'
           ? prerenderBlock(
               `<main><h1>Shop Sunday Rolls Golf</h1><p>${escapeHtml(meta.description)}</p><ul>${productLinks(products, base)}</ul></main>`,
             )

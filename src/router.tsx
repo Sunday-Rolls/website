@@ -56,6 +56,12 @@ export const router = createBrowserRouter(
           hydrateFallbackElement: <PageLoader label="Loading…" />,
           lazy: async () => ({ Component: (await routeModules.thankYou()).OrderThankYouPage }),
         },
+        {
+          // Unlinked and noindex on purpose; see PrivacyPage.
+          path: 'privacy',
+          hydrateFallbackElement: <PageLoader label="Loading…" />,
+          lazy: async () => ({ Component: (await routeModules.privacy()).PrivacyPage }),
+        },
         { path: '*', element: <NotFoundPage /> },
       ],
     },

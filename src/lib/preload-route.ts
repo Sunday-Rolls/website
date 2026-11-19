@@ -9,6 +9,7 @@ const pageLoaders = {
   contact: () => import('@/pages/ContactPage'),
   cart: () => import('@/pages/CartPage'),
   thankYou: () => import('@/pages/OrderThankYouPage'),
+  privacy: () => import('@/pages/PrivacyPage'),
 } as const
 
 const STALE_CHUNK_RELOAD_KEY = 'sr:stale-chunk-reload'
@@ -48,6 +49,7 @@ export const routeModules = {
   contact: withStaleChunkReload(pageLoaders.contact),
   cart: withStaleChunkReload(pageLoaders.cart),
   thankYou: withStaleChunkReload(pageLoaders.thankYou),
+  privacy: withStaleChunkReload(pageLoaders.privacy),
 }
 
 function normalizePath(to: string) {
