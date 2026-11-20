@@ -15,9 +15,14 @@ export async function listDashboardOrders(store: AnalyticsStore): Promise<Order[
 
 export function withEbayApiOrders(orders: Order[], ebay: EbayOrderDetail[]): Order[] {
   const have = new Set(orders.map((o) => `${o.channel}|${o.externalId}`))
+  // Older sales of a listing were made before it had a SKU; borrow the SKU from a newer sale.
+  const skuByItem = new Map<string, string>()
+  for (const o of [...ebay].sort((a, b) => b.orderedAt.localeCompare(a.orderedAt))) {
+    for (const l of o.lines) if (l.itemId && l.sku && !skuByItem.has(l.itemId)) skuByItem.set(l.itemId, l.sku)
+  }
   const extra = ebay
     .filter(isCountedEbayOrder)
-    .map(ebayOrderToOrder)
+    .map((o) => ebayOrderToOrder(o, skuByItem))
     .filter((o) => o.revenue > 0 && !have.has(`${o.channel}|${o.externalId}`))
   return [...orders, ...extra]
 }

@@ -141,7 +141,7 @@ function performanceTable(products) {
   const body = rows
     .map(
       (p) => `<tr>
-  <td>${escapeHtml(p.name)}</td>
+  <td>${escapeHtml(p.name)}${p.sku ? `<span class="product-sku">${escapeHtml(p.sku)}</span>` : ''}</td>
   <td>${escapeHtml(p.category ?? '—')}</td>
   <td class="align-right">${num(p.units)}</td>
   <td class="align-right">${money(p.revenue)}</td>

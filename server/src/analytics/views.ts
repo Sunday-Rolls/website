@@ -8,6 +8,7 @@
  */
 import { buildRoas, productViewsByName, topSearchKeywords, trafficSourceBreakdown, type RoasPlatform } from './metrics.js'
 import { preferLiveOrders } from './orders.js'
+import { looseName, resolveSku, skuCatalog, type SkuCatalog } from './product-groups.js'
 import { inRange, isWebsiteChannel, storeDay, type DateRange } from './period.js'
 import type {
   AbandonedCartStats,
@@ -245,6 +246,8 @@ export type ProductsView = {
   range: DateRange
   products: Array<{
     name: string
+    /** The SKU the row is grouped by; null when the items had none. */
+    sku: string | null
     category: string | null
     units: number
     revenue: number
@@ -288,48 +291,66 @@ export function buildProductsView(input: {
   range: DateRange
   orders: Order[]
   productViews: DailyProductView[]
+  /** Website SKUs and names; without it, items with a SKU still group by that SKU. */
+  catalog?: SkuCatalog
 }): ProductsView {
+  const catalog = input.catalog ?? skuCatalog(null)
   const orders = liveOrdersIn(input.orders, input.range)
-  const sales = new Map<string, { name: string; category: string | null; units: number; revenue: number; orders: Set<string> }>()
+  type Group = { sku: string | null; names: Map<string, number>; category: string | null; units: number; revenue: number; orders: Set<string> }
+  const groups = new Map<string, Group>()
+  const keyFor = (sku: string | null, name: string) => (sku ? `sku:${sku}` : `name:${name}`)
   const trend = new Map(daysOf(input.range).map((d) => [d, 0]))
   for (const o of orders) {
     const day = storeDay(o.orderedAt)
     for (const line of o.lines) {
       const label = productLabel(o, line)
-      const p = sales.get(label.name) ?? {
-        name: label.name,
-        category: label.category,
-        units: 0,
-        revenue: 0,
-        orders: new Set<string>(),
-      }
-      p.units += line.quantity
-      p.revenue += line.lineRevenue
-      p.orders.add(o.id || `${o.channel}:${o.externalId}`)
-      if (!p.category && label.category) p.category = label.category
-      sales.set(label.name, p)
+      const sku = label.category === 'Design not recorded' ? null : resolveSku(line, catalog)
+      const key = keyFor(sku, label.name)
+      const g = groups.get(key) ?? { sku, names: new Map(), category: label.category, units: 0, revenue: 0, orders: new Set<string>() }
+      g.names.set(label.name, (g.names.get(label.name) ?? 0) + line.quantity)
+      g.units += line.quantity
+      g.revenue += line.lineRevenue
+      g.orders.add(o.id || `${o.channel}:${o.externalId}`)
+      if (!g.category && label.category) g.category = label.category
+      groups.set(key, g)
       if (trend.has(day)) trend.set(day, trend.get(day)! + line.quantity)
     }
   }
 
-  const views = new Map<string, { views: number; category: string | null }>()
-  for (const [name, v] of productViewsByName(input.productViews, input.range)) {
-    const key = productKey(name)
-    const prev = views.get(key)
-    views.set(key, prev ? { ...prev, views: prev.views + v.views } : { ...v })
+  // GA4 views are keyed by the website's product name; attach them to that name's SKU when known,
+  // from the website catalog or else from a sold line with the same name.
+  const soldNameToSku = new Map<string, string | null>()
+  for (const g of groups.values()) {
+    if (!g.sku) continue
+    for (const n of g.names.keys()) {
+      const k = looseName(n)
+      soldNameToSku.set(k, soldNameToSku.has(k) && soldNameToSku.get(k) !== g.sku ? null : g.sku)
+    }
   }
-  const names = new Set([...sales.keys(), ...views.keys()])
-  const products = [...names]
-    .map((name) => {
-      const s = sales.get(name)
-      const v = views.get(name)
-      const orderCount = s?.orders.size ?? 0
+  const views = new Map<string, { name: string; sku: string | null; views: number; category: string | null }>()
+  for (const [name, v] of productViewsByName(input.productViews, input.range)) {
+    const label = productKey(name)
+    const sku = catalog.nameToSku.get(looseName(label)) ?? soldNameToSku.get(looseName(label)) ?? null
+    const key = keyFor(sku, label)
+    const prev = views.get(key)
+    views.set(key, prev ? { ...prev, views: prev.views + v.views } : { name: label, sku, views: v.views, category: v.category })
+  }
+  const keys = new Set([...groups.keys(), ...views.keys()])
+  const products = [...keys]
+    .map((key) => {
+      const g = groups.get(key)
+      const v = views.get(key)
+      const sku = g?.sku ?? v?.sku ?? null
+      const mostSold = g ? [...g.names.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] : undefined
+      const name = (sku && catalog.skuNames[sku]) || v?.name || mostSold || sku || 'Unknown product'
+      const orderCount = g?.orders.size ?? 0
       const viewCount = v ? v.views : null
       return {
-        name,
-        category: s?.category ?? v?.category ?? null,
-        units: s?.units ?? 0,
-        revenue: s?.revenue ?? 0,
+        name: productKey(name),
+        sku,
+        category: g?.category ?? v?.category ?? null,
+        units: g?.units ?? 0,
+        revenue: g?.revenue ?? 0,
         orders: orderCount,
         views: viewCount,
         viewToOrderRate: viewCount ? (orderCount / viewCount) * 100 : null,
