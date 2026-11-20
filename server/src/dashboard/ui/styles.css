@@ -1841,3 +1841,11 @@ a.attention-item:hover {
 .content-bar[hidden] {
   display: none;
 }
+
+/* Products table: the SKU a row is grouped by, under the website name. */
+.product-sku {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

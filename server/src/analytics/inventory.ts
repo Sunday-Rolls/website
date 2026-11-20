@@ -61,6 +61,8 @@ export type ShopifyInventory = {
   listed: Record<string, number>
   /** Product title (and "title - variant") → SKU. */
   titleToSku: Record<string, string>
+  /** SKU → the website's name for it: product title, plus " - variant" when there are variants. */
+  skuNames?: Record<string, string>
   syncedAt: string
 }
 
@@ -283,14 +285,23 @@ export type ShopifyVariantStock = { sku: string | null; productTitle: string; va
 export function shopifyInventory(variants: ShopifyVariantStock[], syncedAt = new Date().toISOString()): ShopifyInventory {
   const listed: Record<string, number> = {}
   const titleToSku: Record<string, string> = {}
+  const skuNames: Record<string, string> = {}
+  const nameIsActive: Record<string, boolean> = {}
   for (const v of variants) {
     const sku = (v.sku || '').trim()
     if (!sku) continue
+    const hasVariant = Boolean(v.variantTitle && v.variantTitle !== 'Default Title')
+    const name = hasVariant ? `${v.productTitle} - ${v.variantTitle}` : v.productTitle
+    // An active product's name wins over an archived one with the same SKU.
+    if (name && (!skuNames[sku] || (v.active && !nameIsActive[sku]))) {
+      skuNames[sku] = name
+      nameIsActive[sku] = v.active
+    }
     if (v.active && v.quantity != null) listed[sku] = (listed[sku] ?? 0) + v.quantity
     titleToSku[norm(v.productTitle)] = sku
     if (v.variantTitle && v.variantTitle !== 'Default Title') titleToSku[norm(`${v.productTitle} - ${v.variantTitle}`)] = sku
   }
-  return { listed, titleToSku, syncedAt }
+  return { listed, titleToSku, skuNames, syncedAt }
 }
 
 /** Sold lines from live Shopify orders; lines without a SKU are matched by product title. */

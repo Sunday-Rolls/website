@@ -179,7 +179,7 @@ describe('buildProductsView', () => {
       productViews: views,
     })
     expect(view.products[0]).toEqual({
-      name: 'Retro Roller', category: 'Rollers', units: 2, revenue: 160, orders: 2, views: 40, viewToOrderRate: 5,
+      name: 'Retro Roller', sku: 'RR', category: 'Rollers', units: 2, revenue: 160, orders: 2, views: 40, viewToOrderRate: 5,
     })
     expect(view.products.find((p) => p.name === 'Hat')).toMatchObject({ units: 0, views: 10, viewToOrderRate: 0 })
     expect(view.categories).toEqual([{ category: 'Rollers', units: 2, revenue: 160 }])

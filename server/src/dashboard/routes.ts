@@ -36,6 +36,7 @@ import {
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
 import { listDashboardOrders } from '../analytics/orders.js'
+import { skuCatalog } from '../analytics/product-groups.js'
 import { ebayAuthorizeUrl, exchangeEbayCode, fetchEbayUsername } from '../analytics/ebay.js'
 import { exchangeRedditCode, listRedditAdAccounts, redditAuthorizeUrl } from '../analytics/reddit-ads.js'
 import { customerOrdersFromSquarespaceCsv } from '../analytics/squarespace-orders.js'
@@ -250,8 +251,13 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const range = rangeOrError(c)
     if (range instanceof Response) return range
-    const [orders, productViews] = await Promise.all([listDashboardOrders(store), store.listProductViews()])
-    return c.json({ ok: true, data: buildProductsView({ range, orders, productViews }) })
+    const [orders, productViews, shopify] = await Promise.all([
+      listDashboardOrders(store),
+      store.listProductViews(),
+      store.getIntegrationState(INVENTORY_SHOPIFY_KEY).catch(() => null),
+    ])
+    const catalog = skuCatalog(shopify as Partial<ShopifyInventory> | null)
+    return c.json({ ok: true, data: buildProductsView({ range, orders, productViews, catalog }) })
   })
 
   app.get('/api/etsy', async (c) => {

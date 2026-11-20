@@ -153,15 +153,16 @@ export function isCountedEbayOrder(o: Pick<EbayOrderDetail, 'cancelState' | 'pay
 
 /**
  * A counted eBay API order as a dashboard order (source `ebay`). Revenue matches the reports
- * sheet; fees, label cost and Promoted Listings fees are eBay's own figures.
+ * sheet; fees, label cost and Promoted Listings fees are eBay's own figures. Lines without a SKU
+ * take the SKU seen on another sale of the same listing (`skuByItem`, item id → SKU).
  */
-export function ebayOrderToOrder(o: EbayOrderDetail): Order {
+export function ebayOrderToOrder(o: EbayOrderDetail, skuByItem: Map<string, string> = new Map()): Order {
   const revenue = ebayRevenue(o)
   const lines = o.lines
     .filter((l) => l.quantity > 0)
     .map((l) => ({
       productName: l.title.trim() || 'eBay item',
-      productSku: l.sku,
+      productSku: l.sku || (l.itemId ? skuByItem.get(l.itemId) ?? null : null),
       category: /towel/i.test(l.title) ? 'Towel' : 'Headcover',
       quantity: l.quantity,
       unitPrice: l.unitPrice,
