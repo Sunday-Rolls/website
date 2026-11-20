@@ -71,6 +71,27 @@ export interface HomeContent {
   values: {
     items: Array<{ label: string; icon?: ValueIcon }>
   }
+  /** Flagship-product banner: copy beside a spotlit cutout of the cover. */
+  featured?: {
+    title: string
+    tagline?: string
+    lines: string[]
+    /** Putter fits (center-shafted, mallet), each with the colourways it comes in. */
+    fits: Array<{
+      label: string
+      /** Which putters it fits, shown under the picker. */
+      note?: string
+      colorways: Array<{
+        label: string
+        /** CSS colour for the swatch button. */
+        swatch: string
+        href: string
+        /** Square cutout of the cover on a transparent background (WebP). */
+        image: string
+      }>
+    }>
+    cta: ContentLink
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

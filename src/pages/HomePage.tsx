@@ -7,6 +7,7 @@ import {
 } from '@/lib/product-catalog'
 import { scheduleAfterLoad } from '@/lib/schedule'
 import type { ShopifyProduct } from '@/lib/shopify'
+import { FeaturedProductBanner } from '@/components/home/FeaturedProductBanner'
 import { HeroSection } from '@/components/home/HeroSection'
 import { MediaBreak } from '@/components/home/MediaBreak'
 import { NewsletterSection } from '@/components/home/NewsletterSection'
@@ -51,6 +52,7 @@ export function HomePage() {
     <>
       <HeroSection />
       <ValueStrip items={content.values.items} />
+      <FeaturedProductBanner />
       {blocks.map(({ block, products: blockProducts, tone }, index) => (
         <ProductCarouselBlock
           key={block.id}

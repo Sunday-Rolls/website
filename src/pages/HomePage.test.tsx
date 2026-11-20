@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import homeContent from '@/content/pages/home.json'
 import siteContent from '@/content/site.json'
@@ -30,6 +31,42 @@ vi.mock('@/lib/reviews-api', () => ({
 }))
 
 describe('HomePage', () => {
+  it('renders the featured Retro Roller banner with its colorways', () => {
+    renderWithRouter(<HomePage />)
+
+    const featured = homeContent.featured
+    const heading = screen.getByRole('heading', { level: 2, name: featured.title })
+    const section = heading.closest('section') as HTMLElement
+    for (const fit of featured.fits) {
+      expect(within(section).getByRole('button', { name: fit.label })).toBeInTheDocument()
+    }
+    for (const colorway of featured.fits[0].colorways) {
+      expect(within(section).getByRole('button', { name: colorway.label })).toBeInTheDocument()
+    }
+    expect(within(section).getByRole('img', { name: /retro roller center-shafted putter cover in grey/i })).toBeInTheDocument()
+    expect(within(section).getByRole('link', { name: /shop the retro roller/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/products/retro-roller-grey'),
+    )
+  })
+
+  it('switches the featured banner to mallet colourways and links', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<HomePage />)
+
+    const heading = screen.getByRole('heading', { level: 2, name: homeContent.featured.title })
+    const section = heading.closest('section') as HTMLElement
+    await user.click(within(section).getByRole('button', { name: 'Mallet' }))
+
+    expect(within(section).getByRole('button', { name: 'White' })).toBeInTheDocument()
+    expect(within(section).queryByRole('button', { name: 'Purple' })).not.toBeInTheDocument()
+    expect(within(section).getByRole('img', { name: /mallet putter cover in white/i })).toBeInTheDocument()
+    expect(within(section).getByRole('link', { name: /shop the retro roller/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/products/mallet-retro-roller-white'),
+    )
+  })
+
   it('renders hero content from home.json', () => {
     renderWithRouter(<HomePage />)
 
