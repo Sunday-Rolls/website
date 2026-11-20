@@ -8,7 +8,7 @@
  */
 import { buildRoas, productViewsByName, topSearchKeywords, trafficSourceBreakdown, type RoasPlatform } from './metrics.js'
 import { preferLiveOrders } from './orders.js'
-import { looseName, resolveSku, skuCatalog, type SkuCatalog } from './product-groups.js'
+import { looseName, nameWords, resolveSku, skuCatalog, type SkuCatalog } from './product-groups.js'
 import { inRange, isWebsiteChannel, storeDay, type DateRange } from './period.js'
 import type {
   AbandonedCartStats,
@@ -330,7 +330,7 @@ export function buildProductsView(input: {
   const views = new Map<string, { name: string; sku: string | null; views: number; category: string | null }>()
   for (const [name, v] of productViewsByName(input.productViews, input.range)) {
     const label = productKey(name)
-    const sku = catalog.nameToSku.get(looseName(label)) ?? soldNameToSku.get(looseName(label)) ?? null
+    const sku = catalog.nameToSku.get(looseName(label)) ?? catalog.wordsToSku.get(nameWords(label)) ?? soldNameToSku.get(looseName(label)) ?? null
     const key = keyFor(sku, label)
     const prev = views.get(key)
     views.set(key, prev ? { ...prev, views: prev.views + v.views } : { name: label, sku, views: v.views, category: v.category })
