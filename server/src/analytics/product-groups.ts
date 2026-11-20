@@ -8,8 +8,9 @@
  *    (old Squarespace "SQ…" codes and Shopify lines without a SKU land here);
  * 3. the same, ignoring old-name noise ("Pre-Order", "(L.A.B. DF3)", "SR -", word order),
  *    when that points at exactly one website product;
- * 4. for old Retro Roller / retro gaming listings from before colors existed: the grey DF3 cover,
- *    or the grey mallet cover when the title says mallet or heel shaft (a named color wins);
+ * 4. old marketplace titles by design: Retro Roller / retro gaming listings from before colors
+ *    existed go to the grey DF3 or grey mallet cover (a named color wins); other designs by name
+ *    (Seersucker is Sunday Stripes; "Blue Stripe" is the Sunday Stripes mallet), DF3 or mallet by the title;
  * 5. its own SKU even if Shopify doesn't list it (e.g. an archived product).
  * Lines with no SKU at all stay grouped by their title.
  */
@@ -72,15 +73,46 @@ const COLORS: Array<[RegExp, string]> = [
   [/\b(grey|gray)\b/, 'GRY'],
 ]
 
-/** Old Retro Roller / retro gaming titles → the Retro Roller DF3 or mallet SKU. */
+/** Design words in old marketplace titles → SKU stem. Mallet/heel-shaft titles use the -MAL cover. */
+const DESIGNS: Array<[RegExp, string, 'putter' | 'fixed']> = [
+  [/corduroy/, 'SR-CORD', 'putter'],
+  [/morning dew/, 'SR-DEW', 'putter'],
+  [/birdie/, 'SR-BIRDIE', 'putter'],
+  [/doodle/, 'SR-DOODLE', 'putter'],
+  [/breakfast/, 'SR-BREAKFAST', 'putter'],
+  [/flagstick|fuel/, 'SR-FUEL', 'putter'],
+  // "Blue Stripe" covers were the Sunday Stripes mallet; Seersucker is Sunday Stripes (towels are
+  // handled by name, not here).
+  [/blue stripe/, 'SR-STRIPES-MAL', 'fixed'],
+  [/sunday stripes|seersucker|stripe/, 'SR-STRIPES', 'putter'],
+  [/sunny side/, 'SR-SUNNY-OZ', 'fixed'],
+  [/coin collector/, 'SR-COIN-OZ', 'fixed'],
+]
+
+function isMalletTitle(s: string): boolean {
+  return /heel/.test(s) || (/mallet/.test(s) && !/center|centre|df3|l\.?a\.?b/.test(s))
+}
+
+/**
+ * Old marketplace titles → a website SKU. Retro Roller / retro gaming / Game Boy titles from before
+ * colors existed go to the grey DF3 or grey mallet cover (a named color wins); other designs are
+ * found by name. Only SKUs the website has are returned.
+ */
 export function legacyRetroSku(name: string, catalog: SkuCatalog): string | null {
   const s = name.toLowerCase()
-  if (!/retro|game ?boy|gaming/.test(s)) return null
-  const mallet = /heel/.test(s) || (/mallet/.test(s) && !/center|centre|df3|l\.?a\.?b/.test(s))
-  const base = mallet ? 'SR-RETRO-MAL' : 'SR-RETRO-DF3'
-  const color = COLORS.find(([re]) => re.test(s))?.[1]
-  const sku = `${base}-${color ?? 'GRY'}`
-  return catalog.skuNames[sku] ? sku : null
+  if (/towel/.test(s)) return null
+  if (/retro|game ?boy|gaming/.test(s)) {
+    const base = isMalletTitle(s) ? 'SR-RETRO-MAL' : 'SR-RETRO-DF3'
+    const color = COLORS.find(([re]) => re.test(s))?.[1]
+    const sku = `${base}-${color ?? 'GRY'}`
+    return catalog.skuNames[sku] ? sku : null
+  }
+  for (const [re, stem, kind] of DESIGNS) {
+    if (!re.test(s)) continue
+    const sku = kind === 'fixed' ? stem : `${stem}-${isMalletTitle(s) ? 'MAL' : 'DF3'}`
+    return catalog.skuNames[sku] ? sku : null
+  }
+  return null
 }
 
 export function resolveSku(line: { productName: string; productSku: string | null }, catalog: SkuCatalog): string | null {
