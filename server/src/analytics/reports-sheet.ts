@@ -9,7 +9,7 @@
 import { GoogleAuth } from 'google-auth-library'
 import { extractDriveFileId } from './drive.js'
 import { ebayRevenue, isCountedEbayOrder } from './ebay.js'
-import { preferLiveOrders } from './orders.js'
+import { listDashboardOrders, preferLiveOrders } from './orders.js'
 import { storeDay } from './period.js'
 import type { AnalyticsStore } from './store.js'
 import type { DailyAdSpend, DailyTraffic, EbayOrderDetail, EtsyReceiptDetail, Order } from './types.js'
@@ -430,7 +430,7 @@ export async function syncReportsSheet(
   const sync = await store.startSync(REPORTS_SHEET_SYNC_SOURCE)
   try {
     const [orders, adSpend, traffic, etsyReceipts, ebayOrders] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listAdSpend(),
       store.listTraffic(),
       // Detail tables are extras: an error reading one shouldn't stop the export.

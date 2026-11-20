@@ -2,7 +2,9 @@
 
 contact-api reads Sunday Rolls' eBay orders straight from eBay's Sell APIs and writes them to the reports sheet as **`Data · eBay orders`** and **`Data · eBay items`** (see [REPORTS_SHEET.md](REPORTS_SHEET.md)).
 
-The dashboard is unchanged: its eBay numbers still come from the Sales Tracker. eBay orders are stored separately in `analytics_ebay_orders`, and the sync never writes to `analytics_orders`.
+The dashboard uses these orders too. They are stored in `analytics_ebay_orders`, and the dashboard and reports export add the counted ones to the orders list (`listDashboardOrders`, source `ebay`). From the day of the first eBay API order, Sales Tracker eBay rows are dropped (`preferLiveOrders`), so a sale is never counted twice. Older tracker rows, from before the API window, stay. The sync itself still never writes to `analytics_orders`, so tracker re-imports and workbook uploads can't remove them.
+
+The Inventory page still counts eBay units sold from the Sales Tracker's eBay tab (SKU column).
 
 ## What it reads
 

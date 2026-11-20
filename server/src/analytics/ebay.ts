@@ -6,7 +6,7 @@
  * developer.ebay.com and a user refresh token for the Sunday Rolls seller account
  * (valid ~18 months), with the sell.fulfillment.readonly and sell.finances scopes.
  */
-import type { EbayOrderDetail, EbayOrderLine } from './types.js'
+import type { EbayOrderDetail, EbayOrderLine, Order } from './types.js'
 
 export type EbayCredentials = {
   clientId: string
@@ -149,6 +149,42 @@ export function mapEbayOrder(raw: EbayOrderRaw, costs?: EbayOrderCosts | null): 
 /** Cancelled and fully refunded orders are not sales. */
 export function isCountedEbayOrder(o: Pick<EbayOrderDetail, 'cancelState' | 'paymentStatus'>): boolean {
   return o.cancelState !== 'canceled' && o.paymentStatus !== 'fully_refunded'
+}
+
+/**
+ * A counted eBay API order as a dashboard order (source `ebay`). Revenue matches the reports
+ * sheet; fees, label cost and Promoted Listings fees are eBay's own figures.
+ */
+export function ebayOrderToOrder(o: EbayOrderDetail): Order {
+  const revenue = ebayRevenue(o)
+  const lines = o.lines
+    .filter((l) => l.quantity > 0)
+    .map((l) => ({
+      productName: l.title.trim() || 'eBay item',
+      productSku: l.sku,
+      category: /towel/i.test(l.title) ? 'Towel' : 'Headcover',
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      lineRevenue: l.lineRevenue,
+    }))
+  return {
+    id: `ebay-api:${o.orderId}`,
+    externalId: `ebay:${o.orderId}`,
+    channel: 'ebay',
+    source: 'ebay',
+    orderedAt: o.orderedAt,
+    revenue,
+    fees: round2(o.marketplaceFees ?? 0),
+    shippingCost: round2(o.labelCost ?? 0),
+    marketingCost: round2(o.adFees ?? 0),
+    state: o.state,
+    customerEmail: null,
+    isReturning: false,
+    trafficSource: null,
+    lines: lines.length
+      ? lines
+      : [{ productName: 'eBay order', productSku: null, category: 'Headcover', quantity: 1, unitPrice: revenue, lineRevenue: revenue }],
+  }
 }
 
 /** Revenue as the sheet counts it: items − discounts + shipping charged − refunds (eBay remits the tax). */

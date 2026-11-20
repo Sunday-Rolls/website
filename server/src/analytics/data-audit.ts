@@ -1,3 +1,4 @@
+import { listDashboardOrders } from './orders.js'
 import type { AnalyticsStore } from './store.js'
 
 export type DataAudit = {
@@ -39,7 +40,7 @@ export type DataAudit = {
 export async function buildDataAudit(store: AnalyticsStore): Promise<DataAudit> {
   const [orders, traffic, adSpend, productViews, expenses, cash, keywords, abandoned, syncs] =
     await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listTraffic(),
       store.listAdSpend(),
       store.listProductViews(),
