@@ -1,7 +1,8 @@
 import { ebayOrderToOrder, isCountedEbayOrder } from './ebay.js'
+import { etsyCostModel, etsyExternalId } from './etsy-sync.js'
 import { storeDay } from './period.js'
 import type { AnalyticsStore } from './store.js'
-import type { EbayOrderDetail, Order } from './types.js'
+import type { EbayOrderDetail, EtsyReceiptDetail, Order } from './types.js'
 
 /**
  * Orders as the dashboard and reports see them: the orders table plus counted eBay API orders
@@ -9,8 +10,77 @@ import type { EbayOrderDetail, Order } from './types.js'
  * Tracker's eBay rows that the API covers. Edits and imports keep using store.listOrders().
  */
 export async function listDashboardOrders(store: AnalyticsStore): Promise<Order[]> {
-  const [orders, ebay] = await Promise.all([store.listOrders(), store.listEbayOrders().catch(() => [])])
-  return withEbayApiOrders(orders, ebay)
+  const [orders, ebay, etsy] = await Promise.all([
+    store.listOrders(),
+    store.listEbayOrders().catch(() => []),
+    store.listEtsyReceipts().catch(() => []),
+  ])
+  return withEbayApiOrders(withEtsyApiOrders(orders, etsy), ebay)
+}
+
+const round2 = (n: number) => Math.round(n * 100) / 100
+
+function etsyReceiptCounted(status: string): boolean {
+  const s = status.trim().toLowerCase()
+  return s !== 'canceled' && s !== 'cancelled' && s !== 'fully refunded'
+}
+
+/**
+ * Etsy's API copy of each receipt replaces the Sales Tracker's copy of the same receipt (both are
+ * keyed `etsy:<receipt id>`), so every Etsy order carries its real items and SKUs. Receipts Etsy
+ * marks cancelled or fully refunded are removed even if the tracker counts them. Fees, label cost
+ * and Offsite Ads come from Etsy when known; otherwise the tracker row's figures for the same
+ * receipt are kept, and failing that the tracker-learned estimate. Tracker rows with no matching
+ * receipt (older than the API window) stay as they are.
+ */
+export function withEtsyApiOrders(orders: Order[], receipts: EtsyReceiptDetail[]): Order[] {
+  if (!receipts.length) return orders
+  const estimate = etsyCostModel(orders)
+  const byKey = new Map(orders.map((o) => [`${o.channel}|${o.externalId}`, o]))
+  for (const r of receipts) {
+    const externalId = etsyExternalId(r.receiptId)
+    const key = `etsy|${externalId}`
+    const existing = byKey.get(key)
+    if (!etsyReceiptCounted(r.status)) {
+      byKey.delete(key)
+      continue
+    }
+    const revenue = round2(Math.max(0, r.grandtotal - r.refunded))
+    if (revenue <= 0) {
+      byKey.delete(key)
+      continue
+    }
+    const lines = (r.lines ?? [])
+      .filter((l) => l.quantity > 0)
+      .map((l) => ({
+        productName: (l.title || 'Etsy item').trim() || 'Etsy item',
+        productSku: l.sku?.trim() || null,
+        category: /towel/i.test(l.title) ? 'Towel' : 'Headcover',
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        lineRevenue: l.lineRevenue,
+      }))
+    const fallbackLines = existing?.source === 'etsy' && existing.lines.length ? existing.lines : null
+    byKey.set(key, {
+      id: existing?.id ?? `etsy-api:${r.receiptId}`,
+      externalId,
+      channel: 'etsy',
+      source: 'etsy',
+      orderedAt: r.orderedAt,
+      revenue,
+      fees: round2(r.actualFees ?? existing?.fees ?? revenue * estimate.feeRate),
+      shippingCost: round2(r.labelCost ?? existing?.shippingCost ?? estimate.shippingPerOrder),
+      marketingCost: round2(existing && existing.source !== 'etsy' ? existing.marketingCost : (r.offsiteAdsFee ?? existing?.marketingCost ?? 0)),
+      state: existing?.state ?? null,
+      customerEmail: existing?.customerEmail ?? null,
+      isReturning: existing?.isReturning ?? false,
+      trafficSource: existing?.trafficSource ?? null,
+      lines: lines.length
+        ? lines
+        : (fallbackLines ?? [{ productName: 'Etsy order', productSku: null, category: 'Headcover', quantity: 1, unitPrice: revenue, lineRevenue: revenue }]),
+    })
+  }
+  return [...byKey.values()]
 }
 
 export function withEbayApiOrders(orders: Order[], ebay: EbayOrderDetail[]): Order[] {
