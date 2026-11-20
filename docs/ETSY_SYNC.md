@@ -83,3 +83,13 @@ The local script and the server each keep their own token chain. If the script l
 ## Scopes
 
 The app asks for `transactions_r listings_r shops_r`, which is read-only. The ledger and payments are covered by `transactions_r`, so the new detail data needs no re-auth. Buyer emails need `email_r`, so live Etsy rows have no customer email, the same as sheet rows.
+
+
+## Dashboard: Etsy API is the record (Nov 2026)
+
+The dashboard and reports export read orders through `listDashboardOrders` (`server/src/analytics/orders.ts`). `withEtsyApiOrders` puts Etsy's API copy of each receipt in place of the Sales Tracker's copy of the same receipt (both keyed `etsy:<receipt id>`), so every Etsy order has its real items and SKUs.
+
+- Receipts Etsy marks cancelled or fully refunded are removed, even if the tracker still counts them.
+- Fees, label cost and Offsite Ads come from Etsy when known. Otherwise the tracker row's figures for the same receipt are kept, and failing that the estimate learned from tracker history.
+- Tracker rows with no matching receipt (from before the API window) stay as they are.
+- The stored orders table is unchanged; this happens when orders are read.
