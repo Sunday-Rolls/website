@@ -21,6 +21,9 @@ export const EBAY_SCOPES = [
   'https://api.ebay.com/oauth/api_scope/sell.finances',
 ]
 
+/** Requested only at sign-in, so the connect page can show which eBay account was linked. */
+export const EBAY_IDENTITY_SCOPE = 'https://api.ebay.com/oauth/api_scope/commerce.identity.readonly'
+
 const API = 'https://api.ebay.com'
 const FINANCES_API = 'https://apiz.ebay.com'
 const MARKETPLACE = 'EBAY_US'
@@ -198,6 +201,49 @@ async function readError(res: Response): Promise<string> {
   } catch {
     return text.slice(0, 200)
   }
+}
+
+/** eBay's sign-in link for the one-time connect step. `ruName` is the redirect_uri eBay expects. */
+export function ebayAuthorizeUrl(clientId: string, ruName: string, state: string, scopes: string[] = [...EBAY_SCOPES, EBAY_IDENTITY_SCOPE]): string {
+  const url = new URL('https://auth.ebay.com/oauth2/authorize')
+  url.searchParams.set('client_id', clientId)
+  url.searchParams.set('response_type', 'code')
+  url.searchParams.set('redirect_uri', ruName)
+  url.searchParams.set('scope', scopes.join(' '))
+  url.searchParams.set('state', state)
+  return url.toString()
+}
+
+/** Swap the code eBay sends back for tokens (codes last ~5 minutes and work once). */
+export async function exchangeEbayCode(
+  clientId: string,
+  clientSecret: string,
+  code: string,
+  ruName: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<{ accessToken: string; refreshToken: string; refreshExpiresInSec: number | null }> {
+  const res = await fetchImpl(`${API}/identity/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: ruName }).toString(),
+  })
+  if (!res.ok) throw new Error(`eBay sign-in failed (${res.status}): ${await readError(res)}`)
+  const data = (await res.json()) as { access_token?: string; refresh_token?: string; refresh_token_expires_in?: number }
+  if (!data.access_token || !data.refresh_token) throw new Error('eBay returned no refresh token.')
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    refreshExpiresInSec: typeof data.refresh_token_expires_in === 'number' ? data.refresh_token_expires_in : null,
+  }
+}
+
+/** The eBay username behind a user access token (needs the commerce.identity.readonly scope). */
+export async function fetchEbayUsername(token: string, fetchImpl: typeof fetch = fetch): Promise<string | null> {
+  const data = await getJson<{ username?: string }>(`${FINANCES_API}/commerce/identity/v1/user/`, token, fetchImpl)
+  return data.username?.trim() || null
 }
 
 /** Mint a short-lived user access token from the refresh token. */

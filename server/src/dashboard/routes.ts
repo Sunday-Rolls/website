@@ -35,6 +35,7 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
+import { ebayAuthorizeUrl, exchangeEbayCode, fetchEbayUsername } from '../analytics/ebay.js'
 import { exchangeRedditCode, listRedditAdAccounts, redditAuthorizeUrl } from '../analytics/reddit-ads.js'
 import { customerOrdersFromSquarespaceCsv } from '../analytics/squarespace-orders.js'
 import { rangeForCustom, rangeForPeriod, storeDateOf, storeDay } from '../analytics/period.js'
@@ -632,6 +633,59 @@ ${accountList}
     }
   })
 
+  // One-time eBay seller sign-in (docs/EBAY_SYNC.md). Admin-only like every /api/ route.
+  // The RuName's "auth accepted URL" on developer.ebay.com must point at /dashboard/api/ebay/callback.
+  // Shows the refresh token once so an admin can paste it into Railway; nothing is stored.
+  app.get('/api/ebay/connect', async (c) => {
+    const clientId = process.env.EBAY_CLIENT_ID?.trim()
+    const ruName = process.env.EBAY_RUNAME?.trim()
+    if (!clientId || !process.env.EBAY_CLIENT_SECRET?.trim() || !ruName) {
+      return c.html(redditPage('eBay: add the keys first', '<p>Set <code>EBAY_CLIENT_ID</code>, <code>EBAY_CLIENT_SECRET</code> and <code>EBAY_RUNAME</code> in Railway (contact-api → Variables), wait for the deploy, then open this page again.</p>'), 400)
+    }
+    const state = randomUUID()
+    setCookie(c, EBAY_STATE_COOKIE, state, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      secure: secureCookies,
+      path: '/dashboard/api/ebay',
+      maxAge: 10 * 60,
+    })
+    return c.redirect(ebayAuthorizeUrl(clientId, ruName, state), 302)
+  })
+
+  app.get('/api/ebay/callback', async (c) => {
+    const expected = getCookie(c, EBAY_STATE_COOKIE)
+    deleteCookie(c, EBAY_STATE_COOKIE, { path: '/dashboard/api/ebay' })
+    const code = c.req.query('code')
+    if (!code) {
+      const said = c.req.query('error_description') || c.req.query('error') || 'no code'
+      return c.html(redditPage('eBay sign-in was cancelled', `<p>eBay said: <code>${escapeHtml(said)}</code>. <a href="connect">Try again</a>.</p>`), 400)
+    }
+    if (!expected || c.req.query('state') !== expected) {
+      return c.html(redditPage('eBay sign-in expired', '<p>The sign-in link is too old or was opened in another browser. <a href="connect">Start again</a>.</p>'), 400)
+    }
+    try {
+      const clientId = process.env.EBAY_CLIENT_ID!.trim()
+      const clientSecret = process.env.EBAY_CLIENT_SECRET!.trim()
+      const ruName = process.env.EBAY_RUNAME!.trim()
+      const tokens = await exchangeEbayCode(clientId, clientSecret, code, ruName)
+      const username = await fetchEbayUsername(tokens.accessToken).catch(() => null)
+      const months = tokens.refreshExpiresInSec ? Math.round(tokens.refreshExpiresInSec / (30 * 86_400)) : null
+      return c.html(
+        redditPage(
+          'eBay connected',
+          `<p>Signed in as eBay user <strong>${escapeHtml(username ?? 'unknown')}</strong>. If that isn't the Sunday Rolls seller account, sign out of eBay and <a href="connect">start again</a>.</p>
+<p>Paste this into Railway → contact-api → Variables as <code>EBAY_REFRESH_TOKEN</code>${months ? ` (good for about ${months} months)` : ''}. It is shown only once and isn't saved anywhere; don't paste it into chat.</p>
+<pre>${escapeHtml(tokens.refreshToken)}</pre>
+<p>Let Railway redeploy, then reopen the dashboard. eBay appears under Tools → Connections.</p>`,
+        ),
+      )
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'eBay sign-in failed'
+      return c.html(redditPage('eBay sign-in failed', `<p>${escapeHtml(message)}</p><p><a href="connect">Try again</a>.</p>`), 502)
+    }
+  })
+
   app.post('/api/sync/auto/:source', async (c) => {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
@@ -1053,6 +1107,7 @@ function merchantMissing(env: NodeJS.ProcessEnv = process.env): string | null {
 }
 
 const REDDIT_STATE_COOKIE = 'sr_reddit_state'
+const EBAY_STATE_COOKIE = 'sr_ebay_state'
 
 /**
  * Where Reddit sends the admin back after sign-in. Must match the redirect URI saved on the Reddit

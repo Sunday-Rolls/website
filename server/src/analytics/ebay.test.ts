@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ebayAuthorizeUrl,
   ebayCostsByOrder,
+  exchangeEbayCode,
   ebayMissingEnv,
   ebayRevenue,
   fetchEbayOrders,
@@ -149,5 +151,35 @@ describe('syncEbayToStore', () => {
     const r = await syncEbayToStore(store, creds, { days: 30, now, fetchImpl: impl })
     expect(r.skipped).toEqual(['finances'])
     expect((await store.listEbayOrders())[0]).toMatchObject({ marketplaceFees: 7, labelCost: 4 })
+  })
+})
+
+describe('eBay connect sign-in', () => {
+  it('builds the authorize link with the RuName, state and identity scope', () => {
+    const url = new URL(ebayAuthorizeUrl('client-1', 'Sunday_Rolls-RuName', 'state-1'))
+    expect(url.origin + url.pathname).toBe('https://auth.ebay.com/oauth2/authorize')
+    expect(url.searchParams.get('redirect_uri')).toBe('Sunday_Rolls-RuName')
+    expect(url.searchParams.get('state')).toBe('state-1')
+    expect(url.searchParams.get('scope')).toContain('sell.fulfillment.readonly')
+    expect(url.searchParams.get('scope')).toContain('commerce.identity.readonly')
+  })
+
+  it('exchanges the code for a refresh token', async () => {
+    const calls: { url: string; body: string }[] = []
+    const fetchImpl = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, body: String(init?.body) })
+      return new Response(JSON.stringify({ access_token: 'a', refresh_token: 'r', refresh_token_expires_in: 47_304_000 }), { status: 200 })
+    }) as unknown as typeof fetch
+    const out = await exchangeEbayCode('id', 'secret', 'code-1', 'RuName-1', fetchImpl)
+    expect(out).toEqual({ accessToken: 'a', refreshToken: 'r', refreshExpiresInSec: 47_304_000 })
+    expect(calls[0].url).toBe('https://api.ebay.com/identity/v1/oauth2/token')
+    expect(calls[0].body).toContain('grant_type=authorization_code')
+    expect(calls[0].body).toContain('redirect_uri=RuName-1')
+  })
+
+  it('fails clearly when eBay rejects the code', async () => {
+    const fetchImpl = (async () =>
+      new Response(JSON.stringify({ error: 'invalid_grant', error_description: 'expired' }), { status: 400 })) as unknown as typeof fetch
+    await expect(exchangeEbayCode('id', 'secret', 'old', 'RuName-1', fetchImpl)).rejects.toThrow(/400/)
   })
 })
