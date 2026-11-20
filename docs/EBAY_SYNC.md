@@ -23,31 +23,23 @@ You need a free eBay developer account and the Sunday Rolls seller sign-in.
 1. **Keys.** At [developer.ebay.com](https://developer.ebay.com/my/keys), create an application keyset under **Production**. Copy the **App ID (Client ID)** and **Cert ID (Client Secret)**.
    - eBay asks how you'll handle *marketplace account deletion notifications* before it turns the keyset on. This sync stores your own orders but no buyer usernames. Choose the option that fits how you want to handle it; eBay's page explains both.
 2. **Redirect (RuName).** Open **User Tokens** for the production keyset, then **Get a Token from eBay via Your Application** → **Add eBay Redirect URL**.
-   - Fill in the privacy policy URL and the accept and decline URLs. The site's pages are fine, for example `https://sundayrollsgolf.com`.
-   - Save it, then copy the **RuName** (it looks like `Sunday_Rolls-SundayRo-xxxx-yyyy`).
-3. **Refresh token.** From `server/`, with the values from steps 1 and 2:
-
-   ```bash
-   EBAY_CLIENT_ID=… EBAY_RUNAME=… npm run ebay:auth
-   ```
-
-   Open the link it prints, sign in as the Sunday Rolls eBay seller and agree. eBay then sends you to the accept page. Copy that page's full address within 5 minutes and run:
-
-   ```bash
-   EBAY_CLIENT_ID=… EBAY_CLIENT_SECRET=… EBAY_RUNAME=… npm run ebay:auth -- '<that address>'
-   ```
-
-   It prints a refresh token that's good for about 18 months. Nothing is saved to disk.
-4. **Railway.** In contact-api → Variables, set `EBAY_CLIENT_ID`, `EBAY_CLIENT_SECRET` and `EBAY_REFRESH_TOKEN`, then redeploy.
-   - Optional: `EBAY_SYNC_DAYS` (default 365).
-   - Optional: `EBAY_SCOPES`, if the token was granted something other than `sell.fulfillment.readonly` and `sell.finances`.
+   - Privacy policy URL and auth declined URL: `https://www.sundayrollsgolf.com`.
+   - **Auth accepted URL:** `https://contact-api-production-9af6.up.railway.app/dashboard/api/ebay/callback`.
+   - Turn on **OAuth Enabled**, save, and copy the **RuName** (it looks like `Sunday_Rolls-SundayRo-xxxx-yyyy`).
+3. **Railway.** In contact-api → Variables, set `EBAY_CLIENT_ID` (App ID), `EBAY_CLIENT_SECRET` (Cert ID) and `EBAY_RUNAME`, then let it redeploy.
+4. **Refresh token.** Sign in to the dashboard, then open `/dashboard/api/ebay/connect`. Sign in to eBay **as the Sunday Rolls seller** and agree.
+   - The page that comes back names the eBay account it linked and shows the refresh token once (good for about 18 months).
+   - Add it in Railway as `EBAY_REFRESH_TOKEN` and redeploy.
+   - Optional: `EBAY_SYNC_DAYS` (default 365), and `EBAY_SCOPES` if the token was granted a different set.
+   - Without the dashboard, `npm run ebay:auth` (see `server/src/scripts/ebay-auth.ts`) does the same from a terminal; it needs the RuName's accepted URL to be a page whose address you can copy.
 5. Open the dashboard. Under Tools → Connections, **eBay** should show a sync. The next reports-sheet export adds the two eBay tabs.
 
-When the refresh token expires, or after a password change, the eBay sync fails with an `invalid_grant` message. Repeat step 3 and replace `EBAY_REFRESH_TOKEN`.
+When the refresh token expires, or after a password change, the eBay sync fails with an `invalid_grant` message. Repeat step 4 and replace `EBAY_REFRESH_TOKEN`.
 
 ## Code
 
 - `server/src/analytics/ebay.ts`: OAuth, the API calls and mapping.
 - `server/src/analytics/ebay-sync.ts`: the sync.
-- `server/src/scripts/ebay-auth.ts`: the one-time sign-in.
+- `server/src/dashboard/routes.ts` (`/api/ebay/connect`, `/api/ebay/callback`): the one-time sign-in.
+- `server/src/scripts/ebay-auth.ts`: the same sign-in from a terminal.
 - Tests: `ebay.test.ts`.
