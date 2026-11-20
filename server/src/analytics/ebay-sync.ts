@@ -1,6 +1,7 @@
 /**
- * eBay orders into analytics_ebay_orders, for the reports sheet. The dashboard's eBay numbers
- * still come from the Sales Tracker; nothing here touches analytics_orders.
+ * eBay orders into analytics_ebay_orders. The reports sheet reads them directly, and the
+ * dashboard adds the counted ones to its order list (orders.ts listDashboardOrders), replacing
+ * the Sales Tracker's eBay rows. Nothing here touches analytics_orders.
  *
  * Each run reads the last `days` of orders (Fulfillment API) and the same window of Finances
  * transactions for real sale fees, shipping labels and Promoted Listings fees. If Finances can't

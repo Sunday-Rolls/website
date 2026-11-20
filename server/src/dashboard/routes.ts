@@ -35,6 +35,7 @@ import {
   parseManualWorkbook,
 } from '../analytics/manual-workbook.js'
 import { buildOverview, buildPnL, buildRoas } from '../analytics/metrics.js'
+import { listDashboardOrders } from '../analytics/orders.js'
 import { ebayAuthorizeUrl, exchangeEbayCode, fetchEbayUsername } from '../analytics/ebay.js'
 import { exchangeRedditCode, listRedditAdAccounts, redditAuthorizeUrl } from '../analytics/reddit-ads.js'
 import { customerOrdersFromSquarespaceCsv } from '../analytics/squarespace-orders.js'
@@ -213,7 +214,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
     }
     const [orders, traffic, keywords, productViews, abandoned, adSpend, syncs, cashForecast] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listTraffic(),
       store.listKeywords(),
       store.listProductViews(),
@@ -240,7 +241,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const range = rangeOrError(c)
     if (range instanceof Response) return range
-    const orders = await store.listOrders()
+    const orders = await listDashboardOrders(store)
     return c.json({ ok: true, data: buildOrdersView({ range, orders, channel: c.req.query('channel') }) })
   })
 
@@ -249,7 +250,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const range = rangeOrError(c)
     if (range instanceof Response) return range
-    const [orders, productViews] = await Promise.all([store.listOrders(), store.listProductViews()])
+    const [orders, productViews] = await Promise.all([listDashboardOrders(store), store.listProductViews()])
     return c.json({ ok: true, data: buildProductsView({ range, orders, productViews }) })
   })
 
@@ -259,7 +260,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const range = rangeOrError(c)
     if (range instanceof Response) return range
     const [orders, customerOrders, receipts, fees, listings, reviews, shopDaily, syncs] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listCustomerOrders(),
       store.listEtsyReceipts(),
       store.listEtsyFeesDaily(),
@@ -281,7 +282,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const user = await currentUser(c, store)
     if (!user) return c.json({ ok: false, error: 'Unauthorized' }, 401)
     const [orders, sheet, etsy, shopify] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.getIntegrationState(INVENTORY_SHEET_KEY),
       store.getIntegrationState(INVENTORY_ETSY_KEY),
       store.getIntegrationState(INVENTORY_SHOPIFY_KEY),
@@ -307,7 +308,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const range = rangeOrError(c)
     if (range instanceof Response) return range
     const [orders, adSpend, traffic, keywords, customerOrders] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listAdSpend(),
       store.listTraffic(),
       store.listKeywords(),
@@ -334,7 +335,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const range = rangeOrError(c)
     if (range instanceof Response) return range
     const [orders, traffic, abandoned, customerOrders] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listTraffic(),
       store.getAbandoned(range.start, range.end),
       store.listCustomerOrders(),
@@ -373,7 +374,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     const year = Number(c.req.query('year') ?? new Date().getUTCFullYear())
     const month = c.req.query('month') || null
     const [orders, expenses, cashForecast] = await Promise.all([
-      store.listOrders(),
+      listDashboardOrders(store),
       store.listExpenses(),
       store.listCashForecast(),
     ])
@@ -397,7 +398,7 @@ export function createDashboardRoutes(deps: DashboardDeps) {
     } catch (error) {
       return c.json({ ok: false, error: error instanceof Error ? error.message : 'Invalid date range' }, 400)
     }
-    const [orders, adSpend, traffic] = await Promise.all([store.listOrders(), store.listAdSpend(), store.listTraffic()])
+    const [orders, adSpend, traffic] = await Promise.all([listDashboardOrders(store), store.listAdSpend(), store.listTraffic()])
     return c.json({ ok: true, data: { range, platforms: buildRoas({ range, orders, adSpend, traffic }) } })
   })
 

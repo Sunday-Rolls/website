@@ -6,7 +6,7 @@ export type WebsiteChannel = 'website'
 export type OrderChannel = SalesChannel | WebsiteChannel
 
 /** Where an order row came from — used to prefer live Shopify over sheet history. */
-export type OrderSource = 'sales-tracker' | 'shopify' | 'manual' | 'etsy'
+export type OrderSource = 'sales-tracker' | 'shopify' | 'manual' | 'etsy' | 'ebay'
 
 export type DashboardUser = {
   id: string
