@@ -117,7 +117,7 @@ describe('old marketplace titles by design', () => {
     ['Corduroy LAB DF3 Putter Headcover, Center-Shaft Mallet Headcover', 'SR-CORD-DF3'],
     ['Corduroy Mallet Putter Headcover, Heel-Shaft - Golf Putter Cover', 'SR-CORD-MAL'],
     ['Seersucker Mallet Putter Headcover, Heel-Shaft - Golf Putter Cover', 'SR-STRIPES-MAL'],
-    ['Gift for Him | Blue Stripe Center Shaft Mallet Headcover', 'SR-STRIPES-DF3'],
+    ['Gift for Him | Blue Stripe Center Shaft Mallet Headcover', 'SR-STRIPES-MAL'],
     ['LAB DF3 Putter Headcover, Center-Shafted Mallet Putter Headcover, Birdie Machine', 'SR-BIRDIE-DF3'],
     ['Morning Dew Mallet Putter Headcover, LAB DF3 Center Shaft', 'SR-DEW-DF3'],
     ['Golf Towel - Blue Stripe', 'SR-TOWEL-BLUSTR'],

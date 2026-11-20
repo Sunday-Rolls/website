@@ -10,7 +10,7 @@
  *    when that points at exactly one website product;
  * 4. old marketplace titles by design: Retro Roller / retro gaming listings from before colors
  *    existed go to the grey DF3 or grey mallet cover (a named color wins); other designs by name
- *    (Seersucker and "Blue Stripe" covers are Sunday Stripes), DF3 or mallet by the title;
+ *    (Seersucker is Sunday Stripes; "Blue Stripe" is the Sunday Stripes mallet), DF3 or mallet by the title;
  * 5. its own SKU even if Shopify doesn't list it (e.g. an archived product).
  * Lines with no SKU at all stay grouped by their title.
  */
@@ -81,7 +81,9 @@ const DESIGNS: Array<[RegExp, string, 'putter' | 'fixed']> = [
   [/doodle/, 'SR-DOODLE', 'putter'],
   [/breakfast/, 'SR-BREAKFAST', 'putter'],
   [/flagstick|fuel/, 'SR-FUEL', 'putter'],
-  // Seersucker and "Blue Stripe" covers are Sunday Stripes (towels are handled by name, not here).
+  // "Blue Stripe" covers were the Sunday Stripes mallet; Seersucker is Sunday Stripes (towels are
+  // handled by name, not here).
+  [/blue stripe/, 'SR-STRIPES-MAL', 'fixed'],
   [/sunday stripes|seersucker|stripe/, 'SR-STRIPES', 'putter'],
   [/sunny side/, 'SR-SUNNY-OZ', 'fixed'],
   [/coin collector/, 'SR-COIN-OZ', 'fixed'],
