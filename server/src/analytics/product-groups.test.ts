@@ -58,3 +58,45 @@ describe('Products grouped by SKU', () => {
     expect(view.products.filter((p) => p.units > 0)).toHaveLength(2)
   })
 })
+
+describe('old product names', () => {
+  const full = skuCatalog({
+    skuNames: {
+      'SR-RETRO-DF3-GRY': 'Retro Roller - Grey',
+      'SR-RETRO-DF3-PUR': 'Retro Roller - Purple',
+      'SR-RETRO-DF3-YEL': 'Retro Roller - Yellow',
+      'SR-RETRO-MAL-GRY': 'Mallet - Retro Roller - Grey',
+      'SR-RETRO-MAL-WHT': 'Mallet - Retro Roller - White',
+      'SR-STRIPES-DF3': 'Sunday Stripes',
+      'SR-STRIPES-MAL': 'Mallet - Sunday Stripes',
+      'SR-BIRDIE-DF3': 'The Birdie Machine',
+      'SR-TOWEL-GRN': 'Golf Towel - Green Stripe',
+      'SR-TOWEL-BLK': 'Golf Towel - Solid Black',
+    },
+  })
+  const cases: Array<[string, string | null]> = [
+    ['Retro Roller', 'SR-RETRO-DF3-GRY'],
+    ['Pre-Order: Retro Roller', 'SR-RETRO-DF3-GRY'],
+    ['Retro Roller - Grey (L.A.B. DF3)', 'SR-RETRO-DF3-GRY'],
+    ['Retro Roller - Purple', 'SR-RETRO-DF3-PUR'],
+    ['Retro Roller - Yellow (L.A.B. DF3)', 'SR-RETRO-DF3-YEL'],
+    ['PRE ORDER - Mallet Retro Roller', 'SR-RETRO-MAL-GRY'],
+    ['Mallet Retro Roller - Grey (TaylorMade Spider)', 'SR-RETRO-MAL-GRY'],
+    ['Mallet Retro Roller - White (TaylorMade Spider)', 'SR-RETRO-MAL-WHT'],
+    ['Center-Shafted Mallet Golf Putter Headcover. L.A.B. Putter Headcover - DF3. Compatible w/ Spider ZT. Vintage Gameboy.', 'SR-RETRO-DF3-GRY'],
+    ['Retro Gaming Golf Putter Cover - Center Shaft L.A.B. Mallet Headcover, Magnetic Closure', 'SR-RETRO-DF3-GRY'],
+    ['Mallet Putter Headcover. Heel Shaft - Golf Putter cover. Vintage Gameboy', 'SR-RETRO-MAL-GRY'],
+    ['White Retro Gaming Heel Shaft Putter Cover | Magnetic', 'SR-RETRO-MAL-WHT'],
+    ['LAB DF3 Putter Headcover, Center-Shafted Mallet Putter Headcover, Retro Roller', 'SR-RETRO-DF3-GRY'],
+    ['Sunday Stripes (L.A.B. DF3)', 'SR-STRIPES-DF3'],
+    ['PRE ORDER - Sunday Stripes', 'SR-STRIPES-DF3'],
+    ['Mallet Sunday Stripes (TaylorMade Spider)', 'SR-STRIPES-MAL'],
+    ['Pre-Order - The Birdie Machine', 'SR-BIRDIE-DF3'],
+    ['SR - Striped Golf Towel - Green Stripe', 'SR-TOWEL-GRN'],
+    ['SR - Solid Golf Towel - Black', 'SR-TOWEL-BLK'],
+    ['T-Shirt', null],
+  ]
+  it.each(cases)('%s → %s', (name, sku) => {
+    expect(resolveSku({ productName: name, productSku: null }, full)).toBe(sku)
+  })
+})
