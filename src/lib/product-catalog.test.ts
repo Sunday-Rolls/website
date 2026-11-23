@@ -10,8 +10,8 @@ import { placeholderProducts } from '@/lib/shopify'
 
 describe('product catalog', () => {
   it('loads all products from the Excel template', () => {
-    expect(getCatalogProducts()).toHaveLength(23)
-    expect(getPublishedCatalogProducts()).toHaveLength(23)
+    expect(getCatalogProducts()).toHaveLength(24)
+    expect(getPublishedCatalogProducts()).toHaveLength(24)
   })
 
   it('generates stable handles from product titles', () => {

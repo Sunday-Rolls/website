@@ -45,7 +45,7 @@ describe('ShopPage', () => {
   it('groups every catalog product under its putter type', () => {
     renderWithRouter(<ShopPage />)
 
-    const [towels, centerShafted, mallet, ozMezz] = shopContent.sections.map((section) =>
+    const [towels, apparel, centerShafted, mallet, ozMezz] = shopContent.sections.map((section) =>
       sectionFor(section.title),
     )
 
@@ -53,12 +53,14 @@ describe('ShopPage', () => {
     expect(within(towels).getAllByText('New!').length).toBeGreaterThanOrEqual(1)
     expect(within(towels).getAllByText('New!').length).toBeLessThan(7)
     expect(within(towels).getByRole('heading', { name: 'Golf Towel - Green Stripe' })).toBeInTheDocument()
+    expect(within(apparel).getAllByRole('heading', { level: 3 })).toHaveLength(1)
+    expect(within(apparel).getByRole('heading', { name: 'The SR Tee - Black' })).toBeInTheDocument()
     expect(within(centerShafted).getAllByRole('heading', { level: 3 })).toHaveLength(10)
     expect(within(centerShafted).getByRole('heading', { name: 'Morning Dew' })).toBeInTheDocument()
     expect(within(centerShafted).getByRole('heading', { name: 'The Doodle' })).toBeInTheDocument()
     expect(within(mallet).getAllByRole('heading', { level: 3 })).toHaveLength(4)
     expect(within(ozMezz).getAllByRole('heading', { level: 3 })).toHaveLength(2)
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(23)
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(24)
   })
 
   it('renders section chips above the product sections, matching footer shop labels', () => {

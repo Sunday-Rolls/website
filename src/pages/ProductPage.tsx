@@ -52,6 +52,7 @@ export function ProductPage() {
             keyFeatures: known.keyFeatures ?? item.keyFeatures,
             features: known.features ?? item.features,
             dimensionsDisplay: known.dimensionsDisplay ?? item.dimensionsDisplay,
+            sizes: known.sizes ?? item.sizes,
           }
         }
         setProduct(resolved)

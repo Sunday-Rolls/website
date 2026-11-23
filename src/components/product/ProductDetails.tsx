@@ -4,7 +4,9 @@ import { useCart } from '@/lib/cart'
 import { getButtonLabel, usePageContent } from '@/lib/content'
 import { trackAddToCart } from '@/lib/gtm'
 import type { ShopifyProduct } from '@/lib/shopify'
+import { productSizeOptions } from '@/lib/product-sizes'
 import { Button } from '@/components/ui/Button'
+import { SizePicker } from '@/components/product/SizePicker'
 
 const shopifyConfigured = Boolean(
   import.meta.env.VITE_SHOPIFY_STORE_DOMAIN && import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN,
@@ -20,6 +22,9 @@ export function ProductDetails({ product }: ProductDetailsProps) {
   const { addItem, isUpdating } = useCart()
   const [isAdding, setIsAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const sizeOptions = productSizeOptions(product)
+  const needsSize = sizeOptions.length > 0
 
   const keyFeatures = product.keyFeatures
   const legacyFeatures =
@@ -35,13 +40,23 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       return
     }
 
+    if (needsSize && !selectedSize) {
+      setError(content.sizeRequired ?? 'Choose a size first.')
+      return
+    }
+
     setIsAdding(true)
     setError(null)
 
     try {
+      const { fetchProductByHandle, findVariantForSize } = await import('@/lib/shopify')
       let variantId = product.variantId
-      if (!variantId) {
-        const { fetchProductByHandle } = await import('@/lib/shopify')
+      if (needsSize && selectedSize) {
+        const variants = product.variants?.length
+          ? product.variants
+          : (await fetchProductByHandle(product.handle))?.variants
+        variantId = findVariantForSize(variants, selectedSize)?.id
+      } else if (!variantId) {
         const live = await fetchProductByHandle(product.handle)
         variantId = live?.variantId
       }
@@ -117,6 +132,18 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       ) : null}
 
       <div className="space-y-3">
+        {needsSize ? (
+          <SizePicker
+            label={content.sizeLabel ?? 'Size'}
+            options={sizeOptions}
+            value={selectedSize}
+            disabled={busy}
+            onChange={(size) => {
+              setSelectedSize(size)
+              setError(null)
+            }}
+          />
+        ) : null}
         <Button onClick={() => void handleAddToCart()} disabled={busy}>
           {busy ? getButtonLabel('addingToCart') : getButtonLabel('addToCart')}
         </Button>

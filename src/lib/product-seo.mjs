@@ -23,6 +23,7 @@ export function productDisplayName(title) {
 /** The kind of product and its fit, e.g. "L.A.B. DF3 Putter Cover" or "Waffle Golf Towel". */
 export function productFitLabel(product) {
   if (product?.category === 'towels') return 'Waffle Golf Towel'
+  if (product?.category === 'apparel') return 'Golf T-Shirt'
   return FIT_LABELS[product?.subcategory] ?? 'Putter Cover'
 }
 
@@ -34,6 +35,10 @@ export function productSeoTitle(product) {
     // "Golf Towel - Green Stripe" → "Green Stripe Waffle Golf Towel"
     name = name.replace(/^golf towel\s*/i, '')
     return `${name} ${fit} | Sunday Rolls Golf`.trim()
+  }
+  if (product?.category === 'apparel') {
+    // "The SR Tee - Black" → "The SR Tee Black — Golf T-Shirt | Sunday Rolls Golf"
+    return `${name} — ${fit} | Sunday Rolls Golf`
   }
   return `${name} — ${fit} | Sunday Rolls Golf`
 }
@@ -50,7 +55,9 @@ export function productMetaDescription(product) {
   const lead =
     product?.category === 'towels'
       ? `${name.replace(/^golf towel\s*/i, '')} waffle golf towel by Sunday Rolls Golf.`
-      : `${name} ${fit} by Sunday Rolls Golf.`
+      : product?.category === 'apparel'
+        ? `${name} golf t-shirt by Sunday Rolls Golf.`
+        : `${name} ${fit} by Sunday Rolls Golf.`
   const text = String(product?.description ?? '').replace(/\s+/g, ' ').trim()
   const sentence = text.match(/^.*?[.!?](\s|$)/)?.[0]?.trim() ?? text
   const full = sentence ? `${lead} ${sentence}` : lead
