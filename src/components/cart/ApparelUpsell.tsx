@@ -80,7 +80,7 @@ export function ApparelUpsell({
     <aside
       aria-label={copy.title}
       className={cn(
-        'grid h-full gap-4 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr] sm:items-start',
+        'grid h-full grid-cols-[72px_1fr] items-start gap-x-4 gap-y-3 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr]',
         !compact && 'lg:grid-cols-[88px_1fr_auto]',
       )}
     >
@@ -124,7 +124,7 @@ export function ApparelUpsell({
       <div
         className={cn(
           'flex items-center',
-          compact ? 'sm:col-start-2' : 'lg:justify-end lg:self-center',
+          compact ? 'col-start-2' : 'col-start-2 lg:col-start-auto lg:justify-end lg:self-center',
         )}
       >
         <Button type="button" variant="secondary" disabled={busy} onClick={() => void handleAdd()}>

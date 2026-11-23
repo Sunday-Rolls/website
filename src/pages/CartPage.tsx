@@ -333,7 +333,7 @@ export function CartPage() {
               <div className="overflow-hidden">
                 <aside
                   className={cn(
-                    'grid h-full gap-4 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr] sm:items-start',
+                    'grid h-full grid-cols-[72px_1fr] items-start gap-x-4 gap-y-3 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr]',
                     !sideBySide && 'lg:grid-cols-[88px_1fr_auto]',
                   )}
                 >
@@ -403,7 +403,7 @@ export function CartPage() {
                   <div
                     className={cn(
                       'flex items-center',
-                      sideBySide ? 'sm:col-start-2' : 'lg:justify-end lg:self-center',
+                      sideBySide ? 'col-start-2' : 'col-start-2 lg:col-start-auto lg:justify-end lg:self-center',
                     )}
                   >
                     <Button
