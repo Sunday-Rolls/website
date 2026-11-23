@@ -1,0 +1,130 @@
+name: Experiments
+
+# A/B test lifecycle (docs/EXPERIMENTS_CONTRACT.md, "GitHub integration"; docs/AB_TESTING_PLAN.md §7).
+# The logic lives in .github/scripts/experiments.mjs (tested by experiments.test.mjs).
+# PRs without the `ab-test` label skip every job, so this workflow never blocks them.
+# The dashboard sync needs the EXPERIMENTS_CI_TOKEN secret; without it the jobs still run and say so.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, closed]
+  repository_dispatch:
+    types: [experiment-concluded]
+  schedule:
+    - cron: '0 14 * * 1' # Mondays 14:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr:
+    name: A/B test PR
+    # Only for `ab-test` PRs; a `labeled` run only when the label just added is `ab-test`.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.action != 'closed'
+      && contains(github.event.pull_request.labels.*.name, 'ab-test')
+      && (github.event.action != 'labeled' || github.event.label.name == 'ab-test')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: experiments-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      VITE_CONFIG_NATIVE_IGNORE_WARNING: true
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the experiment registry
+        run: npx vitest run src/experiments
+
+      - name: Comment preview links and sync the draft
+        uses: actions/github-script@v7
+        env:
+          EXPERIMENTS_CI_TOKEN: ${{ secrets.EXPERIMENTS_CI_TOKEN }}
+          EXPERIMENTS_API_URL: ${{ vars.EXPERIMENTS_API_URL }}
+        with:
+          script: |
+            const { runPullRequest } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/experiments.mjs`)
+            await runPullRequest({ github, context, core })
+
+  pr-closed:
+    name: A/B test PR closed
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.action == 'closed'
+      && contains(github.event.pull_request.labels.*.name, 'ab-test')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: experiments-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Record merge or archive the draft
+        uses: actions/github-script@v7
+        env:
+          EXPERIMENTS_CI_TOKEN: ${{ secrets.EXPERIMENTS_CI_TOKEN }}
+          EXPERIMENTS_API_URL: ${{ vars.EXPERIMENTS_API_URL }}
+        with:
+          script: |
+            const { runPullRequest } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/experiments.mjs`)
+            await runPullRequest({ github, context, core })
+
+  cleanup-issue:
+    name: Cleanup issue for a concluded experiment
+    # Sent by contact-api on Promote / Stop. repository_dispatch runs the workflow file on main.
+    if: github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: experiments-cleanup
+      cancel-in-progress: false
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Open or update the cleanup issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { runDispatch } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/experiments.mjs`)
+            await runDispatch({ github, context, core })
+
+  stale:
+    name: Concluded experiments still in code
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: experiments-cleanup
+      cancel-in-progress: false
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Open or update cleanup issues
+        uses: actions/github-script@v7
+        env:
+          EXPERIMENTS_CI_TOKEN: ${{ secrets.EXPERIMENTS_CI_TOKEN }}
+          EXPERIMENTS_API_URL: ${{ vars.EXPERIMENTS_API_URL }}
+        with:
+          script: |
+            const { runStale } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/experiments.mjs`)
+            await runStale({ github, context, core })

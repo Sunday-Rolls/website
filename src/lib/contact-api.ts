@@ -1,3 +1,6 @@
+import { contactApiBaseUrl } from '@/lib/api-base'
+import { experimentString, visitorId } from '@/lib/experiments'
+
 export type ContactFormPayload = {
   name: string
   email: string
@@ -5,14 +8,15 @@ export type ContactFormPayload = {
   message: string
 }
 
-/** Production Railway API — used when the Vite env var is missing at build time. */
-const DEFAULT_CONTACT_API_URL = 'https://contact-api-production-9af6.up.railway.app'
-
-function contactApiBaseUrl(): string | null {
-  const configured = import.meta.env.VITE_CONTACT_API_URL?.replace(/\/$/, '')
-  if (configured) return configured
-  if (import.meta.env.PROD) return DEFAULT_CONTACT_API_URL
-  return null
+/** Adds the visitor id and exposure string (contract: optional, never put in the email). */
+function withExperiments(payload: ContactFormPayload) {
+  const vid = visitorId()
+  const experiments = experimentString()
+  return {
+    ...payload,
+    ...(vid ? { visitorId: vid } : {}),
+    ...(experiments && experiments.length <= 500 ? { experiments } : {}),
+  }
 }
 
 export async function submitContactForm(
@@ -35,7 +39,7 @@ export async function submitContactForm(
   const response = await fetch(`${baseUrl}/contact`, {
     method: 'POST',
     headers,
-    body: JSON.stringify(payload),
+    body: JSON.stringify(withExperiments(payload)),
   })
 
   let data: { ok?: boolean; error?: string } | null = null

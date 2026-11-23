@@ -31,7 +31,7 @@ async function setup() {
 describe('dashboard auth + overview', () => {
   it('serves the UI shell and page modules with no-cache so deploys are never mixed', async () => {
     const { app } = await setup()
-    for (const path of ['/dashboard', '/dashboard/app.js', '/dashboard/styles.css', '/dashboard/lib/ui.js', '/dashboard/pages/overview.js']) {
+    for (const path of ['/dashboard', '/dashboard/app.js', '/dashboard/styles.css', '/dashboard/lib/ui.js', '/dashboard/pages/overview.js', '/dashboard/pages/experiments.js']) {
       const res = await app.request(path)
       expect(res.status, path).toBe(200)
       expect(res.headers.get('cache-control'), path).toBe('no-cache')
