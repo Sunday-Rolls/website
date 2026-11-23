@@ -1,7 +1,8 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import homeContent from '@/content/pages/home.json'
+import { __resetExperimentsForTests, bootExperiments, experimentString } from '@/lib/experiments'
 import siteContent from '@/content/site.json'
 import reviewsData from '@/data/reviews.json'
 import { fitsMarqueeCard } from '@/lib/marquee-reviews'
@@ -30,9 +31,37 @@ vi.mock('@/lib/reviews-api', () => ({
   submitProductReview: vi.fn(),
 }))
 
+function bootHomeBanner(arm: 'control' | 'b') {
+  window.__SR_EXP__ = {
+    vid: 'AbCdEfGhIjKlMnOpQrStUv',
+    assignments: { 'home-banner': arm },
+    tracked: ['home-banner'],
+    bot: false,
+  }
+  bootExperiments({ search: '', fetchConfig: false })
+}
+
 describe('HomePage', () => {
-  it('renders the featured Retro Roller banner with its colorways', () => {
+  beforeEach(() => {
+    __resetExperimentsForTests()
+    localStorage.clear()
+    sessionStorage.clear()
+    delete window.__SR_EXP__
+    Object.defineProperty(navigator, 'sendBeacon', { value: vi.fn(() => true), configurable: true })
+  })
+
+  it('hides the Retro Roller banner for the home-banner control arm', () => {
+    bootHomeBanner('control')
     renderWithRouter(<HomePage />)
+
+    expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+    expect(experimentString()).toBe('home-banner:control')
+  })
+
+  it('renders the featured Retro Roller banner with its colorways', () => {
+    bootHomeBanner('b')
+    renderWithRouter(<HomePage />)
+    expect(experimentString()).toBe('home-banner:b')
 
     const featured = homeContent.featured
     const heading = screen.getByRole('heading', { level: 2, name: featured.title })
@@ -51,6 +80,7 @@ describe('HomePage', () => {
   })
 
   it('switches the featured banner to mallet colourways and links', async () => {
+    bootHomeBanner('b')
     const user = userEvent.setup()
     renderWithRouter(<HomePage />)
 

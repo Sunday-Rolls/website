@@ -17,6 +17,8 @@
     "test:e2e": "playwright test",
     "test:e2e:order-analytics": "E2E_ORDER_ANALYTICS=1 playwright test e2e/order-analytics.spec.ts --workers=1",
     "test:all": "vitest run && playwright test",
+    "experiments:verify": "node scripts/verify-experiments.mjs",
+    "experiments:verify:browser": "playwright test -c playwright.live.config.ts",
     "catalog:sync": "python3 scripts/sync-product-catalog.py",
     "catalog:port-shopify": "node scripts/port-catalog-to-shopify.mjs",
     "assets:scrape": "python3 scripts/scrape-sundayrolls-assets.py",

@@ -16,7 +16,7 @@ import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
 import { SocialsBanner } from '@/components/home/SocialsBanner'
 import { StoryBanner } from '@/components/home/StoryBanner'
 import { ValueStrip } from '@/components/ui/ValueStrip'
-import { useVariant } from '@/components/experiments'
+import { Variant, useVariant } from '@/components/experiments'
 
 export function HomePage() {
   const content = usePageContent('home')
@@ -55,7 +55,10 @@ export function HomePage() {
     <>
       <HeroSection />
       <ValueStrip items={content.values.items} />
-      <FeaturedProductBanner />
+      {/* A/B test home-banner (src/experiments/home-banner.json): arm b sees the Retro Roller banner. */}
+      <Variant experiment="home-banner" is="b">
+        <FeaturedProductBanner />
+      </Variant>
       {blocks.map(({ block, products: blockProducts, tone }, index) => (
         <ProductCarouselBlock
           key={block.id}

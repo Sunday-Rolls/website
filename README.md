@@ -140,6 +140,7 @@ A change can ship **dark** behind an experiment flag and be started, paused, sto
 - **Developer:** add `src/experiments/<key>.json` (schema `src/experiments/schema.json`, example `aa-check.json`), gate the change with `<Variant>` / `useVariant` from `@/components/experiments` or a content-JSON `experiments` block, and label the PR `ab-test`. `/website-change` walks it ("Run it as an A/B test"). `npm test` fails if a key used in `src/` has no valid registry file.
 - **CI:** [`.github/workflows/experiments.yml`](.github/workflows/experiments.yml) (logic in `.github/scripts/experiments.mjs`, tests: `node --test .github/scripts/*.test.mjs`) checks the registry, comments one `?sr_force=<key>:<arm>` preview link per arm, creates a draft in the dashboard, marks it merged or archives it when the PR closes, and opens a cleanup issue when a test is promoted or stopped (plus a weekly check for concluded tests still in code). PRs without the label are skipped.
 - **Operators:** `/admin-handoff` → Operations → "A/B tests".
+- **After a deploy:** `npm run experiments:verify -- --expect <key>` (HTTP: cookie, sticky version, bots, split) and `npm run experiments:verify:browser` (Playwright against the live site: each arm renders, exposure beacon). Neither adds visitors to a test. Runbook: [`docs/AB_TESTING_VERIFY.md`](docs/AB_TESTING_VERIFY.md).
 
 **One-time setup (each is a live change: confirm with the owner before applying it).** Until 1–2 are done, the workflow still validates and comments previews, and says the dashboard sync is not set up.
 

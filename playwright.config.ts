@@ -29,6 +29,8 @@ if (needsLocalDashboard) {
 
 export default defineConfig({
   testDir: './e2e',
+  // e2e/live runs against the deployed site: playwright.live.config.ts
+  testIgnore: ['live/**'],
   fullyParallel: !orderAnalytics,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
