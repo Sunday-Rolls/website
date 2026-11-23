@@ -4,6 +4,7 @@ import { assetUrl } from '@/lib/asset-url'
 import type { CatalogProduct } from '@/lib/product-catalog'
 import { productSizeOptions } from '@/lib/product-sizes'
 import { sitePath } from '@/lib/site-path'
+import { cn } from '@/lib/utils'
 import {
   fetchProductByHandle,
   findVariantForSize,
@@ -19,12 +20,21 @@ interface ApparelUpsellProps {
   copy: NonNullable<CartContent['apparelUpsell']>
   currencyCode: string
   disabled?: boolean
+  /** Half-width layout (next to the towel card): the button sits under the text. */
+  compact?: boolean
   /** Adds the chosen variant; the cart provider shows any error. */
   onAdd: (variantId: string) => Promise<unknown>
 }
 
 /** "Complete the look" card: pick a size, add the tee to the order. */
-export function ApparelUpsell({ product, copy, currencyCode, disabled, onAdd }: ApparelUpsellProps) {
+export function ApparelUpsell({
+  product,
+  copy,
+  currencyCode,
+  disabled,
+  compact,
+  onAdd,
+}: ApparelUpsellProps) {
   const [variants, setVariants] = useState<ProductVariant[] | undefined>(undefined)
   const [size, setSize] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
@@ -69,7 +79,10 @@ export function ApparelUpsell({ product, copy, currencyCode, disabled, onAdd }: 
   return (
     <aside
       aria-label={copy.title}
-      className="grid gap-4 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr] sm:items-start lg:grid-cols-[88px_1fr_auto]"
+      className={cn(
+        'grid h-full gap-4 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr] sm:items-start',
+        !compact && 'lg:grid-cols-[88px_1fr_auto]',
+      )}
     >
       <Link to={sitePath(`/products/${product.handle}`)} className="block overflow-hidden">
         {image ? (
@@ -108,7 +121,12 @@ export function ApparelUpsell({ product, copy, currencyCode, disabled, onAdd }: 
           </p>
         ) : null}
       </div>
-      <div className="flex items-center lg:justify-end lg:self-center">
+      <div
+        className={cn(
+          'flex items-center',
+          compact ? 'sm:col-start-2' : 'lg:justify-end lg:self-center',
+        )}
+      >
         <Button type="button" variant="secondary" disabled={busy} onClick={() => void handleAdd()}>
           {adding ? copy.addingLabel : copy.ctaLabel}
         </Button>

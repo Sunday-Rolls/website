@@ -112,6 +112,7 @@ export function CartPage() {
     () => (lines.length > 0 ? (listApparelUpsellOptions(cartHandles)[0] ?? null) : null),
     [cartHandles, lines.length],
   )
+  const showApparelUpsell = Boolean(apparelUpsell && content.apparelUpsell)
   const selectedTowel =
     towelOptions.find((option) => option.handle === selectedTowelHandle) ?? towelOptions[0] ?? null
   // The towel card folds away (and back) instead of popping, so it keeps the last towel it
@@ -120,6 +121,8 @@ export function CartPage() {
   if (selectedTowel && selectedTowel.handle !== shownTowel?.handle) setShownTowel(selectedTowel)
   const upsellOpen = Boolean(selectedTowel)
   const towel = selectedTowel ?? shownTowel
+  // Both add-ons showing: towel and tee sit side by side on wide screens, stacked on phones.
+  const sideBySide = upsellOpen && showApparelUpsell
   const towelImage = towel?.images[0] ? assetUrl(towel.images[0]) : undefined
   const towelPrice = towel?.price
     ? formatPrice(towel.price, cart?.currencyCode ?? 'USD')
@@ -316,92 +319,117 @@ export function CartPage() {
         </div>
       </div>
 
-      {towel ? (
-        <div
-          className={cn(
-            'grid transition-[grid-template-rows,opacity,margin] duration-[400ms] ease-out',
-            upsellOpen ? 'grid-rows-[1fr] opacity-100' : '!mt-0 grid-rows-[0fr] opacity-0',
-          )}
-          aria-hidden={!upsellOpen}
-          inert={!upsellOpen}
-        >
-          <div className="overflow-hidden">
-            <aside className="grid gap-4 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr] sm:items-start lg:grid-cols-[88px_1fr_auto]">
-              <Link
-                to={sitePath(`/products/${towel.handle}`)}
-                className="block overflow-hidden"
-              >
-                {towelImage ? (
-                  <img
-                    src={towelImage}
-                    alt={towel.title}
-                    className="aspect-square w-full object-cover"
-                  />
-                ) : (
-                  <div className="aspect-square bg-warm-sand" />
-                )}
-              </Link>
-              <div className="flex min-w-0 flex-col gap-3">
-                <div className="space-y-1">
-                  <p className="font-body text-label uppercase tracking-widest text-leather">
-                    {upsell.eyebrow}
-                  </p>
-                  <h2 className="font-display text-xl text-heritage-green">{upsell.title}</h2>
-                  <p className="max-w-xl font-body text-body-small text-matte-black/75">
-                    {upsell.description}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <label className="inline-flex items-center gap-2" htmlFor={towelColorId}>
-                    <span className="font-body text-label uppercase tracking-widest text-leather">
-                      {upsell.colorLabel}
-                    </span>
-                    <span className="relative inline-flex">
-                      <select
-                        id={towelColorId}
-                        value={towel.handle}
-                        disabled={isUpdating || addingUpsell}
-                        onChange={(event) => setSelectedTowelHandle(event.target.value)}
-                        className="appearance-none border-0 border-b border-leather/40 bg-transparent py-1 pl-0 pr-6 font-body text-body-small text-heritage-green transition-colors hover:border-heritage-green focus:border-heritage-green focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {towelOptions.map((option) => (
-                          <option key={option.handle} value={option.handle}>
-                            {towelColorLabel(option.title)}
-                          </option>
-                        ))}
-                      </select>
-                      <span
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-leather"
-                      >
-                        <svg width="10" height="6" viewBox="0 0 12 8" fill="none">
-                          <path
-                            d="M1 1.5L6 6.5L11 1.5"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="square"
-                          />
-                        </svg>
-                      </span>
-                    </span>
-                  </label>
-                  {towelPrice ? (
-                    <p className="font-body text-body-small text-matte-black/70">{towelPrice}</p>
-                  ) : null}
-                </div>
-              </div>
-              <div className="flex items-center lg:justify-end lg:self-center">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={isUpdating || addingUpsell}
-                  onClick={() => void handleAddTowelUpsell()}
+      {towel || showApparelUpsell ? (
+        <div className={cn('grid gap-4', sideBySide && 'lg:grid-cols-2 lg:items-stretch')}>
+          {towel ? (
+            <div
+              className={cn(
+                'grid transition-[grid-template-rows,opacity,margin] duration-[400ms] ease-out',
+                upsellOpen ? 'grid-rows-[1fr] opacity-100' : '-mb-4 grid-rows-[0fr] opacity-0',
+              )}
+              aria-hidden={!upsellOpen}
+              inert={!upsellOpen}
+            >
+              <div className="overflow-hidden">
+                <aside
+                  className={cn(
+                    'grid h-full gap-4 border border-sand bg-warm-sand/35 p-4 sm:grid-cols-[88px_1fr] sm:items-start',
+                    !sideBySide && 'lg:grid-cols-[88px_1fr_auto]',
+                  )}
                 >
-                  {addingUpsell ? upsell.addingLabel : upsell.ctaLabel}
-                </Button>
+                  <Link
+                    to={sitePath(`/products/${towel.handle}`)}
+                    className="block overflow-hidden"
+                  >
+                    {towelImage ? (
+                      <img
+                        src={towelImage}
+                        alt={towel.title}
+                        className="aspect-square w-full object-cover"
+                      />
+                    ) : (
+                      <div className="aspect-square bg-warm-sand" />
+                    )}
+                  </Link>
+                  <div className="flex min-w-0 flex-col gap-3">
+                    <div className="space-y-1">
+                      <p className="font-body text-label uppercase tracking-widest text-leather">
+                        {upsell.eyebrow}
+                      </p>
+                      <h2 className="font-display text-xl text-heritage-green">{upsell.title}</h2>
+                      <p className="max-w-xl font-body text-body-small text-matte-black/75">
+                        {upsell.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <label className="inline-flex items-center gap-2" htmlFor={towelColorId}>
+                        <span className="font-body text-label uppercase tracking-widest text-leather">
+                          {upsell.colorLabel}
+                        </span>
+                        <span className="relative inline-flex">
+                          <select
+                            id={towelColorId}
+                            value={towel.handle}
+                            disabled={isUpdating || addingUpsell}
+                            onChange={(event) => setSelectedTowelHandle(event.target.value)}
+                            className="appearance-none border-0 border-b border-leather/40 bg-transparent py-1 pl-0 pr-6 font-body text-body-small text-heritage-green transition-colors hover:border-heritage-green focus:border-heritage-green focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {towelOptions.map((option) => (
+                              <option key={option.handle} value={option.handle}>
+                                {towelColorLabel(option.title)}
+                              </option>
+                            ))}
+                          </select>
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-leather"
+                          >
+                            <svg width="10" height="6" viewBox="0 0 12 8" fill="none">
+                              <path
+                                d="M1 1.5L6 6.5L11 1.5"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="square"
+                              />
+                            </svg>
+                          </span>
+                        </span>
+                      </label>
+                      {towelPrice ? (
+                        <p className="font-body text-body-small text-matte-black/70">{towelPrice}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div
+                    className={cn(
+                      'flex items-center',
+                      sideBySide ? 'sm:col-start-2' : 'lg:justify-end lg:self-center',
+                    )}
+                  >
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={isUpdating || addingUpsell}
+                      onClick={() => void handleAddTowelUpsell()}
+                    >
+                      {addingUpsell ? upsell.addingLabel : upsell.ctaLabel}
+                    </Button>
+                  </div>
+                </aside>
               </div>
-            </aside>
-          </div>
+            </div>
+          ) : null}
+          {showApparelUpsell && apparelUpsell && content.apparelUpsell ? (
+            <ApparelUpsell
+              key={apparelUpsell.handle}
+              product={apparelUpsell}
+              copy={content.apparelUpsell}
+              currencyCode={cart?.currencyCode ?? 'USD'}
+              disabled={isUpdating}
+              compact={sideBySide}
+              onAdd={(variantId) => addItem(variantId, 1)}
+            />
+          ) : null}
         </div>
       ) : null}
 
@@ -519,17 +547,6 @@ export function CartPage() {
         })}
 
       </div>
-
-      {apparelUpsell && content.apparelUpsell ? (
-        <ApparelUpsell
-          key={apparelUpsell.handle}
-          product={apparelUpsell}
-          copy={content.apparelUpsell}
-          currencyCode={cart?.currencyCode ?? 'USD'}
-          disabled={isUpdating}
-          onAdd={(variantId) => addItem(variantId, 1)}
-        />
-      ) : null}
 
       <div className="flex flex-col items-end gap-4 border-t border-sand pt-6">
         <dl className="w-full max-w-sm space-y-2">
