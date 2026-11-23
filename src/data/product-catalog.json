@@ -891,7 +891,7 @@
     "handle": "sr-tee-black",
     "status": "Published",
     "productType": "T-Shirt",
-    "description": "The SR Tee is a black golf t-shirt made with soft cotton for all-day comfort, finished with the cream Sunday Rolls SR script monogram on the left chest. A relaxed, boxy fit moves with your swing on the course and looks just as right at the range, the clubhouse or the 19th hole.",
+    "description": "The SR Tee is a black golf t-shirt printed on a Comfort Colors cotton tee, so it's soft and comfortable from the first wear. It's finished with the cream Sunday Rolls SR script monogram on the left chest. A relaxed, boxy fit moves with your swing on the course and looks just as right at the range, the clubhouse or the 19th hole.",
     "price": "30.00",
     "sellingMethod": "By the item",
     "category": "apparel",
@@ -908,8 +908,8 @@
     ],
     "keyFeatures": [
       {
-        "label": "Cotton Comfort",
-        "text": "Soft, breathable cotton that stays comfortable from the first tee to the last putt"
+        "label": "Comfort Colors Cotton",
+        "text": "A soft, breathable Comfort Colors tee that stays comfortable from the first tee to the last putt"
       },
       {
         "label": "SR Script Monogram",
