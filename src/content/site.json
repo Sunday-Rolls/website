@@ -1,4 +1,12 @@
 {
+  "promoBanner": {
+    "startsAt": "2026-11-23T00:00:00-06:00",
+    "endsAt": "2026-12-01T00:00:00-06:00",
+    "eyebrow": "Black Friday",
+    "headline": "25% off everything",
+    "detail": "Through Cyber Monday · Taken off at checkout, no code needed",
+    "cta": { "label": "Shop the sale", "href": "/shop" }
+  },
   "brand": {
     "name": "Sunday Rolls",
     "shortName": "SR",
