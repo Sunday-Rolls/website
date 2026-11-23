@@ -20,6 +20,11 @@ function absoluteImage(url: string, origin: string): string {
  * rating. Google's review-snippet rules forbid ratings aggregated from other
  * sites, so imported Etsy reviews (and reviews of sibling products) are left out.
  */
+const STRUCTURED_DATA_CATEGORY: Partial<Record<NonNullable<ShopifyProduct['category']>, string>> = {
+  towels: 'Golf Towels',
+  apparel: 'Golf Apparel',
+}
+
 export function buildProductJsonLd(
   product: ShopifyProduct,
   reviews: ProductReview[],
@@ -40,7 +45,7 @@ export function buildProductJsonLd(
   }
   if (product.description) data.description = product.description
   if (images.length > 0) data.image = images
-  if (product.category) data.category = product.category === 'towels' ? 'Golf Towels' : 'Golf Putter Headcovers'
+  if (product.category) data.category = STRUCTURED_DATA_CATEGORY[product.category] ?? 'Golf Putter Headcovers'
 
   const price = Number(product.priceAmount)
   if (Number.isFinite(price) && price > 0 && product.currencyCode) {

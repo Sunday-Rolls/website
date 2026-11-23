@@ -270,7 +270,12 @@ function productJsonLd(product, pageUrl, imageUrl) {
     '@type': 'Product',
     name: product.title,
     brand: { '@type': 'Brand', name: 'Sunday Rolls' },
-    category: product.category === 'towels' ? 'Golf Towels' : 'Golf Putter Headcovers',
+    category:
+      product.category === 'towels'
+        ? 'Golf Towels'
+        : product.category === 'apparel'
+          ? 'Golf Apparel'
+          : 'Golf Putter Headcovers',
   }
   if (pageUrl) data.url = pageUrl
   if (product.description) data.description = product.description

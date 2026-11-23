@@ -4,6 +4,7 @@ import { assetUrl } from '@/lib/asset-url'
 import { useCart } from '@/lib/cart'
 import { cn } from '@/lib/utils'
 import { freeShippingProgress } from '@/lib/cart-free-shipping'
+import { listApparelUpsellOptions } from '@/lib/cart-apparel-upsell'
 import {
   listTowelUpsellOptions,
   shouldShowTowelUpsell,
@@ -19,6 +20,7 @@ import { useMinimumDuration } from '@/lib/motion'
 import { applyPageMeta } from '@/lib/page-meta'
 import { sitePath } from '@/lib/site-path'
 import { fetchProductByHandle, formatPrice, isShopifyConfigured, type ShopifyCart } from '@/lib/shopify'
+import { ApparelUpsell } from '@/components/cart/ApparelUpsell'
 import { PUTT_LOOP_MS, PuttAnimation } from '@/components/golf/PuttAnimation'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
@@ -104,6 +106,11 @@ export function CartPage() {
     () =>
       showTowelUpsell ? listTowelUpsellOptions(cartHandles, upsell.preferredHandle) : [],
     [cartHandles, showTowelUpsell, upsell.preferredHandle],
+  )
+  // The tee card shows on any cart (no price window), until a shirt is in the cart.
+  const apparelUpsell = useMemo(
+    () => (lines.length > 0 ? (listApparelUpsellOptions(cartHandles)[0] ?? null) : null),
+    [cartHandles, lines.length],
   )
   const selectedTowel =
     towelOptions.find((option) => option.handle === selectedTowelHandle) ?? towelOptions[0] ?? null
@@ -446,7 +453,9 @@ export function CartPage() {
                       >
                         {item.title}
                       </Link>
-                      <p className="font-body text-body-small text-matte-black/70">{item.price}</p>
+                      <p className="font-body text-body-small text-matte-black/70">
+                        {item.variantTitle ? `Size ${item.variantTitle} · ${item.price}` : item.price}
+                      </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
@@ -510,6 +519,17 @@ export function CartPage() {
         })}
 
       </div>
+
+      {apparelUpsell && content.apparelUpsell ? (
+        <ApparelUpsell
+          key={apparelUpsell.handle}
+          product={apparelUpsell}
+          copy={content.apparelUpsell}
+          currencyCode={cart?.currencyCode ?? 'USD'}
+          disabled={isUpdating}
+          onAdd={(variantId) => addItem(variantId, 1)}
+        />
+      ) : null}
 
       <div className="flex flex-col items-end gap-4 border-t border-sand pt-6">
         <dl className="w-full max-w-sm space-y-2">

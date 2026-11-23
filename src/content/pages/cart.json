@@ -32,6 +32,15 @@
     "ctaLabel": "Add to cart",
     "addingLabel": "Adding…"
   },
+  "apparelUpsell": {
+    "eyebrow": "Add-on",
+    "title": "Complete the look",
+    "description": "Throw the SR Tee in with your order. Black with our cream SR script monogram.",
+    "sizeLabel": "Size",
+    "sizeRequired": "Pick a size to add the tee.",
+    "ctaLabel": "Add to cart",
+    "addingLabel": "Adding…"
+  },
   "lineActions": {
     "quantityLabel": "Qty",
     "removeLabel": "Remove",

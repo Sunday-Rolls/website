@@ -107,7 +107,7 @@ export interface HomeContent {
 }
 
 export interface ShopSection {
-  /** Matches `product.subcategory`, or `product.category` for towels. */
+  /** Matches `product.subcategory`, or `product.category` for towels and apparel. */
   id: string
   title: string
   subtitle?: string
@@ -156,6 +156,10 @@ export interface ProductContent {
   }
   featuresHeading: string
   dimensionsHeading?: string
+  /** Size chip label for apparel, e.g. "Size". */
+  sizeLabel?: string
+  /** Shown when Add to cart is pressed before a size is picked. */
+  sizeRequired?: string
   defaultFeatures: string[]
   story: {
     title: string
@@ -287,6 +291,16 @@ export interface CartContent {
     title: string
     description: string
     colorLabel: string
+    ctaLabel: string
+    addingLabel: string
+  }
+  /** Add-on card for apparel, shown below the cart lines while no shirt is in the cart. */
+  apparelUpsell?: {
+    eyebrow: string
+    title: string
+    description: string
+    sizeLabel: string
+    sizeRequired: string
     ctaLabel: string
     addingLabel: string
   }

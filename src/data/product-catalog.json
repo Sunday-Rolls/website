@@ -885,5 +885,44 @@
         "text": "Light enough to tuck on the bag and grab between shots"
       }
     ]
+  },
+  {
+    "title": "The SR Tee - Black",
+    "handle": "sr-tee-black",
+    "status": "Published",
+    "productType": "T-Shirt",
+    "description": "A black tee with our cream SR script monogram on the chest. A relaxed, boxy fit made for the walk from the 18th green to the 19th hole. Wear it on the course, at the range, or anywhere the good times roll.",
+    "price": "30.00",
+    "sellingMethod": "By the item",
+    "category": "apparel",
+    "productToken": "T-Shirt",
+    "sizes": [
+      "L",
+      "XL"
+    ],
+    "images": [
+      "/assets/products/sr-tee-black.jpg",
+      "/assets/products/sr-tee-black-back.jpg",
+      "/assets/products/sr-tee-black-hanging.jpg",
+      "/assets/products/sr-tee-black-detail.jpg"
+    ],
+    "keyFeatures": [
+      {
+        "label": "SR Monogram",
+        "text": "Cream SR script logo on the left chest"
+      },
+      {
+        "label": "Relaxed Fit",
+        "text": "Boxy, slightly oversized cut with a ribbed crew neck"
+      },
+      {
+        "label": "Clean Back",
+        "text": "No back print, so it dresses up or down"
+      },
+      {
+        "label": "Designed in the USA",
+        "text": "Part of the Sunday Rolls golf goods lineup"
+      }
+    ]
   }
 ]

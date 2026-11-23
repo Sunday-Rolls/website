@@ -10,6 +10,8 @@
   },
   "featuresHeading": "Key Features",
   "dimensionsHeading": "Dimensions",
+  "sizeLabel": "Size",
+  "sizeRequired": "Choose a size first.",
   "defaultFeatures": [
     "Plush velvet interior",
     "Premium exterior materials"

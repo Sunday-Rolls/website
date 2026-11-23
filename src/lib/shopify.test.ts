@@ -9,7 +9,7 @@ const subcategoryOrder = ['center-shafted', 'mallet', 'oz-mezz']
 
 describe('filterProductsByCategory', () => {
   it('returns all products for the all filter', () => {
-    expect(filterProductsByCategory(placeholderProducts, 'all')).toHaveLength(23)
+    expect(filterProductsByCategory(placeholderProducts, 'all')).toHaveLength(24)
   })
 
   it('sorts all products center shafted, then mallet, then OZ like the home page', () => {

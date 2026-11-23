@@ -52,6 +52,8 @@ export interface CatalogProduct {
   }
   dimensionsDisplay?: string
   keyFeatures?: ProductFeature[]
+  /** Apparel sizes, matching the Shopify variant titles (e.g. ["L", "XL"]). */
+  sizes?: string[]
   images: string[]
 }
 
@@ -143,6 +145,7 @@ export function catalogProductToShopifyProduct(
     features: defaultFeatures(product),
     keyFeatures: product.keyFeatures,
     dimensionsDisplay: formatDimensionsDisplay(product),
+    ...(product.sizes?.length ? { sizes: product.sizes } : {}),
   }
 }
 

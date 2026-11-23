@@ -10,7 +10,7 @@ const storeDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN
 const publicAccessToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN
 const apiVersion = import.meta.env.VITE_SHOPIFY_API_VERSION ?? '2025-01'
 
-export type ProductCategory = 'headcovers' | 'bags' | 'towels' | 'accessories'
+export type ProductCategory = 'headcovers' | 'bags' | 'towels' | 'apparel' | 'accessories'
 export type HeadcoverSubcategory = 'center-shafted' | 'mallet' | 'oz-mezz'
 
 export const isShopifyConfigured = Boolean(storeDomain && publicAccessToken)
@@ -42,6 +42,13 @@ export interface ProductFeature {
   text: string
 }
 
+/** One purchasable option, e.g. a t-shirt size. Single-option products have one "Default Title" variant. */
+export interface ProductVariant {
+  id: string
+  title: string
+  availableForSale: boolean
+}
+
 export interface ProductImage {
   url: string
   alt?: string
@@ -69,8 +76,12 @@ export interface ShopifyProduct {
   features?: string[]
   keyFeatures?: ProductFeature[]
   dimensionsDisplay?: string
-  /** Storefront variant GID required for cart lines */
+  /** Storefront variant GID required for cart lines (the first variant). */
   variantId?: string
+  /** Every Shopify variant; more than one means the buyer picks (e.g. a size). */
+  variants?: ProductVariant[]
+  /** Sizes from the catalog, shown before Shopify answers (apparel). */
+  sizes?: string[]
 }
 
 export interface CartLineItem {
@@ -79,6 +90,8 @@ export interface CartLineItem {
   title: string
   handle: string
   variantId: string
+  /** Variant name such as a size ("L"); undefined for single-variant products. */
+  variantTitle?: string
   /** Storefront product GID; analytics item_id so cart events match product events. */
   productId: string
   /** Formatted unit merchandise price. */
@@ -133,9 +146,11 @@ const PRODUCT_SELECTION = `
       currencyCode
     }
   }
-  variants(first: 1) {
+  variants(first: 20) {
     nodes {
       id
+      title
+      availableForSale
     }
   }
 `
@@ -325,7 +340,7 @@ type ProductNode = {
     nodes: Array<{ url: string; altText?: string | null }>
   } | null
   priceRange: { minVariantPrice: Money }
-  variants?: { nodes: Array<{ id: string }> }
+  variants?: { nodes: Array<{ id: string; title?: string | null; availableForSale?: boolean | null }> }
 }
 
 type DiscountAllocationNode = {
@@ -450,6 +465,7 @@ function enrichFromCatalog(product: ShopifyProduct): ShopifyProduct {
     imageAlt: images?.[0]?.alt ?? product.imageAlt ?? fromCatalog.imageAlt,
     images,
     variantId: product.variantId,
+    variants: product.variants,
     description: product.description || fromCatalog.description,
     material: fromCatalog.material,
     category: fromCatalog.category,
@@ -485,7 +501,47 @@ function mapProduct(node: ProductNode): ShopifyProduct {
     imageAlt: images[0]?.alt ?? node.featuredImage?.altText ?? node.title,
     images: images.length > 0 ? images : undefined,
     variantId: node.variants?.nodes?.[0]?.id,
+    variants: node.variants?.nodes?.map((variant) => ({
+      id: variant.id,
+      title: variant.title ?? '',
+      availableForSale: variant.availableForSale ?? true,
+    })),
   })
+}
+
+const DEFAULT_VARIANT_TITLE = 'Default Title'
+
+/** The variant title worth showing a buyer, or undefined for single-variant products. */
+export function displayVariantTitle(title: string | null | undefined): string | undefined {
+  const trimmed = title?.trim()
+  if (!trimmed || trimmed === DEFAULT_VARIANT_TITLE) return undefined
+  return trimmed
+}
+
+/** Find the variant for a size label, matching "L" to "L" or "Large" loosely. */
+export function findVariantForSize(
+  variants: ProductVariant[] | undefined,
+  size: string,
+): ProductVariant | undefined {
+  if (!variants?.length) return undefined
+  const wanted = normalizeSize(size)
+  return variants.find((variant) => normalizeSize(variant.title) === wanted)
+}
+
+const SIZE_ALIASES: Record<string, string> = {
+  small: 's',
+  medium: 'm',
+  large: 'l',
+  'x-large': 'xl',
+  'extra large': 'xl',
+  xlarge: 'xl',
+  'xx-large': 'xxl',
+  '2xl': 'xxl',
+}
+
+function normalizeSize(value: string): string {
+  const key = value.trim().toLowerCase()
+  return SIZE_ALIASES[key] ?? key
 }
 
 function mapCart(node: CartNode): ShopifyCart {
@@ -518,6 +574,7 @@ function mapCart(node: CartNode): ShopifyCart {
         title: line.merchandise.product.title,
         handle: line.merchandise.product.handle,
         variantId: line.merchandise.id,
+        variantTitle: displayVariantTitle(line.merchandise.title),
         productId: line.merchandise.product.id,
         price: formatPrice(unitMoney.amount, unitMoney.currencyCode),
         lineTotal: formatPrice(lineMoney.amount, lineMoney.currencyCode),
