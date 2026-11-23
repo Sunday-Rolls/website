@@ -3,7 +3,20 @@ export interface NavLink {
   href: string
 }
 
+/** Sitewide sale bar above the header, shown only between `startsAt` and `endsAt`. */
+export interface PromoBannerContent {
+  /** ISO time with offset, e.g. "2026-11-23T00:00:00-06:00". */
+  startsAt: string
+  /** First moment the bar is gone (exclusive). */
+  endsAt: string
+  eyebrow: string
+  headline: string
+  detail: string
+  cta: { label: string; href: string }
+}
+
 export interface SiteContent {
+  promoBanner?: PromoBannerContent
   brand: {
     name: string
     shortName: string
