@@ -1,6 +1,8 @@
 import { screen, within } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import homeContent from '@/content/pages/home.json'
+import { __resetExperimentsForTests, bootExperiments, experimentString } from '@/lib/experiments'
 import siteContent from '@/content/site.json'
 import reviewsData from '@/data/reviews.json'
 import { fitsMarqueeCard } from '@/lib/marquee-reviews'
@@ -29,7 +31,72 @@ vi.mock('@/lib/reviews-api', () => ({
   submitProductReview: vi.fn(),
 }))
 
+function bootHomeBanner(arm: 'control' | 'b') {
+  window.__SR_EXP__ = {
+    vid: 'AbCdEfGhIjKlMnOpQrStUv',
+    assignments: { 'home-banner': arm },
+    tracked: ['home-banner'],
+    bot: false,
+  }
+  bootExperiments({ search: '', fetchConfig: false })
+}
+
 describe('HomePage', () => {
+  beforeEach(() => {
+    __resetExperimentsForTests()
+    localStorage.clear()
+    sessionStorage.clear()
+    delete window.__SR_EXP__
+    Object.defineProperty(navigator, 'sendBeacon', { value: vi.fn(() => true), configurable: true })
+  })
+
+  it('hides the Retro Roller banner for the home-banner control arm', () => {
+    bootHomeBanner('control')
+    renderWithRouter(<HomePage />)
+
+    expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+    expect(experimentString()).toBe('home-banner:control')
+  })
+
+  it('renders the featured Retro Roller banner with its colorways', () => {
+    bootHomeBanner('b')
+    renderWithRouter(<HomePage />)
+    expect(experimentString()).toBe('home-banner:b')
+
+    const featured = homeContent.featured
+    const heading = screen.getByRole('heading', { level: 2, name: featured.title })
+    const section = heading.closest('section') as HTMLElement
+    for (const fit of featured.fits) {
+      expect(within(section).getByRole('button', { name: fit.label })).toBeInTheDocument()
+    }
+    for (const colorway of featured.fits[0].colorways) {
+      expect(within(section).getByRole('button', { name: colorway.label })).toBeInTheDocument()
+    }
+    expect(within(section).getByRole('img', { name: /retro roller center-shafted putter cover in grey/i })).toBeInTheDocument()
+    expect(within(section).getByRole('link', { name: /shop the retro roller/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/products/retro-roller-grey'),
+    )
+  })
+
+  it('switches the featured banner to mallet colourways and links', async () => {
+    bootHomeBanner('b')
+    const user = userEvent.setup()
+    renderWithRouter(<HomePage />)
+
+    const heading = screen.getByRole('heading', { level: 2, name: homeContent.featured.title })
+    const section = heading.closest('section') as HTMLElement
+    await user.click(within(section).getByRole('button', { name: 'Mallet' }))
+
+    expect(within(section).getByRole('button', { name: 'White' })).toBeInTheDocument()
+    expect(within(section).queryByRole('button', { name: 'Purple' })).not.toBeInTheDocument()
+    expect(within(section).getByRole('img', { name: /mallet putter cover in white/i })).toBeInTheDocument()
+    expect(within(section).getByRole('link', { name: /shop the retro roller/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/products/mallet-retro-roller-white'),
+    )
+  })
+
   it('renders hero content from home.json', () => {
     renderWithRouter(<HomePage />)
 

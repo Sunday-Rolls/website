@@ -7,6 +7,7 @@ import {
 } from '@/lib/product-catalog'
 import { scheduleAfterLoad } from '@/lib/schedule'
 import type { ShopifyProduct } from '@/lib/shopify'
+import { FeaturedProductBanner } from '@/components/home/FeaturedProductBanner'
 import { HeroSection } from '@/components/home/HeroSection'
 import { MediaBreak } from '@/components/home/MediaBreak'
 import { NewsletterSection } from '@/components/home/NewsletterSection'
@@ -15,7 +16,7 @@ import { ReviewsMarquee } from '@/components/home/ReviewsMarquee'
 import { SocialsBanner } from '@/components/home/SocialsBanner'
 import { StoryBanner } from '@/components/home/StoryBanner'
 import { ValueStrip } from '@/components/ui/ValueStrip'
-import { useVariant } from '@/components/experiments'
+import { Variant, useVariant } from '@/components/experiments'
 
 export function HomePage() {
   const content = usePageContent('home')
@@ -54,6 +55,10 @@ export function HomePage() {
     <>
       <HeroSection />
       <ValueStrip items={content.values.items} />
+      {/* A/B test home-banner (src/experiments/home-banner.json): arm b sees the Retro Roller banner. */}
+      <Variant experiment="home-banner" is="b">
+        <FeaturedProductBanner />
+      </Variant>
       {blocks.map(({ block, products: blockProducts, tone }, index) => (
         <ProductCarouselBlock
           key={block.id}

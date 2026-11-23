@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "key": "home-banner",
+  "name": "Retro Roller banner on the home page",
+  "hypothesis": "Showing the spotlit Retro Roller banner (fit picker, colour buttons, direct shop link) under the value strip gets more home-page visitors to add a cover to their cart than the current home page without it.",
+  "variants": [
+    { "key": "control", "name": "Current home page (no banner)", "weight": 50 },
+    { "key": "b", "name": "Retro Roller banner", "weight": 50 }
+  ],
+  "primaryMetric": "add_to_cart",
+  "paths": ["/"],
+  "minVisitorsPerArm": 1000,
+  "minDays": 14
+}
