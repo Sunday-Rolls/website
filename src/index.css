@@ -13,6 +13,12 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* 8-bit palette (Coin Collector banner) */
+  --color-pixel-sky: #5ec6f2;
+  --color-pixel-ink: #14141f;
+  --color-pixel-brick: #c8642a;
+  --color-pixel-gold: #ffd23f;
+  --color-pixel-grass: #2fbf71;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
@@ -228,6 +234,75 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Coin Collector banner: the bonus block bumps when hit, a coin pops out and spins away. */
+@keyframes block-bump {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes coin-pop {
+  0% {
+    transform: translateY(0) scaleX(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-70px) scaleX(0.2);
+  }
+  50% {
+    transform: translateY(-96px) scaleX(1);
+  }
+  75% {
+    transform: translateY(-80px) scaleX(0.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px) scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes coin-spin {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.15);
+  }
+}
+
+@keyframes pixel-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pixel-burst-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pixel-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
   }
 }
 

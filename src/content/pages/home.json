@@ -79,6 +79,39 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "coin": {
+    "eyebrow": "Player 1 · Press Start",
+    "title": "Level Up Your Bag",
+    "subtitle": "Hit the block. Grab the coins. Sink the putt.",
+    "lines": [
+      "The Coin Collector packs classic 8-bit charm into a premium cover: sky-blue leather, a Game Mode patch and our pixel golfer out on the course. Plush velvet inside and a magnetic closure outside keep you locked in from the first tee to the 18th green."
+    ],
+    "stats": [
+      {
+        "label": "Made for",
+        "value": "L.A.B. OZ.1i & Mezz.1"
+      },
+      {
+        "label": "Shaft",
+        "value": "Center only (not HS)"
+      },
+      {
+        "label": "Lining",
+        "value": "Plush velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "coinsForPowerUp": 5,
+    "href": "/products/coin-collector",
+    "image": "/assets/home/coin/coin-collector.webp",
+    "imageSmall": "/assets/home/coin/coin-collector-720.webp",
+    "cta": {
+      "label": "Shop the Coin Collector"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",

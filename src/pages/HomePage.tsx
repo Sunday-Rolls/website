@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { usePageContent } from '@/lib/content'
 import { applyPageMeta } from '@/lib/page-meta'
 import {
@@ -17,6 +17,11 @@ import { SocialsBanner } from '@/components/home/SocialsBanner'
 import { StoryBanner } from '@/components/home/StoryBanner'
 import { ValueStrip } from '@/components/ui/ValueStrip'
 import { Variant, useVariant } from '@/components/experiments'
+
+// Arm b of home-coin-banner only: control visitors never download this banner or its image.
+const CoinBanner = lazy(() =>
+  import('@/components/home/CoinBanner').then((module) => ({ default: module.CoinBanner })),
+)
 
 export function HomePage() {
   const content = usePageContent('home')
@@ -55,9 +60,24 @@ export function HomePage() {
     <>
       <HeroSection />
       <ValueStrip items={content.values.items} />
-      {/* A/B test home-banner (src/experiments/home-banner.json): arm b sees the Retro Roller banner. */}
-      <Variant experiment="home-banner" is="b">
-        <FeaturedProductBanner />
+      {/*
+        A/B test home-coin-banner (src/experiments/home-coin-banner.json): arm b sees the
+        Coin Collector 8-bit banner in this slot. Until that test is started from the dashboard
+        every visitor is in control, which renders exactly what was here before: the home-banner
+        test (src/experiments/home-banner.json), whose arm b sees the Retro Roller banner.
+      */}
+      <Variant
+        experiment="home-coin-banner"
+        is="b"
+        fallback={
+          <Variant experiment="home-banner" is="b">
+            <FeaturedProductBanner />
+          </Variant>
+        }
+      >
+        <Suspense fallback={null}>
+          <CoinBanner />
+        </Suspense>
       </Variant>
       {blocks.map(({ block, products: blockProducts, tone }, index) => (
         <ProductCarouselBlock
