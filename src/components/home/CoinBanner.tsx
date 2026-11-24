@@ -59,9 +59,7 @@ export function CoinBanner() {
                   text={line}
                   shadow={1}
                   shadowColor="var(--color-pixel-ink)"
-                  className="mb-[0.6vw] block h-auto text-white last:mb-0 lg:mb-2"
-                  // Same pixel size for every line: width follows the character count.
-                  style={{ width: `min(100%, ${line.length * 3.6}rem)` }}
+                  className="mb-2 block max-w-full text-white [--px:5px] last:mb-0 sm:[--px:7px] lg:[--px:8px]"
                 />
               ))}
             </h2>
@@ -128,16 +126,16 @@ function Hud({ coins }: { coins: number }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 text-white" aria-hidden="true">
       <div className="flex items-center gap-3">
-        <PixelText text="SCORE" shadow={1} shadowColor="var(--color-pixel-ink)" className="h-4 w-auto sm:h-5" />
-        <PixelText text={score} shadow={1} shadowColor="var(--color-pixel-ink)" className="h-4 w-auto sm:h-5" />
+        <PixelText text="SCORE" shadow={1} shadowColor="var(--color-pixel-ink)" className="[--px:2px] sm:[--px:3px]" />
+        <PixelText text={score} shadow={1} shadowColor="var(--color-pixel-ink)" className="[--px:2px] sm:[--px:3px]" />
       </div>
       <div className="flex items-center gap-2.5">
         <PixelCoin className="h-5 w-4 motion-safe:animate-[coin-spin_1.2s_steps(4)_infinite] sm:h-6 sm:w-5" />
-        <PixelText text={`×${count}`} shadow={1} shadowColor="var(--color-pixel-ink)" className="h-4 w-auto sm:h-5" />
+        <PixelText text={`×${count}`} shadow={1} shadowColor="var(--color-pixel-ink)" className="[--px:2px] sm:[--px:3px]" />
       </div>
       <div className="flex items-center gap-3">
-        <PixelText text="HOLE" shadow={1} shadowColor="var(--color-pixel-ink)" className="h-4 w-auto sm:h-5" />
-        <PixelText text="18" shadow={1} shadowColor="var(--color-pixel-ink)" className="h-4 w-auto sm:h-5" />
+        <PixelText text="HOLE" shadow={1} shadowColor="var(--color-pixel-ink)" className="[--px:2px] sm:[--px:3px]" />
+        <PixelText text="18" shadow={1} shadowColor="var(--color-pixel-ink)" className="[--px:2px] sm:[--px:3px]" />
       </div>
     </div>
   )
@@ -233,7 +231,7 @@ function Stage({
                 text="POWER UP!"
                 shadow={1}
                 shadowColor="var(--color-pixel-ink)"
-                className="h-8 w-auto text-pixel-gold motion-safe:animate-[pixel-float_0.8s_steps(3)_infinite] sm:h-10"
+                className="text-pixel-gold [--px:4px] motion-safe:animate-[pixel-float_0.8s_steps(3)_infinite] sm:[--px:5px]"
               />
             </div>
           ) : null}
@@ -254,11 +252,14 @@ function PixelWorld() {
       {/* Dithered sky: hard colour steps, lighter toward the horizon. */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,#46b6ea_0%,#46b6ea_30%,#5ec6f2_30%,#5ec6f2_58%,#78d2f5_58%,#78d2f5_78%,#94ddf7_78%)]" />
 
+      {/* Clouds, anchored to the top of the sky. */}
+      <svg viewBox="0 0 360 80" preserveAspectRatio="xMidYMin slice" className="absolute inset-x-0 top-0 h-[40%] w-full" shapeRendering="crispEdges">
+        <PixelCloud x={12} y={30} />
+        <PixelCloud x={150} y={44} scale={0.8} />
+        <PixelCloud x={290} y={26} />
+      </svg>
+
       <svg viewBox="0 0 360 225" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full" shapeRendering="crispEdges">
-        {/* Clouds */}
-        <PixelCloud x={20} y={26} />
-        <PixelCloud x={150} y={14} scale={0.8} />
-        <PixelCloud x={268} y={40} />
         {/* Hills */}
         <path d="M0 196 h10 v-8 h8 v-8 h8 v-6 h16 v6 h8 v8 h8 v8 h10 Z" fill="#3fa56a" />
         <path d="M250 196 h8 v-6 h8 v-8 h8 v-8 h20 v8 h8 v8 h8 v6 h8 Z" fill="#3fa56a" />

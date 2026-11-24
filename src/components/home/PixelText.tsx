@@ -70,7 +70,10 @@ export function pixelPath(text: string): { d: string; width: number } {
 
 type PixelTextProps = {
   text: string
-  /** Height of one line in CSS (the font is 7 pixels tall, so multiples of 7 stay crisp). */
+  /**
+   * Sizing: set the CSS variable `--px` (screen pixels per font pixel, a whole number keeps
+   * every pixel crisp), e.g. `[--px:6px] lg:[--px:8px]`. Width and height follow from it.
+   */
   className?: string
   /** Hard drop shadow offset in font pixels, drawn in `shadowColor`. */
   shadow?: number
@@ -85,7 +88,11 @@ export function PixelText({ text, className, style, shadow = 0, shadowColor = 'c
       aria-hidden="true"
       viewBox={`0 0 ${width + shadow} ${7 + shadow}`}
       className={className}
-      style={style}
+      style={{
+        width: `calc(var(--px, 4px) * ${width + shadow})`,
+        height: `calc(var(--px, 4px) * ${7 + shadow})`,
+        ...style,
+      }}
       shapeRendering="crispEdges"
       preserveAspectRatio="xMinYMid meet"
     >
