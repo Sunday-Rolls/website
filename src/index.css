@@ -13,6 +13,13 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* Breakfast palette (Breakfast Roller banner) */
+  --color-cereal: #ec6a1e;
+  --color-cereal-deep: #c9500f;
+  --color-yolk: #f7c548;
+  --color-ribbon: #1f4fae;
+  --color-ribbon-deep: #13203a;
+  --color-oat: #e7decd;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
@@ -228,6 +235,24 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Breakfast Roller banner: the sunburst turns very slowly behind the box. */
+@keyframes sunburst-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Breakfast Roller banner: cereal flakes drift and tumble. */
+@keyframes flake-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--flake-rot, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(calc(var(--flake-rot, 0deg) + 14deg));
   }
 }
 

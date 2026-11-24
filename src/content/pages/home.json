@@ -79,6 +79,30 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "breakfast": {
+    "eyebrow": "The Breakfast Roller",
+    "title": "Breakfast Before Birdies",
+    "subtitle": "Rise early. Roll pure. Chase birdies all morning.",
+    "lines": [
+      "Our brightest cover, in a full serving of orange with the embroidered Sunday Rolls crew front and center. A plush velvet lining, reinforced stitching and a magnetic closure keep your putter fresh from the first tee time to the last putt."
+    ],
+    "details": [
+      "Velvet lining",
+      "Reinforced stitching",
+      "Magnetic closure"
+    ],
+    "badge": "Bogey Free Edition",
+    "fit": {
+      "label": "Center-shafted",
+      "note": "L.A.B. DF3 and putters like it"
+    },
+    "href": "/products/the-breakfast-roller",
+    "image": "/assets/home/breakfast/breakfast-roller.webp",
+    "imageSmall": "/assets/home/breakfast/breakfast-roller-720.webp",
+    "cta": {
+      "label": "Shop the Breakfast Roller"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",

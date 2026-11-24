@@ -210,4 +210,41 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-breakfast-banner', () => {
+    const breakfast = homeContent.breakfast
+
+    function bootBreakfast(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootBreakfast({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /breakfast before birdies/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the Breakfast Roller banner in place of the Retro Roller for arm b, with a shop link', async () => {
+      bootBreakfast({ 'home-banner': 'b', 'home-breakfast-banner': 'b' }, ['home-breakfast-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /breakfast before birdies/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-breakfast-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByText(breakfast.subtitle)).toBeInTheDocument()
+      expect(within(section).getByRole('img', { name: /breakfast roller center-shafted putter cover/i })).toBeInTheDocument()
+      expect(within(section).getByRole('link', { name: /shop the breakfast roller/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(breakfast.href),
+      )
+      // Center-shafted only: no fit picker.
+      expect(within(section).queryByRole('group', { name: /putter fit/i })).toBeNull()
+    })
+  })
 })
