@@ -79,6 +79,38 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "sunny": {
+    "eyebrow": "Sunny Side Up",
+    "title": "Rise and Roll.",
+    "subtitle": "Start your round sunny side up.",
+    "lines": [
+      "A clean cream cover with an embroidered fried egg and a little Sunday Rolls on the side. Cut for the L.A.B. OZ.1i and Mezz.1, with a plush velvet lining and a magnetic closure that keeps it all together."
+    ],
+    "menu": [
+      {
+        "label": "Made for",
+        "value": "L.A.B. OZ.1i & Mezz.1"
+      },
+      {
+        "label": "Shaft",
+        "value": "Center-shaft only (not HS)"
+      },
+      {
+        "label": "Lining",
+        "value": "Plush velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "href": "/products/sunny-side-up",
+    "image": "/assets/home/sunny/sunny-side-up.webp",
+    "imageSmall": "/assets/home/sunny/sunny-side-up-720.webp",
+    "cta": {
+      "label": "Shop Sunny Side Up"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",

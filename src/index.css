@@ -13,6 +13,11 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* Morning palette (Sunny Side Up banner) */
+  --color-yolk-sun: #f6a21e;
+  --color-egg-white: #fffdf7;
+  --color-toast: #5a3a1a;
+  --color-fairway: #9fb57e;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
@@ -228,6 +233,33 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Sunny Side Up banner: the yolk sun rises as the section scrolls into view. */
+@keyframes sun-rise {
+  from {
+    transform: translateY(22%);
+  }
+  to {
+    transform: translateY(-6%);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .sunny-sun {
+      animation: sun-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 55%;
+    }
+  }
+}
+
+/* Sunny Side Up banner: rays turn very slowly. */
+@keyframes rays-turn {
+  to {
+    transform: rotate(360deg);
   }
 }
 
