@@ -254,7 +254,7 @@ function Drips({ colors }: { colors: string[] }) {
       aria-hidden="true"
       viewBox="0 0 1440 440"
       preserveAspectRatio="xMidYMin slice"
-      className="pointer-events-none absolute inset-x-0 top-0 h-[300px] w-full sm:h-[380px] lg:h-[440px]"
+      className="pointer-events-none absolute inset-x-0 top-0 h-[max(300px,30.6vw)] w-full overflow-visible"
     >
       <defs>
         {thirds.map((third, i) => (
