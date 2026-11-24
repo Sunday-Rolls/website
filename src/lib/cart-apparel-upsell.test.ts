@@ -15,9 +15,13 @@ describe('apparel cart add-on', () => {
     )
   })
 
-  it('shows on any non-empty cart without the shirt, at any total', () => {
-    expect(shouldShowApparelUpsell(['the-corduroy'], 1)).toBe(true)
-    expect(shouldShowApparelUpsell([], 0)).toBe(false)
-    expect(shouldShowApparelUpsell(['sr-tee-black'], 1)).toBe(false)
+  it('shows between $59 and under $100 when the shirt is not in the cart', () => {
+    expect(shouldShowApparelUpsell(['the-corduroy'], 1, 80)).toBe(true)
+    expect(shouldShowApparelUpsell(['the-corduroy'], 1, 59)).toBe(true)
+    expect(shouldShowApparelUpsell(['the-corduroy'], 1, 99.99)).toBe(true)
+    expect(shouldShowApparelUpsell(['the-corduroy'], 1, 58.99)).toBe(false)
+    expect(shouldShowApparelUpsell(['the-corduroy'], 1, 100)).toBe(false)
+    expect(shouldShowApparelUpsell([], 0, 80)).toBe(false)
+    expect(shouldShowApparelUpsell(['sr-tee-black'], 1, 80)).toBe(false)
   })
 })
