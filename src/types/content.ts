@@ -105,6 +105,23 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Birdie Machine banner (A/B test home-mystery-banner, arm b). One fit only. */
+  mystery?: {
+    eyebrow?: string
+    /** Small line above the headline ("The Case of the"). */
+    kicker?: string
+    title: string
+    subtitle?: string
+    lines: string[]
+    /** Tab label on the case file. */
+    caseNumber?: string
+    /** Typed rows on the case file card. */
+    evidence?: Array<{ label: string; value: string }>
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP). */
+    image: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

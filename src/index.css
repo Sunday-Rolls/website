@@ -13,6 +13,13 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* Night-mystery palette (Birdie Machine banner) */
+  --color-midnight: #1b1838;
+  --color-dusk: #3a2556;
+  --color-groovy-teal: #2bb8c6;
+  --color-groovy-lime: #8fdc4e;
+  --color-groovy-orange: #f08a3c;
+  --color-manila: #e9cf96;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
@@ -228,6 +235,28 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Birdie Machine banner: fog banks roll slowly across the course. */
+@keyframes fog-roll {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-6%);
+  }
+}
+
+/* Birdie Machine banner: stars twinkle. */
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.25;
   }
 }
 

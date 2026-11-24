@@ -79,6 +79,39 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "mystery": {
+    "eyebrow": "The Birdie Machine",
+    "kicker": "The Case of the",
+    "title": "Missing Birdies",
+    "subtitle": "Every round has a mystery. This one ends at the bottom of the cup.",
+    "lines": [
+      "Teal leather, lime piping and our embroidered Birdie Machine rolling out on the hunt. A plush velvet lining and magnetic closure keep your putter safe while the gang tracks down every last birdie."
+    ],
+    "caseNumber": "Case No. 18",
+    "evidence": [
+      {
+        "label": "Fit",
+        "value": "Center-shafted"
+      },
+      {
+        "label": "Made for",
+        "value": "L.A.B. DF3 and putters like it"
+      },
+      {
+        "label": "Lining",
+        "value": "Plush velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "href": "/products/the-birdie-machine",
+    "image": "/assets/home/mystery/birdie-machine.webp",
+    "cta": {
+      "label": "Shop the Birdie Machine"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
