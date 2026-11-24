@@ -13,6 +13,12 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* Clubhouse palette (Corduroy banner) */
+  --color-mahogany: #3a2216;
+  --color-mahogany-deep: #24150d;
+  --color-club-green: #22382b;
+  --color-brass: #c9a45c;
+  --color-brass-light: #ecd59a;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
