@@ -33,7 +33,7 @@ export function StripesBanner() {
       {/* Sky to shore, with low sun in the upper right. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,var(--color-sea-mist)_0%,#edf1ed_55%,var(--color-cream)_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,var(--color-sea-mist)_0%,#eef0ea_50%,#ebe2cf_100%)]"
       />
       <div
         aria-hidden="true"
@@ -73,8 +73,8 @@ export function StripesBanner() {
                   fetchPriority="low"
                   decoding="async"
                   className={cn(
-                    'absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
-                    index === fitIndex ? 'scale-[1.12] opacity-100' : 'scale-[1.18] opacity-0',
+                    'absolute inset-0 h-full w-full object-contain transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+                    index === fitIndex ? 'translate-y-[5%] opacity-100' : 'translate-y-[5%] scale-[1.06] opacity-0',
                   )}
                 />
               ))}
@@ -208,7 +208,7 @@ export function StripesBanner() {
         <svg
           viewBox="0 0 1440 96"
           preserveAspectRatio="none"
-          className="absolute bottom-0 -left-[5%] h-full w-[110%] fill-seersucker/30 motion-safe:animate-[tide-drift_18s_ease-in-out_infinite]"
+          className="absolute bottom-0 -left-[5%] h-full w-[110%] fill-seersucker/40 motion-safe:animate-[tide-drift_18s_ease-in-out_infinite]"
         >
           <path d="M0 46 C 240 14, 480 78, 720 46 S 1200 14, 1440 46 V96 H0 Z" />
         </svg>
