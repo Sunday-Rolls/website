@@ -1,0 +1,1 @@
+import{a as e}from"./index-D56R-rAm.js";function t(t){e.success(t)}function n(t){e.error(t)}export{t as n,n as t};
