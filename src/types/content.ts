@@ -105,6 +105,21 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Sunny Side Up banner (A/B test home-sunny-banner, arm b). One fit only. */
+  sunny?: {
+    eyebrow?: string
+    title: string
+    subtitle?: string
+    lines: string[]
+    /** Rows on the brunch-menu card: label, dotted leader, value. */
+    menu?: Array<{ label: string; value: string }>
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP), 1200px. */
+    image: string
+    /** Same photo at 720px for small screens. */
+    imageSmall?: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string
