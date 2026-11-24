@@ -54,7 +54,7 @@ export function MysteryBanner() {
       {/* Flashlight: warm light wherever it points, and the trail it uncovers. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 mix-blend-screen [background:radial-gradient(circle_260px_at_var(--lx)_var(--ly),rgba(255,236,190,0.22)_0%,rgba(255,236,190,0.08)_45%,rgba(255,236,190,0)_70%)]"
+        className="pointer-events-none absolute inset-0 mix-blend-screen [background:radial-gradient(circle_260px_at_var(--lx)_var(--ly),rgba(255,236,190,0.3)_0%,rgba(255,236,190,0.1)_45%,rgba(255,236,190,0)_70%)]"
       />
       <BirdieTracks />
 
@@ -220,7 +220,7 @@ function Moon() {
       <div className="absolute top-[58%] left-[30%] h-[10%] w-[10%] rounded-full bg-[#dccb98]/60" />
       <div className="absolute top-[22%] left-[26%] h-[7%] w-[7%] rounded-full bg-[#dccb98]/50" />
       {/* A wisp of cloud across the moon. */}
-      <div className="absolute top-[58%] -left-[30%] h-[18%] w-[120%] rounded-full bg-[#5b4a7e]/70 blur-[6px]" />
+      <div className="absolute top-[60%] -left-[35%] h-[12%] w-[110%] rounded-full bg-[#4a3a6e]/45 blur-[10px]" />
     </div>
   )
 }
@@ -285,7 +285,7 @@ function BirdieTracks() {
 
 function TrackPrint({ style }: { style: CSSProperties }) {
   return (
-    <svg viewBox="0 0 20 22" className="absolute h-5 w-5" style={style} fill="none">
+    <svg viewBox="0 0 20 22" className="absolute h-7 w-7" style={style} fill="none">
       <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         <path d="M10 20 L10 8" />
         <path d="M10 9 L3 2" />
