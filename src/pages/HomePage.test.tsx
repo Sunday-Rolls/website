@@ -210,4 +210,43 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-coin-banner', () => {
+    const coin = homeContent.coin
+
+    function bootCoin(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootCoin({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /level up your bag/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the Coin Collector banner for arm b, and the bonus block counts coins up to a power-up', async () => {
+      bootCoin({ 'home-banner': 'b', 'home-coin-banner': 'b' }, ['home-coin-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /level up your bag/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-coin-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByRole('img', { name: /coin collector putter cover/i })).toBeInTheDocument()
+      expect(within(section).getByRole('link', { name: /shop the coin collector/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(coin.href),
+      )
+
+      const block = within(section).getByRole('button', { name: /hit the bonus block/i })
+      expect(within(section).getByText(/hit me!/i)).toBeInTheDocument()
+      for (let i = 0; i < coin.coinsForPowerUp; i += 1) await userEvent.click(block)
+      expect(within(section).getByText(/power up!/i)).toBeInTheDocument()
+    })
+  })
 })

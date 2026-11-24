@@ -105,6 +105,24 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Coin Collector banner (A/B test home-coin-banner, arm b). One fit only. */
+  coin?: {
+    eyebrow?: string
+    /** Drawn in the pixel font; also the heading's accessible text. */
+    title: string
+    subtitle?: string
+    lines: string[]
+    /** Rows in the "item stats" dialog box. */
+    stats?: Array<{ label: string; value: string }>
+    /** Coins to collect from the bonus block before the power-up moment. */
+    coinsForPowerUp?: number
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP), 1200px. */
+    image: string
+    /** Same photo at 720px for small screens. */
+    imageSmall?: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

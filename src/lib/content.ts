@@ -21,6 +21,7 @@ const pageContent: PageContentMap = {
     ...homeContent,
     values: homeContent.values as HomeContent['values'],
     featured: homeContent.featured as HomeContent['featured'],
+    coin: homeContent.coin as HomeContent['coin'],
   },
   shop: shopContent,
   product: productContent,
