@@ -105,6 +105,29 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Flagstick Fuel banner (A/B test home-fuel-banner, arm b). One fit only. */
+  fuel?: {
+    eyebrow?: string
+    /** The flavor-block strip on the cover, in order; each becomes a word of the headline and a flavor button. */
+    flavors: Array<{
+      label: string
+      /** CSS colour for the word, its drip and the glow when picked. */
+      color: string
+      /** One line shown when this flavor is picked. */
+      line?: string
+    }>
+    /** Rest of the headline after the flavor words. */
+    title: string
+    lines: string[]
+    /** Spec tiles: label above, value below. */
+    stats?: Array<{ label: string; value: string }>
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP), 1200px. */
+    image: string
+    /** Same photo at 720px for small screens. */
+    imageSmall?: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string
