@@ -8,6 +8,10 @@ import { Container } from '@/components/ui/Container'
 // Only this lazily loaded banner uses the italic, so control visitors never download it.
 import '@fontsource/cormorant-garamond/latin-500-italic.css'
 
+/** Tufted leather tile: diamond creases between buttons, a soft puff in each diamond, brass tacks. */
+const TUFTING =
+  'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2256%22%20height%3D%2244%22%20viewBox%3D%220%200%2056%2044%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22p%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%220.08%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23fff%22%20stop-opacity%3D%220%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Cg%20fill%3D%22url%28%23p%29%22%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%220%22%20r%3D%2218%22%2F%3E%3Ccircle%20cx%3D%220%22%20cy%3D%2222%22%20r%3D%2218%22%2F%3E%3Ccircle%20cx%3D%2256%22%20cy%3D%2222%22%20r%3D%2218%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%2244%22%20r%3D%2218%22%2F%3E%3C%2Fg%3E%3Cpath%20d%3D%22M0%200%20L56%2044%20M56%200%20L0%2044%22%20stroke%3D%22%23000%22%20stroke-opacity%3D%220.42%22%20stroke-width%3D%221.2%22%20fill%3D%22none%22%2F%3E%3Cg%20fill%3D%22%23c9a45c%22%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2256%22%20cy%3D%220%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%220%22%20cy%3D%2244%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2256%22%20cy%3D%2244%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2228%22%20cy%3D%2222%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E'
+
 const GOLD_TEXT =
   'bg-[linear-gradient(180deg,#f6e7b8_0%,#e2c27a_38%,#b88c3f_62%,#ecd59a_100%)] bg-clip-text text-transparent'
 
@@ -31,7 +35,7 @@ export function CorduroyBanner() {
     >
       <Paneling />
 
-      <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+2rem)] lg:pt-24 lg:pb-28">
+      <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+7rem)] lg:pt-24 lg:pb-52">
         <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
           <div className="order-2 space-y-7 lg:order-1 lg:max-w-xl">
             <div className="flex items-center gap-4">
@@ -215,11 +219,17 @@ function Paneling() {
       <div className="absolute inset-0 [background-image:repeating-linear-gradient(90deg,rgba(0,0,0,0.45)_0_2px,rgba(255,200,150,0.07)_2px_3px,transparent_3px_240px)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_30%,rgba(255,200,130,0.12)_0%,rgba(0,0,0,0)_50%),radial-gradient(ellipse_at_50%_50%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.45)_100%)]" />
 
-      {/* Chair rail and tufted leather wainscot. */}
-      <div className="absolute inset-x-0 bottom-0 h-[16%] min-h-20">
+      {/* Chair rail and tufted leather wainscot, below the content. */}
+      <div className="absolute inset-x-0 bottom-0 h-20 lg:h-28">
         <div className="absolute inset-x-0 top-0 h-3 bg-[linear-gradient(180deg,#5a3520,#2a170c)] shadow-[0_3px_6px_rgba(0,0,0,0.6)]" />
         <div className="absolute inset-x-0 top-3 h-[2px] bg-[linear-gradient(90deg,#8a6a2c,var(--color-brass-light),#8a6a2c)]" />
-        <div className="absolute inset-x-0 top-[14px] bottom-0 bg-club-green [background-image:radial-gradient(circle,rgba(201,164,92,0.85)_0_1.6px,rgba(0,0,0,0.5)_2.2px,transparent_4px),radial-gradient(circle,rgba(201,164,92,0.85)_0_1.6px,rgba(0,0,0,0.5)_2.2px,transparent_4px),linear-gradient(180deg,rgba(255,255,255,0.05),rgba(0,0,0,0.35))] [background-position:0_0,22px_18px,0_0] [background-size:44px_36px,44px_36px,100%_100%]" />
+        <div
+          className="absolute inset-x-0 top-[14px] bottom-0 bg-club-green"
+          style={{
+            backgroundImage: `url("${TUFTING}"), linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.4))`,
+            backgroundSize: '56px 44px, 100% 100%',
+          }}
+        />
       </div>
     </div>
   )
