@@ -105,6 +105,28 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Corduroy banner (A/B test home-corduroy-banner, arm b). */
+  corduroy?: {
+    eyebrow?: string
+    title: string
+    subtitle?: string
+    lines: string[]
+    /** Rows in the club register: label, gold dotted leader, value. */
+    register?: Array<{ label: string; value: string }>
+    /** Putter fits, each linking to its own product. */
+    fits: Array<{
+      label: string
+      note?: string
+      href: string
+      /** Square photo of the cover on the warm-sand backdrop (WebP), 1200px. */
+      image: string
+      /** Same photo at 720px for small screens. */
+      imageSmall?: string
+    }>
+    /** Name engraved on the brass plaque under the frame. */
+    plaque?: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

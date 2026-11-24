@@ -79,6 +79,56 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "corduroy": {
+    "eyebrow": "Members' Selection",
+    "title": "The Sunday Classic",
+    "subtitle": "A classic for the greens.",
+    "lines": [
+      "Corduroy with the texture of your favorite throwback jacket, a sage suede stripe down the middle and our signature leather patch holding it all together. Plush velvet inside, a magnetic closure outside, and a bag that looks like it means business."
+    ],
+    "register": [
+      {
+        "label": "Fabric",
+        "value": "Corduroy"
+      },
+      {
+        "label": "Stripe",
+        "value": "Sage suede"
+      },
+      {
+        "label": "Patch",
+        "value": "Signature leather"
+      },
+      {
+        "label": "Lining",
+        "value": "Plush velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "fits": [
+      {
+        "label": "Center-shafted",
+        "note": "L.A.B. DF3 and center-shaft mallets",
+        "href": "/products/the-corduroy",
+        "image": "/assets/home/corduroy/corduroy.webp",
+        "imageSmall": "/assets/home/corduroy/corduroy-720.webp"
+      },
+      {
+        "label": "Mallet",
+        "note": "Spider and similar mallets",
+        "href": "/products/mallet-the-corduroy",
+        "image": "/assets/home/corduroy/mallet-corduroy.webp",
+        "imageSmall": "/assets/home/corduroy/mallet-corduroy-720.webp"
+      }
+    ],
+    "plaque": "The Corduroy",
+    "cta": {
+      "label": "Shop The Corduroy"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
