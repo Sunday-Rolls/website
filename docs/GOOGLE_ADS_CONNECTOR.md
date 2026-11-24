@@ -24,6 +24,7 @@ plans an owner adds it once under Organization connectors.
 | `google_ads_negative_keywords` | Negatives at campaign, ad group and shared-list level |
 | `google_ads_query` | Any read-only GAQL `SELECT` |
 | `google_ads_change_log` | Changes made through the connector |
+| `reddit_ads_performance` | Reddit Ads spend, Reddit-reported purchases and value per campaign per day (read-only). Reads what the server syncs from Reddit (`docs/REDDIT_ADS_SYNC.md`), refreshing it if older than 30 minutes. Feeds Reddit in the "Sunday Rolls Ad ROI" Claude dashboard. |
 | `google_ads_add_negative_keywords` | Add negatives to one campaign |
 | `google_ads_remove_negative_keywords` | Remove negatives by resource name |
 | `google_ads_set_target_roas` | Target ROAS (ratio, 1.8 = 180%) on Max conversion value / tROAS campaigns |

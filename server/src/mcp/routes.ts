@@ -9,6 +9,7 @@ import { googleAdsMissingEnv, loadGoogleAdsCredentialsFromEnv, type GoogleAdsCre
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { RateLimiter } from '../rate-limit.js'
 import { GOOGLE_ADS_TOOLS, ToolInputError, type ToolContext } from './google-ads-tools.js'
+import { redditAdsTools } from './reddit-ads-tools.js'
 import {
   ACCESS_TTL_S,
   CODE_TTL_S,
@@ -37,7 +38,8 @@ const INSTRUCTIONS =
   'Google Ads for Sunday Rolls Golf (account 299-697-4701). Read tools query the live account. Change tools are two-step: ' +
   'call without confirm_token to get a validated preview, show the user exactly what will change and get an explicit yes, ' +
   'then call again with the same arguments and the confirm_token. Never apply a change the user has not approved. ' +
-  'Google Ads conversions can differ from real Shopify orders, so say so when using them to judge performance.'
+  'Google Ads conversions can differ from real Shopify orders, so say so when using them to judge performance. ' +
+  'reddit_ads_performance reads Reddit Ads spend and Reddit-reported purchases (read-only).'
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`)
 
@@ -50,6 +52,8 @@ export function createMcpRoutes(deps: McpDeps) {
   const { store, checkRateLimit } = deps
   const env = deps.env ?? process.env
   const usedCodes = new Map<string, number>()
+  const redditTools = redditAdsTools({ store, env, fetchImpl: deps.fetchImpl })
+  const allTools = [...GOOGLE_ADS_TOOLS, ...redditTools]
 
   function baseUrl(c: Context): string {
     const configured = env.MCP_PUBLIC_URL?.trim()
@@ -336,7 +340,7 @@ ${form}
           return isNotification ? null : ok({})
         case 'tools/list':
           return ok({
-            tools: GOOGLE_ADS_TOOLS.map((t) => ({
+            tools: allTools.map((t) => ({
               name: t.name,
               title: t.title,
               description: t.description,
@@ -346,9 +350,12 @@ ${form}
           })
         case 'tools/call': {
           const name = String(r.params?.name ?? '')
-          const tool = GOOGLE_ADS_TOOLS.find((t) => t.name === name)
+          const tool = allTools.find((t) => t.name === name)
           if (!tool) return err(-32602, `Unknown tool: ${name}`)
-          const context = ctx()
+          // Reddit tools don't need Google Ads credentials.
+          const context = redditTools.includes(tool)
+            ? ({ store, user: { id: user.id, email: user.email } } as unknown as ToolContext)
+            : ctx()
           if (!context) {
             return ok({
               isError: true,
