@@ -16,7 +16,13 @@ declare global {
     gtag?: (...args: unknown[]) => void
     fbq?: Fbq
     _fbq?: Fbq
+    rdt?: Rdt
   }
+}
+
+type Rdt = ((...args: unknown[]) => void) & {
+  sendEvent?: (...args: unknown[]) => void
+  callQueue: unknown[][]
 }
 
 const gtmId = (import.meta.env.VITE_GTM_ID as string | undefined)?.trim()
@@ -32,6 +38,8 @@ const sendDirect =
   Boolean(ga4MeasurementId)
 /** Meta Pixel. Loaded with GTM; calls made before then queue on the fbq stub. */
 const metaPixelId = (import.meta.env.VITE_META_PIXEL_ID as string | undefined)?.trim()
+/** Reddit Pixel. Same loading as Meta: calls queue on the rdt stub until pixel.js arrives. */
+const redditPixelId = (import.meta.env.VITE_REDDIT_PIXEL_ID as string | undefined)?.trim()
 
 const PENDING_CHECKOUT_KEY = 'sr_pending_checkout'
 
@@ -112,6 +120,13 @@ function loadAnalyticsScripts(): void {
     document.head.appendChild(script)
   }
 
+  if (redditPixelId && window.rdt) {
+    const script = document.createElement('script')
+    script.async = true
+    script.src = 'https://www.redditstatic.com/ads/pixel.js'
+    document.head.appendChild(script)
+  }
+
   if (sendDirect && ga4MeasurementId) {
     window.gtag = function gtag(...args: unknown[]) {
       // GA4 expects the Arguments-like object pushed onto dataLayer
@@ -152,6 +167,7 @@ export function initGtm(): void {
 
   window.dataLayer = window.dataLayer ?? []
   installMetaPixelStub()
+  installRedditPixelStub()
 
   if (hasAdClickId(window.location.search)) {
     loadAnalyticsScripts()
@@ -184,6 +200,45 @@ function installMetaPixelStub(): void {
   window.fbq = fbq
   window._fbq = window._fbq ?? fbq
   fbq('init', metaPixelId)
+}
+
+/** Reddit's base-code stub: queues calls until pixel.js loads and replays them. */
+function installRedditPixelStub(): void {
+  if (!redditPixelId || window.rdt) return
+  const rdt = function (...args: unknown[]) {
+    if (rdt.sendEvent) rdt.sendEvent(...args)
+    else rdt.callQueue.push(args)
+  } as Rdt
+  rdt.callQueue = []
+  window.rdt = rdt
+  // Values are sent in dollars (80.5), not cents.
+  rdt('init', redditPixelId, { optOut: false, useDecimalCurrencyValues: true })
+}
+
+/**
+ * GA4 ecommerce event → Reddit standard event. Reddit has no checkout-start event.
+ * No `purchase`: checkout runs on Shopify, so Purchase comes from the Shopify custom
+ * web pixel (docs/SHOPIFY_WEB_PIXEL.md). Sending it here too would count sales twice.
+ */
+const REDDIT_ECOMMERCE_EVENTS: Record<string, string> = {
+  view_item: 'ViewContent',
+  add_to_cart: 'AddToCart',
+}
+
+function sendRedditEcommerce(event: string, ecommerce: Record<string, unknown>): void {
+  const redditEvent = REDDIT_ECOMMERCE_EVENTS[event]
+  if (!redditEvent || !window.rdt) return
+  const items = (ecommerce.items as EcommerceItem[] | undefined) ?? []
+  window.rdt('track', redditEvent, {
+    itemCount: items.reduce((sum, item) => sum + (item.quantity ?? 1), 0),
+    value: ecommerce.value,
+    currency: ecommerce.currency ?? 'USD',
+    products: items.map((item) => ({ id: item.item_id, name: item.item_name })),
+  })
+}
+
+function sendRedditEvent(event: string): void {
+  window.rdt?.('track', event)
 }
 
 /**
@@ -264,6 +319,7 @@ function pushEcommerce(event: string, ecommerce: Record<string, unknown>): void 
   pushEvent(event, { ecommerce })
   sendGa4Ecommerce(event, ecommerce)
   sendMetaEcommerce(event, ecommerce)
+  sendRedditEcommerce(event, ecommerce)
 }
 
 export function trackPageView(path: string, title?: string): void {
@@ -272,6 +328,7 @@ export function trackPageView(path: string, title?: string): void {
     page_title: title ?? (typeof document !== 'undefined' ? document.title : path),
   })
   sendMetaEvent('PageView')
+  sendRedditEvent('PageVisit')
   withShopify((shopify) => shopify.shopifyPageView())
   if (sendDirect && window.gtag && ga4MeasurementId) {
     window.gtag('event', 'page_view', {
@@ -431,16 +488,19 @@ export function clearPendingCheckout(): void {
 export function trackNewsletterSubscribe(method = 'shopify_storefront'): void {
   pushEvent('newsletter_subscribe', { method })
   sendMetaEvent('Lead')
+  sendRedditEvent('SignUp')
 }
 
 export function trackContactSubmit(method = 'contact_api'): void {
   pushEvent('contact_submit', { method })
   sendMetaEvent('Contact')
+  sendRedditEvent('Lead')
 }
 
 export const analyticsConfig = {
   gtmId: gtmId || null,
   ga4MeasurementId: ga4MeasurementId || null,
   metaPixelId: metaPixelId || null,
+  redditPixelId: redditPixelId || null,
   sendDirect,
 }
