@@ -13,7 +13,7 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 | GA4 | `G-YK0BB0TPM4` (zeros, not the letter O; confirmed in GA4 Admin → Data streams, 2026-11-03) |
 | Google Ads | `AW-17744695066`, purchase label `PznHCIOf2-EbEJqeqo1C` |
 | Meta Pixel | `1274109674861464` (Purchase via the Facebook & Instagram app only) |
-| Reddit Pixel | `REDDIT_PIXEL_ID` below (Reddit Ads → Events Manager); the site reads the same ID from `VITE_REDDIT_PIXEL_ID` |
+| Reddit Pixel | `a2_k15k2zr8av7g` (Reddit Ads → Events Manager); the site reads the same ID from `VITE_REDDIT_PIXEL_ID` |
 
 ## Install (Shopify Admin)
 
@@ -29,7 +29,7 @@ The SPA (`src/lib/gtm.ts`) covers everything before checkout: GTM (GA4 + Google 
 const GA4_MEASUREMENT_ID = 'G-YK0BB0TPM4'
 const ADS_ID = 'AW-17744695066'
 const ADS_PURCHASE_LABEL = 'PznHCIOf2-EbEJqeqo1C'
-const REDDIT_PIXEL_ID = 'PASTE_REDDIT_PIXEL_ID'
+const REDDIT_PIXEL_ID = 'a2_k15k2zr8av7g'
 
 // Reddit base code (queues calls until pixel.js loads)
 !(function (w, d) {

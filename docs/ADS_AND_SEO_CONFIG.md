@@ -12,7 +12,7 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Merchant Center | `5685591896` "Sunday Rolls", linked to Ads since 2025-11-19 | [merchants.google.com](https://merchants.google.com/mc/overview?a=5685591896) | User (invited by Sam, accepted 2026-11-02) |
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
-| Reddit Pixel | Set in Railway `website` → `VITE_REDDIT_PIXEL_ID` and in the custom pixel | [ads.reddit.com](https://ads.reddit.com) → Events Manager | Not checked |
+| Reddit Pixel | `a2_k15k2zr8av7g` (Railway `website` → `VITE_REDDIT_PIXEL_ID`, and the custom pixel) | [ads.reddit.com](https://ads.reddit.com) → Events Manager | Not checked |
 
 ## Change log: 2026-11-24
 
