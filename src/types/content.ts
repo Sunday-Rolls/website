@@ -105,6 +105,20 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Doodle banner (A/B test home-doodle-banner, arm b). One fit only. */
+  doodle?: {
+    eyebrow?: string
+    /** Headline, one entry per line (drawn as outlined bubble letters). */
+    titleLines: string[]
+    subtitle?: string
+    lines: string[]
+    /** Rows on the sketchbook "field notes" card. */
+    notes?: Array<{ label: string; value: string }>
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP). */
+    image: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

@@ -79,6 +79,40 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "doodle": {
+    "eyebrow": "The Doodle",
+    "titleLines": [
+      "Little Monsters.",
+      "Big Putts."
+    ],
+    "subtitle": "Drawn by one of our founders. Stitched for your bag.",
+    "lines": [
+      "A whole crowd of quirky, friendly little creatures in dense monochrome embroidery, packed edge to edge. Plush velvet inside and a magnetic closure outside keep your putter protected while they bring the personality."
+    ],
+    "notes": [
+      {
+        "label": "Made for",
+        "value": "L.A.B. DF3 (center-shafted)"
+      },
+      {
+        "label": "Artwork",
+        "value": "Drawn by a founder"
+      },
+      {
+        "label": "Lining",
+        "value": "Plush velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "href": "/products/the-doodle",
+    "image": "/assets/home/doodle/the-doodle.webp",
+    "cta": {
+      "label": "Shop The Doodle"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
