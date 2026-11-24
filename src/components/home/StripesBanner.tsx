@@ -42,8 +42,9 @@ export function StripesBanner() {
       {/* A whisper of seersucker across the sky, fading out before the copy gets busy. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 [background-image:repeating-linear-gradient(90deg,rgba(143,176,220,0.14)_0_2px,transparent_2px_18px)] [mask-image:linear-gradient(to_bottom,black,transparent_65%)]"
+        className="pointer-events-none absolute inset-0 [background-image:repeating-linear-gradient(90deg,rgba(143,176,220,0.14)_0_2px,transparent_2px_18px)] [mask-image:linear-gradient(to_bottom,black,transparent_45%)]"
       />
+      <CoastScene />
 
       <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+4rem)] lg:pt-24 lg:pb-36">
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
@@ -229,6 +230,128 @@ function splitLastWord(title: string): [string, string] {
   const trimmed = title.trim()
   const cut = trimmed.lastIndexOf(' ')
   return cut === -1 ? ['', trimmed] : [trimmed.slice(0, cut), trimmed.slice(cut + 1)]
+}
+
+/**
+ * The beach behind the banner, back to front: gulls in the sky, a distant sea with a horizon
+ * and glints, a far dune, then a near dune with grass and a rope fence. Each layer drifts at its
+ * own speed as the section scrolls past (see `.coast-layer-*` in index.css), so it reads as depth.
+ * Everything is anchored to the bottom so the sea always sits behind the middle of the banner.
+ */
+function CoastScene() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      {/* Sea and horizon */}
+      <svg
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMax slice"
+        className="coast-layer-far absolute inset-0 h-full w-full"
+      >
+        <defs>
+          <linearGradient id="coast-sea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#c9dbe8" />
+            <stop offset="1" stopColor="#b3cde0" />
+          </linearGradient>
+          <linearGradient id="coast-haze" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffffff" stopOpacity="0.7" />
+            <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="470" width="1440" height="200" fill="url(#coast-sea)" opacity="0.75" />
+        <rect x="0" y="470" width="1440" height="26" fill="url(#coast-haze)" />
+        <line x1="0" y1="470.5" x2="1440" y2="470.5" stroke="#9fbbd3" strokeOpacity="0.6" />
+        {/* Glints on the water, mostly under the sun on the right. */}
+        <g stroke="#ffffff" strokeLinecap="round" strokeOpacity="0.75">
+          <line x1="1010" y1="500" x2="1060" y2="500" strokeWidth="2" />
+          <line x1="1110" y1="512" x2="1180" y2="512" strokeWidth="2" />
+          <line x1="1215" y1="496" x2="1250" y2="496" strokeWidth="1.5" />
+          <line x1="960" y1="528" x2="990" y2="528" strokeWidth="1.5" />
+          <line x1="1290" y1="530" x2="1350" y2="530" strokeWidth="2" />
+          <line x1="140" y1="508" x2="180" y2="508" strokeWidth="1.5" strokeOpacity="0.5" />
+          <line x1="560" y1="540" x2="610" y2="540" strokeWidth="1.5" strokeOpacity="0.5" />
+        </g>
+        {/* A small sail on the horizon. */}
+        <g transform="translate(1180 438)" fill="#f8f4ec" stroke="#9fbbd3" strokeWidth="1">
+          <path d="M14 0 L14 28 L0 28 Z" />
+          <path d="M17 6 L17 28 L28 28 Z" />
+          <path d="M-4 31 L32 31 L27 36 L1 36 Z" fill="#9fbbd3" stroke="none" />
+        </g>
+      </svg>
+
+      {/* Far dune */}
+      <svg
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMax slice"
+        className="coast-layer-mid absolute inset-0 h-full w-full"
+      >
+        <path
+          d="M0 610 C 180 560, 360 585, 520 600 S 860 560, 1040 590 S 1320 600, 1440 570 V900 H0 Z"
+          fill="#e5dbc3"
+        />
+      </svg>
+
+      {/* Near dune, grass and fence */}
+      <svg
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMax slice"
+        className="coast-layer-near absolute inset-0 h-full w-full"
+      >
+        <path
+          d="M0 690 C 220 640, 420 660, 640 700 S 1080 690, 1260 650 S 1400 655, 1440 660 V900 H0 Z"
+          fill="#ebe2cf"
+        />
+        <g stroke="#a7a77c" strokeLinecap="round" fill="none" strokeOpacity="0.85">
+          <DuneGrass x={90} y={668} />
+          <DuneGrass x={150} y={660} scale={0.8} />
+          <DuneGrass x={1240} y={652} />
+          <DuneGrass x={1310} y={650} scale={1.15} />
+          <DuneGrass x={1380} y={656} scale={0.75} />
+        </g>
+        {/* Weathered dune fence with a sagging rope. */}
+        <g stroke="#a58b6a" strokeLinecap="round" fill="none">
+          {[210, 262, 314, 366].map((x, i) => (
+            <line key={x} x1={x} y1={652 + i * 4} x2={x - 3} y2={690 + i * 4} strokeWidth="3" />
+          ))}
+          <path d="M209 660 Q 236 670 261 664 Q 288 674 313 668 Q 340 678 365 672" strokeWidth="1.25" />
+        </g>
+      </svg>
+
+      {/* Gulls, each on its own slow glide. */}
+      <div className="absolute inset-x-0 top-0 h-[55%]">
+        <Gull className="left-[8%] top-[14%] w-9 opacity-60 motion-safe:animate-[gull-glide_14s_ease-in-out_infinite]" />
+        <Gull className="left-[15%] top-[24%] w-6 opacity-45 motion-safe:animate-[gull-glide_17s_ease-in-out_-4s_infinite]" />
+        <Gull className="left-[58%] top-[9%] w-7 opacity-50 motion-safe:animate-[gull-glide_19s_ease-in-out_-9s_infinite]" />
+        <Gull className="right-[9%] top-[30%] w-10 opacity-55 motion-safe:animate-[gull-glide_16s_ease-in-out_-6s_infinite]" />
+        <Gull className="right-[17%] top-[38%] w-5 opacity-40 motion-safe:animate-[gull-glide_21s_ease-in-out_-12s_infinite]" />
+      </div>
+    </div>
+  )
+}
+
+function Gull({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 14" fill="none" className={cn('absolute h-auto text-harbor', className)}>
+      <path
+        d="M1 9 C 7 2, 13 2, 20 9 C 27 2, 33 2, 39 9"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function DuneGrass({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`} strokeWidth="2">
+      <path d="M0 0 C -2 -20, -10 -34, -20 -44" />
+      <path d="M4 0 C 4 -22, 2 -40, -2 -56" />
+      <path d="M8 0 C 10 -18, 16 -32, 26 -40" />
+      <path d="M12 0 C 14 -14, 20 -22, 30 -26" />
+      <path d="M-4 0 C -8 -10, -16 -16, -26 -18" />
+    </g>
+  )
 }
 
 function WaveMark({ className }: { className?: string }) {
