@@ -34,7 +34,7 @@ export function DoodleBanner() {
       />
       <Crowd />
 
-      <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+7.5rem)] lg:pt-24 lg:pb-60">
+      <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+9rem)] lg:pt-24 lg:pb-72">
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
           <div className="order-2 space-y-7 lg:order-1 lg:max-w-xl">
             {doodle.eyebrow ? (
@@ -229,13 +229,16 @@ function Monster({ shape, delay, blink }: { shape: MonsterShape; delay: number; 
 
 /** Where each monster sits: [left %, top %, size rem, rotation, monster, wide screens only]. */
 const PLACEMENTS: Array<[number, number, number, number, number, boolean]> = [
-  // Crowd along the bottom edge.
-  [-2, 80, 9, -8, 0, false], [7, 84, 7.5, 6, 3, false], [15, 79, 8.5, -4, 5, false], [24, 85, 7, 10, 1, false],
-  [32, 81, 8, -6, 7, false], [41, 86, 7, 4, 2, false], [49, 80, 9, -10, 9, false], [58, 85, 7.5, 8, 4, false],
-  [66, 80, 8.5, -3, 6, false], [75, 85, 7, 7, 8, false], [83, 79, 9, -7, 0, false], [92, 84, 8, 5, 5, false],
+  // Back row of the crowd, peeking over the front row.
+  [3, 72, 9, 8, 8, false], [19, 71, 9.5, -6, 2, false], [36, 73, 9, 10, 5, false], [53, 71, 9.5, -8, 1, false],
+  [70, 72, 9, 6, 3, false], [86, 71, 9.5, -10, 6, false],
+  // Front row along the bottom edge, packed shoulder to shoulder like the cover.
+  [-4, 78, 12, -8, 0, false], [7, 82, 11, 6, 3, false], [17, 77, 12.5, -4, 5, false], [28, 83, 10.5, 10, 1, false],
+  [37, 78, 12, -6, 7, false], [47, 84, 10.5, 4, 2, false], [56, 77, 12.5, -10, 9, false], [66, 83, 11, 8, 4, false],
+  [75, 78, 12, -3, 6, false], [85, 83, 10.5, 7, 8, false], [93, 77, 12, -7, 0, false],
   // Up the sides on wide screens.
-  [-3, 8, 8, 12, 2, true], [1, 30, 7, -10, 8, true], [-2, 52, 8.5, 6, 1, true],
-  [92, 6, 8, -12, 3, true], [95, 28, 7, 8, 9, true], [91, 50, 8, -5, 6, true],
+  [-3, 6, 10, 12, 2, true], [0, 28, 9, -10, 8, true], [-2, 48, 10.5, 6, 1, true],
+  [91, 4, 10, -12, 3, true], [94, 26, 9, 8, 9, true], [90, 46, 10, -5, 6, true],
 ]
 
 function Crowd() {
@@ -249,7 +252,7 @@ function Crowd() {
           style={{
             left: `${left}%`,
             top: `${top}%`,
-            width: `clamp(${(size * 0.6).toFixed(2)}rem, ${(size * 0.95).toFixed(2)}vw, ${size}rem)`,
+            width: `clamp(${(size * 0.55).toFixed(2)}rem, ${(size * 0.9).toFixed(2)}vw, ${size}rem)`,
             aspectRatio: '1',
             transform: `rotate(${rotate}deg)`,
           }}
