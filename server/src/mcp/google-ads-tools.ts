@@ -98,7 +98,7 @@ export function confirmToken(secret: string, tool: string, args: Record<string, 
   return `${expiresAt}.${sign(secret, `${tool}|${expiresAt}|${canonical(rest)}`)}`
 }
 
-function confirmTokenValid(secret: string, tool: string, args: Record<string, unknown>, now: number): boolean {
+export function confirmTokenValid(secret: string, tool: string, args: Record<string, unknown>, now: number): boolean {
   const token = String(args.confirm_token ?? '')
   const [exp] = token.split('.')
   const expiresAt = Number(exp)

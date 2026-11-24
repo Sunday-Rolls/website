@@ -26,10 +26,10 @@ describe('reddit ads', () => {
     ).toEqual({ clientId: 'id', clientSecret: 's', refreshToken: 'r', adAccountId: 'a2_abc' })
   })
 
-  it('asks for a permanent, read-only token', () => {
+  it('asks for a permanent token with read and edit access', () => {
     const url = new URL(redditAuthorizeUrl('id', 'https://x.test/cb', 'st'))
     expect(url.searchParams.get('duration')).toBe('permanent')
-    expect(url.searchParams.get('scope')).toBe('adsread')
+    expect(url.searchParams.get('scope')).toBe('adsread adsedit')
     expect(url.searchParams.get('redirect_uri')).toBe('https://x.test/cb')
   })
 

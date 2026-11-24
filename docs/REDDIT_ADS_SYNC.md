@@ -6,7 +6,10 @@ MER, the Reddit campaigns table) and runs with the other syncs when the dashboar
 `reddit-ads`, at most every 30 minutes). Purchases/value are Reddit's own count (pixel / Conversions
 API, click + view-through). Days are UTC days.
 
-Code: `server/src/analytics/reddit-ads.ts`. Read-only: the token only has the `adsread` scope.
+Code: `server/src/analytics/reddit-ads.ts`. The sync only reads. The sign-in asks for `adsread` and
+`adsedit`; `adsedit` is used only by the Claude connector's Reddit change tools (below), each of which
+needs a previewed change and an explicit yes. Tokens made before 2026-11-24 are read-only: redo the
+sign-in (step 3) to get edit access.
 
 ## Railway variables (`contact-api`)
 
@@ -46,6 +49,33 @@ ID (`rdt_cid`) or UTMs on the landing URL, e.g.
 destination URL in Reddit Ads Manager; if `utm_campaign` matches the Reddit campaign name the sale
 lands on that campaign's row. Untagged orders are not guessed for Reddit (GA4 doesn't give per-campaign
 Reddit visits), so they show under "No website orders tagged" until tagged clicks come in.
+
+## Claude connector tools
+
+The Sunday Rolls connector (`https://dashboard.sundayrollsgolf.com/mcp`,
+[GOOGLE_ADS_CONNECTOR.md](GOOGLE_ADS_CONNECTOR.md)) includes these Reddit tools. Code:
+`server/src/mcp/reddit-ads-tools.ts` and `reddit-ads-manage-tools.ts`.
+
+| Tool | What it does |
+|------|--------------|
+| `reddit_ads_performance` | Spend and Reddit-reported purchases per campaign per day (stored sync data) |
+| `reddit_ads_structure` | Live campaigns → ad groups (status, budget, bid, keywords, communities) → ads (status, URL) |
+| `reddit_ads_set_ad_url` | Change an ad's destination URL or add UTMs (must stay on sundayrollsgolf.com) |
+| `reddit_ads_update_targeting` | Add/remove keywords, excluded keywords, communities, excluded communities |
+| `reddit_ads_set_status` | Pause or turn on a campaign, ad group or ad |
+| `reddit_ads_set_daily_budget` | Daily budget $5–$500 on the ad group, or its campaign under campaign budget optimization |
+| `reddit_ads_create_ad_group` | Copy an ad group (bidding, pixel, targeting) with a new name and keywords; created **paused** with paused copies of its ads |
+| `reddit_ads_change_log` | Changes made through the connector |
+
+Changes are two-step, like the Google tools: without `confirm_token` the tool reads the live values
+and returns a before/after preview and a token (15 minutes, tied to the exact arguments); repeating the
+call with the token applies it and logs it (`analytics_integration_state` key `reddit-ads-change-log`,
+last 300). Reddit has no validate-only mode, so Reddit's own checks run only when a change is applied.
+
+API notes: single entities use bare paths with `PATCH {"data": {...}}` (`/ads/{id}`,
+`/ad_groups/{id}`, `/campaigns/{id}`); lists and creates use `/ad_accounts/{id}/…`; money is
+microcurrency. Ad copy (headline, body) can't be edited through the API; new ads with new creative are
+made in Reddit Ads Manager. A 403 on a change usually means the token lacks `adsedit`: redo step 3.
 
 ## Errors (dashboard sync bar)
 
