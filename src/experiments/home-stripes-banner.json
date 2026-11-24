@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "key": "home-stripes-banner",
+  "name": "Coastal Sunday Stripes banner on the home page",
+  "hypothesis": "Showing the coastal Sunday Stripes banner (fit picker, direct shop link) under the value strip gets more home-page visitors to add a cover to their cart than the home page without it. Queued to start after home-banner ends; control keeps whatever home-banner left on the page.",
+  "variants": [
+    { "key": "control", "name": "Current home page", "weight": 50 },
+    { "key": "b", "name": "Coastal Sunday Stripes banner", "weight": 50 }
+  ],
+  "primaryMetric": "add_to_cart",
+  "paths": ["/"],
+  "minVisitorsPerArm": 1000,
+  "minDays": 14
+}

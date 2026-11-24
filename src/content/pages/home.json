@@ -79,6 +79,38 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "stripes": {
+    "eyebrow": "The Sunday Stripes",
+    "title": "A Little Closer to the Coast",
+    "subtitle": "Classic stripes. Coastal tones. Made for wherever the round takes you.",
+    "lines": [
+      "Soft blue seersucker, cream piping and our embroidered Skipper taking a well-earned break. A plush lining and magnetic closure keep your putter covered from the first tee to last light."
+    ],
+    "details": [
+      "Seersucker cotton",
+      "Embroidered Skipper",
+      "Magnetic closure"
+    ],
+    "fits": [
+      {
+        "label": "Center-shafted",
+        "note": "L.A.B. DF3 and putters like it",
+        "href": "/products/sunday-stripes",
+        "image": "/assets/home/stripes/sunday-stripes.webp",
+        "imageSmall": "/assets/home/stripes/sunday-stripes-720.webp"
+      },
+      {
+        "label": "Mallet",
+        "note": "Spider and heel-shafted mallets",
+        "href": "/products/mallet-sunday-stripes",
+        "image": "/assets/home/stripes/mallet-sunday-stripes.webp",
+        "imageSmall": "/assets/home/stripes/mallet-sunday-stripes-720.webp"
+      }
+    ],
+    "cta": {
+      "label": "Shop the Sunday Stripes"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",

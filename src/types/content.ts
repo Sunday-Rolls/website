@@ -105,6 +105,26 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Coastal Sunday Stripes banner (A/B test home-stripes-banner, arm b). */
+  stripes?: {
+    eyebrow?: string
+    title: string
+    subtitle?: string
+    lines: string[]
+    /** Short material callouts shown as a row under the copy. */
+    details?: string[]
+    /** Putter fits, each linking to its own product. */
+    fits: Array<{
+      label: string
+      note?: string
+      href: string
+      /** Square photo of the cover on the warm-sand backdrop (WebP), 1200px. */
+      image: string
+      /** Same photo at 720px for small screens. */
+      imageSmall?: string
+    }>
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

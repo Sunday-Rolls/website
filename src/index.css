@@ -13,6 +13,11 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* Coastal palette (Sunday Stripes banner) */
+  --color-harbor: #1d3557;
+  --color-harbor-deep: #142640;
+  --color-seersucker: #8fb0dc;
+  --color-sea-mist: #e3ecf1;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
@@ -228,6 +233,17 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Sunday Stripes banner: the shoreline waves drift slowly side to side. */
+@keyframes tide-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-4%);
   }
 }
 
