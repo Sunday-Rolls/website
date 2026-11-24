@@ -105,6 +105,24 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Breakfast Roller banner (A/B test home-breakfast-banner, arm b). One fit only. */
+  breakfast?: {
+    eyebrow?: string
+    title: string
+    subtitle?: string
+    lines: string[]
+    /** Short material callouts shown as a row under the copy. */
+    details?: string[]
+    /** Starburst sticker text on the box front. */
+    badge?: string
+    fit: { label: string; note?: string }
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP), 1200px. */
+    image: string
+    /** Same photo at 720px for small screens. */
+    imageSmall?: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string

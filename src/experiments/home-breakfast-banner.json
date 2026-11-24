@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "key": "home-breakfast-banner",
+  "name": "Breakfast Roller banner on the home page",
+  "hypothesis": "Showing the cereal-box Breakfast Roller banner (direct shop link, center-shafted only) under the value strip gets more home-page visitors to add a cover to their cart than the home page without it. A draft for a future slot; control keeps whatever is in the banner slot when it starts.",
+  "variants": [
+    { "key": "control", "name": "Current home page", "weight": 50 },
+    { "key": "b", "name": "Breakfast Roller banner", "weight": 50 }
+  ],
+  "primaryMetric": "add_to_cart",
+  "paths": ["/"],
+  "minVisitorsPerArm": 1000,
+  "minDays": 14
+}
