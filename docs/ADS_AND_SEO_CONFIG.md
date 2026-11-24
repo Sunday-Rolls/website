@@ -12,6 +12,15 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 | Merchant Center | `5685591896` "Sunday Rolls", linked to Ads since 2025-11-19 | [merchants.google.com](https://merchants.google.com/mc/overview?a=5685591896) | User (invited by Sam, accepted 2026-11-02) |
 | Search Console | URL-prefix property `https://www.sundayrollsgolf.com/` (the domain property `sundayrollsgolf.com` exists but devops isn't on it) | [search.google.com/search-console](https://search.google.com/search-console?resource_id=https%3A%2F%2Fwww.sundayrollsgolf.com%2F) | Yes (granted 2026-11-02) |
 | Meta Pixel | `1274109674861464` | Events Manager | Not checked |
+| Reddit Pixel | `a2_k15k2zr8av7g` (Railway `website` → `VITE_REDDIT_PIXEL_ID`, and the custom pixel) | [ads.reddit.com](https://ads.reddit.com) → Events Manager | Not checked |
+
+## Change log: 2026-11-24
+
+### Reddit Pixel
+
+- Reddit Ads could see clicks but nothing after them, so it couldn't report or optimize for sales. The site now loads the Reddit Pixel next to the Meta Pixel (`src/lib/gtm.ts`, same deferred boot; `rdt_cid` landings boot right away). It sends `PageVisit`, `ViewContent`, `AddToCart`, `SignUp` (newsletter) and `Lead` (contact form).
+- `Purchase` comes only from the `Sunday Rolls purchase` custom pixel at Shopify checkout, keyed on the order ID, with email and phone for matching.
+- **Manual steps:** add `VITE_REDDIT_PIXEL_ID` to the Railway `website` service, and replace the custom pixel's script in Shopify Admin (Settings → Customer events) with the one in [`SHOPIFY_WEB_PIXEL.md`](SHOPIFY_WEB_PIXEL.md). Revert by removing the variable and pasting the previous script back.
 
 ## Change log: 2026-11-17
 
@@ -162,7 +171,7 @@ Property `https://www.sundayrollsgolf.com/`.
 
 To add one, edit `scripts/lib/legacy-redirects.mjs`, add a case to `scripts/lib/legacy-redirects.test.mjs`, and run `node --test scripts/lib/legacy-redirects.test.mjs`. Railway's `website` watch patterns don't include `scripts/lib/**`. A change only there won't redeploy on its own: redeploy `website` from Railway, or ship it with another file it watches.
 
-**Ad click IDs.** `initGtm()` in `src/lib/gtm.ts` normally defers GTM and the Meta pixel until the first interaction or 2 s after the page load event (`GTM_POST_LOAD_DELAY_MS`). If the landing URL has `gclid`, `gbraid`, `wbraid` or `fbclid`, it loads them immediately, so `_gcl_aw` / `_fbc` are set before the first in-app navigation drops the query. The list is `AD_CLICK_PARAMS`.
+**Ad click IDs.** `initGtm()` in `src/lib/gtm.ts` normally defers GTM and the Meta pixel until the first interaction or 2 s after the page load event (`GTM_POST_LOAD_DELAY_MS`). If the landing URL has `gclid`, `gbraid`, `wbraid`, `fbclid` or `rdt_cid`, it loads them immediately, so `_gcl_aw` / `_fbc` are set before the first in-app navigation drops the query. The list is `AD_CLICK_PARAMS`.
 
 **Canonical URLs and sitemap.**
 - `build:railway` in `package.json` sets `VITE_SITE_ORIGIN=https://www.sundayrollsgolf.com`.
