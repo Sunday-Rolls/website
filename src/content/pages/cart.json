@@ -22,7 +22,7 @@
     "barLabel": "Progress toward free shipping"
   },
   "towelUpsell": {
-    "minTotal": 70,
+    "minTotal": 59,
     "maxTotal": 100,
     "preferredHandle": "golf-towel-green-stripe",
     "eyebrow": "Close to free shipping",
@@ -33,6 +33,8 @@
     "addingLabel": "Adding…"
   },
   "apparelUpsell": {
+    "minTotal": 59,
+    "maxTotal": 100,
     "eyebrow": "Add-on",
     "title": "Complete the look",
     "description": "Throw the SR Tee in with your order. A black Comfort Colors tee with our cream SR script monogram.",

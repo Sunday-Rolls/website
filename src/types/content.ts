@@ -328,8 +328,10 @@ export interface CartContent {
     ctaLabel: string
     addingLabel: string
   }
-  /** Add-on card for apparel, shown below the cart lines while no shirt is in the cart. */
+  /** Add-on card for apparel, shown while no shirt is in the cart and the total is in [minTotal, maxTotal). */
   apparelUpsell?: {
+    minTotal: number
+    maxTotal: number
     eyebrow: string
     title: string
     description: string

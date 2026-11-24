@@ -1,6 +1,6 @@
 import { getPublishedCatalogProducts, type CatalogProduct } from '@/lib/product-catalog'
 
-export const TOWEL_UPSELL_MIN_TOTAL_USD = 70
+export const TOWEL_UPSELL_MIN_TOTAL_USD = 59
 export const TOWEL_UPSELL_MAX_TOTAL_USD = 100
 export const DEFAULT_TOWEL_UPSELL_HANDLE = 'golf-towel-green-stripe'
 

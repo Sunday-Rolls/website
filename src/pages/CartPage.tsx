@@ -4,7 +4,7 @@ import { assetUrl } from '@/lib/asset-url'
 import { useCart } from '@/lib/cart'
 import { cn } from '@/lib/utils'
 import { freeShippingProgress } from '@/lib/cart-free-shipping'
-import { listApparelUpsellOptions } from '@/lib/cart-apparel-upsell'
+import { isInApparelUpsellWindow, listApparelUpsellOptions } from '@/lib/cart-apparel-upsell'
 import {
   listTowelUpsellOptions,
   shouldShowTowelUpsell,
@@ -107,10 +107,17 @@ export function CartPage() {
       showTowelUpsell ? listTowelUpsellOptions(cartHandles, upsell.preferredHandle) : [],
     [cartHandles, showTowelUpsell, upsell.preferredHandle],
   )
-  // The tee card shows on any cart (no price window), until a shirt is in the cart.
+  // The tee card shows in the same cart-total window as the towel, until a shirt is in the cart.
+  const apparelCopy = content.apparelUpsell
+  const apparelInWindow = apparelCopy
+    ? isInApparelUpsellWindow(cart?.totalAmount ?? 0, apparelCopy.minTotal, apparelCopy.maxTotal)
+    : false
   const apparelUpsell = useMemo(
-    () => (lines.length > 0 ? (listApparelUpsellOptions(cartHandles)[0] ?? null) : null),
-    [cartHandles, lines.length],
+    () =>
+      lines.length > 0 && apparelInWindow
+        ? (listApparelUpsellOptions(cartHandles)[0] ?? null)
+        : null,
+    [cartHandles, lines.length, apparelInWindow],
   )
   const showApparelUpsell = Boolean(apparelUpsell && content.apparelUpsell)
   const selectedTowel =

@@ -8,9 +8,9 @@ import {
 } from '@/lib/cart-towel-upsell'
 
 describe('shouldShowTowelUpsell', () => {
-  it('shows between $70 and under $100', () => {
-    expect(shouldShowTowelUpsell(69.99)).toBe(false)
-    expect(shouldShowTowelUpsell(70)).toBe(true)
+  it('shows between $59 and under $100', () => {
+    expect(shouldShowTowelUpsell(58.99)).toBe(false)
+    expect(shouldShowTowelUpsell(59)).toBe(true)
     expect(shouldShowTowelUpsell(85)).toBe(true)
     expect(shouldShowTowelUpsell(99.99)).toBe(true)
     expect(shouldShowTowelUpsell(100)).toBe(false)
