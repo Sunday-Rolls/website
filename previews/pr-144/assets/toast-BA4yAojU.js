@@ -1,1 +1,0 @@
-import{a as e}from"./index-CkX-gABr.js";function t(t){e.success(t)}function n(t){e.error(t)}export{t as n,n as t};
