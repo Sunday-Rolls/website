@@ -232,7 +232,7 @@ describe('HomePage', () => {
       bootFuel({ 'home-banner': 'b', 'home-fuel-banner': 'b' }, ['home-fuel-banner'])
       renderWithRouter(<HomePage />)
 
-      const heading = await screen.findByRole('heading', { level: 2, name: /par\. birdie\. bogey\. pick your flavor/i })
+      const heading = await screen.findByRole('heading', { level: 2, name: /par\.\s*birdie\.\s*bogey\.\s*pick your flavor/i })
       expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
       expect(experimentString()).toBe('home-fuel-banner:b')
 
