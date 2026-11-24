@@ -39,6 +39,12 @@ What is configured outside this repo (Tag Manager, Google Ads, Merchant Center, 
 - The checkout button now copies the GA4 client ID and session ID onto the cart as hidden attributes `_sr_ga_cid` / `_sr_ga_sid` (`src/lib/ga-ids.ts`, `prepareCheckout` in `src/lib/cart.tsx`; waits at most 1.5 s).
 - **Manual step in Shopify Admin:** update the `Sunday Rolls purchase` custom pixel (Settings → Customer events) with the new script in [`SHOPIFY_WEB_PIXEL.md`](SHOPIFY_WEB_PIXEL.md), which sends `purchase` under those IDs. Revert by pasting the previous script back.
 
+## Change log: 2026-11-13
+
+### Search Atlas OTTO
+
+- Added the Search Atlas OTTO script (`id="sa-dynamic-optimization"`, project uuid `9a5ab3ac-16eb-4a6f-b32d-b854fe99937d`) to the `<head>` of `index.html`, right after the charset meta. It goes in the site code, not the Shopify theme: the storefront is headless, so `theme.liquid` never loads for visitors.
+
 ## Change log: 2026-11-11
 
 ### Google Ads API
