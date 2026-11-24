@@ -301,18 +301,20 @@ function CoastScene() {
           fill="#ebe2cf"
         />
         <g stroke="#a7a77c" strokeLinecap="round" fill="none" strokeOpacity="0.85">
-          <DuneGrass x={90} y={668} />
-          <DuneGrass x={150} y={660} scale={0.8} />
           <DuneGrass x={1240} y={652} />
           <DuneGrass x={1310} y={650} scale={1.15} />
           <DuneGrass x={1380} y={656} scale={0.75} />
         </g>
         {/* Weathered dune fence with a sagging rope. */}
         <g stroke="#a58b6a" strokeLinecap="round" fill="none">
-          {[210, 262, 314, 366].map((x, i) => (
-            <line key={x} x1={x} y1={652 + i * 4} x2={x - 3} y2={690 + i * 4} strokeWidth="3" />
+          {[48, 96, 144, 192].map((x, i) => (
+            <line key={x} x1={x} y1={664 - i * 3} x2={x - 3} y2={702 - i * 3} strokeWidth="3" />
           ))}
-          <path d="M209 660 Q 236 670 261 664 Q 288 674 313 668 Q 340 678 365 672" strokeWidth="1.25" />
+          <path d="M47 672 Q 72 682 95 669 Q 120 679 143 666 Q 168 676 191 663" strokeWidth="1.25" />
+        </g>
+        <g stroke="#a7a77c" strokeLinecap="round" fill="none" strokeOpacity="0.85">
+          <DuneGrass x={24} y={688} scale={0.85} />
+          <DuneGrass x={170} y={674} />
         </g>
       </svg>
 
@@ -322,7 +324,7 @@ function CoastScene() {
         <Gull className="left-[15%] top-[24%] w-6 opacity-45 motion-safe:animate-[gull-glide_17s_ease-in-out_-4s_infinite]" />
         <Gull className="left-[58%] top-[9%] w-7 opacity-50 motion-safe:animate-[gull-glide_19s_ease-in-out_-9s_infinite]" />
         <Gull className="right-[9%] top-[30%] w-10 opacity-55 motion-safe:animate-[gull-glide_16s_ease-in-out_-6s_infinite]" />
-        <Gull className="right-[17%] top-[38%] w-5 opacity-40 motion-safe:animate-[gull-glide_21s_ease-in-out_-12s_infinite]" />
+        <Gull className="right-[3%] top-[16%] w-5 opacity-40 motion-safe:animate-[gull-glide_21s_ease-in-out_-12s_infinite]" />
       </div>
     </div>
   )
