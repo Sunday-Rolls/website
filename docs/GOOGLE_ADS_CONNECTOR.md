@@ -31,6 +31,8 @@ plans an owner adds it once under Organization connectors.
 | `google_ads_set_daily_budget` | Daily budget, $1–$500, not shared budgets |
 | `google_ads_set_campaign_status` | Pause or enable |
 
+Reddit Ads tools (`reddit_ads_*`: performance, structure, ad URL, keywords/communities, status, budget, new ad group, change log) are on the same connector; see [REDDIT_ADS_SYNC.md](REDDIT_ADS_SYNC.md#claude-connector-tools).
+
 Changes are two-step. The first call asks Google to validate the change (`validateOnly`) and
 returns a preview plus a `confirm_token`. Nothing is applied until the same call is repeated with
 that token (valid 15 minutes, tied to the exact arguments). Applied changes are logged in

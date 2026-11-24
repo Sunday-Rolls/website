@@ -4,7 +4,8 @@
  * Reddit campaigns table), the same way meta-ads.ts does for Meta. See docs/REDDIT_ADS_SYNC.md.
  *
  * Auth: a Reddit developer app (client id + secret) and a permanent refresh token with the
- * `adsread` scope, made once from the dashboard (GET /dashboard/api/reddit/connect).
+ * `adsread` and `adsedit` scopes, made once from the dashboard (GET /dashboard/api/reddit/connect).
+ * The sync only reads; `adsedit` is for the connector's change tools (mcp/reddit-ads-manage-tools.ts).
  */
 import { addUtcDays, formatUtcDate, parseUtcDate, resolveAsOf } from './period.js'
 import type { AnalyticsStore } from './store.js'
@@ -14,7 +15,8 @@ export const REDDIT_ADS_PLATFORM = 'Reddit Ads'
 export const REDDIT_ADS_API = 'https://ads-api.reddit.com/api/v3'
 export const REDDIT_AUTHORIZE_URL = 'https://www.reddit.com/api/v1/authorize'
 export const REDDIT_TOKEN_URL = 'https://www.reddit.com/api/v1/access_token'
-export const REDDIT_SCOPES = 'adsread'
+/** Space-separated. `adsedit` lets the Claude connector change ads after a confirmed preview. */
+export const REDDIT_SCOPES = 'adsread adsedit'
 /** Reddit rejects requests without a descriptive User-Agent. */
 export const REDDIT_USER_AGENT = 'server:sunday-rolls-dashboard:1.0 (by Sunday Rolls Golf)'
 /** Days per report request; keeps each response small. */
@@ -51,7 +53,7 @@ export function loadRedditAdsCredentialsFromEnv(env: NodeJS.ProcessEnv = process
 const basicAuth = (clientId: string, clientSecret: string) =>
   `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
 
-type TokenResponse = { access_token?: string; refresh_token?: string; scope?: string; error?: string; message?: string }
+export type TokenResponse = { access_token?: string; refresh_token?: string; scope?: string; error?: string; message?: string }
 
 async function tokenRequest(
   clientId: string,
@@ -95,7 +97,7 @@ export async function exchangeRedditCode(
   code: string,
   redirectUri: string,
   fetchImpl: typeof fetch = fetch,
-): Promise<{ accessToken: string; refreshToken: string }> {
+): Promise<{ accessToken: string; refreshToken: string; scope: string }> {
   const data = await tokenRequest(
     clientId,
     clientSecret,
@@ -103,7 +105,7 @@ export async function exchangeRedditCode(
     fetchImpl,
   )
   if (!data.refresh_token) throw new Error('Reddit returned no refresh token (sign-in must use duration=permanent).')
-  return { accessToken: data.access_token!, refreshToken: data.refresh_token }
+  return { accessToken: data.access_token!, refreshToken: data.refresh_token, scope: data.scope ?? '' }
 }
 
 export async function redditAccessToken(creds: RedditAdsCredentials, fetchImpl: typeof fetch = fetch): Promise<string> {
@@ -116,11 +118,11 @@ export async function redditAccessToken(creds: RedditAdsCredentials, fetchImpl: 
   return data.access_token!
 }
 
-type Page<T> = { data?: T; pagination?: { next_url?: string | null } }
+export type Page<T> = { data?: T; pagination?: { next_url?: string | null } }
 
-async function redditApi<T>(
+export async function redditApi<T>(
   accessToken: string,
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PATCH',
   url: string,
   body: unknown,
   fetchImpl: typeof fetch,
@@ -152,7 +154,7 @@ async function redditApi<T>(
 }
 
 /** GET/POST and follow pagination.next_url (at most 50 pages). */
-async function collect<T>(
+export async function collect<T>(
   accessToken: string,
   method: 'GET' | 'POST',
   url: string,

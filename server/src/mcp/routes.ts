@@ -9,6 +9,7 @@ import { googleAdsMissingEnv, loadGoogleAdsCredentialsFromEnv, type GoogleAdsCre
 import type { AnalyticsStore } from '../analytics/store.js'
 import type { RateLimiter } from '../rate-limit.js'
 import { GOOGLE_ADS_TOOLS, ToolInputError, type ToolContext } from './google-ads-tools.js'
+import { REDDIT_MANAGE_TOOLS } from './reddit-ads-manage-tools.js'
 import { redditAdsTools } from './reddit-ads-tools.js'
 import {
   ACCESS_TTL_S,
@@ -39,7 +40,9 @@ const INSTRUCTIONS =
   'call without confirm_token to get a validated preview, show the user exactly what will change and get an explicit yes, ' +
   'then call again with the same arguments and the confirm_token. Never apply a change the user has not approved. ' +
   'Google Ads conversions can differ from real Shopify orders, so say so when using them to judge performance. ' +
-  'reddit_ads_performance reads Reddit Ads spend and Reddit-reported purchases (read-only).'
+  'Reddit Ads: reddit_ads_performance reads spend and Reddit-reported purchases; reddit_ads_structure lists campaigns, ad groups, ' +
+  'targeting and ads with their ids. reddit_ads_* change tools use the same preview → explicit yes → confirm_token flow. ' +
+  'Reddit has no validate-only mode, so a Reddit preview is built from live values and Reddit checks the change when it is applied.'
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`)
 
@@ -53,7 +56,8 @@ export function createMcpRoutes(deps: McpDeps) {
   const env = deps.env ?? process.env
   const usedCodes = new Map<string, number>()
   const redditTools = redditAdsTools({ store, env, fetchImpl: deps.fetchImpl })
-  const allTools = [...GOOGLE_ADS_TOOLS, ...redditTools]
+  const manageTools = REDDIT_MANAGE_TOOLS as unknown as typeof GOOGLE_ADS_TOOLS
+  const allTools = [...GOOGLE_ADS_TOOLS, ...redditTools, ...manageTools]
 
   function baseUrl(c: Context): string {
     const configured = env.MCP_PUBLIC_URL?.trim()
@@ -353,7 +357,9 @@ ${form}
           const tool = allTools.find((t) => t.name === name)
           if (!tool) return err(-32602, `Unknown tool: ${name}`)
           // Reddit tools don't need Google Ads credentials.
-          const context = redditTools.includes(tool)
+          const context = manageTools.includes(tool)
+            ? ({ store, env, secret, user: { id: user.id, email: user.email }, fetchImpl: deps.fetchImpl } as unknown as ToolContext)
+            : redditTools.includes(tool)
             ? ({ store, user: { id: user.id, email: user.email } } as unknown as ToolContext)
             : ctx()
           if (!context) {

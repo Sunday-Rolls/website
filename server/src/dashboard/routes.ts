@@ -655,10 +655,14 @@ export function createDashboardRoutes(deps: DashboardDeps) {
             .map((a) => `<li><code>${escapeHtml(a.id)}</code> ${escapeHtml(a.name)}${a.business ? ` (${escapeHtml(a.business)})` : ''}</li>`)
             .join('')}</ul>`
         : '<p>Copy the ad account ID from Reddit Ads Manager (top-left account menu, starts with <code>a2_</code> or <code>t2_</code>).</p>'
+      const scopes = tokens.scope.split(/[\s,]+/)
+      const editNote = scopes.includes('adsedit')
+        ? '<p>This sign-in includes edit access, so the Claude connector can change ads after you approve each change.</p>'
+        : '<p><strong>Reddit didn’t grant edit access</strong> (<code>adsedit</code>), so the Claude connector can only read. Spend sync still works.</p>'
       return c.html(
         redditPage(
           'Reddit Ads connected',
-          `<p>Paste this into Railway → contact-api → Variables as <code>REDDIT_ADS_REFRESH_TOKEN</code>. It is shown only once and isn't saved anywhere; don't paste it into chat.</p>
+          `${editNote}<p>Paste this into Railway → contact-api → Variables as <code>REDDIT_ADS_REFRESH_TOKEN</code>. It is shown only once and isn't saved anywhere; don't paste it into chat.</p>
 <pre>${escapeHtml(tokens.refreshToken)}</pre>
 ${accountList}
 <p>Set <code>REDDIT_ADS_ACCOUNT_ID</code> to the account Sunday Rolls advertises from, let Railway redeploy, then reopen the dashboard. Reddit Ads appears in the sync bar.</p>`,
