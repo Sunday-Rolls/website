@@ -13,6 +13,11 @@
   --color-white: #ffffff;
   --color-warm-sand: #e7dece;
   --color-sand: #ede3cb;
+  /* Coastal palette (Sunday Stripes banner) */
+  --color-harbor: #1d3557;
+  --color-harbor-deep: #142640;
+  --color-seersucker: #8fb0dc;
+  --color-sea-mist: #e3ecf1;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-body: Inter, system-ui, sans-serif;
@@ -228,6 +233,65 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Sunday Stripes banner: gulls glide and bob in place. */
+@keyframes gull-glide {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(14px, -6px) rotate(-3deg);
+  }
+  50% {
+    transform: translate(28px, 2px) rotate(1deg);
+  }
+  75% {
+    transform: translate(12px, 5px) rotate(3deg);
+  }
+}
+
+/* Sunday Stripes banner: beach layers move at different speeds as the section scrolls by. */
+@keyframes coast-parallax {
+  from {
+    transform: translateY(var(--coast-shift));
+  }
+  to {
+    transform: translateY(calc(var(--coast-shift) * -1));
+  }
+}
+
+.coast-layer-far {
+  --coast-shift: 10px;
+}
+.coast-layer-mid {
+  --coast-shift: 22px;
+}
+.coast-layer-near {
+  --coast-shift: 38px;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .coast-layer-far,
+    .coast-layer-mid,
+    .coast-layer-near {
+      animation: coast-parallax linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+/* Sunday Stripes banner: the shoreline waves drift slowly side to side. */
+@keyframes tide-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-4%);
   }
 }
 

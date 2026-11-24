@@ -210,4 +210,42 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-stripes-banner', () => {
+    const stripes = homeContent.stripes
+
+    function bootStripes(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootStripes({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /closer to the coast/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the coastal banner in place of the Retro Roller for arm b, with a fit picker and shop link', async () => {
+      bootStripes({ 'home-banner': 'b', 'home-stripes-banner': 'b' }, ['home-stripes-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /a little closer to the coast/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-stripes-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByText(stripes.subtitle)).toBeInTheDocument()
+      const shop = within(section).getByRole('link', { name: /shop the sunday stripes/i })
+      expect(shop).toHaveAttribute('href', expect.stringContaining(stripes.fits[0].href))
+      expect(within(section).getByRole('img', { name: /sunday stripes center-shafted putter cover/i })).toBeInTheDocument()
+
+      await userEvent.click(within(section).getByRole('button', { name: stripes.fits[1].label }))
+      expect(within(section).getByRole('button', { name: stripes.fits[1].label })).toHaveAttribute('aria-pressed', 'true')
+      expect(shop).toHaveAttribute('href', expect.stringContaining(stripes.fits[1].href))
+      expect(within(section).getByRole('img', { name: /sunday stripes mallet putter cover/i })).toBeInTheDocument()
+    })
+  })
 })
