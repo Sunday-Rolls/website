@@ -185,7 +185,7 @@ function RollerFacts({
       {details.length ? (
         <div className="pt-1.5 text-[0.75rem] leading-snug">
           <dt className="inline font-semibold">Contains: </dt>
-          <dd className="inline">{details.join(', ')}.</dd>
+          <dd className="inline">{details.map((detail) => detail.toLowerCase()).join(', ')}.</dd>
         </div>
       ) : null}
       </dl>
@@ -230,12 +230,12 @@ function Starburst({ label }: { label: string }) {
 }
 
 const FLAKES: Array<{ className: string; rot: number; delay: string; fill: string }> = [
-  { className: 'left-[4%] top-[12%] w-7', rot: -20, delay: '0s', fill: 'var(--color-yolk)' },
-  { className: 'left-[44%] top-[6%] w-5', rot: 35, delay: '-3s', fill: '#f9dc8f' },
-  { className: 'right-[6%] top-[10%] w-8', rot: 10, delay: '-5s', fill: 'var(--color-yolk)' },
-  { className: 'right-[3%] top-[58%] w-6', rot: -40, delay: '-2s', fill: '#f9dc8f' },
-  { className: 'left-[2%] top-[62%] w-6', rot: 50, delay: '-6s', fill: '#f9dc8f' },
-  { className: 'left-[47%] bottom-[16%] w-5', rot: -10, delay: '-4s', fill: 'var(--color-yolk)' },
+  { className: 'left-[4%] top-[12%] w-11', rot: -20, delay: '0s', fill: 'var(--color-yolk)' },
+  { className: 'left-[44%] top-[6%] w-8', rot: 35, delay: '-3s', fill: '#f9dc8f' },
+  { className: 'right-[6%] top-[10%] w-12', rot: 10, delay: '-5s', fill: 'var(--color-yolk)' },
+  { className: 'right-[3%] top-[58%] w-9', rot: -40, delay: '-2s', fill: '#f9dc8f' },
+  { className: 'left-[2%] top-[62%] w-10', rot: 50, delay: '-6s', fill: '#f9dc8f' },
+  { className: 'left-[47%] bottom-[16%] w-8', rot: -10, delay: '-4s', fill: 'var(--color-yolk)' },
 ]
 
 /** A few toasted flakes drifting at the edges, clear of the copy. */
@@ -245,20 +245,24 @@ function Flakes() {
       {FLAKES.map((flake) => (
         <svg
           key={flake.className}
-          viewBox="0 0 40 32"
+          viewBox="0 0 41 32"
           className={cn(
             'absolute h-auto drop-shadow-[2px_2px_0_rgba(19,32,58,0.35)] motion-safe:animate-[flake-drift_9s_ease-in-out_infinite]',
             flake.className,
           )}
           style={{ '--flake-rot': `${flake.rot}deg`, animationDelay: flake.delay, transform: `rotate(${flake.rot}deg)` } as CSSProperties}
         >
+          {/* A curled, toasted flake: ragged outline, a darker toasted edge and a crease. */}
           <path
-            d="M6 10 C 10 2, 26 0, 34 6 C 40 11, 38 22, 30 27 C 22 32, 8 30, 4 23 C 1 18, 2 14, 6 10 Z"
+            d="M3 14 L7 8 L12 9 L15 3 L21 6 L26 2 L30 7 L36 6 L37 12 L39 17 L34 21 L35 27 L28 26 L23 30 L18 26 L11 28 L9 22 L2 20 Z"
             fill={flake.fill}
-            stroke="rgba(19,32,58,0.45)"
-            strokeWidth="1.2"
+            stroke="#b4540f"
+            strokeOpacity="0.7"
+            strokeWidth="1.3"
+            strokeLinejoin="round"
           />
-          <path d="M12 14 C 17 11, 23 12, 27 15" stroke="rgba(201,80,15,0.45)" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+          <path d="M9 16 C 15 12, 24 12, 31 16" stroke="#c9500f" strokeOpacity="0.5" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+          <path d="M14 21 C 19 19, 24 19, 28 21" stroke="#ffffff" strokeOpacity="0.45" strokeWidth="1.1" fill="none" strokeLinecap="round" />
         </svg>
       ))}
     </div>
