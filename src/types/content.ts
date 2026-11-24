@@ -105,6 +105,20 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Morning Dew banner (A/B test home-dew-banner, arm b). One fit only. */
+  dew?: {
+    eyebrow?: string
+    /** Headline, one entry per line; the last line glows citrus. */
+    titleLines: string[]
+    subtitle?: string
+    lines: string[]
+    /** Rows on the tee-sheet card. */
+    teeSheet?: Array<{ label: string; value: string }>
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP). */
+    image: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string
