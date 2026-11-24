@@ -127,7 +127,8 @@ function useEyesFollowPointer(sectionRef: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const section = sectionRef.current
     if (!section) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    // matchMedia is missing in some environments (old browsers, tests): then just track the pointer.
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     let frame = 0
     let pointer: { x: number; y: number } | null = null
 
