@@ -242,6 +242,9 @@ function DawnFairway() {
         </g>
       </svg>
 
+      {/* Morning haze behind the copy so the text reads cleanly over the pines. */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_28%_48%,rgba(247,248,239,0.82)_0%,rgba(247,248,239,0.55)_45%,rgba(247,248,239,0)_75%)]" />
+
       {/* Mist banks, and a soft fade into the cream section below. */}
       <div className="absolute top-[48%] -left-[10%] h-24 w-[70%] rounded-full bg-white/45 blur-2xl motion-safe:animate-[mist-drift_24s_ease-in-out_infinite]" />
       <div className="absolute top-[56%] -right-[10%] h-28 w-[65%] rounded-full bg-white/40 blur-2xl motion-safe:animate-[mist-drift_30s_ease-in-out_infinite_reverse]" />
