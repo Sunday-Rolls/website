@@ -210,4 +210,43 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-fuel-banner', () => {
+    const fuel = homeContent.fuel
+
+    function bootFuel(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootFuel({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /pick your flavor/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the Flagstick Fuel banner in place of the Retro Roller for arm b, with flavors and a shop link', async () => {
+      bootFuel({ 'home-banner': 'b', 'home-fuel-banner': 'b' }, ['home-fuel-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /par\. birdie\. bogey\. pick your flavor/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-fuel-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByRole('img', { name: /flagstick fuel center-shafted putter cover/i })).toBeInTheDocument()
+      expect(within(section).getByRole('link', { name: /shop flagstick fuel/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(fuel.href),
+      )
+
+      const flavors = within(section).getByRole('group', { name: /pick a flavor/i })
+      await userEvent.click(within(flavors).getByRole('button', { name: fuel.flavors[0].label }))
+      expect(within(flavors).getByRole('button', { name: fuel.flavors[0].label })).toHaveAttribute('aria-pressed', 'true')
+      expect(within(section).getByText(fuel.flavors[0].line)).toBeInTheDocument()
+    })
+  })
 })

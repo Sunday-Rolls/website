@@ -79,6 +79,54 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "fuel": {
+    "eyebrow": "Flagstick Fuel",
+    "flavors": [
+      {
+        "label": "Par",
+        "color": "#e3242b",
+        "line": "Steady. Two putts, no drama."
+      },
+      {
+        "label": "Birdie",
+        "color": "#f4c20d",
+        "line": "The good stuff. One roll, one drop."
+      },
+      {
+        "label": "Bogey",
+        "color": "#f26b1d",
+        "line": "It happens. Shake it off on the next tee."
+      }
+    ],
+    "title": "Pick Your Flavor.",
+    "lines": [
+      "Deep green leather, an embroidered bolt and a flavor-block strip for every kind of scorecard. Plush velvet inside and a magnetic closure outside keep your putter protected and your momentum flowing all round long."
+    ],
+    "stats": [
+      {
+        "label": "Fit",
+        "value": "Center-shafted"
+      },
+      {
+        "label": "Made for",
+        "value": "L.A.B. DF3"
+      },
+      {
+        "label": "Lining",
+        "value": "Velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "href": "/products/flagstick-fuel",
+    "image": "/assets/home/fuel/flagstick-fuel.webp",
+    "imageSmall": "/assets/home/fuel/flagstick-fuel-720.webp",
+    "cta": {
+      "label": "Shop Flagstick Fuel"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
