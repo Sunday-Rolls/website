@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "key": "home-dew-banner",
+  "name": "Morning Dew dawn-fairway banner on the home page",
+  "hypothesis": "Showing the dewy dawn-fairway Morning Dew banner (dewy glass card, rising fizz, direct shop link, DF3 only) under the value strip gets more home-page visitors to add a cover to their cart than the home page without it. A draft for a future slot; control keeps whatever is in the banner slot when it starts.",
+  "variants": [
+    { "key": "control", "name": "Current home page", "weight": 50 },
+    { "key": "b", "name": "Morning Dew dawn-fairway banner", "weight": 50 }
+  ],
+  "primaryMetric": "add_to_cart",
+  "paths": ["/"],
+  "minVisitorsPerArm": 1000,
+  "minDays": 14
+}

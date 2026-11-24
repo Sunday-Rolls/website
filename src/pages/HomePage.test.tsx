@@ -210,4 +210,39 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-dew-banner', () => {
+    const dew = homeContent.dew
+
+    function bootDew(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootDew({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /fresh dew/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the Morning Dew banner in place of the Retro Roller for arm b, with a shop link', async () => {
+      bootDew({ 'home-banner': 'b', 'home-dew-banner': 'b' }, ['home-dew-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /first tee\.\s*fresh dew/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-dew-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByText(dew.subtitle)).toBeInTheDocument()
+      expect(within(section).getByRole('img', { name: /morning dew center-shafted putter cover/i })).toBeInTheDocument()
+      expect(within(section).getByRole('link', { name: /shop morning dew/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(dew.href),
+      )
+    })
+  })
 })

@@ -79,6 +79,40 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "dew": {
+    "eyebrow": "Morning Dew",
+    "titleLines": [
+      "First Tee.",
+      "Fresh Dew."
+    ],
+    "subtitle": "Start the round with a little extra fizz.",
+    "lines": [
+      "White and pine green, with our embroidered Morning Dew mark over a row of evergreens. Made for the dawn patrol: a plush velvet lining and magnetic closure keep your putter covered from the first tee to the last putt."
+    ],
+    "teeSheet": [
+      {
+        "label": "Tee time",
+        "value": "First light"
+      },
+      {
+        "label": "Made for",
+        "value": "L.A.B. DF3 (center-shafted)"
+      },
+      {
+        "label": "Lining",
+        "value": "Plush velvet"
+      },
+      {
+        "label": "Closure",
+        "value": "Magnetic"
+      }
+    ],
+    "href": "/products/morning-dew",
+    "image": "/assets/home/dew/morning-dew.webp",
+    "cta": {
+      "label": "Shop Morning Dew"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
