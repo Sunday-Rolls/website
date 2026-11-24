@@ -210,4 +210,40 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-mystery-banner', () => {
+    const mystery = homeContent.mystery
+
+    function bootMystery(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootMystery({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /missing birdies/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the Birdie Machine banner in place of the Retro Roller for arm b, with a shop link', async () => {
+      bootMystery({ 'home-banner': 'b', 'home-mystery-banner': 'b' }, ['home-mystery-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /the case of the\s*missing birdies/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-mystery-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByText(mystery.subtitle)).toBeInTheDocument()
+      expect(within(section).getByRole('img', { name: /birdie machine center-shafted putter cover/i })).toBeInTheDocument()
+      expect(within(section).getByRole('link', { name: /shop the birdie machine/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(mystery.href),
+      )
+      expect(within(section).getByText(mystery.caseNumber)).toBeInTheDocument()
+    })
+  })
 })
