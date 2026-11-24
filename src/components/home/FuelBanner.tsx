@@ -34,7 +34,7 @@ export function FuelBanner() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-[18%] right-[-10%] h-[85%] w-[70%] rounded-full opacity-35 blur-[90px] transition-[background-color] duration-700 lg:right-[-4%]"
+        className="pointer-events-none absolute top-[30%] right-[-6%] h-[60%] w-[45%] rounded-full opacity-25 mix-blend-screen blur-[110px] transition-[background-color] duration-700 lg:right-[2%]"
         style={{ backgroundColor: 'var(--flavor)' }}
       />
       <div
