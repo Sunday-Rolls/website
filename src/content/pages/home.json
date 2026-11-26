@@ -79,6 +79,49 @@
       "href": "/products/retro-roller-grey"
     }
   },
+  "sunnyDiner": {
+    "eyebrow": "Short-order special",
+    "titleLines": [
+      "Fresh off",
+      "the griddle."
+    ],
+    "subtitle": "Cooked to order for the early tee time.",
+    "lines": [
+      "A clean cream cover with an embroidered fried egg and a little Sunday Rolls on the side, served hot for the L.A.B. OZ.1i and Mezz.1. Plush velvet inside, magnetic closure outside, no substitutions needed."
+    ],
+    "ticket": {
+      "number": "18",
+      "table": "Tee 1",
+      "items": [
+        "1 × Sunny Side Up putter cover"
+      ],
+      "notes": [
+        {
+          "label": "Fits",
+          "value": "L.A.B. OZ.1i & Mezz.1"
+        },
+        {
+          "label": "Shaft",
+          "value": "Center-shaft only (not HS)"
+        },
+        {
+          "label": "Lining",
+          "value": "Plush velvet"
+        },
+        {
+          "label": "Closure",
+          "value": "Magnetic"
+        }
+      ]
+    },
+    "neon": "Open early",
+    "href": "/products/sunny-side-up",
+    "image": "/assets/home/sunny-diner/sunny-side-up.webp",
+    "imageSmall": "/assets/home/sunny-diner/sunny-side-up-600.webp",
+    "cta": {
+      "label": "Shop Sunny Side Up"
+    }
+  },
   "productBlocks": [
     {
       "id": "center-shafted",
