@@ -28,7 +28,7 @@ export function SunnyDinerBanner() {
     <section className="relative overflow-hidden bg-diner-butter text-diner-ink" aria-labelledby="home-sunny-diner-heading">
       <DinerWall neon={sunnyDiner.neon} />
 
-      <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+4rem)] lg:pt-24 lg:pb-36">
+      <Container className="relative pt-section-y pb-[calc(var(--spacing-section-y)+10rem)] lg:pt-24 lg:pb-56">
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
           <div className="order-2 space-y-7 lg:order-1 lg:max-w-xl">
             {sunnyDiner.eyebrow ? (
@@ -106,9 +106,9 @@ function DinerWall({ neon }: { neon?: string }) {
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_35%,rgba(255,236,180,0.9)_0%,rgba(253,240,196,0)_55%)]" />
       {/* Subwall tile and trim behind the counter. */}
-      <div className="absolute inset-x-0 bottom-12 h-[30%] bg-diner-mint [background-image:linear-gradient(90deg,rgba(29,29,29,0.08)_1px,transparent_1px),linear-gradient(0deg,rgba(29,29,29,0.08)_1px,transparent_1px)] [background-size:28px_28px] sm:bottom-14" />
-      <div className="absolute inset-x-0 bottom-[calc(30%+3rem)] h-3 bg-diner-red shadow-[0_2px_0_#8f1f18] sm:bottom-[calc(30%+3.5rem)]" />
-      <div className="absolute inset-x-0 bottom-[calc(30%+3.75rem)] h-[5px] bg-[linear-gradient(180deg,#ffffff,#a9adb3_60%,#e9eaec)] sm:bottom-[calc(30%+4.25rem)]" />
+      <div className="absolute inset-x-0 bottom-12 h-24 bg-diner-mint [background-image:linear-gradient(90deg,rgba(29,29,29,0.08)_1px,transparent_1px),linear-gradient(0deg,rgba(29,29,29,0.08)_1px,transparent_1px)] [background-size:28px_28px] sm:bottom-14 lg:h-28" />
+      <div className="absolute inset-x-0 bottom-36 h-3 bg-diner-red shadow-[0_2px_0_#8f1f18] sm:bottom-[9.5rem] lg:bottom-[10.5rem]" />
+      <div className="absolute inset-x-0 bottom-[9.75rem] h-[5px] bg-[linear-gradient(180deg,#ffffff,#a9adb3_60%,#e9eaec)] sm:bottom-[10.25rem] lg:bottom-[11.25rem]" />
 
       {neon ? (
         <div className="absolute top-[7%] right-[4%] hidden -rotate-3 rounded-2xl border-[3px] border-[#3a1416] bg-[#2a0f12]/90 px-6 py-3 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)] md:block lg:right-[6%]">
@@ -136,7 +136,7 @@ function Skillet({ image, imageSmall }: { image: string; imageSmall?: string }) 
             className="absolute bottom-0 h-20 w-8 opacity-0 motion-safe:animate-[steam-rise_3.6s_ease-out_infinite] motion-reduce:opacity-50"
             style={{ left: `${i * 34}%`, animationDelay: `${i * 1.2}s` } as CSSProperties}
           >
-            <path d="M15 78 C 4 64, 26 52, 15 38 C 4 24, 26 14, 15 2" fill="none" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" opacity="0.85" />
+            <path d="M15 78 C 4 64, 26 52, 15 38 C 4 24, 26 14, 15 2" fill="none" stroke="#b9a684" strokeWidth="5" strokeLinecap="round" opacity="0.55" />
           </svg>
         ))}
       </div>
@@ -173,7 +173,7 @@ type Ticket = NonNullable<NonNullable<HomeContent['sunnyDiner']>['ticket']>
 /** A handwritten-style order ticket clipped to a chrome rail. */
 function OrderTicket({ ticket }: { ticket: Ticket }) {
   return (
-    <div className="relative z-10 ml-auto -mb-10 w-[64%] sm:-mb-14 lg:absolute lg:-top-6 lg:-right-10 lg:mb-0 lg:w-[56%]">
+    <div className="relative z-10 ml-auto -mb-6 w-[60%] sm:-mb-10 lg:absolute lg:-top-16 lg:-right-24 lg:mb-0 lg:w-[50%]">
       {/* Rail */}
       <div aria-hidden="true" className="h-3 rounded-full bg-[linear-gradient(180deg,#ffffff,#a9adb3_60%,#6d7177)] shadow-[0_3px_6px_rgba(0,0,0,0.35)]" />
       <div className="relative mx-auto -mt-1 w-[92%] rotate-[4deg] bg-white px-4 pt-4 pb-6 font-mono text-[0.72rem] text-diner-ink shadow-[0_14px_24px_-12px_rgba(0,0,0,0.45)] [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),94%_100%,88%_calc(100%-8px),82%_100%,76%_calc(100%-8px),70%_100%,64%_calc(100%-8px),58%_100%,52%_calc(100%-8px),46%_100%,40%_calc(100%-8px),34%_100%,28%_calc(100%-8px),22%_100%,16%_calc(100%-8px),10%_100%,4%_calc(100%-8px),0_100%)]">
