@@ -247,5 +247,39 @@ describe('HomePage', () => {
       await userEvent.click(within(section).getByRole('button', { name: /ring the service bell/i }))
       expect(within(section).getByText(/order up!/i)).toBeInTheDocument()
     })
+
+    it('plays a bell sound when the service bell is rung', async () => {
+      const oscillators: number[] = []
+      const param = () => ({ value: 0, setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() })
+      const node = () => ({ connect: vi.fn() })
+      class FakeAudioContext {
+        currentTime = 0
+        sampleRate = 44100
+        state = 'running'
+        destination = {}
+        resume = vi.fn()
+        createGain = () => ({ ...node(), gain: param() })
+        createOscillator = () => ({
+          ...node(),
+          type: 'sine',
+          frequency: { value: 0 },
+          start: vi.fn(() => oscillators.push(1)),
+          stop: vi.fn(),
+        })
+        createBuffer = (_channels: number, length: number) => ({ getChannelData: () => new Float32Array(length) })
+        createBufferSource = () => ({ ...node(), buffer: null, start: vi.fn() })
+        createBiquadFilter = () => ({ ...node(), type: 'highpass', frequency: { value: 0 } })
+      }
+      vi.stubGlobal('AudioContext', FakeAudioContext)
+
+      bootDiner({ 'home-sunny-diner-banner': 'b' }, ['home-sunny-diner-banner'])
+      renderWithRouter(<HomePage />)
+      const heading = await screen.findByRole('heading', { level: 2, name: /fresh off\s*the griddle/i })
+      const section = heading.closest('section') as HTMLElement
+      await userEvent.click(within(section).getByRole('button', { name: /ring the service bell/i }))
+
+      expect(oscillators.length).toBeGreaterThan(0)
+      vi.unstubAllGlobals()
+    })
   })
 })

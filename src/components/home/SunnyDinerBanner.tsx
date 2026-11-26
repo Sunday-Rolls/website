@@ -3,6 +3,7 @@ import { usePageContent } from '@/lib/content'
 import type { HomeContent } from '@/types/content'
 import { assetUrl } from '@/lib/asset-url'
 import { trackCtaClick } from '@/lib/gtm'
+import { playBell } from '@/lib/bell-sound'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
@@ -80,7 +81,13 @@ export function SunnyDinerBanner() {
                   →
                 </span>
               </Button>
-              <ServiceBell rings={rings} onRing={() => setRings((count) => count + 1)} />
+              <ServiceBell
+                rings={rings}
+                onRing={() => {
+                  playBell()
+                  setRings((count) => count + 1)
+                }}
+              />
             </div>
           </div>
 
@@ -204,7 +211,7 @@ function OrderTicket({ ticket }: { ticket: Ticket }) {
   )
 }
 
-/** A chrome service bell. Ringing it calls "Order up!" (announced for screen readers too). */
+/** A chrome service bell. Ringing it plays a bell ding and calls "Order up!" (announced for screen readers too). */
 function ServiceBell({ rings, onRing }: { rings: number; onRing: () => void }) {
   return (
     <div className="relative flex items-center gap-3">
