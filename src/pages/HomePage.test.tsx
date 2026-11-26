@@ -210,4 +210,76 @@ describe('HomePage', () => {
       document.querySelector('source[type="image/webp"]')?.getAttribute('srcset'),
     ).toContain('/assets/home/videos/hero-poster-960.webp 960w')
   })
+
+  describe('home-sunny-diner-banner', () => {
+    const diner = homeContent.sunnyDiner
+
+    function bootDiner(assignments: Record<string, string>, tracked: string[]) {
+      window.__SR_EXP__ = { vid: 'AbCdEfGhIjKlMnOpQrStUv', assignments, tracked, bot: false }
+      bootExperiments({ search: '', fetchConfig: false })
+    }
+
+    it('while it is a draft, leaves the running home-banner test exactly as it was', () => {
+      bootDiner({ 'home-banner': 'b' }, ['home-banner'])
+      renderWithRouter(<HomePage />)
+
+      expect(screen.getByRole('heading', { level: 2, name: homeContent.featured.title })).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /fresh off/i })).toBeNull()
+      expect(experimentString()).toBe('home-banner:b')
+    })
+
+    it('renders the diner banner in place of the Retro Roller for arm b, with the ticket, bell and shop link', async () => {
+      bootDiner({ 'home-banner': 'b', 'home-sunny-diner-banner': 'b' }, ['home-sunny-diner-banner'])
+      renderWithRouter(<HomePage />)
+
+      const heading = await screen.findByRole('heading', { level: 2, name: /fresh off\s*the griddle/i })
+      expect(screen.queryByRole('heading', { level: 2, name: homeContent.featured.title })).toBeNull()
+      expect(experimentString()).toBe('home-sunny-diner-banner:b')
+
+      const section = heading.closest('section') as HTMLElement
+      expect(within(section).getByRole('img', { name: /sunny side up putter cover/i })).toBeInTheDocument()
+      expect(within(section).getByRole('link', { name: /shop sunny side up/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(diner.href),
+      )
+      expect(within(section).getByText(/center-shaft only \(not hs\)/i)).toBeInTheDocument()
+
+      await userEvent.click(within(section).getByRole('button', { name: /ring the service bell/i }))
+      expect(within(section).getByText(/order up!/i)).toBeInTheDocument()
+    })
+
+    it('plays a bell sound when the service bell is rung', async () => {
+      const oscillators: number[] = []
+      const param = () => ({ value: 0, setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() })
+      const node = () => ({ connect: vi.fn() })
+      class FakeAudioContext {
+        currentTime = 0
+        sampleRate = 44100
+        state = 'running'
+        destination = {}
+        resume = vi.fn()
+        createGain = () => ({ ...node(), gain: param() })
+        createOscillator = () => ({
+          ...node(),
+          type: 'sine',
+          frequency: { value: 0 },
+          start: vi.fn(() => oscillators.push(1)),
+          stop: vi.fn(),
+        })
+        createBuffer = (_channels: number, length: number) => ({ getChannelData: () => new Float32Array(length) })
+        createBufferSource = () => ({ ...node(), buffer: null, start: vi.fn() })
+        createBiquadFilter = () => ({ ...node(), type: 'highpass', frequency: { value: 0 } })
+      }
+      vi.stubGlobal('AudioContext', FakeAudioContext)
+
+      bootDiner({ 'home-sunny-diner-banner': 'b' }, ['home-sunny-diner-banner'])
+      renderWithRouter(<HomePage />)
+      const heading = await screen.findByRole('heading', { level: 2, name: /fresh off\s*the griddle/i })
+      const section = heading.closest('section') as HTMLElement
+      await userEvent.click(within(section).getByRole('button', { name: /ring the service bell/i }))
+
+      expect(oscillators.length).toBeGreaterThan(0)
+      vi.unstubAllGlobals()
+    })
+  })
 })

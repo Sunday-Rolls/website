@@ -1,0 +1,14 @@
+{
+  "$schema": "./schema.json",
+  "key": "home-sunny-diner-banner",
+  "name": "Sunny Side Up diner banner on the home page (option 2)",
+  "hypothesis": "Showing the 1950s diner Sunny Side Up banner (skillet, order ticket, service bell, direct shop link, OZ.1i and Mezz.1 only) under the value strip gets more home-page visitors to add a cover to their cart than the home page without it. A second design option alongside home-sunny-banner; a draft for a future slot, and control keeps whatever is in the banner slot when it starts.",
+  "variants": [
+    { "key": "control", "name": "Current home page", "weight": 50 },
+    { "key": "b", "name": "Sunny Side Up diner banner", "weight": 50 }
+  ],
+  "primaryMetric": "add_to_cart",
+  "paths": ["/"],
+  "minVisitorsPerArm": 1000,
+  "minDays": 14
+}

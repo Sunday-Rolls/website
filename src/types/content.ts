@@ -105,6 +105,29 @@ export interface HomeContent {
     }>
     cta: ContentLink
   }
+  /** Sunny Side Up diner banner, the second Sunny Side Up option (A/B test home-sunny-diner-banner, arm b). */
+  sunnyDiner?: {
+    eyebrow?: string
+    /** Headline, one entry per line. */
+    titleLines: string[]
+    subtitle?: string
+    lines: string[]
+    /** The order ticket clipped to the rail: order number, table, items and notes. */
+    ticket?: {
+      number?: string
+      table?: string
+      items?: string[]
+      notes?: Array<{ label: string; value: string }>
+    }
+    /** Text on the neon sign. */
+    neon?: string
+    href: string
+    /** Square photo of the cover on the warm-sand backdrop (WebP), 1000px. */
+    image: string
+    /** Same photo at 600px for small screens. */
+    imageSmall?: string
+    cta: { label: string }
+  }
   productBlocks: HomeProductBlock[]
   socials?: {
     eyebrow?: string
